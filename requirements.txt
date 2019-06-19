@@ -1,0 +1,5 @@
+Django>=2.2
+djangorestframework>=3.9
+django-filter
+Markdown
+python-decouple
