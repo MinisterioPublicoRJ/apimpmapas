@@ -3,6 +3,8 @@ from unittest import mock
 from django.test import TestCase
 from django.urls import reverse
 
+from login.decorators import auth_required
+
 
 class LoginTest(TestCase):
 
@@ -24,7 +26,6 @@ class LoginTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json(), 'eyJ0eXAiOi')
 
-
     @mock.patch('login.views.authenticate')
     def test_login_sca_failed(self, _auth):
         _auth.return_value = 403
@@ -38,3 +39,38 @@ class LoginTest(TestCase):
         )
 
         self.assertEqual(resp.status_code, 403)
+
+
+class JWTDecoratorTest(TestCase):
+
+    def test_valid_token(self):
+        def mock_config(*args, **kwargs):
+            if args[0] == 'SECRET_KEY':
+                return 'sfdfsdf'
+
+        @auth_required
+        def mock_view(*args, **kwargs):
+            return True
+
+        with mock.patch('login.decorators.config', side_effect=mock_config):
+            resp = mock_view(
+                'args1', {'auth_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.'
+                        'eyJ1aWQiOiJFc3RldmFuIn0.'
+                        'QsoGOa0S89KYUUpuwQ-QPq9cSSpuJdvxa3zYBeWcN1o'})
+
+        self.assertTrue(resp)
+
+
+    def test_invalid_token(self):
+
+        @auth_required
+        def mock_view(*args, **kwargs):
+            return True
+
+        resp = mock_view(
+            'args1', {
+                'auth_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.'\
+                'c3RldmFuI.SSpuJdvxa3'
+        })
+
+        self.assertEqual(resp, 403)
