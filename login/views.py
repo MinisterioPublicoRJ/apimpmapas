@@ -22,3 +22,5 @@ class LoginView(APIView):
             secret = config('SECRET_KEY')
             token = jwt.encode(payload, secret)
             return Response(token, status=200)
+
+        return Response('Usuário ou senha incorretos', status=403)

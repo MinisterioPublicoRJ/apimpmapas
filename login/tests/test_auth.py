@@ -23,3 +23,18 @@ class LoginTest(TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json(), 'eyJ0eXAiOi')
+
+
+    @mock.patch('login.views.authenticate')
+    def test_login_sca_failed(self, _auth):
+        _auth.return_value = 403
+        url = reverse('login:login')
+        resp = self.client.post(
+            url,
+            data={
+                'username': 'usuario_nulo',
+                'password': 'senhaqq',
+            }
+        )
+
+        self.assertEqual(resp.status_code, 403)

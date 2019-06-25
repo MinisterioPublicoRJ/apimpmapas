@@ -13,7 +13,7 @@ def authenticate(username, password):
         url=config('SCA_AUTH'),
         data={
             'username': username,
-            'password': base64.b64encode(password).decode('utf-8') 
+            'password': base64.b64encode(password).decode('utf-8')
         }
     )
 
