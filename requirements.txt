@@ -3,3 +3,4 @@ djangorestframework>=3.9
 django-filter
 Markdown
 python-decouple
+requests
