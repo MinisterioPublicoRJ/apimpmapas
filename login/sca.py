@@ -2,7 +2,7 @@ import base64
 import json
 import requests
 
-from django.conf import settings
+from decouple import config
 
 
 def authenticate(username, password):
@@ -10,7 +10,7 @@ def authenticate(username, password):
     session = requests.session()
 
     response = session.post(
-        url=settings.AUTH_MPRJ,
+        url=config('SCA_AUTH'),
         data={
             'username': username,
             'password': base64.b64encode(password).decode('utf-8') 
@@ -18,7 +18,7 @@ def authenticate(username, password):
     )
 
     if response.status_code == 200:
-        user_info = session.get(url=settings.AITJ_MPRJ_USERINFO)
+        user_info = session.get(url=config('SCA_CHECK'))
         body = json.loads(user_info.content.decode('utf-8'))
         permissions = body['permissions']
         if (
