@@ -6,9 +6,11 @@ from django.urls import reverse
 
 class LoginTest(TestCase):
 
+    @mock.patch('login.views.jwt')
     @mock.patch('login.views.authenticate')
-    def test_login_user(self, _auth):
+    def test_login_user(self, _auth, _jwt):
         _auth.return_value = 200
+        _jwt.encode.return_value = 'eyJ0eXAiOi'
 
         url = reverse('login:login')
         resp = self.client.post(
@@ -20,3 +22,4 @@ class LoginTest(TestCase):
         )
 
         self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), 'eyJ0eXAiOi')
