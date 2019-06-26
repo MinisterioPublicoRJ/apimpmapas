@@ -4,6 +4,9 @@ clean-pyc:
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
 
+lint:
+	flake8 --exclude=.tox
+
 test: clean-pyc
 	py.test --verbose --color=yes $(TEST_PATH)
 
