@@ -44,6 +44,13 @@ class LoginTest(TestCase):
 class JWTDecoratorTest(TestCase):
 
     def test_valid_token(self):
+        token = {'auth_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.'
+                 'eyJ1aWQiOiJFc3RldmFuIn0.'
+                 'QsoGOa0S89KYUUpuwQ-QPq9cSSpuJdvxa3zYBeWcN1o'
+                 }
+        mock_request = mock.MagicMock()
+        mock_request.GET.return_value = token
+
         def mock_config(*args, **kwargs):
             if args[0] == 'SECRET_KEY':
                 return 'sfdfsdf'
@@ -53,24 +60,21 @@ class JWTDecoratorTest(TestCase):
             return True
 
         with mock.patch('login.decorators.config', side_effect=mock_config):
-            resp = mock_view(
-                'args1', {'auth_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.'
-                        'eyJ1aWQiOiJFc3RldmFuIn0.'
-                        'QsoGOa0S89KYUUpuwQ-QPq9cSSpuJdvxa3zYBeWcN1o'})
+            resp = mock_view('args1', mock_request)
 
         self.assertTrue(resp)
 
-
     def test_invalid_token(self):
+        token = {'auth_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.'
+                 'c3RldmFuI.SSpuJdvxa3'
+                 }
+        mock_request = mock.MagicMock()
+        mock_request.GET.return_value = token
 
         @auth_required
         def mock_view(*args, **kwargs):
             return True
 
-        resp = mock_view(
-            'args1', {
-                'auth_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.'\
-                'c3RldmFuI.SSpuJdvxa3'
-        })
+        resp = mock_view('args1', mock_request)
 
-        self.assertEqual(resp, 403)
+        self.assertEqual(resp.status_code, 403)
