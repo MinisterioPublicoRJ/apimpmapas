@@ -16,7 +16,8 @@ def auth_required(func):
         try:
             jwt.decode(
                 token,
-                config('SECRET_KEY')
+                config('SECRET_KEY'),
+                algorithms=["HS256"]
             )
         except (InvalidSignatureError, DecodeError):
             return Response({}, status=403)
