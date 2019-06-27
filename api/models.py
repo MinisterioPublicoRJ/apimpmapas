@@ -27,6 +27,9 @@ class EntidadeModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.entity_type.name + ' - ' + self.title
+
 
 class DadoModel(models.Model):
     title = models.CharField(max_length=100)
