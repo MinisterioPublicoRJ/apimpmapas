@@ -8,6 +8,12 @@ class TipoEntidadeModel(models.Model):
     last_modified = models.DateTimeField(auto_now=True)
 
 
+class TipoDadoModel(models.Model):
+    name = models.CharField(max_length=50)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
+
+
 class EntidadeModel(models.Model):
     title = models.CharField(max_length=100)
     entity_type = models.ForeignKey(
@@ -20,4 +26,14 @@ class EntidadeModel(models.Model):
 
 
 class DadoModel(models.Model):
-    pass
+    title = models.CharField(max_length=100)
+    data_type = models.ForeignKey(
+        'TipoDadoModel',
+        on_delete=models.PROTECT
+    )
+    entity = models.ForeignKey(
+        'EntidadeModel',
+        on_delete=models.CASCADE
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
