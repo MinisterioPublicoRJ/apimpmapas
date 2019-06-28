@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.gis.db import models as gis_models
 
 
-class TipoEntidadeModel(models.Model):
+class TipoEntidade(models.Model):
     name = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
@@ -11,7 +11,7 @@ class TipoEntidadeModel(models.Model):
         return self.name
 
 
-class TipoDadoModel(models.Model):
+class TipoDado(models.Model):
     name = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
@@ -20,10 +20,10 @@ class TipoDadoModel(models.Model):
         return self.name
 
 
-class EntidadeModel(models.Model):
+class Entidade(models.Model):
     title = models.CharField(max_length=100)
     entity_type = models.ForeignKey(
-        'TipoEntidadeModel',
+        'TipoEntidade',
         on_delete=models.PROTECT
     )
     geometry = gis_models.GeometryField(null=True, blank=True)
@@ -34,15 +34,29 @@ class EntidadeModel(models.Model):
         return self.entity_type.name + ' - ' + self.title
 
 
-class DadoModel(models.Model):
+class Dado(models.Model):
+    POSTGRESQL = 'PG'
+    ORACLE = 'ORA'
+    BDA = 'BDA'
+    DATABASE_CHOICES = [
+        (POSTGRESQL, 'PostgreSQL Opengeo'),
+        (ORACLE, 'Oracle ExaData'),
+        (BDA, 'Oracle BDA'),
+    ]
     title = models.CharField(max_length=100)
     data_type = models.ForeignKey(
-        'TipoDadoModel',
+        'TipoDado',
         on_delete=models.PROTECT
     )
-    entity = models.ForeignKey(
-        'EntidadeModel',
+    entity_type = models.ForeignKey(
+        'TipoEntidade',
         on_delete=models.CASCADE
     )
+    database = models.CharField(
+        max_length=3,
+        choices=DATABASE_CHOICES,
+        default=POSTGRESQL,
+    )
+    query = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)

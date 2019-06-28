@@ -1,14 +1,14 @@
 from django.contrib import admin
 
 from api.models import (
-    EntidadeModel,
-    TipoEntidadeModel,
-    TipoDadoModel,
-    DadoModel
+    Entidade,
+    TipoEntidade,
+    TipoDado,
+    Dado
 )
 
 
-admin.site.register(TipoEntidadeModel)
-admin.site.register(TipoDadoModel)
-admin.site.register(EntidadeModel)
-admin.site.register(DadoModel)
+admin.site.register(TipoEntidade)
+admin.site.register(TipoDado)
+admin.site.register(Entidade)
+admin.site.register(Dado)
