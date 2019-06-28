@@ -13,7 +13,7 @@ class EntidadeView(GenericAPIView):
     def get_object(self):
         return get_object_or_404(
             self.queryset,
-            entity_type__name=self.kwargs['entity_type'],
+            entity_type=self.kwargs['entity_type'],
             domain_id=self.kwargs['domain_id']
         )
 
