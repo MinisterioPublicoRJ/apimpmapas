@@ -16,4 +16,12 @@ class EntidadeViewTest(TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp_json['title'], entidade_obj.title)
-        
+
+    def test_get_entidade_404(self):
+        make('api.Entidade', entity_type__name='municipio', domain_id=404)
+
+        url = reverse('api:detail_entidade', args=('municipio', '1',))
+
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 404)
