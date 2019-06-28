@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 import pytest
+from model_mommy.mommy import make
 
 from api.models import (
     TipoEntidade,
@@ -37,3 +38,8 @@ class TestStringRepresentation(TestCase):
         model.save()
 
         self.assertEqual(model.__str__(), 'teste_entidade - teste_nome')
+
+    def test_string_dado(self):
+        dado = make('api.Dado', title='teste_nome')
+
+        self.assertEqual(dado.__str__(), 'teste_nome')
