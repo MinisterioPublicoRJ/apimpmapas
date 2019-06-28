@@ -21,6 +21,7 @@ class TipoDado(models.Model):
 
 
 class Entidade(models.Model):
+    domain_id = models.CharField(max_length=20)  # ID único da entidade para correspondência com o banco externo
     title = models.CharField(max_length=100)
     entity_type = models.ForeignKey(
         'TipoEntidade',
