@@ -1,3 +1,7 @@
 from django.contrib import admin
 
-# Register your models here.
+from api.models import Entidade, Dado
+
+
+admin.site.register(Entidade)
+admin.site.register(Dado)

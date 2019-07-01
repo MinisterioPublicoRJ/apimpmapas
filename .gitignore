@@ -110,3 +110,6 @@ GitHub.sublime-settings
 
 # Visual Studio Code # 
 .vscode/* 
+
+# Ubuntu
+.directory

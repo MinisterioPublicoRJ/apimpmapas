@@ -1,7 +1,10 @@
 Django>=2.2
 djangorestframework>=3.9
 django-filter
+dj-database-url
 Markdown
+psycopg2
+psycopg2-binary
 pyjwt
 python-decouple
 requests
