@@ -19,4 +19,7 @@ class EntidadeView(GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
-        return Response(EntidadeSerializer(obj).data)
+        return Response(EntidadeSerializer(
+            obj,
+            entity_type=self.kwargs['entity_type']
+        ).data)

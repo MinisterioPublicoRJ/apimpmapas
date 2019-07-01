@@ -29,3 +29,30 @@ class EntidadeViewTest(TestCase):
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 404)
+
+
+class ListDadosViewTest(TestCase):
+    def test_get_lista_dados(self):
+        """Deve retornar dados referentes ao tipo de entidade chamado"""
+        entidade_object = make('api.Entidade', entity_type='MUN', domain_id=1)
+        dado_object_mun = make('api.Dado', entity_type='MUN', _quantity=2)
+        dado_object_est = make('api.Dado', entity_type='EST', _quantity=2)
+
+        url = reverse('api:detail_entidade', args=('MUN', '1',))
+
+        resp = self.client.get(url)
+        resp_json = resp.json()
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            len(resp_json['data_list']),
+            2
+        )
+        self.assertEqual(
+            resp_json['data_list'][0]['id'],
+            dado_object_mun[0].id
+        )
+        self.assertEqual(
+            resp_json['data_list'][1]['id'],
+            dado_object_mun[1].id
+        )
