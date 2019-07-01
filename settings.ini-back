@@ -1,7 +1,0 @@
-[settings]
-SECRET_KEY=bb#83!#672hg@f=!h+9mg3j!6ixw1oqb_7c2cd3w0=(bu%mmsi
-DEBUG=True
-SCA_AUTH=http://apps.mprj.mp.br/mpmapas/api/authentication
-SCA_CHECK=http://apps.mprj.mp.br/mpmapas/api/authenticate
-ALLOWED_HOSTS=*,
-DATABASE_URL=postgis://ebarbara:wwHYKnYKX@localhost:5432/mprjapi
