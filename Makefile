@@ -8,7 +8,7 @@ lint:
 	flake8
 
 test: clean-pyc
-	py.test --verbose --color=yes $(TEST_PATH)
+	py.test --verbose --color=yes -s $(TEST_PATH)
 
 run:
 	python manage.py runserver
