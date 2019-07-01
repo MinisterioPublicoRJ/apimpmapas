@@ -12,7 +12,8 @@ ENTITY_CHOICES = [
 
 
 class Entidade(models.Model):
-    domain_id = models.CharField(max_length=20)  # ID único da entidade para correspondência com o banco externo
+    # ID único da entidade para correspondência com o banco externo
+    domain_id = models.CharField(max_length=20)
     title = models.CharField(max_length=100)
     exibition_field = models.CharField(max_length=100, null=True, blank=True)
     entity_type = models.CharField(

@@ -34,9 +34,9 @@ class EntidadeViewTest(TestCase):
 class ListDadosViewTest(TestCase):
     def test_get_lista_dados(self):
         """Deve retornar dados referentes ao tipo de entidade chamado"""
-        entidade_object = make('api.Entidade', entity_type='MUN', domain_id=1)
+        make('api.Entidade', entity_type='MUN', domain_id=1)
+        make('api.Dado', entity_type='EST', _quantity=2)
         dado_object_mun = make('api.Dado', entity_type='MUN', _quantity=2)
-        dado_object_est = make('api.Dado', entity_type='EST', _quantity=2)
 
         url = reverse('api:detail_entidade', args=('MUN', '1',))
 
