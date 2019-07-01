@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.gis.db import models as gis_models
 
 ESTADO = 'EST'
 MUNICIPIO = 'MUN'
@@ -40,7 +39,6 @@ class Entidade(models.Model):
         choices=ENTITY_CHOICES,
         default=ORGAO,
     )
-    geometry = gis_models.GeometryField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 
