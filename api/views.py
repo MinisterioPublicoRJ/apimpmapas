@@ -28,3 +28,11 @@ class EntidadeView(GenericAPIView):
 class DadoView(RetrieveAPIView):
     serializer_class = DadoSerializer
     queryset = Dado.objects.all()
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(
+            instance,
+            domain_id=self.kwargs['domain_id']
+        )
+        return Response(serializer.data)
