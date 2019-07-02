@@ -3,8 +3,9 @@ from psycopg2 import connect as postgres_connect
 
 
 def execute(db_name, query, domain_id, *args, **kwargs):
-    pass
+    conns = {'PG': postgres_access}
 
+    conns[db_name](query)
 
 def postgres_access(query):
     with postgres_connect(
