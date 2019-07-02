@@ -6,6 +6,7 @@ __pycache__
 db.sqlite3
 media
 /settings.ini
+/settings.ini-bak
 
 # Backup files # 
 *.bak 
