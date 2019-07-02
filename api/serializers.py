@@ -26,7 +26,7 @@ class DadoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Dado
-        fields = '__all__'
+        exclude = ['title', 'entity_type', 'database', 'query']
 
     def __init__(self, *args, **kwargs):
         self.domain_id = kwargs.pop('domain_id')
