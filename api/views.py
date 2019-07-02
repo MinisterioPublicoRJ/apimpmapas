@@ -1,9 +1,9 @@
 from django.shortcuts import get_object_or_404
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, RetrieveAPIView
 from rest_framework.response import Response
 
-from api.models import Entidade
-from api.serializers import EntidadeSerializer
+from api.models import Entidade, Dado
+from api.serializers import EntidadeSerializer, DadoSerializer
 
 
 class EntidadeView(GenericAPIView):
@@ -23,3 +23,8 @@ class EntidadeView(GenericAPIView):
             obj,
             entity_type=self.kwargs['entity_type']
         ).data)
+
+
+class DadoView(RetrieveAPIView):
+    serializer_class = DadoSerializer
+    queryset = Dado.objects.all()

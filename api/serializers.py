@@ -16,3 +16,9 @@ class EntidadeSerializer(serializers.ModelSerializer):
 
     def get_data_list(self, obj):
         return Dado.objects.filter(entity_type=self.entity_type).values('id')
+
+
+class DadoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Dado
+        fields = '__all__'

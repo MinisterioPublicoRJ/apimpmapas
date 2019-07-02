@@ -56,3 +56,14 @@ class ListDadosViewTest(TestCase):
             resp_json['data_list'][1]['id'],
             dado_object_mun[1].id
         )
+
+
+class DetailDadosViewTest(TestCase):
+
+    def test_dados_estado(self):
+        make('api.Dado', id=1)
+
+        url = reverse('api:detail_dado', args=('33', '1',))
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
