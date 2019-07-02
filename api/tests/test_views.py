@@ -61,9 +61,11 @@ class ListDadosViewTest(TestCase):
 class DetailDadosViewTest(TestCase):
 
     def test_dados_estado(self):
-        make('api.Dado', id=1)
+        dado_obj = make('api.Dado', id=1)
 
         url = reverse('api:detail_dado', args=('33', '1',))
         resp = self.client.get(url)
+        resp_json = resp.json()
 
         self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp_json['id'], dado_obj.id)
