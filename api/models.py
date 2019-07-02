@@ -22,10 +22,12 @@ DATABASE_CHOICES = [
 NUMBER = 'NUM'
 TEXT = 'TEX'
 GRAPH = 'GRA'
+MAP = 'MAP'
 DATA_CHOICES = [
     (NUMBER, 'Número'),
     (TEXT, 'Texto'),
     (GRAPH, 'Gráfico'),
+    (MAP, 'Mapa'),
 ]
 
 
