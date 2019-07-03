@@ -10,7 +10,6 @@ from login.sca import authenticate
 class LoginView(APIView):
 
     def post(self, request, *args, **kwargs):
-        # import pdb; pdb.set_trace()
 
         username = request.POST['username']
         password = request.POST['password']
