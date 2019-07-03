@@ -1,5 +1,7 @@
 Django>=2.2
 djangorestframework>=3.9
+django-cors-headers
+django-ordered-model
 django-filter
 dj-database-url
 Markdown
