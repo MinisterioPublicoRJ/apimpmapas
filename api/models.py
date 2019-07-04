@@ -1,3 +1,4 @@
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 ESTADO = 'EST'
@@ -67,7 +68,12 @@ class Dado(models.Model):
         choices=DATABASE_CHOICES,
         default=POSTGRES,
     )
-    query = models.TextField()
+    schema = models.CharField(max_length=100, null=True, blank=True)
+    table = models.CharField(max_length=100)
+    columns = ArrayField(
+        models.CharField(max_length=50)
+    )
+    id_column = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 

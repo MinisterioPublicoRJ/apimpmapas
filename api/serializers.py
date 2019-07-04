@@ -26,11 +26,26 @@ class DadoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Dado
-        exclude = ['title', 'entity_type', 'database', 'query']
+        exclude = [
+            'title',
+            'entity_type',
+            'schema',
+            'database',
+            'table',
+            'columns',
+            'id_column'
+        ]
 
     def __init__(self, *args, **kwargs):
         self.domain_id = kwargs.pop('domain_id')
         super().__init__(*args, **kwargs)
 
     def execute_query(self, obj):
-        return execute(obj.database, obj.query, self.domain_id)
+        return execute(
+            obj.database,
+            obj.schema,
+            obj.table,
+            obj.columns,
+            obj.id_column,
+            self.domain_id
+        )
