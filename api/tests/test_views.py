@@ -1,3 +1,4 @@
+from unittest import mock
 from django.test import TestCase
 from django.urls import reverse
 
@@ -60,12 +61,27 @@ class ListDadosViewTest(TestCase):
 
 class DetailDadosViewTest(TestCase):
 
-    def test_dados_estado(self):
-        dado_obj = make('api.Dado', id=1)
+    @mock.patch('api.serializers.execute')
+    def test_dados_estado(self, _execute):
+        expected_response = [2143, 23546, 23546]
 
-        url = reverse('api:detail_dado', args=('33', '1',))
+        _execute.return_value = expected_response
+        domain_id = '33'
+
+        dado_obj = make('api.Dado', id=1, columns=['col1', 'col2', 'col3'])
+
+        url = reverse('api:detail_dado', args=(domain_id, '1',))
         resp = self.client.get(url)
         resp_json = resp.json()
+
+        _execute.assert_called_once_with(
+            dado_obj.database,
+            dado_obj.schema,
+            dado_obj.table,
+            dado_obj.columns,
+            dado_obj.id_column,
+            domain_id
+        )
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp_json['id'], dado_obj.id)
