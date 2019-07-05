@@ -1,5 +1,5 @@
 from decouple import config
-from psycopg2 import sql as pg_sql, connect as pg_connect
+from psycopg2 import connect as pg_connect
 
 
 def execute(
@@ -14,25 +14,37 @@ def execute(
 ):
     conns = {'PG': postgres_access}
 
-    return conns[db_name](schema, table, columns, id_column, domain_id)
+    query = generate_query(
+        db_name,
+        schema,
+        table,
+        columns,
+        id_column
+    )
+    return conns[db_name](query, domain_id)
 
 
-def postgres_access(schema, table, columns, id_column, domain_id):
-    if schema is None:
+def generate_query(db_name, schema, table, columns, id_column):
+    if db_name == 'PG' and schema is None:
         schema = 'public'
 
-    query = pg_sql.SQL("SELECT {} FROM {}.{} WHERE {} = %s").format(
-        pg_sql.SQL(",").join(map(pg_sql.Identifier, columns)),
-        pg_sql.Identifier(schema),
-        pg_sql.Identifier(table),
-        pg_sql.Identifier(id_column)
-    )
+    query = "SELECT {columns} FROM {schema}.{table} WHERE {id_column} = %s"\
+        .format(
+            columns=', '.join(columns),
+            schema=schema,
+            table=table,
+            id_column=id_column
+        )
 
+    return query
+
+
+def postgres_access(query, domain_id):
     with pg_connect(
         host=config('PG_HOST'),
         dbname=config('PG_BASE'),
         user=config('PG_USER')
     ) as conn:
         with conn.cursor() as curs:
-            curs.execute(query, (int(domain_id), ))
+            curs.execute(query, (domain_id,))
             return curs.fetchall()
