@@ -1,6 +1,10 @@
+import os
+
 from decouple import config
 from psycopg2 import connect as pg_connect
 from cx_Oracle import connect as ora_connect
+
+os.environ['NLS_LANG'] = 'American_America.UTF8'
 
 
 def execute(
@@ -13,7 +17,10 @@ def execute(
     *args,
     **kwargs
 ):
-    conns = {'PG': postgres_access}
+    conns = {
+        'PG': postgres_access,
+        'ORA': oracle_access,
+    }
 
     query = generate_query(
         db_name,
@@ -25,8 +32,8 @@ def execute(
     return conns[db_name](query, domain_id)
 
 
-def generate_query(schema, table, columns, id_column):
-    query = "SELECT {columns} FROM {schema}.{table} WHERE {id_column} = %s"\
+def generate_query(db_name, schema, table, columns, id_column):
+    query = "SELECT {columns} FROM {schema}.{table} WHERE {id_column} = "\
         .format(
             columns=', '.join(columns),
             schema=schema,
@@ -34,6 +41,10 @@ def generate_query(schema, table, columns, id_column):
             id_column=id_column
         )
 
+    if db_name == 'PG':
+        query += "%s"
+    elif db_name == 'ORA':
+        query += ":1"
     return query
 
 
@@ -55,5 +66,6 @@ def oracle_access(query, domain_id):
         dsn=config('ORA_HOST')
     ) as conn:
         with conn.cursor() as curs:
+            print(query)
             curs.execute(query, (domain_id, ))
             return curs.fetchall()

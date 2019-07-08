@@ -12,8 +12,6 @@ from api.db_connectors import (
 class CommonSetup(TestCase):
 
     def setUp(self):
-        self.query = 'SELECT col1, col2 FROM schema.tabela WHERE '\
-                              'col_id = %s'
         self.schema = 'schema'
         self.table = 'tabela'
         self.columns = ['col1', 'col2']
@@ -21,23 +19,12 @@ class CommonSetup(TestCase):
         self.domain_id = '00'
 
 
-class CommonsTestCase(CommonSetup):
-
-    def test_generate_query(self):
-        gen_query = generate_query(
-            self.schema,
-            self.table,
-            self.columns,
-            self.id_column
-        )
-
-        self.assertEqual(gen_query, self.query)
-
-
 class PostgresAccess(CommonSetup):
 
     def setUp(self):
         super().setUp()
+        self.query = 'SELECT col1, col2 FROM schema.tabela WHERE '\
+                     'col_id = %s'
         self.db = 'PG'
 
     @mock.patch('api.db_connectors.pg_connect')
@@ -50,6 +37,17 @@ class PostgresAccess(CommonSetup):
             dbname=config('PG_BASE'),
             user=config('PG_USER')
         )
+
+    def test_generate_query_postgres(self):
+        gen_query = generate_query(
+            self.db,
+            self.schema,
+            self.table,
+            self.columns,
+            self.id_column
+        )
+
+        self.assertEqual(gen_query, self.query)
 
     @mock.patch('api.db_connectors.pg_connect')
     def test_execute_postgres(self, _pg_connect):
@@ -70,6 +68,8 @@ class OracleAccess(CommonSetup):
     def setUp(self):
         super().setUp()
         self.db = 'ORA'
+        self.query = 'SELECT col1, col2 FROM schema.tabela WHERE '\
+                     'col_id = :1'
 
     @mock.patch('api.db_connectors.ora_connect')
     def test_connect_oracle(self, _ora_connect):
@@ -80,6 +80,17 @@ class OracleAccess(CommonSetup):
             password=config('ORA_PASS'),
             dsn=config('ORA_HOST')
         )
+
+    def test_generate_query_oracle(self):
+        gen_query = generate_query(
+            self.db,
+            self.schema,
+            self.table,
+            self.columns,
+            self.id_column
+        )
+
+        self.assertEqual(gen_query, self.query)
 
     @mock.patch('api.db_connectors.ora_connect')
     def test_execute_oracle(self, _ora_connect):
