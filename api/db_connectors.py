@@ -1,5 +1,6 @@
 from decouple import config
 from psycopg2 import connect as pg_connect
+from cx_Oracle import connect as ora_connect
 
 
 def execute(
@@ -48,3 +49,12 @@ def postgres_access(query, domain_id):
         with conn.cursor() as curs:
             curs.execute(query, (domain_id,))
             return curs.fetchall()
+
+
+def oracle_access(query, domain_id):
+    with ora_connect(
+        user=config('ORA_USER'),
+        password=config('ORA_PASS'),
+        dsn=config('ORA_HOST')
+    ) as conn:
+        pass

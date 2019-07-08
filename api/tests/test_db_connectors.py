@@ -2,7 +2,11 @@ from unittest import TestCase, mock
 
 from decouple import config
 
-from api.db_connectors import postgres_access, generate_query
+from api.db_connectors import (
+    oracle_access,
+    postgres_access,
+    generate_query
+)
 
 
 class PostgresAccess(TestCase):
@@ -43,3 +47,31 @@ class PostgresAccess(TestCase):
         )
 
         self.assertEqual(gen_query, self.query)
+
+
+class OracleAccess(TestCase):
+
+    def setUp(self):
+        self.query = 'SELECT col1, col2 FROM schema.tabela WHERE '\
+                     'col_id = %s'
+        self.db = 'ORA'
+        self.schema = 'schema'
+        self.table = 'tabela'
+        self.columns = ['col1', 'col2']
+        self.id_column = 'col_id'
+        self.domain_id = '00'
+
+    @mock.patch('api.db_connectors.ora_connect')
+    def test_connect_oracle(self, _ora_connect):
+        cursor = mock.MagicMock()
+        _ora_connect.return_value.__enter__\
+            .return_value.cursor.return_value.__enter__\
+            .return_value = cursor
+
+        oracle_access(self.query, self.domain_id)
+
+        _ora_connect.assert_called_once_with(
+            user=config('ORA_USER'),
+            password=config('ORA_PASS'),
+            dsn=config('ORA_HOST')
+        )
