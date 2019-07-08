@@ -63,11 +63,6 @@ class OracleAccess(TestCase):
 
     @mock.patch('api.db_connectors.ora_connect')
     def test_connect_oracle(self, _ora_connect):
-        cursor = mock.MagicMock()
-        _ora_connect.return_value.__enter__\
-            .return_value.cursor.return_value.__enter__\
-            .return_value = cursor
-
         oracle_access(self.query, self.domain_id)
 
         _ora_connect.assert_called_once_with(
@@ -75,3 +70,15 @@ class OracleAccess(TestCase):
             password=config('ORA_PASS'),
             dsn=config('ORA_HOST')
         )
+
+    @mock.patch('api.db_connectors.ora_connect')
+    def test_execute_oracle(self, _ora_connect):
+        cursor = mock.MagicMock()
+        _ora_connect.return_value.__enter__\
+            .return_value.cursor.return_value.__enter__\
+            .return_value = cursor
+
+        oracle_access(self.query, self.domain_id)
+
+        cursor.execute.assert_called_once_with(self.query, (self.domain_id,))
+        cursor.fetchall.assert_called_once_with()

@@ -57,4 +57,6 @@ def oracle_access(query, domain_id):
         password=config('ORA_PASS'),
         dsn=config('ORA_HOST')
     ) as conn:
-        pass
+        with conn.cursor() as curs:
+            curs.execute(query, (domain_id, ))
+            return curs.fetchall()
