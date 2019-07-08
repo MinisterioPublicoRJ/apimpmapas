@@ -25,10 +25,7 @@ def execute(
     return conns[db_name](query, domain_id)
 
 
-def generate_query(db_name, schema, table, columns, id_column):
-    if db_name == 'PG' and schema is None:
-        schema = 'public'
-
+def generate_query(schema, table, columns, id_column):
     query = "SELECT {columns} FROM {schema}.{table} WHERE {id_column} = %s"\
         .format(
             columns=', '.join(columns),

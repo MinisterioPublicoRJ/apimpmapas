@@ -68,7 +68,7 @@ class Dado(models.Model):
         choices=DATABASE_CHOICES,
         default=POSTGRES,
     )
-    schema = models.CharField(max_length=100, null=True, blank=True)
+    schema = models.CharField(max_length=100)
     table = models.CharField(max_length=100)
     columns = ArrayField(
         models.CharField(max_length=50)
