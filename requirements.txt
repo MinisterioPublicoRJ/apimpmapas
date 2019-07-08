@@ -1,8 +1,10 @@
 cx_Oracle
-Django>=2.2
-djangorestframework>=3.9
-django-filter
 dj-database-url
+Django>=2.2
+django-cors-headers
+django-filter
+djangorestframework>=3.9
+impyla
 Markdown
 psycopg2
 psycopg2-binary

@@ -1,8 +1,8 @@
 -r requirements.txt
-pytest
-pytest-cov
-pytest-django
 flake8
 ipdb
 model_mommy
+pytest
+pytest-cov
+pytest-django
 tox
