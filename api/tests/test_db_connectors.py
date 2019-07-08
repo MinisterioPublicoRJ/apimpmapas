@@ -5,7 +5,7 @@ from decouple import config
 from api.db_connectors import postgres_access, generate_query
 
 
-class Database_access(TestCase):
+class PostgresAccess(TestCase):
     def setUp(self):
         self.query = 'SELECT col1, col2 FROM schema.tabela WHERE '\
                               'col_id = %s'
