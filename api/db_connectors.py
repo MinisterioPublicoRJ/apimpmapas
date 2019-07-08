@@ -3,7 +3,7 @@ import os
 from decouple import config
 from psycopg2 import connect as pg_connect
 from cx_Oracle import connect as ora_connect
-from impala.dbapi import connect as dba_connect
+from impala.dbapi import connect as bda_connect
 
 
 os.environ['NLS_LANG'] = 'American_America.UTF8'
@@ -22,7 +22,7 @@ def execute(
     conns = {
         'PG': postgres_access,
         'ORA': oracle_access,
-        'DBA': dba_access,
+        'BDA': bda_access,
     }
 
     query = generate_query(
@@ -73,8 +73,8 @@ def oracle_access(query, domain_id):
             return curs.fetchall()
 
 
-def dba_access(query, domain_id):
-    with dba_connect(
+def bda_access(query, domain_id):
+    with bda_connect(
         host=config('IMPALA_HOST'),
         port=config('IMPALA_PORT', cast=int)
     ) as conn:

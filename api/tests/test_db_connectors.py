@@ -3,7 +3,7 @@ from unittest import TestCase, mock
 from decouple import config
 
 from api.db_connectors import (
-    dba_access,
+    bda_access,
     oracle_access,
     postgres_access,
     generate_query
@@ -106,24 +106,24 @@ class OracleAccess(CommonSetup):
         cursor.fetchall.assert_called_once_with()
 
 
-class DbaAccess(CommonSetup):
+class BdaAccess(CommonSetup):
 
     def setUp(self):
         super().setUp()
-        self.db = 'DBA'
+        self.db = 'BDA'
         self.query = 'SELECT col1, col2 FROM schema.tabela WHERE '\
                      'col_id = :1'
 
-    @mock.patch('api.db_connectors.dba_connect')
-    def test_connect_dba(self, _dba_connect):
-        dba_access(self.query, self.domain_id)
+    @mock.patch('api.db_connectors.bda_connect')
+    def test_connect_dba(self, _bda_connect):
+        bda_access(self.query, self.domain_id)
 
-        _dba_connect.assert_called_once_with(
+        _bda_connect.assert_called_once_with(
             host=config('IMPALA_HOST'),
             port=config('IMPALA_PORT', cast=int)
         )
 
-    def test_generate_query_dba(self):
+    def test_generate_query_bda(self):
         gen_query = generate_query(
             self.db,
             self.schema,
@@ -134,14 +134,14 @@ class DbaAccess(CommonSetup):
 
         self.assertEqual(gen_query, self.query)
 
-    @mock.patch('api.db_connectors.dba_connect')
-    def test_execute_dba(self, _dba_connect):
+    @mock.patch('api.db_connectors.bda_connect')
+    def test_execute_dba(self, _bda_connect):
         cursor = mock.MagicMock()
-        _dba_connect.return_value.__enter__\
+        _bda_connect.return_value.__enter__\
             .return_value.cursor.return_value.__enter__\
             .return_value = cursor
 
-        dba_access(self.query, self.domain_id)
+        bda_access(self.query, self.domain_id)
 
         cursor.execute.assert_called_once_with(self.query, (self.domain_id,))
         cursor.fetchall.assert_called_once_with()
