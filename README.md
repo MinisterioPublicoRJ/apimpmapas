@@ -30,6 +30,11 @@ git clone https://github.com/MinisterioPublicoRJ/apimpmapas.git
 
 ## Instalar dependências
 
+Caso algum dado a ser usado seja originado de alguma base Oracle,
+será necessário instalar o Oracle instant client
+No Debian/Ubuntu siga as instruções:
+https://help.ubuntu.com/community/Oracle%20Instant%20Client
+
 O projeto precisa do GDAL instalado no ambiente
 No Debian/Ubuntu use:
 
@@ -47,4 +52,17 @@ pip install -r dev-requirements.txt
 
 ```bash
 make test
+```
+
+# Rodando os testes de integração
+Esse teste valida o acesso real aos bancos usados - PostgreSQL, Oracle e Impala.
+Assim, as configurações de acesso devem estar corretamente registradas em um arquivo
+de configurações ou variáveis de ambiente.
+
+Para rodar os testes é necessário antes do comando "make test" exportar a 
+variável de ambiente INTEGRATION_TEST.
+No Debian/Ubuntu faça
+
+```bash
+export INTEGRATION_TEST=1
 ```
