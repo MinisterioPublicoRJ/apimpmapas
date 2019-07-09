@@ -7,12 +7,13 @@ from model_mommy.mommy import make
 
 
 class IntegrationTest(TestCase):
-    def test_integration_view_postgres(self):
+    def setUp(self):
         if 'INTEGRATION_TEST' not in os.environ:
             self.skipTest(
                 "Integration tests shouldn't be run along with unit tests"
             )
 
+    def test_integration_view_postgres(self):
         make(
             'api.Dado',
             id=1,
@@ -37,11 +38,6 @@ class IntegrationTest(TestCase):
         self.assertEqual(resp_json['external_data'], [[7625679.0, 8364250.0]])
 
     def test_integration_view_oracle(self):
-        if 'INTEGRATION_TEST' not in os.environ:
-            self.skipTest(
-                "Integration tests shouldn't be run along with unit tests"
-            )
-
         make(
             'api.Dado',
             id=3,
@@ -69,11 +65,6 @@ class IntegrationTest(TestCase):
         )
 
     def test_integration_view_bda(self):
-        if 'INTEGRATION_TEST' not in os.environ:
-            self.skipTest(
-                "Integration tests shouldn't be run along with unit tests"
-            )
-
         make(
             'api.Dado',
             id=3,
@@ -99,3 +90,4 @@ class IntegrationTest(TestCase):
             resp_json['external_data'],
             [['1ª PROMOTORIA DE JUSTIÇA DA INFÂNCIA E DA JUVENTUDE DE BELFORD ROXO']]
         )
+        
