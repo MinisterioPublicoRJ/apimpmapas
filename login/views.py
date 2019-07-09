@@ -20,7 +20,7 @@ class LoginView(APIView):
                 'uid': username
             }
             secret = config('SECRET_KEY')
-            token = jwt.encode(payload, secret, algorithms=["HS256"])
+            token = jwt.encode(payload, secret, algorithm="HS256")
             return Response(token, status=200)
 
         return Response('Usuário ou senha incorretos', status=403)
