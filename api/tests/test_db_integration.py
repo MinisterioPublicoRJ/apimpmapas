@@ -61,7 +61,8 @@ class IntegrationTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(
             resp_json['external_data'],
-            [['1ª PROMOTORIA DE JUSTIÇA DA INFÂNCIA E DA JUVENTUDE DE BELFORD ROXO']]
+            [['1ª PROMOTORIA DE JUSTIÇA DA INFÂNCIA E'
+              'DA JUVENTUDE DE BELFORD ROXO']]
         )
 
     def test_integration_view_bda(self):
@@ -88,6 +89,6 @@ class IntegrationTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(
             resp_json['external_data'],
-            [['1ª PROMOTORIA DE JUSTIÇA DA INFÂNCIA E DA JUVENTUDE DE BELFORD ROXO']]
+            [['1ª PROMOTORIA DE JUSTIÇA DA INFÂNCIA E'
+              'DA JUVENTUDE DE BELFORD ROXO']]
         )
-        
