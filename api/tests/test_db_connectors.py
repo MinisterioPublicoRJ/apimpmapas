@@ -4,6 +4,7 @@ from decouple import config
 
 from api.db_connectors import (
     bda_access,
+    execute as db_execute,
     oracle_access,
     postgres_access,
     generate_query
@@ -50,6 +51,33 @@ class PostgresAccess(CommonSetup):
 
         self.assertEqual(gen_query, self.query)
 
+    @mock.patch(
+        'api.db_connectors.generate_query',
+        return_value='generated_query'
+    )
+    @mock.patch('api.db_connectors.postgres_access')
+    def test_call_correct_pg(self, _postgres_access, _generate_query):
+        db_execute(
+            self.db,
+            self.schema,
+            self.table,
+            self.columns,
+            self.id_column,
+            self.domain_id
+        )
+
+        _generate_query.assert_called_once_with(
+            self.db,
+            self.schema,
+            self.table,
+            self.columns,
+            self.id_column
+        )
+        _postgres_access.assert_called_once_with(
+            'generated_query',
+            self.domain_id
+        )
+
     @mock.patch('api.db_connectors.pg_connect')
     def test_execute_postgres(self, _pg_connect):
 
@@ -93,6 +121,33 @@ class OracleAccess(CommonSetup):
 
         self.assertEqual(gen_query, self.query)
 
+    @mock.patch(
+        'api.db_connectors.generate_query',
+        return_value='generated_query'
+    )
+    @mock.patch('api.db_connectors.oracle_access')
+    def test_call_correct_pg(self, _oracle_access, _generate_query):
+        db_execute(
+            self.db,
+            self.schema,
+            self.table,
+            self.columns,
+            self.id_column,
+            self.domain_id
+        )
+
+        _generate_query.assert_called_once_with(
+            self.db,
+            self.schema,
+            self.table,
+            self.columns,
+            self.id_column
+        )
+        _oracle_access.assert_called_once_with(
+            'generated_query',
+            self.domain_id
+        )
+
     @mock.patch('api.db_connectors.ora_connect')
     def test_execute_oracle(self, _ora_connect):
         cursor = mock.MagicMock()
@@ -133,6 +188,33 @@ class BdaAccess(CommonSetup):
         )
 
         self.assertEqual(gen_query, self.query)
+
+    @mock.patch(
+        'api.db_connectors.generate_query',
+        return_value='generated_query'
+    )
+    @mock.patch('api.db_connectors.bda_access')
+    def test_call_correct_pg(self, _bda_access, _generate_query):
+        db_execute(
+            self.db,
+            self.schema,
+            self.table,
+            self.columns,
+            self.id_column,
+            self.domain_id
+        )
+
+        _generate_query.assert_called_once_with(
+            self.db,
+            self.schema,
+            self.table,
+            self.columns,
+            self.id_column
+        )
+        _bda_access.assert_called_once_with(
+            'generated_query',
+            self.domain_id
+        )
 
     @mock.patch('api.db_connectors.bda_connect')
     def test_execute_dba(self, _bda_connect):
