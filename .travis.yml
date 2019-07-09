@@ -1,0 +1,16 @@
+language: python
+python:
+  - "3.5"
+  - "3.6"
+  - "3.7"
+install:
+  pip install -r dev-requirements.txt;
+script:
+  - flake8 .
+  - make test
+after_success:
+  - codecov 
+notifications:
+  email:
+- estevan.barbara@gmail.com
+- rhenan.bartels@gmail.com
