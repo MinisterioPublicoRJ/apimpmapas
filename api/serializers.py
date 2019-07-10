@@ -6,10 +6,17 @@ from api.models import Entidade, Dado
 
 class EntidadeSerializer(serializers.ModelSerializer):
     data_list = serializers.SerializerMethodField()
+    entity_type = serializers.SerializerMethodField()
 
     class Meta:
         model = Entidade
-        fields = '__all__'
+        fields = [
+            'id',
+            'data_list',
+            'domain_id',
+            'exibition_field',
+            'entity_type',
+        ]
 
     def __init__(self, *args, **kwargs):
         self.entity_type = kwargs.pop('entity_type')
@@ -17,6 +24,15 @@ class EntidadeSerializer(serializers.ModelSerializer):
 
     def get_data_list(self, obj):
         return Dado.objects.filter(entity_type=self.entity_type).values('id')
+
+    def get_entity_type(self, obj):
+        if obj.entity_type == 'EST':
+            return 'Estado'
+        elif obj.entity_type == 'MUN':
+            return 'Municipio'
+        elif obj.entity_type == 'ORG':
+            return 'Orgao'
+        return 'Unknown'
 
 
 class DadoSerializer(serializers.ModelSerializer):

@@ -8,19 +8,36 @@ from model_mommy.mommy import make
 class EntidadeViewTest(TestCase):
 
     def test_get_entidade(self):
-        entidade_obj = make(
+        expected_answer = {
+            'id': 2,
+            'data_list': [
+                {'id': 1},
+                {'id': 7},
+            ],
+            'domain_id': '33',
+            'exibition_field': 'Rio de Janeiro',
+            'entity_type': 'Estado'
+        }
+
+        make(
             'api.Entidade',
-            entity_type='MUN',
-            domain_id=1
+            id=2,
+            entity_type='EST',
+            exibition_field='Rio de Janeiro',
+            domain_id=33
         )
 
-        url = reverse('api:detail_entidade', args=('MUN', '1',))
+        make('api.Dado', id=1, entity_type='EST')
+        make('api.Dado', id=7, entity_type='EST')
+        make('api.Dado', id=9, entity_type='MUN')
+
+        url = reverse('api:detail_entidade', args=('EST', '33',))
 
         resp = self.client.get(url)
         resp_json = resp.json()
 
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp_json['title'], entidade_obj.title)
+        self.assertEqual(resp_json, expected_answer)
 
     def test_get_entidade_404(self):
         make('api.Entidade', entity_type='MUN', domain_id=404)
