@@ -80,29 +80,43 @@ class DetailDadosViewTest(TestCase):
 
     @mock.patch('api.serializers.execute')
     def test_dados_estado(self, _execute):
+        data_id = 7
+        external_data = '202'
+        external_source = 'http://mca.mp.rj.gov.br/'
+        external_description = None
+        exibition_field = 'Abrigos para crianças e adolescentes'
+        domain_id = '33'
+        entity_type = 'EST'
+
+        _execute.return_value = [(
+            external_data,
+            external_source,
+            external_description
+        )]
+
         expected_response = {
-            'id': 7,
+            'id': data_id,
             'external_data': {
-                'dado': '202',
-                'fonte': 'http://mca.mp.rj.gov.br/',
-                'descricao': None
+                'dado': external_data,
+                'fonte': external_source,
+                'descricao': external_description
             },
-            'exibition_field': 'Abrigos para crianças e adolescentes',
+            'exibition_field': exibition_field,
             'data_type': 'texto_pequeno_destaque'
         }
 
-        _execute.return_value = [('202', 'http://mca.mp.rj.gov.br/', None)]
-        domain_id = '33'
-
         make(
             'api.Dado',
-            id=7,
+            id=data_id,
             data_type='TEX_PEQ_DEST',
-            entity_type='EST',
-            exibition_field='Abrigos para crianças e adolescentes'
+            entity_type=entity_type,
+            exibition_field=exibition_field
         )
 
-        url = reverse('api:detail_dado', args=(domain_id, '7',))
+        url = reverse(
+            'api:detail_dado',
+            args=(entity_type, domain_id, data_id,)
+        )
         resp = self.client.get(url)
         resp_json = resp.json()
 

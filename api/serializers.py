@@ -72,15 +72,19 @@ class DadoSerializer(serializers.ModelSerializer):
             obj.id_column,
             self.domain_id
         )
-        main_result = db_result[0]
 
-        data = {
-            'dado': main_result[0],
-            'fonte': main_result[1],
-            'descricao': main_result[2],
-        }
+        if db_result:
+            main_result = db_result[0]
 
-        return data
+            data = {
+                'dado': main_result[0],
+                'fonte': main_result[1],
+                'descricao': main_result[2],
+            }
+
+            return data
+
+        return {}
 
     def get_data_type(self, obj):
         if obj.data_type == 'TEX_GDE':

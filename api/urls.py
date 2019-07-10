@@ -12,7 +12,7 @@ urlpatterns = [
         name='detail_entidade'
     ),
     path(
-        'data/<str:domain_id>/<int:pk>',
+        'data/<str:entity_type>/<str:domain_id>/<int:pk>',
         DadoView.as_view(),
         name='detail_dado'
     ),
