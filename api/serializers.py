@@ -32,24 +32,22 @@ class EntidadeSerializer(serializers.ModelSerializer):
             return 'Municipio'
         elif obj.entity_type == 'ORG':
             return 'Orgao'
-        return 'Unknown'
+        return 'Tipo_desconhecido'
 
 
 class DadoSerializer(serializers.ModelSerializer):
+    data_type = serializers.SerializerMethodField()
     external_data = serializers.SerializerMethodField(
         method_name="execute_query"
     )
 
     class Meta:
         model = Dado
-        exclude = [
-            'title',
-            'entity_type',
-            'schema',
-            'database',
-            'table',
-            'columns',
-            'id_column'
+        fields = [
+            'id',
+            'external_data',
+            'exibition_field',
+            'data_type'
         ]
 
     def __init__(self, *args, **kwargs):
@@ -57,11 +55,33 @@ class DadoSerializer(serializers.ModelSerializer):
         super().__init__(*args, **kwargs)
 
     def execute_query(self, obj):
-        return execute(
+        columns = []
+        columns.append(obj.data_column)
+        columns.append(obj.source_column if obj.source_column else 'NULL as fonte')
+        columns.append(obj.details_column if obj.details_column else 'NULL as detalhes')
+
+        db_result = execute(
             obj.database,
             obj.schema,
             obj.table,
-            obj.columns,
+            columns,
             obj.id_column,
             self.domain_id
         )
+        data = {
+            'dado': db_result[0],
+            'fonte': db_result[1],
+            'descricao': db_result[2],
+        }
+
+        return data
+
+    def get_data_type(self, obj):
+        if obj.data_type == 'TEX_GDE':
+            return 'texto_grande'
+        elif obj.data_type == 'TEX_PEQ':
+            return 'texto_pequeno'
+        elif obj.data_type == 'TEX_PEQ_DEST':
+            return 'texto_pequeno_destaque'
+
+        return 'tipo_desconhecido'

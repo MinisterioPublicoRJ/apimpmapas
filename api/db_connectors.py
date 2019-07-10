@@ -48,6 +48,8 @@ def generate_query(db_name, schema, table, columns, id_column):
         query += "%s"
     else:
         query += ":1"
+
+    print(query)
     return query
 
 

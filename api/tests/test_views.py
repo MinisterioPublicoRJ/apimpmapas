@@ -80,25 +80,31 @@ class DetailDadosViewTest(TestCase):
 
     @mock.patch('api.serializers.execute')
     def test_dados_estado(self, _execute):
-        expected_response = [2143, 23546, 23546]
+        expected_response = {
+            'id': 7,
+            'external_data': {
+                'dado': '202',
+                'fonte': 'http://mca.mp.rj.gov.br/',
+                'descricao': None
+            },
+            'exibition_field': 'Abrigos para crianças e adolescentes',
+            'data_type': 'texto_pequeno_destaque'
+        }
 
-        _execute.return_value = expected_response
+        _execute.return_value = ['202', 'http://mca.mp.rj.gov.br/', None]
         domain_id = '33'
 
-        dado_obj = make('api.Dado', id=1, columns=['col1', 'col2', 'col3'])
+        make(
+            'api.Dado',
+            id=7,
+            data_type='TEX_PEQ_DEST',
+            entity_type='EST',
+            exibition_field='Abrigos para crianças e adolescentes'
+        )
 
-        url = reverse('api:detail_dado', args=(domain_id, '1',))
+        url = reverse('api:detail_dado', args=(domain_id, '7',))
         resp = self.client.get(url)
         resp_json = resp.json()
 
-        _execute.assert_called_once_with(
-            dado_obj.database,
-            dado_obj.schema,
-            dado_obj.table,
-            dado_obj.columns,
-            dado_obj.id_column,
-            domain_id
-        )
-
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp_json['id'], dado_obj.id)
+        self.assertEqual(resp_json, expected_response)
