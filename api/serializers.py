@@ -57,8 +57,12 @@ class DadoSerializer(serializers.ModelSerializer):
     def execute_query(self, obj):
         columns = []
         columns.append(obj.data_column)
-        columns.append(obj.source_column if obj.source_column else 'NULL as fonte')
-        columns.append(obj.details_column if obj.details_column else 'NULL as detalhes')
+        columns.append(
+            obj.source_column if obj.source_column else 'NULL as fonte'
+        )
+        columns.append(
+            obj.details_column if obj.details_column else 'NULL as detalhes'
+        )
 
         db_result = execute(
             obj.database,
