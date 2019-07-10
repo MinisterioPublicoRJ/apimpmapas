@@ -49,7 +49,6 @@ def generate_query(db_name, schema, table, columns, id_column):
     else:
         query += ":1"
 
-    print(query)
     return query
 
 
