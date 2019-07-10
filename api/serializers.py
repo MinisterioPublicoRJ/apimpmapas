@@ -72,10 +72,12 @@ class DadoSerializer(serializers.ModelSerializer):
             obj.id_column,
             self.domain_id
         )
+        main_result = db_result[0]
+
         data = {
-            'dado': db_result[0],
-            'fonte': db_result[1],
-            'descricao': db_result[2],
+            'dado': main_result[0],
+            'fonte': main_result[1],
+            'descricao': main_result[2],
         }
 
         return data

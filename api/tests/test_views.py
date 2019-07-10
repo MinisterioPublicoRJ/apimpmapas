@@ -91,7 +91,7 @@ class DetailDadosViewTest(TestCase):
             'data_type': 'texto_pequeno_destaque'
         }
 
-        _execute.return_value = ['202', 'http://mca.mp.rj.gov.br/', None]
+        _execute.return_value = [('202', 'http://mca.mp.rj.gov.br/', None)]
         domain_id = '33'
 
         make(
