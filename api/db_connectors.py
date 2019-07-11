@@ -1,7 +1,7 @@
 import os
 
 from decouple import config
-from psycopg2 import connect as pg_connect
+from psycopg2 import connect as pg_connect, Error as PG_Error
 from cx_Oracle import connect as ora_connect
 from impala.dbapi import connect as bda_connect
 
@@ -59,8 +59,11 @@ def postgres_access(query, domain_id):
         user=config('PG_USER')
     ) as conn:
         with conn.cursor() as curs:
-            curs.execute(query, (domain_id,))
-            return curs.fetchall()
+            try:
+                curs.execute(query, (domain_id,))
+                return curs.fetchall()
+            except PG_Error:
+                return None
 
 
 def oracle_access(query, domain_id):
