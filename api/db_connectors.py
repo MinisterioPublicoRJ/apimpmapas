@@ -1,4 +1,5 @@
 import os
+import logging
 
 from decouple import config
 from psycopg2 import connect as pg_connect, Error as PG_Error
@@ -6,6 +7,7 @@ from cx_Oracle import connect as ora_connect
 from impala.dbapi import connect as bda_connect
 
 
+logger = logging.getLogger(__name__)
 os.environ['NLS_LANG'] = 'American_America.UTF8'
 
 
