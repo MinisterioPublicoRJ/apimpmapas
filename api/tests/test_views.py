@@ -7,7 +7,7 @@ from model_mommy.mommy import make
 
 class EntidadeViewTest(TestCase):
 
-    def test_get_entidade(self):
+    def test_entidade_ok(self):
         expected_answer = {
             'id': 2,
             'data_list': [
@@ -39,7 +39,7 @@ class EntidadeViewTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp_json, expected_answer)
 
-    def test_get_entidade_404(self):
+    def test_entidade_nao_existente(self):
         make('api.Entidade', entity_type='MUN', domain_id=404)
 
         url = reverse('api:detail_entidade', args=('MUN', '1',))
@@ -78,47 +78,91 @@ class ListDadosViewTest(TestCase):
 
 class DetailDadosViewTest(TestCase):
 
+    def setUp(self):
+        self.data_id = 7
+        self.data_id_alt = 9
+        self.external_data = '202'
+        self.external_source = 'http://mca.mp.rj.gov.br/'
+        self.external_description = None
+        self.exibition_field = 'Abrigos para crianças e adolescentes'
+        self.domain_id = '33'
+        self.entity_type = 'EST'
+        self.text_type = 'TEX_PEQ_DEST'
+        self.text_response = 'texto_pequeno_destaque'
+
     @mock.patch('api.serializers.execute')
-    def test_dados_estado(self, _execute):
-        data_id = 7
-        external_data = '202'
-        external_source = 'http://mca.mp.rj.gov.br/'
-        external_description = None
-        exibition_field = 'Abrigos para crianças e adolescentes'
-        domain_id = '33'
-        entity_type = 'EST'
+    def test_dado_ok(self, _execute):
+        expected_response = {
+            'id': self.data_id,
+            'external_data': {
+                'dado': self.external_data,
+                'fonte': self.external_source,
+                'descricao': self.external_description
+            },
+            'exibition_field': self.exibition_field,
+            'data_type': self.text_response
+        }
 
         _execute.return_value = [(
-            external_data,
-            external_source,
-            external_description
+            self.external_data,
+            self.external_source,
+            self.external_description
         )]
-
-        expected_response = {
-            'id': data_id,
-            'external_data': {
-                'dado': external_data,
-                'fonte': external_source,
-                'descricao': external_description
-            },
-            'exibition_field': exibition_field,
-            'data_type': 'texto_pequeno_destaque'
-        }
 
         make(
             'api.Dado',
-            id=data_id,
-            data_type='TEX_PEQ_DEST',
-            entity_type=entity_type,
-            exibition_field=exibition_field
+            id=self.data_id,
+            data_type=self.text_type,
+            entity_type=self.entity_type,
+            exibition_field=self.exibition_field
         )
 
         url = reverse(
             'api:detail_dado',
-            args=(entity_type, domain_id, data_id,)
+            args=(self.entity_type, self.domain_id, self.data_id)
         )
         resp = self.client.get(url)
         resp_json = resp.json()
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp_json, expected_response)
+
+    @mock.patch('api.serializers.execute')
+    def test_dado_parametro_errado(self, _execute):
+        _execute.return_value = []
+
+        make(
+            'api.Dado',
+            id=self.data_id,
+            data_type=self.text_type,
+            entity_type=self.entity_type,
+            exibition_field=self.exibition_field
+        )
+
+        url = reverse(
+            'api:detail_dado',
+            args=(self.entity_type, self.domain_id, self.data_id)
+        )
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 404)
+
+    def test_dado_query_errada(self):
+        pass
+
+    def test_dado_nao_existente(self):
+        make(
+            'api.Dado',
+            id=self.data_id_alt,
+            data_type=self.text_type,
+            entity_type=self.entity_type,
+            exibition_field=self.exibition_field
+        )
+
+        url = reverse(
+            'api:detail_dado',
+            args=(self.entity_type, self.domain_id, self.data_id)
+        )
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 404)
