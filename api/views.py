@@ -11,15 +11,13 @@ class EntidadeView(GenericAPIView):
     serializer_class = EntidadeSerializer
     queryset = Entidade.objects.all()
 
-    def get_object(self):
-        return get_object_or_404(
+    def get(self, request, *args, **kwargs):
+        obj = get_object_or_404(
             self.queryset,
             entity_type=self.kwargs['entity_type'],
             domain_id=self.kwargs['domain_id']
         )
 
-    def get(self, request, *args, **kwargs):
-        obj = self.get_object()
         return Response(EntidadeSerializer(
             obj,
             entity_type=self.kwargs['entity_type']
