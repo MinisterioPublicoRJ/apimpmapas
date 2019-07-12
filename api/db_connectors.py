@@ -6,6 +6,8 @@ from psycopg2 import connect as pg_connect, Error as PG_Error
 from cx_Oracle import connect as ora_connect
 from impala.dbapi import connect as bda_connect
 
+from api.exceptions import QueryError
+
 
 logger = logging.getLogger(__name__)
 os.environ['NLS_LANG'] = 'American_America.UTF8'
@@ -66,7 +68,7 @@ def postgres_access(query, domain_id):
                 return curs.fetchall()
             except PG_Error as e:
                 logger.error("Error on query: " + str(e))
-                return None
+                raise QueryError(e)
 
 
 def oracle_access(query, domain_id):

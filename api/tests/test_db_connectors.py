@@ -8,7 +8,8 @@ from api.db_connectors import (
     oracle_access,
     postgres_access,
     generate_query,
-    PG_Error
+    PG_Error,
+    QueryError
 )
 
 
@@ -92,20 +93,21 @@ class PostgresAccess(CommonSetup):
         cursor.execute.assert_called_once_with(self.query, (self.domain_id,))
         cursor.fetchall.assert_called_once_with()
 
+    @mock.patch('api.db_connectors.QueryError')
     @mock.patch('api.db_connectors.pg_connect')
-    def test_query_wrong(self, _pg_connect):
+    def test_query_wrong(self, _pg_connect, _QueryError):
         cursor = mock.MagicMock()
-        cursor.execute.side_effect = PG_Error
+        cursor.execute.side_effect = QueryError
 
         _pg_connect.return_value.__enter__\
             .return_value.cursor.return_value.__enter__\
             .return_value = cursor
 
-        query_data = postgres_access(self.query, self.domain_id)
+        postgres_access(self.query, self.domain_id)
 
         cursor.execute.assert_called_once_with(self.query, (self.domain_id,))
         self.assertRaises(PG_Error)
-        self.assertEqual(query_data, None)
+        _QueryError.assert_called_once_with()
 
 
 class OracleAccess(CommonSetup):
