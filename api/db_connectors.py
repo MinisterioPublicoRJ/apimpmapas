@@ -64,7 +64,8 @@ def postgres_access(query, domain_id):
             try:
                 curs.execute(query, (domain_id,))
                 return curs.fetchall()
-            except PG_Error:
+            except PG_Error as e:
+                logger.error("Error on query: " + str(e))
                 return None
 
 

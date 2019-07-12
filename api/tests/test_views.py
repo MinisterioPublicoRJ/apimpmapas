@@ -128,7 +128,7 @@ class DetailDadosViewTest(TestCase):
         self.assertEqual(resp_json, expected_response)
 
     @mock.patch('api.serializers.execute')
-    def test_dado_parametro_errado(self, _execute):
+    def test_dado_sem_retorno_db(self, _execute):
         _execute.return_value = []
 
         make(
@@ -146,9 +146,6 @@ class DetailDadosViewTest(TestCase):
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 404)
-
-    def test_dado_query_errada(self):
-        pass
 
     def test_dado_nao_existente(self):
         make(
