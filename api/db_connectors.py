@@ -68,7 +68,7 @@ def postgres_access(query, domain_id):
                 return curs.fetchall()
             except PG_Error as e:
                 logger.error("Error on query: " + str(e))
-                raise QueryError(e)
+                raise QueryError(str(e)) from e
 
 
 def oracle_access(query, domain_id):
