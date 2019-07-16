@@ -92,6 +92,9 @@ class DetailDadosViewTest(TestCase):
         self.entity_type = 'EST'
         self.text_type = 'TEX_PEQ_DEST'
         self.text_response = 'texto_pequeno_destaque'
+        self.icon_id = 1
+        self.icon_file = 'icones/python.svg'
+
 
     @mock.patch('api.serializers.execute')
     def test_dado_ok(self, _execute):
@@ -103,7 +106,8 @@ class DetailDadosViewTest(TestCase):
                 'descricao': self.external_description
             },
             'exibition_field': self.exibition_field,
-            'data_type': self.text_response
+            'data_type': self.text_response,
+            'icon': self.icon_file
         }
 
         _execute.return_value = [(
@@ -118,6 +122,7 @@ class DetailDadosViewTest(TestCase):
             data_type=self.text_type,
             entity_type=self.entity_type,
             exibition_field=self.exibition_field
+            icon__file_path=self.icon_file
         )
 
         url = reverse(

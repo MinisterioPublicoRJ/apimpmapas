@@ -30,6 +30,11 @@ DATA_CHOICES = [
 ]
 
 
+class Icone(models.Model):
+    name = models.CharField(max_length=20)
+    file_path = models.FileField(upload_to='icones')
+
+
 class Entidade(models.Model):
     # ID único da entidade para correspondência com o banco externo
     domain_id = models.CharField(max_length=20)
@@ -65,6 +70,13 @@ class Dado(models.Model):
         max_length=3,
         choices=DATABASE_CHOICES,
         default=POSTGRES,
+    )
+
+    icon = models.ForeignKey(
+        'Icone',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL
     )
 
     schema = models.CharField(max_length=100)
