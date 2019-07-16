@@ -3,7 +3,7 @@ import logging
 
 from decouple import config
 from psycopg2 import connect as pg_connect, Error as PG_Error
-from cx_Oracle import connect as ora_connect
+from cx_Oracle import connect as ora_connect, DatabaseError as ORA_Error
 from impala.dbapi import connect as bda_connect
 
 from api.exceptions import QueryError
@@ -78,8 +78,12 @@ def oracle_access(query, domain_id):
         dsn=config('ORA_HOST')
     ) as conn:
         with conn.cursor() as curs:
-            curs.execute(query, (domain_id, ))
-            return curs.fetchall()
+            try:
+                curs.execute(query, (domain_id, ))
+                return curs.fetchall()
+            except ORA_Error as e:
+                logger.error("Error on query: " + str(e))
+                raise QueryError(str(e)) from e
 
 
 def bda_access(query, domain_id):

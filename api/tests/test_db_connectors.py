@@ -8,6 +8,7 @@ from api.db_connectors import (
     oracle_access,
     postgres_access,
     generate_query,
+    ORA_Error,
     PG_Error,
     QueryError
 )
@@ -94,7 +95,7 @@ class PostgresAccess(CommonSetup):
         cursor.fetchall.assert_called_once_with()
 
     @mock.patch('api.db_connectors.pg_connect')
-    def test_query_wrong(self, _pg_connect):
+    def test_query_wrong_postgres(self, _pg_connect):
         cursor = mock.MagicMock()
         cursor.execute.side_effect = PG_Error('test error')
 
@@ -173,6 +174,18 @@ class OracleAccess(CommonSetup):
 
         cursor.execute.assert_called_once_with(self.query, (self.domain_id,))
         cursor.fetchall.assert_called_once_with()
+
+    @mock.patch('api.db_connectors.ora_connect')
+    def test_query_wrong_oracle(self, _ora_connect):
+        cursor = mock.MagicMock()
+        cursor.execute.side_effect = ORA_Error('test error')
+
+        with self.assertRaises(QueryError):
+            _ora_connect.return_value.__enter__\
+                .return_value.cursor.return_value.__enter__\
+                .return_value = cursor
+
+            oracle_access(self.query, self.domain_id)
 
 
 class BdaAccess(CommonSetup):
