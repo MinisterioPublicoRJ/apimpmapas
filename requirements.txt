@@ -5,6 +5,8 @@ django-cors-headers
 django-filter
 djangorestframework>=3.9
 impyla
+django-ordered-model
+gunicorn==19.9.0
 Markdown
 psycopg2
 psycopg2-binary
