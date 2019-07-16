@@ -1,8 +1,11 @@
 from unittest import mock
+
 from django.test import TestCase
 from django.urls import reverse
 
 from model_mommy.mommy import make
+
+from api.exceptions import QueryError
 
 
 class EntidadeViewTest(TestCase):
@@ -151,6 +154,26 @@ class DetailDadosViewTest(TestCase):
         make(
             'api.Dado',
             id=self.data_id_alt,
+            data_type=self.text_type,
+            entity_type=self.entity_type,
+            exibition_field=self.exibition_field
+        )
+
+        url = reverse(
+            'api:detail_dado',
+            args=(self.entity_type, self.domain_id, self.data_id)
+        )
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 404)
+
+    @mock.patch('api.serializers.execute')
+    def test_dado_com_erro(self, _execute):
+        _execute.side_effect = QueryError('test error')
+
+        make(
+            'api.Dado',
+            id=self.data_id,
             data_type=self.text_type,
             entity_type=self.entity_type,
             exibition_field=self.exibition_field

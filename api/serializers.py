@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from api.db_connectors import execute
+from api.exceptions import QueryError
 from api.models import Entidade, Dado
 
 
@@ -63,15 +64,17 @@ class DadoSerializer(serializers.ModelSerializer):
         columns.append(
             obj.details_column if obj.details_column else 'NULL as detalhes'
         )
-
-        db_result = execute(
-            obj.database,
-            obj.schema,
-            obj.table,
-            columns,
-            obj.id_column,
-            self.domain_id
-        )
+        try:
+            db_result = execute(
+                obj.database,
+                obj.schema,
+                obj.table,
+                columns,
+                obj.id_column,
+                self.domain_id
+            )
+        except QueryError:
+            return {}
 
         if db_result:
             main_result = db_result[0]

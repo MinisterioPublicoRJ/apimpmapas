@@ -95,10 +95,10 @@ class PostgresAccess(CommonSetup):
 
     @mock.patch('api.db_connectors.pg_connect')
     def test_query_wrong(self, _pg_connect):
-        with self.assertRaises(QueryError):
-            cursor = mock.MagicMock()
-            cursor.execute.side_effect = PG_Error('test error')
+        cursor = mock.MagicMock()
+        cursor.execute.side_effect = PG_Error('test error')
 
+        with self.assertRaises(QueryError):
             _pg_connect.return_value.__enter__\
                 .return_value.cursor.return_value.__enter__\
                 .return_value = cursor
