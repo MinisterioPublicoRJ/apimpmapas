@@ -109,7 +109,11 @@ Control.system-ca-bundle
 GitHub.sublime-settings 
 
 # Visual Studio Code # 
-.vscode/* 
+.vscode/*
+
+# django
+static/
+media/
 
 # Ubuntu
 .directory

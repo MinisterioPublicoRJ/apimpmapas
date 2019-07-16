@@ -4,6 +4,7 @@ django-cors-headers
 django-ordered-model
 django-filter
 dj-database-url
+gunicorn==19.9.0
 Markdown
 psycopg2
 psycopg2-binary
