@@ -30,15 +30,17 @@ git clone https://github.com/MinisterioPublicoRJ/apimpmapas.git
 
 ## Instalar dependências
 
-```bash
-pip install -r dev-requirements.txt
-```
-
 O projeto precisa do GDAL instalado no ambiente
 No Debian/Ubuntu use:
 
 ```bash
 sudo apt-get install binutils libproj-dev gdal-bin
+```
+
+Em seguida devem ser instaladas as dependências Python
+
+```bash
+pip install -r dev-requirements.txt
 ```
 
 # Rodando os testes

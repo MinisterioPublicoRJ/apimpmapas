@@ -3,10 +3,6 @@ from rest_framework import serializers
 from api.models import Entidade, Dado
 
 
-class DataIdSerializer(serializers.Serializer):
-    data_id = serializers.IntegerField(read_only=True)
-
-
 class EntidadeSerializer(serializers.ModelSerializer):
     data_list = serializers.SerializerMethodField()
 

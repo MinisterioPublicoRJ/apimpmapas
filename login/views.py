@@ -10,6 +10,7 @@ from login.sca import authenticate
 class LoginView(APIView):
 
     def post(self, request, *args, **kwargs):
+
         username = request.POST['username']
         password = request.POST['password']
 
@@ -20,7 +21,7 @@ class LoginView(APIView):
                 'uid': username
             }
             secret = config('SECRET_KEY')
-            token = jwt.encode(payload, secret, algorithms=["HS256"])
+            token = jwt.encode(payload, secret, algorithm="HS256")
             return Response(token, status=200)
 
         return Response('Usuário ou senha incorretos', status=403)
