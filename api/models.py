@@ -34,6 +34,10 @@ class Icone(models.Model):
     name = models.CharField(max_length=20)
     file_path = models.FileField(upload_to='icones')
 
+    def __str__(self):
+        if self is not None:
+            return self.name
+
 
 class Entidade(models.Model):
     # ID único da entidade para correspondência com o banco externo

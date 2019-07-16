@@ -38,9 +38,8 @@ class EntidadeSerializer(serializers.ModelSerializer):
 
 class DadoSerializer(serializers.ModelSerializer):
     data_type = serializers.SerializerMethodField()
-    external_data = serializers.SerializerMethodField(
-        method_name="execute_query"
-    )
+    external_data = serializers.SerializerMethodField()
+    icon = serializers.SerializerMethodField()
 
     class Meta:
         model = Dado
@@ -48,14 +47,15 @@ class DadoSerializer(serializers.ModelSerializer):
             'id',
             'external_data',
             'exibition_field',
-            'data_type'
+            'data_type',
+            'icon'
         ]
 
     def __init__(self, *args, **kwargs):
         self.domain_id = kwargs.pop('domain_id')
         super().__init__(*args, **kwargs)
 
-    def execute_query(self, obj):
+    def get_external_data(self, obj):
         columns = []
         columns.append(obj.data_column)
         columns.append(
@@ -98,3 +98,9 @@ class DadoSerializer(serializers.ModelSerializer):
             return 'texto_pequeno_destaque'
 
         return 'tipo_desconhecido'
+
+    def get_icon(self, obj):
+        if obj.icon:
+            icon_url = obj.icon.file_path.url
+            return icon_url
+        return None

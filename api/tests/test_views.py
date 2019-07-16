@@ -1,5 +1,6 @@
 from unittest import mock
 
+from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 
@@ -92,9 +93,7 @@ class DetailDadosViewTest(TestCase):
         self.entity_type = 'EST'
         self.text_type = 'TEX_PEQ_DEST'
         self.text_response = 'texto_pequeno_destaque'
-        self.icon_id = 1
         self.icon_file = 'icones/python.svg'
-
 
     @mock.patch('api.serializers.execute')
     def test_dado_ok(self, _execute):
@@ -107,7 +106,7 @@ class DetailDadosViewTest(TestCase):
             },
             'exibition_field': self.exibition_field,
             'data_type': self.text_response,
-            'icon': self.icon_file
+            'icon': settings.MEDIA_URL + self.icon_file
         }
 
         _execute.return_value = [(
@@ -121,7 +120,7 @@ class DetailDadosViewTest(TestCase):
             id=self.data_id,
             data_type=self.text_type,
             entity_type=self.entity_type,
-            exibition_field=self.exibition_field
+            exibition_field=self.exibition_field,
             icon__file_path=self.icon_file
         )
 
