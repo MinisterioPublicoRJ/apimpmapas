@@ -8,6 +8,7 @@ from api.db_connectors import (
     oracle_access,
     postgres_access,
     generate_query,
+    BDA_Error,
     ORA_Error,
     PG_Error,
     QueryError
@@ -254,3 +255,15 @@ class BdaAccess(CommonSetup):
 
         cursor.execute.assert_called_once_with(self.query, (self.domain_id,))
         cursor.fetchall.assert_called_once_with()
+
+    @mock.patch('api.db_connectors.bda_connect')
+    def test_query_wrong_bda(self, _bda_connect):
+        cursor = mock.MagicMock()
+        cursor.execute.side_effect = BDA_Error('test error')
+
+        with self.assertRaises(QueryError):
+            _bda_connect.return_value.__enter__\
+                .return_value.cursor.return_value.__enter__\
+                .return_value = cursor
+
+            bda_access(self.query, self.domain_id)
