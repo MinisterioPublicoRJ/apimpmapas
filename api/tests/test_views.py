@@ -1,27 +1,49 @@
+from unittest import mock
+
+from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 
 from model_mommy.mommy import make
 
+from api.exceptions import QueryError
+
 
 class EntidadeViewTest(TestCase):
 
-    def test_get_entidade(self):
-        entidade_obj = make(
+    def test_entidade_ok(self):
+        expected_answer = {
+            'id': 2,
+            'data_list': [
+                {'id': 1},
+                {'id': 7},
+            ],
+            'domain_id': '33',
+            'exibition_field': 'Rio de Janeiro',
+            'entity_type': 'Estado'
+        }
+
+        make(
             'api.Entidade',
-            entity_type='MUN',
-            domain_id=1
+            id=2,
+            entity_type='EST',
+            exibition_field='Rio de Janeiro',
+            domain_id=33
         )
 
-        url = reverse('api:detail_entidade', args=('MUN', '1',))
+        make('api.Dado', id=1, entity_type='EST')
+        make('api.Dado', id=7, entity_type='EST')
+        make('api.Dado', id=9, entity_type='MUN')
+
+        url = reverse('api:detail_entidade', args=('EST', '33',))
 
         resp = self.client.get(url)
         resp_json = resp.json()
 
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp_json['title'], entidade_obj.title)
+        self.assertEqual(resp_json, expected_answer)
 
-    def test_get_entidade_404(self):
+    def test_entidade_nao_existente(self):
         make('api.Entidade', entity_type='MUN', domain_id=404)
 
         url = reverse('api:detail_entidade', args=('MUN', '1',))
@@ -56,3 +78,115 @@ class ListDadosViewTest(TestCase):
             resp_json['data_list'][1]['id'],
             dado_object_mun[1].id
         )
+
+
+class DetailDadosViewTest(TestCase):
+
+    def setUp(self):
+        self.data_id = 7
+        self.data_id_alt = 9
+        self.external_data = '202'
+        self.external_source = 'http://mca.mp.rj.gov.br/'
+        self.external_description = None
+        self.exibition_field = 'Abrigos para crianças e adolescentes'
+        self.domain_id = '33'
+        self.entity_type = 'EST'
+        self.text_type = 'TEX_PEQ_DEST'
+        self.text_response = 'texto_pequeno_destaque'
+        self.icon_file = 'icones/python.svg'
+
+    @mock.patch('api.serializers.execute')
+    def test_dado_ok(self, _execute):
+        expected_response = {
+            'id': self.data_id,
+            'external_data': {
+                'dado': self.external_data,
+                'fonte': self.external_source,
+                'descricao': self.external_description
+            },
+            'exibition_field': self.exibition_field,
+            'data_type': self.text_response,
+            'icon': settings.MEDIA_URL + self.icon_file
+        }
+
+        _execute.return_value = [(
+            self.external_data,
+            self.external_source,
+            self.external_description
+        )]
+
+        make(
+            'api.Dado',
+            id=self.data_id,
+            data_type=self.text_type,
+            entity_type=self.entity_type,
+            exibition_field=self.exibition_field,
+            icon__file_path=self.icon_file
+        )
+
+        url = reverse(
+            'api:detail_dado',
+            args=(self.entity_type, self.domain_id, self.data_id)
+        )
+        resp = self.client.get(url)
+        resp_json = resp.json()
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp_json, expected_response)
+
+    @mock.patch('api.serializers.execute')
+    def test_dado_sem_retorno_db(self, _execute):
+        _execute.return_value = []
+
+        make(
+            'api.Dado',
+            id=self.data_id,
+            data_type=self.text_type,
+            entity_type=self.entity_type,
+            exibition_field=self.exibition_field
+        )
+
+        url = reverse(
+            'api:detail_dado',
+            args=(self.entity_type, self.domain_id, self.data_id)
+        )
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 404)
+
+    def test_dado_nao_existente(self):
+        make(
+            'api.Dado',
+            id=self.data_id_alt,
+            data_type=self.text_type,
+            entity_type=self.entity_type,
+            exibition_field=self.exibition_field
+        )
+
+        url = reverse(
+            'api:detail_dado',
+            args=(self.entity_type, self.domain_id, self.data_id)
+        )
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 404)
+
+    @mock.patch('api.serializers.execute')
+    def test_dado_com_erro(self, _execute):
+        _execute.side_effect = QueryError('test error')
+
+        make(
+            'api.Dado',
+            id=self.data_id,
+            data_type=self.text_type,
+            entity_type=self.entity_type,
+            exibition_field=self.exibition_field
+        )
+
+        url = reverse(
+            'api:detail_dado',
+            args=(self.entity_type, self.domain_id, self.data_id)
+        )
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 404)

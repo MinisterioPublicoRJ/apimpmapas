@@ -1,9 +1,11 @@
-Django>=2.2
-djangorestframework>=3.9
-django-cors-headers
-django-ordered-model
-django-filter
+cx_Oracle
 dj-database-url
+Django>=2.2
+django-cors-headers
+django-filter
+djangorestframework>=3.9
+impyla
+django-ordered-model
 gunicorn==19.9.0
 Markdown
 psycopg2

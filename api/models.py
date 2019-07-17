@@ -19,14 +19,23 @@ DATABASE_CHOICES = [
     (BDA, 'Oracle BDA'),
 ]
 
-NUMBER = 'NUM'
-TEXT = 'TEX'
-GRAPH = 'GRA'
+TEXT_GDE = 'TEX_GDE'
+TEXT_PEQ = 'TEX_PEQ'
+TEXT_PEQ_DEST = 'TEX_PEQ_DEST'
 DATA_CHOICES = [
-    (NUMBER, 'Número'),
-    (TEXT, 'Texto'),
-    (GRAPH, 'Gráfico'),
+    (TEXT_GDE, 'Texto em coluna dupla'),
+    (TEXT_PEQ, 'Texto em coluna simples'),
+    (TEXT_PEQ_DEST, 'Texto destacado em coluna simples'),
 ]
+
+
+class Icone(models.Model):
+    name = models.CharField(max_length=20)
+    file_path = models.FileField(upload_to='icones')
+
+    def __str__(self):
+        if self is not None:
+            return self.name
 
 
 class Entidade(models.Model):
@@ -51,9 +60,9 @@ class Dado(models.Model):
     title = models.CharField(max_length=100)
     exibition_field = models.CharField(max_length=50, null=True, blank=True)
     data_type = models.CharField(
-        max_length=3,
+        max_length=20,
         choices=DATA_CHOICES,
-        default=TEXT,
+        default=TEXT_GDE,
     )
     entity_type = models.CharField(
         max_length=3,
@@ -65,7 +74,21 @@ class Dado(models.Model):
         choices=DATABASE_CHOICES,
         default=POSTGRES,
     )
-    query = models.TextField()
+
+    icon = models.ForeignKey(
+        'Icone',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL
+    )
+
+    schema = models.CharField(max_length=100)
+    table = models.CharField(max_length=100)
+    data_column = models.CharField(max_length=200)
+    id_column = models.CharField(max_length=200)
+    source_column = models.CharField(max_length=200, null=True, blank=True)
+    details_column = models.CharField(max_length=200, null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 

@@ -152,3 +152,6 @@ MEDIA_ROOT = config(
 CORS_ORIGIN_ALLOW_ALL = True
 
 CSRF_TRUSTED_ORIGINS = ['*']
+
+# E-mail
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

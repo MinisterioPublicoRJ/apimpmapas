@@ -49,7 +49,7 @@ class JWTDecoratorTest(TestCase):
                  'QsoGOa0S89KYUUpuwQ-QPq9cSSpuJdvxa3zYBeWcN1o'
                  }
         mock_request = mock.MagicMock()
-        mock_request.GET.return_value = token
+        mock_request.GET.get.return_value = token['auth_token']
 
         def mock_config(*args, **kwargs):
             if args[0] == 'SECRET_KEY':
@@ -62,7 +62,7 @@ class JWTDecoratorTest(TestCase):
         with mock.patch('login.decorators.config', side_effect=mock_config):
             resp = mock_view('args1', mock_request)
 
-        self.assertTrue(resp)
+        self.assertEqual(resp, True)
 
     def test_invalid_token(self):
         token = {'auth_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.'
