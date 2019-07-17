@@ -48,6 +48,11 @@ class Entidade(models.Model):
         choices=ENTITY_CHOICES,
         default=ORGAO,
     )
+
+    map_table = models.CharField(max_length=25, null=True, blank=True)
+    map_column_id = models.CharField(max_length=25, null=True, blank=True)
+    map_column_geom = models.CharField(max_length=25, null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 
