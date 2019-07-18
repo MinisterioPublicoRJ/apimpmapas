@@ -3,8 +3,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework.generics import GenericAPIView, RetrieveAPIView
 from rest_framework.response import Response
 
-from api.models import Entidade, Dado
-from api.serializers import EntidadeSerializer, DadoSerializer
+from api.models import Entidade, TipoEntidade, Dado
+from api.serializers import EntidadeSerializer, TipoEntidadeSerializer, DadoSerializer
 
 
 class EntidadeView(GenericAPIView):
@@ -21,6 +21,22 @@ class EntidadeView(GenericAPIView):
         return Response(EntidadeSerializer(
             obj,
             entity_type=self.kwargs['entity_type']
+        ).data)
+
+
+class TipoEntidadeView(GenericAPIView):
+    serializer_class = TipoEntidadeSerializer
+    queryset = TipoEntidade.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        obj = get_object_or_404(
+            self.queryset,
+            abreviation=self.kwargs['entity_type']
+        )
+
+        return Response(TipoEntidadeSerializer(
+            obj,
+            domain_id=self.kwargs['domain_id']
         ).data)
 
 

@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from api.db_connectors import execute
 from api.exceptions import QueryError
-from api.models import Entidade, Dado
+from api.models import TipoEntidade, Entidade, Dado
 
 
 class EntidadeSerializer(serializers.ModelSerializer):
@@ -59,6 +59,78 @@ class EntidadeSerializer(serializers.ModelSerializer):
                 return json.loads(main_result[0])
 
         return None
+
+
+class TipoEntidadeSerializer(serializers.ModelSerializer):
+    domain_id = serializers.SerializerMethodField()
+    entity_type = serializers.SerializerMethodField()
+    exibition_field = serializers.SerializerMethodField()
+    data_list = serializers.SerializerMethodField()
+    geojson = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TipoEntidade
+        fields = [
+            'domain_id',
+            'entity_type',
+            'exibition_field',
+            'geojson',
+            'data_list',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        tipo_entidade = args[0]
+        self.base_data = self.get_base_data(
+            tipo_entidade,
+            kwargs.pop('domain_id')
+        )
+        super().__init__(*args, **kwargs)
+
+    def get_base_data(self, tipo_entidade, domain_id):
+        data = {
+            'domain_id': domain_id,
+            'exibition_field': None,
+            'geojson': None
+        }
+
+        columns = [tipo_entidade.name_column]
+        if tipo_entidade.geom_column:
+            columns.append(tipo_entidade.geom_column)
+
+        try:
+            db_result = execute(
+                tipo_entidade.database,
+                tipo_entidade.schema,
+                tipo_entidade.table,
+                columns,
+                tipo_entidade.id_column,
+                domain_id
+            )
+        except QueryError:
+            return data
+
+        if db_result:
+            main_result = db_result[0]
+            data['exibition_field'] = main_result[0]
+            if tipo_entidade.geom_column:
+                data['geojson'] = json.loads(main_result[1])
+
+        return data
+
+    def get_entity_type(self, obj):
+        return obj.name
+
+    def get_exibition_field(self, obj):
+        return self.base_data['exibition_field']
+
+    def get_domain_id(self, obj):
+        return self.base_data['domain_id']
+
+    def get_geojson(self, obj):
+        return self.base_data['geojson']
+
+    def get_data_list(self, obj):
+        return Dado.objects.filter(entity_type=obj.abreviation).values('id')
 
 
 class DadoSerializer(serializers.ModelSerializer):
