@@ -38,6 +38,27 @@ class Icone(models.Model):
             return self.name
 
 
+class TipoEntidade(models.Model):
+    name = models.CharField(max_length=25)
+    abreviation = models.CharField(max_length=3)
+
+    database = models.CharField(
+        max_length=3,
+        choices=DATABASE_CHOICES,
+        default=POSTGRES,
+    )
+
+    schema = models.CharField(max_length=100)
+    table = models.CharField(max_length=100)
+    data_column = models.CharField(max_length=200)
+    id_column = models.CharField(max_length=200)
+    name_column = models.CharField(max_length=200)
+    geom_column = models.CharField(max_length=25, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
+
+
 class Entidade(models.Model):
     # ID único da entidade para correspondência com o banco externo
     domain_id = models.CharField(max_length=20)
