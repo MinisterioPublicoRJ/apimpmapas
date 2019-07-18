@@ -7,12 +7,18 @@ from api.exceptions import QueryError
 from api.models import Entidade, Dado
 
 
+class DadoInternalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Dado
+        fields = ['id', ]
+
+
 class EntidadeSerializer(serializers.ModelSerializer):
+    entity_type = serializers.CharField(source='name')
     domain_id = serializers.SerializerMethodField()
-    entity_type = serializers.SerializerMethodField()
     exibition_field = serializers.SerializerMethodField()
-    data_list = serializers.SerializerMethodField()
     geojson = serializers.SerializerMethodField()
+    data_list = DadoInternalSerializer(many=True, read_only=True)
 
     class Meta:
         model = Entidade
@@ -63,9 +69,6 @@ class EntidadeSerializer(serializers.ModelSerializer):
 
         return data
 
-    def get_entity_type(self, obj):
-        return obj.name
-
     def get_exibition_field(self, obj):
         return self.base_data['exibition_field']
 
@@ -75,8 +78,9 @@ class EntidadeSerializer(serializers.ModelSerializer):
     def get_geojson(self, obj):
         return self.base_data['geojson']
 
-    def get_data_list(self, obj):
-        return Dado.objects.filter(entity_type=obj.abreviation).values('id')
+    # def get_data_list(self, obj):
+    #    return Dado.objects.\
+    #        filter(entity_type__abreviation=obj.abreviation).values('id')
 
 
 class DadoSerializer(serializers.ModelSerializer):

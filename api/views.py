@@ -30,7 +30,7 @@ class DadoView(RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         obj = get_object_or_404(
             self.queryset,
-            entity_type=self.kwargs['entity_type'],
+            entity_type__abreviation=self.kwargs['entity_type'],
             pk=self.kwargs['pk']
         )
 

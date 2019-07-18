@@ -1,15 +1,5 @@
 from django.db import models
 
-ESTADO = 'EST'
-MUNICIPIO = 'MUN'
-ORGAO = 'ORG'
-
-ENTITY_CHOICES = [
-    (ESTADO, 'Estado'),
-    (MUNICIPIO, 'Município'),
-    (ORGAO, 'Órgão'),
-]
-
 POSTGRES = 'PG'
 ORACLE = 'ORA'
 BDA = 'BDA'
@@ -70,11 +60,13 @@ class Dado(models.Model):
         choices=DATA_CHOICES,
         default=TEXT_GDE,
     )
-    entity_type = models.CharField(
-        max_length=3,
-        choices=ENTITY_CHOICES,
-        default=ORGAO,
+
+    entity_type = models.ForeignKey(
+        Entidade,
+        on_delete=models.CASCADE,
+        related_name="data_list"
     )
+
     database = models.CharField(
         max_length=3,
         choices=DATABASE_CHOICES,
@@ -82,7 +74,7 @@ class Dado(models.Model):
     )
 
     icon = models.ForeignKey(
-        'Icone',
+        Icone,
         null=True,
         blank=True,
         on_delete=models.SET_NULL
