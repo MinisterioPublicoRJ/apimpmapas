@@ -1,3 +1,5 @@
+import json
+
 from rest_framework import serializers
 
 from api.db_connectors import execute
@@ -8,6 +10,7 @@ from api.models import Entidade, Dado
 class EntidadeSerializer(serializers.ModelSerializer):
     data_list = serializers.SerializerMethodField()
     entity_type = serializers.SerializerMethodField()
+    geojson = serializers.SerializerMethodField()
 
     class Meta:
         model = Entidade
@@ -17,6 +20,7 @@ class EntidadeSerializer(serializers.ModelSerializer):
             'domain_id',
             'exibition_field',
             'entity_type',
+            'geojson',
         ]
 
     def __init__(self, *args, **kwargs):
@@ -34,6 +38,27 @@ class EntidadeSerializer(serializers.ModelSerializer):
         elif obj.entity_type == 'ORG':
             return 'Orgao'
         return 'Tipo_desconhecido'
+
+    def get_geojson(self, obj):
+        if (obj.map_table) and (obj.map_column_id) and (obj.map_column_geom):
+            try:
+                db_result = execute(
+                    'PG',
+                    'lupa',
+                    obj.map_table,
+                    [obj.map_column_geom, ],
+                    obj.map_column_id,
+                    obj.domain_id
+                )
+            except QueryError:
+                return None
+
+            if db_result:
+                main_result = db_result[0]
+
+                return json.loads(main_result[0])
+
+        return None
 
 
 class DadoSerializer(serializers.ModelSerializer):

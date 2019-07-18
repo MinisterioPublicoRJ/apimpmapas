@@ -20,7 +20,8 @@ class EntidadeViewTest(TestCase):
             ],
             'domain_id': '33',
             'exibition_field': 'Rio de Janeiro',
-            'entity_type': 'Estado'
+            'entity_type': 'Estado',
+            'geojson': None
         }
 
         make(
