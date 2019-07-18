@@ -4,64 +4,10 @@ from rest_framework import serializers
 
 from api.db_connectors import execute
 from api.exceptions import QueryError
-from api.models import TipoEntidade, Entidade, Dado
+from api.models import Entidade, Dado
 
 
 class EntidadeSerializer(serializers.ModelSerializer):
-    data_list = serializers.SerializerMethodField()
-    entity_type = serializers.SerializerMethodField()
-    geojson = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Entidade
-        fields = [
-            'id',
-            'data_list',
-            'domain_id',
-            'exibition_field',
-            'entity_type',
-            'geojson',
-        ]
-
-    def __init__(self, *args, **kwargs):
-        self.entity_type = kwargs.pop('entity_type')
-        super().__init__(*args, **kwargs)
-
-    def get_data_list(self, obj):
-        return Dado.objects.filter(entity_type=self.entity_type).values('id')
-
-    def get_entity_type(self, obj):
-        if obj.entity_type == 'EST':
-            return 'Estado'
-        elif obj.entity_type == 'MUN':
-            return 'Municipio'
-        elif obj.entity_type == 'ORG':
-            return 'Orgao'
-        return 'Tipo_desconhecido'
-
-    def get_geojson(self, obj):
-        if (obj.map_table) and (obj.map_column_id) and (obj.map_column_geom):
-            try:
-                db_result = execute(
-                    'PG',
-                    'lupa',
-                    obj.map_table,
-                    [obj.map_column_geom, ],
-                    obj.map_column_id,
-                    obj.domain_id
-                )
-            except QueryError:
-                return None
-
-            if db_result:
-                main_result = db_result[0]
-
-                return json.loads(main_result[0])
-
-        return None
-
-
-class TipoEntidadeSerializer(serializers.ModelSerializer):
     domain_id = serializers.SerializerMethodField()
     entity_type = serializers.SerializerMethodField()
     exibition_field = serializers.SerializerMethodField()
@@ -69,7 +15,7 @@ class TipoEntidadeSerializer(serializers.ModelSerializer):
     geojson = serializers.SerializerMethodField()
 
     class Meta:
-        model = TipoEntidade
+        model = Entidade
         fields = [
             'domain_id',
             'entity_type',

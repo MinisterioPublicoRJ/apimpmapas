@@ -38,7 +38,7 @@ class Icone(models.Model):
             return self.name
 
 
-class TipoEntidade(models.Model):
+class Entidade(models.Model):
     name = models.CharField(max_length=25)
     abreviation = models.CharField(max_length=3)
 
@@ -60,29 +60,6 @@ class TipoEntidade(models.Model):
     def __str__(self):
         if self is not None:
             return self.name
-
-
-class Entidade(models.Model):
-    # ID único da entidade para correspondência com o banco externo
-    domain_id = models.CharField(max_length=20)
-    title = models.CharField(max_length=100)
-    exibition_field = models.CharField(max_length=100, null=True, blank=True)
-    entity_type = models.CharField(
-        max_length=3,
-        choices=ENTITY_CHOICES,
-        default=ORGAO,
-    )
-
-    map_table = models.CharField(max_length=25, null=True, blank=True)
-    map_column_id = models.CharField(max_length=25, null=True, blank=True)
-    map_column_geom = models.CharField(max_length=25, null=True, blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    last_modified = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        if self is not None:
-            return self.title
 
 
 class Dado(models.Model):
