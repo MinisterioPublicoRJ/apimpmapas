@@ -33,3 +33,5 @@ class MapTest(TestCase):
         ent_ser = EntidadeSerializer(entidade, entity_type='ORG').data
 
         self.assertEqual(ent_ser['geojson'], coord)
+
+    # TODO: Teste para caso de erro
