@@ -14,14 +14,13 @@ class EntidadeView(GenericAPIView):
     def get(self, request, *args, **kwargs):
         obj = get_object_or_404(
             self.queryset,
-            entity_type=self.kwargs['entity_type'],
-            domain_id=self.kwargs['domain_id']
+            abreviation=self.kwargs['entity_type']
         )
 
-        return Response(EntidadeSerializer(
-            obj,
-            entity_type=self.kwargs['entity_type']
-        ).data)
+        data = EntidadeSerializer(obj, domain_id=self.kwargs['domain_id']).data
+        if not data['exibition_field']:
+            raise Http404
+        return Response(data)
 
 
 class DadoView(RetrieveAPIView):
@@ -31,7 +30,7 @@ class DadoView(RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         obj = get_object_or_404(
             self.queryset,
-            entity_type=self.kwargs['entity_type'],
+            entity_type__abreviation=self.kwargs['entity_type'],
             pk=self.kwargs['pk']
         )
 

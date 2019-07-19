@@ -14,10 +14,8 @@ class MapTest(TestCase):
     def test_map_json(self, _execute):
         entidade = make(
             'api.Entidade',
-            entity_type='ORG',
-            map_table='tabela',
-            map_column_id='id',
-            map_column_geom='geom'
+            abreviation='ORG',
+            geom_column='geom'
         )
 
         coord = {
@@ -28,9 +26,9 @@ class MapTest(TestCase):
             ]
         }
 
-        _execute.return_value = [[json.dumps(coord), ], ]
+        _execute.return_value = [['Sbrubbles', json.dumps(coord), ], ]
 
-        ent_ser = EntidadeSerializer(entidade, entity_type='ORG').data
+        ent_ser = EntidadeSerializer(entidade, domain_id='99').data
 
         self.assertEqual(ent_ser['geojson'], coord)
 

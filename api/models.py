@@ -1,14 +1,5 @@
 from django.db import models
-
-ESTADO = 'EST'
-MUNICIPIO = 'MUN'
-ORGAO = 'ORG'
-
-ENTITY_CHOICES = [
-    (ESTADO, 'Estado'),
-    (MUNICIPIO, 'Município'),
-    (ORGAO, 'Órgão'),
-]
+from ordered_model.models import OrderedModel
 
 POSTGRES = 'PG'
 ORACLE = 'ORA'
@@ -39,29 +30,30 @@ class Icone(models.Model):
 
 
 class Entidade(models.Model):
-    # ID único da entidade para correspondência com o banco externo
-    domain_id = models.CharField(max_length=20)
-    title = models.CharField(max_length=100)
-    exibition_field = models.CharField(max_length=100, null=True, blank=True)
-    entity_type = models.CharField(
+    name = models.CharField(max_length=25)
+    abreviation = models.CharField(max_length=3)
+
+    database = models.CharField(
         max_length=3,
-        choices=ENTITY_CHOICES,
-        default=ORGAO,
+        choices=DATABASE_CHOICES,
+        default=POSTGRES,
     )
 
-    map_table = models.CharField(max_length=25, null=True, blank=True)
-    map_column_id = models.CharField(max_length=25, null=True, blank=True)
-    map_column_geom = models.CharField(max_length=25, null=True, blank=True)
+    schema = models.CharField(max_length=100)
+    table = models.CharField(max_length=100)
+    id_column = models.CharField(max_length=200)
+    name_column = models.CharField(max_length=200)
+    geom_column = models.CharField(max_length=25, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         if self is not None:
-            return self.title
+            return self.name
 
 
-class Dado(models.Model):
+class Dado(OrderedModel):
     title = models.CharField(max_length=100)
     exibition_field = models.CharField(max_length=50, null=True, blank=True)
     data_type = models.CharField(
@@ -69,11 +61,13 @@ class Dado(models.Model):
         choices=DATA_CHOICES,
         default=TEXT_GDE,
     )
-    entity_type = models.CharField(
-        max_length=3,
-        choices=ENTITY_CHOICES,
-        default=ORGAO,
+
+    entity_type = models.ForeignKey(
+        Entidade,
+        on_delete=models.CASCADE,
+        related_name="data_list"
     )
+
     database = models.CharField(
         max_length=3,
         choices=DATABASE_CHOICES,
@@ -81,7 +75,7 @@ class Dado(models.Model):
     )
 
     icon = models.ForeignKey(
-        'Icone',
+        Icone,
         null=True,
         blank=True,
         on_delete=models.SET_NULL

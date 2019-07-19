@@ -11,30 +11,27 @@ from api.exceptions import QueryError
 
 class EntidadeViewTest(TestCase):
 
-    def test_entidade_ok(self):
+    @mock.patch('api.serializers.execute')
+    def test_entidade_ok(self, _execute):
         expected_answer = {
-            'id': 2,
+            'domain_id': '33',
+            'entity_type': 'Estado',
+            'exibition_field': 'Rio de Janeiro',
+            'geojson': None,
             'data_list': [
                 {'id': 1},
                 {'id': 7},
-            ],
-            'domain_id': '33',
-            'exibition_field': 'Rio de Janeiro',
-            'entity_type': 'Estado',
-            'geojson': None
+            ]
         }
 
-        make(
-            'api.Entidade',
-            id=2,
-            entity_type='EST',
-            exibition_field='Rio de Janeiro',
-            domain_id=33
-        )
+        _execute.return_value = [('Rio de Janeiro', 'mock_geo')]
 
-        make('api.Dado', id=1, entity_type='EST')
-        make('api.Dado', id=7, entity_type='EST')
-        make('api.Dado', id=9, entity_type='MUN')
+        estado = make('api.Entidade', name='Estado', abreviation='EST')
+        municipio = make('api.Entidade', abreviation='MUN')
+
+        make('api.Dado', id=1, entity_type=estado, order=1)
+        make('api.Dado', id=7, entity_type=estado, order=3)
+        make('api.Dado', id=9, entity_type=municipio, order=2)
 
         url = reverse('api:detail_entidade', args=('EST', '33',))
 
@@ -44,8 +41,10 @@ class EntidadeViewTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp_json, expected_answer)
 
-    def test_entidade_nao_existente(self):
-        make('api.Entidade', entity_type='MUN', domain_id=404)
+    @mock.patch('api.serializers.execute')
+    def test_entidade_nao_existente(self, _execute):
+        make('api.Entidade', abreviation='MUN')
+        _execute.return_value = []
 
         url = reverse('api:detail_entidade', args=('MUN', '1',))
 
@@ -53,37 +52,63 @@ class EntidadeViewTest(TestCase):
 
         self.assertEqual(resp.status_code, 404)
 
+    @mock.patch('api.serializers.execute')
+    def test_entidade_com_erro(self, _execute):
+        _execute.side_effect = QueryError('test error')
+
+        make('api.Entidade', id=1, abreviation='MUN')
+        url = reverse('api:detail_entidade', args=('MUN', '1',))
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 404)
+
 
 class ListDadosViewTest(TestCase):
-    def test_get_lista_dados(self):
+
+    @mock.patch('api.serializers.execute')
+    def test_get_lista_dados(self, _execute):
         """Deve retornar dados referentes ao tipo de entidade chamado"""
-        make('api.Entidade', entity_type='MUN', domain_id=1)
-        make('api.Dado', entity_type='EST', _quantity=2)
-        dado_object_mun = make('api.Dado', entity_type='MUN', _quantity=2)
+        _execute.return_value = [('mock_name', 'mock_geo')]
+
+        ent_estado = make('api.Entidade', abreviation='EST')
+        ent_municipio = make('api.Entidade', abreviation='MUN')
+
+        make('api.Dado', entity_type=ent_estado, _quantity=2)
+        dado_object_mun_0 = make(
+            'api.Dado',
+            entity_type=ent_municipio,
+            order=1
+        )
+        dado_object_mun_1 = make(
+            'api.Dado',
+            entity_type=ent_municipio,
+            order=2
+        )
+        expected_datalist = [
+            {"id": dado_object_mun_0.id},
+            {"id": dado_object_mun_1.id}
+        ]
 
         url = reverse('api:detail_entidade', args=('MUN', '1',))
 
         resp = self.client.get(url)
         resp_json = resp.json()
 
+        # import pdb; pdb.set_trace()
+
         self.assertEqual(resp.status_code, 200)
+        self.assertEqual(len(resp_json['data_list']), 2)
         self.assertEqual(
-            len(resp_json['data_list']),
-            2
-        )
-        self.assertEqual(
-            resp_json['data_list'][0]['id'],
-            dado_object_mun[0].id
-        )
-        self.assertEqual(
-            resp_json['data_list'][1]['id'],
-            dado_object_mun[1].id
+            resp_json['data_list'],
+            expected_datalist
         )
 
 
 class DetailDadosViewTest(TestCase):
 
     def setUp(self):
+        self.entity_id = 1
+        self.entity_abrv = 'EST'
         self.data_id = 7
         self.data_id_alt = 9
         self.external_data = '202'
@@ -91,7 +116,6 @@ class DetailDadosViewTest(TestCase):
         self.external_description = None
         self.exibition_field = 'Abrigos para crianças e adolescentes'
         self.domain_id = '33'
-        self.entity_type = 'EST'
         self.text_type = 'TEX_PEQ_DEST'
         self.text_response = 'texto_pequeno_destaque'
         self.icon_file = 'icones/python.svg'
@@ -116,18 +140,23 @@ class DetailDadosViewTest(TestCase):
             self.external_description
         )]
 
+        entidade = make(
+            'api.Entidade',
+            id=self.entity_id,
+            abreviation=self.entity_abrv,
+        )
         make(
             'api.Dado',
             id=self.data_id,
             data_type=self.text_type,
-            entity_type=self.entity_type,
+            entity_type=entidade,
             exibition_field=self.exibition_field,
             icon__file_path=self.icon_file
         )
 
         url = reverse(
             'api:detail_dado',
-            args=(self.entity_type, self.domain_id, self.data_id)
+            args=(self.entity_abrv, self.domain_id, self.data_id)
         )
         resp = self.client.get(url)
         resp_json = resp.json()
@@ -139,34 +168,44 @@ class DetailDadosViewTest(TestCase):
     def test_dado_sem_retorno_db(self, _execute):
         _execute.return_value = []
 
+        entidade = make(
+            'api.Entidade',
+            id=self.entity_id,
+            abreviation=self.entity_abrv,
+        )
         make(
             'api.Dado',
             id=self.data_id,
             data_type=self.text_type,
-            entity_type=self.entity_type,
+            entity_type=entidade,
             exibition_field=self.exibition_field
         )
 
         url = reverse(
             'api:detail_dado',
-            args=(self.entity_type, self.domain_id, self.data_id)
+            args=(self.entity_abrv, self.domain_id, self.data_id)
         )
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 404)
 
     def test_dado_nao_existente(self):
+        entidade = make(
+            'api.Entidade',
+            id=self.entity_id,
+            abreviation=self.entity_abrv,
+        )
         make(
             'api.Dado',
             id=self.data_id_alt,
             data_type=self.text_type,
-            entity_type=self.entity_type,
+            entity_type=entidade,
             exibition_field=self.exibition_field
         )
 
         url = reverse(
             'api:detail_dado',
-            args=(self.entity_type, self.domain_id, self.data_id)
+            args=(self.entity_abrv, self.domain_id, self.data_id)
         )
         resp = self.client.get(url)
 
@@ -176,17 +215,22 @@ class DetailDadosViewTest(TestCase):
     def test_dado_com_erro(self, _execute):
         _execute.side_effect = QueryError('test error')
 
+        entidade = make(
+            'api.Entidade',
+            id=self.entity_id,
+            abreviation=self.entity_abrv,
+        )
         make(
             'api.Dado',
             id=self.data_id,
             data_type=self.text_type,
-            entity_type=self.entity_type,
+            entity_type=entidade,
             exibition_field=self.exibition_field
         )
 
         url = reverse(
             'api:detail_dado',
-            args=(self.entity_type, self.domain_id, self.data_id)
+            args=(self.entity_abrv, self.domain_id, self.data_id)
         )
         resp = self.client.get(url)
 

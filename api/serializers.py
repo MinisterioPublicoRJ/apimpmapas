@@ -7,58 +7,83 @@ from api.exceptions import QueryError
 from api.models import Entidade, Dado
 
 
+class DadoInternalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Dado
+        fields = ['id', ]
+
+
 class EntidadeSerializer(serializers.ModelSerializer):
-    data_list = serializers.SerializerMethodField()
-    entity_type = serializers.SerializerMethodField()
+    entity_type = serializers.CharField(source='name')
+    domain_id = serializers.SerializerMethodField()
+    exibition_field = serializers.SerializerMethodField()
     geojson = serializers.SerializerMethodField()
+    data_list = serializers.SerializerMethodField()
 
     class Meta:
         model = Entidade
         fields = [
-            'id',
-            'data_list',
             'domain_id',
-            'exibition_field',
             'entity_type',
+            'exibition_field',
             'geojson',
+            'data_list',
         ]
 
     def __init__(self, *args, **kwargs):
-        self.entity_type = kwargs.pop('entity_type')
+        tipo_entidade = args[0]
+        self.base_data = self.get_base_data(
+            tipo_entidade,
+            kwargs.pop('domain_id')
+        )
         super().__init__(*args, **kwargs)
 
-    def get_data_list(self, obj):
-        return Dado.objects.filter(entity_type=self.entity_type).values('id')
+    def get_base_data(self, tipo_entidade, domain_id):
+        data = {
+            'domain_id': domain_id,
+            'exibition_field': None,
+            'geojson': None
+        }
 
-    def get_entity_type(self, obj):
-        if obj.entity_type == 'EST':
-            return 'Estado'
-        elif obj.entity_type == 'MUN':
-            return 'Municipio'
-        elif obj.entity_type == 'ORG':
-            return 'Orgao'
-        return 'Tipo_desconhecido'
+        columns = [tipo_entidade.name_column]
+        if tipo_entidade.geom_column:
+            columns.append(tipo_entidade.geom_column)
+
+        try:
+            db_result = execute(
+                tipo_entidade.database,
+                tipo_entidade.schema,
+                tipo_entidade.table,
+                columns,
+                tipo_entidade.id_column,
+                domain_id
+            )
+        except QueryError:
+            return data
+
+        if db_result:
+            main_result = db_result[0]
+            data['exibition_field'] = main_result[0]
+            if tipo_entidade.geom_column:
+                data['geojson'] = json.loads(main_result[1])
+
+        return data
+
+    def get_exibition_field(self, obj):
+        return self.base_data['exibition_field']
+
+    def get_domain_id(self, obj):
+        return self.base_data['domain_id']
 
     def get_geojson(self, obj):
-        if (obj.map_table) and (obj.map_column_id) and (obj.map_column_geom):
-            try:
-                db_result = execute(
-                    'PG',
-                    'lupa',
-                    obj.map_table,
-                    [obj.map_column_geom, ],
-                    obj.map_column_id,
-                    obj.domain_id
-                )
-            except QueryError:
-                return None
+        return self.base_data['geojson']
 
-            if db_result:
-                main_result = db_result[0]
-
-                return json.loads(main_result[0])
-
-        return None
+    def get_data_list(self, obj):
+        data_list = obj.data_list.all()
+        return DadoInternalSerializer(
+            data_list,
+            many=True,
+            read_only=True).data
 
 
 class DadoSerializer(serializers.ModelSerializer):
