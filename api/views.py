@@ -17,10 +17,10 @@ class EntidadeView(GenericAPIView):
             abreviation=self.kwargs['entity_type']
         )
 
-        return Response(EntidadeSerializer(
-            obj,
-            domain_id=self.kwargs['domain_id']
-        ).data)
+        data = EntidadeSerializer(obj, domain_id=self.kwargs['domain_id']).data
+        if not data['exibition_field']:
+            raise Http404
+        return Response(data)
 
 
 class DadoView(RetrieveAPIView):

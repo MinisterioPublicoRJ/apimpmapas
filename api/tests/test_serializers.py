@@ -4,27 +4,8 @@ import pytest
 
 from model_mommy.mommy import make
 
-from api.serializers import DadoSerializer, EntidadeSerializer
+from api.serializers import DadoSerializer
 
-
-@pytest.mark.django_db(transaction=True)
-class EntidadeSerializerTest(TestCase):
-
-    def test_entity_type_serializing(self):
-        entidade_est = make('api.Entidade', entity_type='EST')
-        entidade_mun = make('api.Entidade', entity_type='MUN')
-        entidade_org = make('api.Entidade', entity_type='ORG')
-        entidade = make('api.Entidade', entity_type='UNK')
-
-        ent_est_ser = EntidadeSerializer(entidade_est, entity_type='EST').data
-        ent_mun_ser = EntidadeSerializer(entidade_mun, entity_type='MUN').data
-        ent_org_ser = EntidadeSerializer(entidade_org, entity_type='ORG').data
-        ent_ser = EntidadeSerializer(entidade, entity_type='UNK').data
-
-        self.assertEqual(ent_est_ser['entity_type'], 'Estado')
-        self.assertEqual(ent_mun_ser['entity_type'], 'Municipio')
-        self.assertEqual(ent_org_ser['entity_type'], 'Orgao')
-        self.assertEqual(ent_ser['entity_type'], 'Tipo_desconhecido')
 
 
 @pytest.mark.django_db(transaction=True)
