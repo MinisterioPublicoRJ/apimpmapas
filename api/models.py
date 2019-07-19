@@ -1,4 +1,5 @@
 from django.db import models
+from ordered_model.models import OrderedModel
 
 POSTGRES = 'PG'
 ORACLE = 'ORA'
@@ -52,7 +53,7 @@ class Entidade(models.Model):
             return self.name
 
 
-class Dado(models.Model):
+class Dado(OrderedModel):
     title = models.CharField(max_length=100)
     exibition_field = models.CharField(max_length=50, null=True, blank=True)
     data_type = models.CharField(

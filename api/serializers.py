@@ -18,7 +18,7 @@ class EntidadeSerializer(serializers.ModelSerializer):
     domain_id = serializers.SerializerMethodField()
     exibition_field = serializers.SerializerMethodField()
     geojson = serializers.SerializerMethodField()
-    data_list = DadoInternalSerializer(many=True, read_only=True)
+    data_list = serializers.SerializerMethodField()
 
     class Meta:
         model = Entidade
@@ -78,9 +78,12 @@ class EntidadeSerializer(serializers.ModelSerializer):
     def get_geojson(self, obj):
         return self.base_data['geojson']
 
-    # def get_data_list(self, obj):
-    #    return Dado.objects.\
-    #        filter(entity_type__abreviation=obj.abreviation).values('id')
+    def get_data_list(self, obj):
+        data_list = obj.data_list.all()
+        return DadoInternalSerializer(
+            data_list,
+            many=True,
+            read_only=True).data
 
 
 class DadoSerializer(serializers.ModelSerializer):
