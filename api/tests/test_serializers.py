@@ -7,7 +7,6 @@ from model_mommy.mommy import make
 from api.serializers import DadoSerializer
 
 
-
 @pytest.mark.django_db(transaction=True)
 class DadoSerializerTest(TestCase):
 
