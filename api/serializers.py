@@ -4,8 +4,18 @@ from rest_framework import serializers
 
 from api.db_connectors import execute
 from api.exceptions import QueryError
-from api.models import Entidade, Dado
-
+from api.models import (
+    Entidade,
+    Dado,
+    TEXT_GDE,
+    TEXT_PEQ,
+    TEXT_PEQ_DEST,
+    LIST_UNRANK,
+    LIST_RANKED,
+    GRAPH_BAR_VERT,
+    GRAPH_BAR_HORI,
+    GRAPH_PIZZA
+)
 
 class DadoInternalSerializer(serializers.ModelSerializer):
     class Meta:
@@ -108,10 +118,16 @@ class DadoSerializer(serializers.ModelSerializer):
         columns = []
         columns.append(obj.data_column)
         columns.append(
+            obj.label_column if obj.label_column else 'NULL as label'
+        )
+        columns.append(
             obj.source_column if obj.source_column else 'NULL as fonte'
         )
         columns.append(
             obj.details_column if obj.details_column else 'NULL as detalhes'
+        )
+        columns.append(
+            obj.link_column if obj.link_column else 'NULL as link'
         )
         try:
             db_result = execute(
@@ -126,16 +142,28 @@ class DadoSerializer(serializers.ModelSerializer):
             return {}
 
         if db_result:
-            main_result = db_result[0]
-
-            data = {
-                'dado': main_result[0],
-                'fonte': main_result[1],
-                'descricao': main_result[2],
-            }
-
-            return data
-
+            if obj.data_type in [TEXT_GDE, TEXT_PEQ, TEXT_PEQ_DEST]:
+                result = db_result[0]
+                data = {
+                    'dado': result[0],
+                    'label': result[1],
+                    'fonte': result[2],
+                    'detalhes': result[3],
+                    'link': result[4],
+                }
+                return data
+            elif obj.data_type in [LIST_UNRANK, LIST_RANKED]:
+                data = []
+                for result in db_result:
+                    data_dict = {
+                        'dado': result[0],
+                        'label': result[1],
+                        'fonte': result[2],
+                        'detalhes': result[3],
+                        'link': result[4],
+                    }
+                    data.append(data_dict)
+                return data
         return {}
 
     def get_icon(self, obj):

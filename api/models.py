@@ -93,10 +93,12 @@ class Dado(OrderedModel):
 
     schema = models.CharField(max_length=100)
     table = models.CharField(max_length=100)
-    data_column = models.CharField(max_length=200)
     id_column = models.CharField(max_length=200)
+    data_column = models.CharField(max_length=200)
+    label_column = models.CharField(max_length=200, null=True, blank=True)
     source_column = models.CharField(max_length=200, null=True, blank=True)
     details_column = models.CharField(max_length=200, null=True, blank=True)
+    link_column = models.CharField(max_length=200, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
