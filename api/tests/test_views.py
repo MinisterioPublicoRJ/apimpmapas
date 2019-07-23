@@ -114,10 +114,11 @@ class DetailDadosViewTest(TestCase):
         self.external_data = '202'
         self.external_source = 'http://mca.mp.rj.gov.br/'
         self.external_description = None
+        self.external_label = None
+        self.external_link = None
         self.exibition_field = 'Abrigos para crianças e adolescentes'
         self.domain_id = '33'
-        self.text_type = 'TEX_PEQ_DEST'
-        self.text_response = 'texto_pequeno_destaque'
+        self.text_type = 'texto_pequeno_destaque'
         self.icon_file = 'icones/python.svg'
 
     @mock.patch('api.serializers.execute')
@@ -126,18 +127,22 @@ class DetailDadosViewTest(TestCase):
             'id': self.data_id,
             'external_data': {
                 'dado': self.external_data,
+                'label': self.external_label,
                 'fonte': self.external_source,
-                'descricao': self.external_description
+                'detalhes': self.external_description,
+                'link': self.external_link
             },
             'exibition_field': self.exibition_field,
-            'data_type': self.text_response,
+            'data_type': self.text_type,
             'icon': settings.MEDIA_URL + self.icon_file
         }
 
         _execute.return_value = [(
             self.external_data,
+            self.external_label,
             self.external_source,
-            self.external_description
+            self.external_description,
+            self.external_link
         )]
 
         entidade = make(
