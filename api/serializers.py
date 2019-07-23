@@ -12,10 +12,11 @@ from api.models import (
     TEXT_PEQ_DEST,
     LIST_UNRANK,
     LIST_RANKED,
-    GRAPH_BAR_VERT,
-    GRAPH_BAR_HORI,
-    GRAPH_PIZZA
+    # GRAPH_BAR_VERT,
+    # GRAPH_BAR_HORI,
+    # GRAPH_PIZZA
 )
+
 
 class DadoInternalSerializer(serializers.ModelSerializer):
     class Meta:
