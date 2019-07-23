@@ -87,7 +87,6 @@ class EntidadeSerializer(serializers.ModelSerializer):
 
 
 class DadoSerializer(serializers.ModelSerializer):
-    data_type = serializers.SerializerMethodField()
     external_data = serializers.SerializerMethodField()
     icon = serializers.SerializerMethodField()
 
@@ -138,16 +137,6 @@ class DadoSerializer(serializers.ModelSerializer):
             return data
 
         return {}
-
-    def get_data_type(self, obj):
-        if obj.data_type == 'TEX_GDE':
-            return 'texto_grande'
-        elif obj.data_type == 'TEX_PEQ':
-            return 'texto_pequeno'
-        elif obj.data_type == 'TEX_PEQ_DEST':
-            return 'texto_pequeno_destaque'
-
-        return 'tipo_desconhecido'
 
     def get_icon(self, obj):
         if obj.icon:

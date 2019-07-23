@@ -139,8 +139,7 @@ class DetailDadosViewTest(TestCase):
         self.external_description = None
         self.exibition_field = 'Abrigos para crianças e adolescentes'
         self.domain_id = '33'
-        self.text_type = 'TEX_PEQ_DEST'
-        self.text_response = 'texto_pequeno_destaque'
+        self.text_type = 'texto_pequeno_destaque'
         self.icon_file = 'icones/python.svg'
 
         self.logged_client = LoggedClient(self.client)
@@ -155,7 +154,7 @@ class DetailDadosViewTest(TestCase):
                 'descricao': self.external_description
             },
             'exibition_field': self.exibition_field,
-            'data_type': self.text_response,
+            'data_type': self.text_type,
             'icon': settings.MEDIA_URL + self.icon_file
         }
 
