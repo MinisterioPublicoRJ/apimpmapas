@@ -9,7 +9,28 @@ from model_mommy.mommy import make
 from api.exceptions import QueryError
 
 
+def mock_config(*args, **kwargs):
+    if args[0] == 'SECRET_KEY':
+        return 'sfdfsdf'
+
+
+class LoggedClient:
+    def __init__(self, client):
+        self.client = client
+
+    def get(self, url):
+        token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9'\
+                '.eyJ1aWQiOiJFc3RldmFuIn0'\
+                '.QsoGOa0S89KYUUpuwQ-QPq9cSSpuJdvxa3zYBeWcN1o'
+        url += '?auth_token=' + token
+
+        with mock.patch('login.decorators.config', side_effect=mock_config):
+            return self.client.get(url)
+
+
 class EntidadeViewTest(TestCase):
+    def setUp(self):
+        self.logged_client = LoggedClient(self.client)
 
     @mock.patch('api.serializers.execute')
     def test_entidade_ok(self, _execute):
@@ -34,8 +55,8 @@ class EntidadeViewTest(TestCase):
         make('api.Dado', id=9, entity_type=municipio, order=2)
 
         url = reverse('api:detail_entidade', args=('EST', '33',))
+        resp = self.logged_client.get(url)
 
-        resp = self.client.get(url)
         resp_json = resp.json()
 
         self.assertEqual(resp.status_code, 200)
@@ -48,7 +69,7 @@ class EntidadeViewTest(TestCase):
 
         url = reverse('api:detail_entidade', args=('MUN', '1',))
 
-        resp = self.client.get(url)
+        resp = self.logged_client.get(url)
 
         self.assertEqual(resp.status_code, 404)
 
@@ -58,12 +79,14 @@ class EntidadeViewTest(TestCase):
 
         make('api.Entidade', id=1, abreviation='MUN')
         url = reverse('api:detail_entidade', args=('MUN', '1',))
-        resp = self.client.get(url)
+        resp = self.logged_client.get(url)
 
         self.assertEqual(resp.status_code, 404)
 
 
 class ListDadosViewTest(TestCase):
+    def setUp(self):
+        self.logged_client = LoggedClient(self.client)
 
     @mock.patch('api.serializers.execute')
     def test_get_lista_dados(self, _execute):
@@ -91,7 +114,7 @@ class ListDadosViewTest(TestCase):
 
         url = reverse('api:detail_entidade', args=('MUN', '1',))
 
-        resp = self.client.get(url)
+        resp = self.logged_client.get(url)
         resp_json = resp.json()
 
         # import pdb; pdb.set_trace()
@@ -119,6 +142,8 @@ class DetailDadosViewTest(TestCase):
         self.text_type = 'TEX_PEQ_DEST'
         self.text_response = 'texto_pequeno_destaque'
         self.icon_file = 'icones/python.svg'
+
+        self.logged_client = LoggedClient(self.client)
 
     @mock.patch('api.serializers.execute')
     def test_dado_ok(self, _execute):
@@ -158,7 +183,7 @@ class DetailDadosViewTest(TestCase):
             'api:detail_dado',
             args=(self.entity_abrv, self.domain_id, self.data_id)
         )
-        resp = self.client.get(url)
+        resp = self.logged_client.get(url)
         resp_json = resp.json()
 
         self.assertEqual(resp.status_code, 200)
@@ -185,7 +210,7 @@ class DetailDadosViewTest(TestCase):
             'api:detail_dado',
             args=(self.entity_abrv, self.domain_id, self.data_id)
         )
-        resp = self.client.get(url)
+        resp = self.logged_client.get(url)
 
         self.assertEqual(resp.status_code, 404)
 
@@ -207,7 +232,7 @@ class DetailDadosViewTest(TestCase):
             'api:detail_dado',
             args=(self.entity_abrv, self.domain_id, self.data_id)
         )
-        resp = self.client.get(url)
+        resp = self.logged_client.get(url)
 
         self.assertEqual(resp.status_code, 404)
 
@@ -232,6 +257,66 @@ class DetailDadosViewTest(TestCase):
             'api:detail_dado',
             args=(self.entity_abrv, self.domain_id, self.data_id)
         )
-        resp = self.client.get(url)
+        resp = self.logged_client.get(url)
 
         self.assertEqual(resp.status_code, 404)
+
+
+class EndpointsAuthentication(TestCase):
+    def setUp(self):
+        self.logged_client = LoggedClient(self.client)
+
+    @mock.patch('api.serializers.execute')
+    def test_not_logged_in_detail_entidade(self, _execute):
+        url = reverse('api:detail_entidade', args=('EST', '33',))
+
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 403)
+
+    @mock.patch('api.serializers.execute')
+    def test_not_logged_in_detail_dado(self, _execute):
+        domain_id = 1
+        entity_abrv = 'EST'
+        data_id = 7
+        url = reverse(
+            'api:detail_dado',
+            args=(entity_abrv, domain_id, data_id)
+        )
+
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 403)
+
+    @mock.patch('api.views.EntidadeSerializer')
+    @mock.patch('api.views.get_object_or_404', return_value=[])
+    @mock.patch('api.serializers.execute')
+    def test_logged_in_detail_entidade(self, _execute, _get_obj, _ser):
+        mock_obj = mock.MagicMock()
+        mock_obj.data = {'exibition_field': 1}
+        _ser.return_value = mock_obj
+        url = reverse('api:detail_entidade', args=('EST', '33',))
+        resp = self.logged_client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
+
+    @mock.patch('api.views.DadoSerializer')
+    @mock.patch('api.views.get_object_or_404', return_value=[])
+    @mock.patch('api.serializers.execute')
+    def test_logged_in_detail_dado(self, _execute, _get_obj, _ser):
+        mock_obj = mock.MagicMock()
+        mock_obj.data = {'external_data': 1}
+        _ser.return_value = mock_obj
+
+        domain_id = 1
+        entity_abrv = 'EST'
+        data_id = 7
+
+        url = reverse(
+            'api:detail_dado',
+            args=(entity_abrv, domain_id, data_id)
+        )
+
+        resp = self.logged_client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
