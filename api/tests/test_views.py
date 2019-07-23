@@ -232,6 +232,66 @@ class DetailDadosViewTest(TestCase):
             'api:detail_dado',
             args=(self.entity_abrv, self.domain_id, self.data_id)
         )
-        resp = self.client.get(url)
+        resp = self.logged_client.get(url)
 
         self.assertEqual(resp.status_code, 404)
+
+
+class EndpointsAuthentication(TestCase):
+    def setUp(self):
+        self.logged_client = LoggedClient(self.client)
+
+    @mock.patch('api.serializers.execute')
+    def test_not_logged_in_detail_entidade(self, _execute):
+        url = reverse('api:detail_entidade', args=('EST', '33',))
+
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 403)
+
+    @mock.patch('api.serializers.execute')
+    def test_not_logged_in_detail_dado(self, _execute):
+        domain_id = 1
+        entity_abrv = 'EST'
+        data_id = 7
+        url = reverse(
+            'api:detail_dado',
+            args=(entity_abrv, domain_id, data_id)
+        )
+
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 403)
+
+    @mock.patch('api.views.EntidadeSerializer')
+    @mock.patch('api.views.get_object_or_404', return_value=[])
+    @mock.patch('api.serializers.execute')
+    def test_logged_in_detail_entidade(self, _execute, _get_obj, _ser):
+        mock_obj = mock.MagicMock()
+        mock_obj.data = {'exibition_field': 1}
+        _ser.return_value = mock_obj
+        url = reverse('api:detail_entidade', args=('EST', '33',))
+        resp = self.logged_client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
+
+    @mock.patch('api.views.DadoSerializer')
+    @mock.patch('api.views.get_object_or_404', return_value=[])
+    @mock.patch('api.serializers.execute')
+    def test_logged_in_detail_dado(self, _execute, _get_obj, _ser):
+        mock_obj = mock.MagicMock()
+        mock_obj.data = {'external_data': 1}
+        _ser.return_value = mock_obj
+
+        domain_id = 1
+        entity_abrv = 'EST'
+        data_id = 7
+
+        url = reverse(
+            'api:detail_dado',
+            args=(entity_abrv, domain_id, data_id)
+        )
+
+        resp = self.logged_client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
