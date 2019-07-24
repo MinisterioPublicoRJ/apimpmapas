@@ -12,9 +12,9 @@ from api.models import (
     TEXT_PEQ_DEST,
     LIST_UNRANK,
     LIST_RANKED,
-    # GRAPH_BAR_VERT,
-    # GRAPH_BAR_HORI,
-    # GRAPH_PIZZA
+    GRAPH_BAR_VERT,
+    GRAPH_BAR_HORI,
+    GRAPH_PIZZA
 )
 
 
@@ -100,6 +100,11 @@ class EntidadeSerializer(serializers.ModelSerializer):
 class DadoSerializer(serializers.ModelSerializer):
     external_data = serializers.SerializerMethodField()
     icon = serializers.SerializerMethodField()
+    exibition_field = serializers.SerializerMethodField()
+
+    singleton_data = [TEXT_GDE, TEXT_PEQ, TEXT_PEQ_DEST]
+    list_data = [LIST_UNRANK, LIST_RANKED]
+    graph_data = [GRAPH_BAR_VERT, GRAPH_BAR_HORI, GRAPH_PIZZA]
 
     class Meta:
         model = Dado
@@ -143,7 +148,7 @@ class DadoSerializer(serializers.ModelSerializer):
             return {}
 
         if db_result:
-            if obj.data_type in [TEXT_GDE, TEXT_PEQ, TEXT_PEQ_DEST]:
+            if obj.data_type in self.singleton_data:
                 result = db_result[0]
                 data = {
                     'dado': result[0],
@@ -153,7 +158,8 @@ class DadoSerializer(serializers.ModelSerializer):
                     'link': result[4],
                 }
                 return data
-            elif obj.data_type in [LIST_UNRANK, LIST_RANKED]:
+            elif (obj.data_type in self.list_data or
+                  obj.data_type in self.graph_data):
                 data = []
                 for result in db_result:
                     data_dict = {
@@ -172,3 +178,8 @@ class DadoSerializer(serializers.ModelSerializer):
             icon_url = obj.icon.file_path.url
             return icon_url
         return None
+
+    def get_exibition_field(self, obj):
+        if obj.exibition_field:
+            return obj.exibition_field
+        return obj.title
