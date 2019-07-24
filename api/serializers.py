@@ -100,6 +100,7 @@ class EntidadeSerializer(serializers.ModelSerializer):
 class DadoSerializer(serializers.ModelSerializer):
     external_data = serializers.SerializerMethodField()
     icon = serializers.SerializerMethodField()
+    exibition_field = serializers.SerializerMethodField()
 
     class Meta:
         model = Dado
@@ -172,3 +173,8 @@ class DadoSerializer(serializers.ModelSerializer):
             icon_url = obj.icon.file_path.url
             return icon_url
         return None
+
+    def get_exibition_field(self, obj):
+        if obj.exibition_field:
+            return obj.exibition_field
+        return obj.title
