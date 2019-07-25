@@ -117,7 +117,7 @@ class DadoSerializer(serializers.ModelSerializer):
         ]
 
     def __init__(self, *args, **kwargs):
-        self.domain_id = kwargs.pop('domain_id')
+        self.domain_id = str(kwargs.pop('domain_id'))
         super().__init__(*args, **kwargs)
 
     def get_external_data(self, obj):
