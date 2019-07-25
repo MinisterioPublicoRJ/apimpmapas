@@ -15,7 +15,7 @@ class MapTest(TestCase):
         entidade = make(
             'api.Entidade',
             abreviation='ORG',
-            geom_column='geom'
+            geom_column_mapa='geom'
         )
 
         coord = {
@@ -26,10 +26,23 @@ class MapTest(TestCase):
             ]
         }
 
-        _execute.return_value = [['Sbrubbles', json.dumps(coord), ], ]
+        features = [{
+            "type": "Feature",
+            "properties": {
+                'name': 'Name',
+                'entity_link_type': 'CRA',
+                'entity_link_id': '2'
+            },
+            "geometry": coord
+        }]
+
+        _execute.side_effect = [
+            [('mock_name', )],
+            [(json.dumps(coord), 'Name', 'CRA', '2')],
+        ]
+        # import ipdb; ipdb.set_trace()
 
         ent_ser = EntidadeSerializer(entidade, domain_id='99').data
-
-        self.assertEqual(ent_ser['geojson'], coord)
+        self.assertEqual(ent_ser['geojson'], features)
 
     # TODO: Teste para caso de erro

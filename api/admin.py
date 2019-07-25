@@ -27,7 +27,9 @@ class EntidadeAdmin(admin.ModelAdmin):
                 'table_mapa',
                 'id_column_mapa',
                 'name_column_mapa',
-                'geom_column_mapa')
+                'geom_column_mapa',
+                'entity_link_type',
+                'entity_link_id_column')
         })
     )
 

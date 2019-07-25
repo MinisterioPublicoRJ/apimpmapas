@@ -35,7 +35,7 @@ class Icone(models.Model):
     file_path = models.FileField(upload_to='icones')
 
     def __str__(self):
-        if self is not None:
+        if self:
             return self.name
 
 
@@ -66,12 +66,18 @@ class Entidade(models.Model):
     id_column_mapa = models.CharField(max_length=200, null=True, blank=True)
     name_column_mapa = models.CharField(max_length=200, null=True, blank=True)
     geom_column_mapa = models.CharField(max_length=25, null=True, blank=True)
+    entity_link_type = models.CharField(max_length=25, null=True, blank=True)
+    entity_link_id_column = models.CharField(
+        max_length=200,
+        null=True,
+        blank=True
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        if self is not None:
+        if self:
             return self.name
 
 
@@ -133,5 +139,5 @@ class Dado(OrderedModel):
     last_modified = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        if self is not None:
+        if self:
             return self.title

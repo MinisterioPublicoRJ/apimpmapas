@@ -68,7 +68,10 @@ class ListDadosViewTest(TestCase):
     @mock.patch('api.serializers.execute')
     def test_get_lista_dados(self, _execute):
         """Deve retornar dados referentes ao tipo de entidade chamado"""
-        _execute.return_value = [('mock_name', 'mock_geo')]
+        _execute.side_effect = [
+            [('mock_name', )],
+            None,
+        ]
 
         ent_estado = make('api.Entidade', abreviation='EST')
         ent_municipio = make('api.Entidade', abreviation='MUN')
@@ -93,8 +96,6 @@ class ListDadosViewTest(TestCase):
 
         resp = self.client.get(url)
         resp_json = resp.json()
-
-        # import pdb; pdb.set_trace()
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(len(resp_json['data_list']), 2)
