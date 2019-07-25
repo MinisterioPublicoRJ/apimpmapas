@@ -98,7 +98,24 @@ class Dado(OrderedModel):
     label_column = models.CharField(max_length=200, null=True, blank=True)
     source_column = models.CharField(max_length=200, null=True, blank=True)
     details_column = models.CharField(max_length=200, null=True, blank=True)
-    link_column = models.CharField(max_length=200, null=True, blank=True)
+    entity_link_id_column = models.CharField(
+        max_length=200,
+        null=True,
+        blank=True
+    )
+
+    entity_link_type = models.ForeignKey(
+        Entidade,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    entity_link_column = models.CharField(
+        max_length=200,
+        null=True,
+        blank=True
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)

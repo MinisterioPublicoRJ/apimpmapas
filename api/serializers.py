@@ -133,7 +133,14 @@ class DadoSerializer(serializers.ModelSerializer):
             obj.details_column if obj.details_column else 'NULL as detalhes'
         )
         columns.append(
-            obj.link_column if obj.link_column else 'NULL as link'
+            obj.entity_link_id_column
+            if obj.entity_link_id_column
+            else 'NULL as link_interno_id'
+        )
+        columns.append(
+            obj.external_link_column
+            if obj.external_link_column
+            else 'NULL as link_externo'
         )
         try:
             db_result = execute(
@@ -155,7 +162,9 @@ class DadoSerializer(serializers.ModelSerializer):
                     'label': result[1],
                     'fonte': result[2],
                     'detalhes': result[3],
-                    'link': result[4],
+                    'link_interno_entidade': obj.entity_link_type,
+                    'link_interno_id': result[4],
+                    'link_externo': result[5],
                 }
                 return data
             elif (obj.data_type in self.list_data or
@@ -167,7 +176,9 @@ class DadoSerializer(serializers.ModelSerializer):
                         'label': result[1],
                         'fonte': result[2],
                         'detalhes': result[3],
-                        'link': result[4],
+                        'link_interno_entidade': obj.entity_link_type,
+                        'link_interno_id': result[4],
+                        'link_externo': result[5],
                     }
                     data.append(data_dict)
                 return data
