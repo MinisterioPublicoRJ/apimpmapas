@@ -124,7 +124,7 @@ class DadoSerializer(serializers.ModelSerializer):
         columns = []
         columns.append(obj.data_column)
         columns.append(
-            obj.label_column if obj.label_column else 'NULL as label'
+            obj.label_column if obj.label_column else 'NULL as rotulo'
         )
         columns.append(
             obj.source_column if obj.source_column else 'NULL as fonte'
@@ -159,7 +159,7 @@ class DadoSerializer(serializers.ModelSerializer):
                 result = db_result[0]
                 data = {
                     'dado': result[0],
-                    'label': result[1],
+                    'rotulo': result[1],
                     'fonte': result[2],
                     'detalhes': result[3],
                     'link_interno_entidade': obj.entity_link_type,
@@ -173,7 +173,7 @@ class DadoSerializer(serializers.ModelSerializer):
                 for result in db_result:
                     data_dict = {
                         'dado': result[0],
-                        'label': result[1],
+                        'rotulo': result[1],
                         'fonte': result[2],
                         'detalhes': result[3],
                         'link_interno_entidade': obj.entity_link_type,
