@@ -164,7 +164,7 @@ class DadoSerializer(serializers.ModelSerializer):
                     'detalhes': result[3],
                     'link_interno_entidade': obj.entity_link_type,
                     'link_interno_id': result[4],
-                    'link_externo': result[5],
+                    'link_externo': result[5]
                 }
                 return data
             elif (obj.data_type in self.list_data or
@@ -178,7 +178,7 @@ class DadoSerializer(serializers.ModelSerializer):
                         'detalhes': result[3],
                         'link_interno_entidade': obj.entity_link_type,
                         'link_interno_id': result[4],
-                        'link_externo': result[5],
+                        'link_externo': result[5]
                     }
                     data.append(data_dict)
                 return data

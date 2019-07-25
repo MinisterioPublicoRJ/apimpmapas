@@ -118,6 +118,8 @@ class DetailDadosViewTest(TestCase):
         self.external_link = None
         self.exibition_field = 'Abrigos para crianças e adolescentes'
         self.domain_id = '33'
+        self.external_entity = None
+        self.external_ent_id = None
         self.text_type = 'texto_pequeno_destaque'
         self.icon_file = 'icones/python.svg'
 
@@ -127,10 +129,12 @@ class DetailDadosViewTest(TestCase):
             'id': self.data_id,
             'external_data': {
                 'dado': self.external_data,
-                'label': self.external_label,
+                'rotulo': self.external_label,
                 'fonte': self.external_source,
                 'detalhes': self.external_description,
-                'link': self.external_link
+                'link_interno_entidade': self.external_entity,
+                'link_interno_id': self.external_ent_id,
+                'link_externo': self.external_link
             },
             'exibition_field': self.exibition_field,
             'data_type': self.text_type,
@@ -142,6 +146,7 @@ class DetailDadosViewTest(TestCase):
             self.external_label,
             self.external_source,
             self.external_description,
+            self.external_ent_id,
             self.external_link
         )]
 

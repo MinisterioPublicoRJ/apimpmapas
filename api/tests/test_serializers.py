@@ -11,28 +11,34 @@ class DataTypeViewTest(TestCase):
 
     def setUp(self):
         self.return_execute = [
-            ('dado1', None, 'fonte', None, 'link1'),
-            ('dado2', None, 'fonte', None, 'link2'),
-            ('dado3', None, 'fonte', None, 'link3'),
+            ('dado1', None, 'fonte', None, None, 'link1'),
+            ('dado2', None, 'fonte', None, None, 'link2'),
+            ('dado3', None, 'fonte', None, None, 'link3'),
         ]
         self.expected_value = [{
             'dado': 'dado1',
-            'label': None,
+            'rotulo': None,
             'fonte': 'fonte',
             'detalhes': None,
-            'link': 'link1'
+            'link_interno_entidade': None,
+            'link_interno_id': None,
+            'link_externo': 'link1'
         }, {
             'dado': 'dado2',
-            'label': None,
+            'rotulo': None,
             'fonte': 'fonte',
             'detalhes': None,
-            'link': 'link2'
+            'link_interno_entidade': None,
+            'link_interno_id': None,
+            'link_externo': 'link2'
         }, {
             'dado': 'dado3',
-            'label': None,
+            'rotulo': None,
             'fonte': 'fonte',
             'detalhes': None,
-            'link': 'link3'
+            'link_interno_entidade': None,
+            'link_interno_id': None,
+            'link_externo': 'link3'
         }]
 
     @mock.patch('api.serializers.execute')
