@@ -68,7 +68,10 @@ class ListDadosViewTest(TestCase):
     @mock.patch('api.serializers.execute')
     def test_get_lista_dados(self, _execute):
         """Deve retornar dados referentes ao tipo de entidade chamado"""
-        _execute.return_value = [('mock_name', 'mock_geo')]
+        _execute.side_effect = [
+            [('mock_name', )],
+            None,
+        ]
 
         ent_estado = make('api.Entidade', abreviation='EST')
         ent_municipio = make('api.Entidade', abreviation='MUN')
@@ -94,8 +97,6 @@ class ListDadosViewTest(TestCase):
         resp = self.client.get(url)
         resp_json = resp.json()
 
-        # import pdb; pdb.set_trace()
-
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(len(resp_json['data_list']), 2)
         self.assertEqual(
@@ -118,6 +119,8 @@ class DetailDadosViewTest(TestCase):
         self.external_link = None
         self.exibition_field = 'Abrigos para crianças e adolescentes'
         self.domain_id = '33'
+        self.external_entity = None
+        self.external_ent_id = None
         self.text_type = 'texto_pequeno_destaque'
         self.icon_file = 'icones/python.svg'
 
@@ -127,10 +130,12 @@ class DetailDadosViewTest(TestCase):
             'id': self.data_id,
             'external_data': {
                 'dado': self.external_data,
-                'label': self.external_label,
+                'rotulo': self.external_label,
                 'fonte': self.external_source,
                 'detalhes': self.external_description,
-                'link': self.external_link
+                'link_interno_entidade': self.external_entity,
+                'link_interno_id': self.external_ent_id,
+                'link_externo': self.external_link
             },
             'exibition_field': self.exibition_field,
             'data_type': self.text_type,
@@ -142,6 +147,7 @@ class DetailDadosViewTest(TestCase):
             self.external_label,
             self.external_source,
             self.external_description,
+            self.external_ent_id,
             self.external_link
         )]
 

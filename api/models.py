@@ -35,7 +35,7 @@ class Icone(models.Model):
     file_path = models.FileField(upload_to='icones')
 
     def __str__(self):
-        if self is not None:
+        if self:
             return self.name
 
 
@@ -53,13 +53,31 @@ class Entidade(models.Model):
     table = models.CharField(max_length=100)
     id_column = models.CharField(max_length=200)
     name_column = models.CharField(max_length=200)
-    geom_column = models.CharField(max_length=25, null=True, blank=True)
+
+    # --------------
+    # Mapa
+    database_mapa = models.CharField(
+        max_length=3,
+        choices=DATABASE_CHOICES,
+        default=POSTGRES,
+    )
+    schema_mapa = models.CharField(max_length=100, null=True, blank=True)
+    table_mapa = models.CharField(max_length=100, null=True, blank=True)
+    id_column_mapa = models.CharField(max_length=200, null=True, blank=True)
+    name_column_mapa = models.CharField(max_length=200, null=True, blank=True)
+    geom_column_mapa = models.CharField(max_length=25, null=True, blank=True)
+    entity_link_type = models.CharField(max_length=25, null=True, blank=True)
+    entity_link_id_column = models.CharField(
+        max_length=200,
+        null=True,
+        blank=True
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        if self is not None:
+        if self:
             return self.name
 
 
@@ -98,11 +116,28 @@ class Dado(OrderedModel):
     label_column = models.CharField(max_length=200, null=True, blank=True)
     source_column = models.CharField(max_length=200, null=True, blank=True)
     details_column = models.CharField(max_length=200, null=True, blank=True)
-    link_column = models.CharField(max_length=200, null=True, blank=True)
+    external_link_column = models.CharField(
+        max_length=200,
+        null=True,
+        blank=True
+    )
+
+    entity_link_type = models.ForeignKey(
+        Entidade,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    entity_link_id_column = models.CharField(
+        max_length=200,
+        null=True,
+        blank=True
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        if self is not None:
+        if self:
             return self.title

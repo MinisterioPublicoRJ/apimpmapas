@@ -53,31 +53,56 @@ class EntidadeSerializer(serializers.ModelSerializer):
         data = {
             'domain_id': domain_id,
             'exibition_field': None,
-            'geojson': None
+            'features': None
         }
 
-        columns = [tipo_entidade.name_column]
-        if tipo_entidade.geom_column:
-            columns.append(tipo_entidade.geom_column)
-
+        db_result = None
         try:
             db_result = execute(
                 tipo_entidade.database,
                 tipo_entidade.schema,
                 tipo_entidade.table,
-                columns,
+                [tipo_entidade.name_column],
                 tipo_entidade.id_column,
                 domain_id
             )
         except QueryError:
-            return data
-
+            pass
         if db_result:
             main_result = db_result[0]
             data['exibition_field'] = main_result[0]
-            if tipo_entidade.geom_column:
-                data['geojson'] = json.loads(main_result[1])
 
+        if tipo_entidade.geom_column_mapa:
+            db_result = None
+            try:
+                columns = [
+                    tipo_entidade.geom_column_mapa,
+                    tipo_entidade.name_column_mapa,
+                    tipo_entidade.entity_link_type,
+                    tipo_entidade.entity_link_id_column
+                ]
+                db_result = execute(
+                    tipo_entidade.database_mapa,
+                    tipo_entidade.schema_mapa,
+                    tipo_entidade.table_mapa,
+                    columns,
+                    tipo_entidade.id_column_mapa,
+                    domain_id
+                )
+            except QueryError:
+                pass
+            if db_result:
+                features = []
+                for main_result in db_result:
+                    feature = {}
+                    feature['geometry'] = json.loads(main_result[0])
+                    feature['type'] = 'Feature'
+                    feature['properties'] = {}
+                    feature['properties']['name'] = main_result[1]
+                    feature['properties']['entity_link_type'] = main_result[2]
+                    feature['properties']['entity_link_id'] = main_result[3]
+                    features.append(feature)
+                data['features'] = features
         return data
 
     def get_exibition_field(self, obj):
@@ -87,7 +112,7 @@ class EntidadeSerializer(serializers.ModelSerializer):
         return self.base_data['domain_id']
 
     def get_geojson(self, obj):
-        return self.base_data['geojson']
+        return self.base_data['features']
 
     def get_data_list(self, obj):
         data_list = obj.data_list.all()
@@ -124,7 +149,7 @@ class DadoSerializer(serializers.ModelSerializer):
         columns = []
         columns.append(obj.data_column)
         columns.append(
-            obj.label_column if obj.label_column else 'NULL as label'
+            obj.label_column if obj.label_column else 'NULL as rotulo'
         )
         columns.append(
             obj.source_column if obj.source_column else 'NULL as fonte'
@@ -133,7 +158,14 @@ class DadoSerializer(serializers.ModelSerializer):
             obj.details_column if obj.details_column else 'NULL as detalhes'
         )
         columns.append(
-            obj.link_column if obj.link_column else 'NULL as link'
+            obj.entity_link_id_column
+            if obj.entity_link_id_column
+            else 'NULL as link_interno_id'
+        )
+        columns.append(
+            obj.external_link_column
+            if obj.external_link_column
+            else 'NULL as link_externo'
         )
         try:
             db_result = execute(
@@ -152,10 +184,12 @@ class DadoSerializer(serializers.ModelSerializer):
                 result = db_result[0]
                 data = {
                     'dado': result[0],
-                    'label': result[1],
+                    'rotulo': result[1],
                     'fonte': result[2],
                     'detalhes': result[3],
-                    'link': result[4],
+                    'link_interno_entidade': obj.entity_link_type,
+                    'link_interno_id': result[4],
+                    'link_externo': result[5]
                 }
                 return data
             elif (obj.data_type in self.list_data or
@@ -164,10 +198,12 @@ class DadoSerializer(serializers.ModelSerializer):
                 for result in db_result:
                     data_dict = {
                         'dado': result[0],
-                        'label': result[1],
+                        'rotulo': result[1],
                         'fonte': result[2],
                         'detalhes': result[3],
-                        'link': result[4],
+                        'link_interno_entidade': obj.entity_link_type,
+                        'link_interno_id': result[4],
+                        'link_externo': result[5]
                     }
                     data.append(data_dict)
                 return data
