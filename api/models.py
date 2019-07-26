@@ -81,6 +81,37 @@ class Entidade(models.Model):
             return self.name
 
 
+class Mapa(models.Model):
+    entity = models.OneToOneField(
+        Entidade,
+        on_delete=models.CASCADE,
+        primary_key=True,
+        related_name='map_info'
+    )
+    database = models.CharField(
+        'Banco de dados',
+        max_length=3,
+        choices=DATABASE_CHOICES,
+        default=POSTGRES,
+    )
+    schema = models.CharField('Esquema', max_length=50)
+    table = models.CharField('Tabela', max_length=50)
+    entity_id_column = models.CharField(
+        'Coluna do ID da entidade',
+        max_length=50
+    )
+    label_column = models.CharField('Coluna do label do mapa', max_length=50)
+    geom_column = models.CharField('Coluna do json do mapa', max_length=50)
+    related_entity_column = models.CharField(
+        'Coluna da entidade apontada',
+        max_length=50
+    )
+    related_id_column = models.CharField(
+        'Coluna do ID apontado',
+        max_length=50
+    )
+
+
 class Dado(OrderedModel):
     title = models.CharField(max_length=100)
     exibition_field = models.CharField(max_length=50, null=True, blank=True)

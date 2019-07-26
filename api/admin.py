@@ -1,7 +1,11 @@
 from django.contrib import admin
 from ordered_model.admin import OrderedModelAdmin
 
-from api.models import Dado, Icone, Entidade
+from api.models import Dado, Icone, Entidade, Mapa
+
+
+class MapaAdminInline(admin.StackedInline):
+    model = Mapa
 
 
 @admin.register(Entidade)
@@ -32,6 +36,7 @@ class EntidadeAdmin(admin.ModelAdmin):
                 'entity_link_id_column')
         })
     )
+    inlines = [MapaAdminInline]
 
 
 @admin.register(Dado)
