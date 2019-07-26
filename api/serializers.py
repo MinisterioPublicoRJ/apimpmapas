@@ -112,6 +112,37 @@ class EntidadeSerializer(serializers.ModelSerializer):
         return self.base_data['domain_id']
 
     def get_geojson(self, obj):
+        if hasattr(obj, 'map_info') and obj.map_info:
+            db_result = None
+            try:
+                columns = [
+                    obj.map_info.geom_column,
+                    obj.map_info.label_column,
+                    obj.map_info.related_entity_column,
+                    obj.map_info.related_id_column
+                ]
+                db_result = execute(
+                    obj.map_info.database,
+                    obj.map_info.schema,
+                    obj.map_info.table,
+                    columns,
+                    obj.map_info.entity_id_column,
+                    self.base_data['domain_id']
+                )
+            except QueryError:
+                return None
+            if db_result:
+                features = []
+                for main_result in db_result:
+                    feature = {}
+                    feature['geometry'] = json.loads(main_result[0])
+                    feature['type'] = 'Feature'
+                    feature['properties'] = {}
+                    feature['properties']['name'] = main_result[1]
+                    feature['properties']['entity_link_type'] = main_result[2]
+                    feature['properties']['entity_link_id'] = main_result[3]
+                    features.append(feature)
+                return features
         return self.base_data['features']
 
     def get_data_list(self, obj):
