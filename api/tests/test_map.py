@@ -40,7 +40,6 @@ class MapTest(TestCase):
             [('mock_name', )],
             [(json.dumps(coord), 'Name', 'CRA', '2')],
         ]
-        # import ipdb; ipdb.set_trace()
 
         ent_ser = EntidadeSerializer(entidade, domain_id='99').data
         self.assertEqual(ent_ser['geojson'], features)

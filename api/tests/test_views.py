@@ -3,7 +3,6 @@ from unittest import mock
 from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
-
 from model_mommy.mommy import make
 
 from api.exceptions import QueryError
@@ -54,7 +53,7 @@ class EntidadeViewTest(TestCase):
 
     @mock.patch('api.serializers.execute')
     def test_entidade_com_erro(self, _execute):
-        _execute.side_effect = QueryError('test error')
+        _execute.side_effect = QueryError()
 
         make('api.Entidade', id=1, abreviation='MUN')
         url = reverse('api:detail_entidade', args=('MUN', '1',))
@@ -224,7 +223,7 @@ class DetailDadosViewTest(TestCase):
 
     @mock.patch('api.serializers.execute')
     def test_dado_com_erro(self, _execute):
-        _execute.side_effect = QueryError('test error')
+        _execute.side_effect = QueryError()
 
         entidade = make(
             'api.Entidade',

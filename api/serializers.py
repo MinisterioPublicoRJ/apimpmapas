@@ -1,9 +1,18 @@
 import json
 
+from decouple import config
+from django.utils import timezone
 from rest_framework import serializers
 
 from api.db_connectors import execute
 from api.exceptions import QueryError
+from api.mail import (
+    login,
+    send_mail,
+    dado_template,
+    ent_template,
+    map_template
+)
 from api.models import (
     Entidade,
     Dado,
@@ -66,8 +75,18 @@ class EntidadeSerializer(serializers.ModelSerializer):
                 tipo_entidade.id_column,
                 domain_id
             )
-        except QueryError:
-            pass
+        except QueryError as e:
+            dest = config('MAIL_DESTINATION')
+            subject = "Erro na entidade {}".format(tipo_entidade.name)
+
+            msg = ent_template.render(
+                entidade_nome=tipo_entidade.name,
+                msg=str(e),
+                datetime=timezone.localtime().strftime("%d/%m/%Y %H:%M:%S ")
+            )
+
+            send_mail(server=login(), msg=msg, dest=dest, subject=subject)
+
         if db_result:
             main_result = db_result[0]
             data['exibition_field'] = main_result[0]
@@ -89,7 +108,19 @@ class EntidadeSerializer(serializers.ModelSerializer):
                     tipo_entidade.id_column_mapa,
                     domain_id
                 )
-            except QueryError:
+            except QueryError as e:
+                dest = config('MAIL_DESTINATION')
+                subject = "Erro no mapa da entidade {}".format(
+                    tipo_entidade.name
+                )
+
+                msg = map_template.render(
+                    entidade_nome=tipo_entidade.name,
+                    msg=str(e),
+                    datetime=timezone.localtime().strftime("%d/%m/%Y %H:%M:%S")
+                )
+
+                send_mail(server=login(), msg=msg, dest=dest, subject=subject)
                 pass
             if db_result:
                 features = []
@@ -129,7 +160,17 @@ class EntidadeSerializer(serializers.ModelSerializer):
                     obj.map_info.entity_id_column,
                     self.base_data['domain_id']
                 )
-            except QueryError:
+            except QueryError as e:
+                dest = config('MAIL_DESTINATION')
+                subject = "Erro no mapa da entidade {}".format(obj.name)
+
+                msg = map_template.render(
+                    entidade_nome=obj.name,
+                    msg=str(e),
+                    datetime=timezone.localtime().strftime("%d/%m/%Y %H:%M:%S")
+                )
+
+                send_mail(server=login(), msg=msg, dest=dest, subject=subject)
                 return None
             if db_result:
                 features = []
@@ -207,7 +248,18 @@ class DadoSerializer(serializers.ModelSerializer):
                 obj.id_column,
                 self.domain_id
             )
-        except QueryError:
+        except QueryError as e:
+            dest = config('MAIL_DESTINATION')
+            subject = "Erro no dado {}".format(obj.title)
+
+            msg = dado_template.render(
+                dado_titulo=obj.title,
+                dado_entidade=obj.entity_type.name,
+                msg=str(e),
+                datetime=timezone.localtime().strftime("%d/%m/%Y %H:%M:%S ")
+            )
+
+            send_mail(server=login(), msg=msg, dest=dest, subject=subject)
             return {}
 
         if db_result:
