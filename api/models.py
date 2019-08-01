@@ -15,6 +15,7 @@ TEXT_PEQ = 'texto_pequeno'
 TEXT_PEQ_DEST = 'texto_pequeno_destaque'
 LIST_UNRANK = 'lista_sem_ordenacao'
 LIST_RANKED = 'lista_ordenada'
+LIST_FILTER = 'lista_filtrada'
 GRAPH_BAR_VERT = 'grafico_barra_vertical'
 GRAPH_BAR_HORI = 'grafico_barra_horizontal'
 GRAPH_BAR_HORI_STACK = 'grafico_barra_horizontal_agrupado'
@@ -25,6 +26,7 @@ REPR_CHOICES = [
     (TEXT_PEQ_DEST, 'Texto destacado em coluna simples'),
     (LIST_UNRANK, 'Lista sem ordenação'),
     (LIST_RANKED, 'Lista ordenada'),
+    (LIST_FILTER, 'Lista sem ordenação com filtro de busca'),
     (GRAPH_BAR_VERT, 'Gráfico de barras verticais'),
     (GRAPH_BAR_HORI, 'Gráfico de barras horizontais'),
     (GRAPH_BAR_HORI_STACK, 'Gráfico de barras horizontais agrupadas')
