@@ -29,7 +29,7 @@ REPR_CHOICES = [
     (LIST_FILTER, 'Lista sem ordenação com filtro de busca'),
     (GRAPH_BAR_VERT, 'Gráfico de barras verticais'),
     (GRAPH_BAR_HORI, 'Gráfico de barras horizontais'),
-    (GRAPH_BAR_HORI_STACK, 'Gráfico de barras horizontais agrupadas')
+    (GRAPH_BAR_HORI_STACK, 'Gráfico de barras horizontais agrupadas'),
     (GRAPH_PIZZA, 'Gráfico de pizza'),
 ]
 
