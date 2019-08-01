@@ -13,6 +13,7 @@ from api.models import (
     LIST_UNRANK,
     LIST_RANKED,
     LIST_FILTER,
+    LIST_PERSON,
     GRAPH_BAR_VERT,
     GRAPH_BAR_HORI,
     GRAPH_BAR_HORI_STACK,
@@ -161,7 +162,7 @@ class DadoSerializer(serializers.ModelSerializer):
     exibition_field = serializers.SerializerMethodField()
 
     singleton_data = [TEXT_GDE, TEXT_PEQ, TEXT_PEQ_DEST]
-    list_data = [LIST_UNRANK, LIST_RANKED, LIST_FILTER]
+    list_data = [LIST_UNRANK, LIST_RANKED, LIST_FILTER, LIST_PERSON]
     graph_data = [
         GRAPH_BAR_VERT,
         GRAPH_BAR_HORI,
