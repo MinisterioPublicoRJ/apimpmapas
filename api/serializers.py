@@ -225,7 +225,10 @@ class DadoSerializer(serializers.ModelSerializer):
                     'rotulo': result[1],
                     'fonte': result[2],
                     'detalhes': result[3],
-                    'link_interno_entidade': obj.entity_link_type.abreviation,
+                    'link_interno_entidade':
+                        obj.entity_link_type.abreviation
+                        if obj.entity_link_type
+                        else None,
                     'link_interno_id': result[4],
                     'link_externo': result[5]
                 }
@@ -240,7 +243,9 @@ class DadoSerializer(serializers.ModelSerializer):
                         'fonte': result[2],
                         'detalhes': result[3],
                         'link_interno_entidade':
-                            obj.entity_link_type.abreviation,
+                            obj.entity_link_type.abreviation
+                            if obj.entity_link_type
+                            else None,
                         'link_interno_id': result[4],
                         'link_externo': result[5]
                     }
