@@ -205,6 +205,9 @@ class DadoSerializer(serializers.ModelSerializer):
             if obj.external_link_column
             else 'NULL as link_externo'
         )
+        columns.append(
+            obj.image_column if obj.image_column else 'NULL as imagem'
+        )
         try:
             db_result = execute(
                 obj.database,
@@ -225,6 +228,7 @@ class DadoSerializer(serializers.ModelSerializer):
                     'rotulo': result[1],
                     'fonte': result[2],
                     'detalhes': result[3],
+                    'imagem': result[6],
                     'link_interno_entidade':
                         obj.entity_link_type.abreviation
                         if obj.entity_link_type
@@ -242,6 +246,7 @@ class DadoSerializer(serializers.ModelSerializer):
                         'rotulo': result[1],
                         'fonte': result[2],
                         'detalhes': result[3],
+                        'imagem': result[6],
                         'link_interno_entidade':
                             obj.entity_link_type.abreviation
                             if obj.entity_link_type

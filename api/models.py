@@ -151,6 +151,7 @@ class Dado(OrderedModel):
     label_column = models.CharField(max_length=200, null=True, blank=True)
     source_column = models.CharField(max_length=200, null=True, blank=True)
     details_column = models.CharField(max_length=200, null=True, blank=True)
+    image_column = models.CharField(max_length=200, null=True, blank=True)
     external_link_column = models.CharField(
         max_length=200,
         null=True,
