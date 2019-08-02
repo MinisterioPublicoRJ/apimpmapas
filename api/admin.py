@@ -31,6 +31,26 @@ class EntidadeAdmin(admin.ModelAdmin):
 class DadoAdmin(OrderedModelAdmin):
     list_display = ('title', 'entity_type', 'move_up_down_links')
     list_filter = ('entity_type__name',)
+    fieldsets = (
+        (None, {
+            'fields': ('title', 'data_type', 'entity_type', 'icon')
+        }),
+        ('Dados exibidos', {
+            'fields': (
+                'database',
+                'schema',
+                'table',
+                'id_column',
+                'data_column',
+                'label_column',
+                'source_column',
+                'details_column',
+                'image_column',
+                'external_link_column',
+                'entity_link_type',
+                'entity_link_id_column')
+        })
+    )
 
 
 admin.site.register(Icone)

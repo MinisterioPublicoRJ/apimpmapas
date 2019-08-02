@@ -39,8 +39,8 @@ REPR_CHOICES = [
 
 
 class Icone(models.Model):
-    name = models.CharField(max_length=20)
-    file_path = models.FileField(upload_to='icones')
+    name = models.CharField('Título do ícone', max_length=20)
+    file_path = models.FileField('Arquivo do ícone', upload_to='icones')
 
     def __str__(self):
         if self:
@@ -48,19 +48,23 @@ class Icone(models.Model):
 
 
 class Entidade(models.Model):
-    name = models.CharField(max_length=25)
-    abreviation = models.CharField(max_length=3)
+    name = models.CharField('Nome da entidade', max_length=25)
+    abreviation = models.CharField('Abreviação da entidade', max_length=5)
 
     database = models.CharField(
+        'Banco de dados',
         max_length=3,
         choices=DATABASE_CHOICES,
         default=POSTGRES,
     )
 
-    schema = models.CharField(max_length=100)
-    table = models.CharField(max_length=100)
-    id_column = models.CharField(max_length=200)
-    name_column = models.CharField(max_length=200)
+    schema = models.CharField('Esquema', max_length=100)
+    table = models.CharField('Tabela', max_length=100)
+    id_column = models.CharField('Coluna de ID da entidade', max_length=200)
+    name_column = models.CharField(
+        'Coluna de nome da entidade',
+        max_length=200
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
@@ -102,9 +106,9 @@ class Mapa(models.Model):
 
 
 class Dado(OrderedModel):
-    title = models.CharField(max_length=100)
-    exibition_field = models.CharField(max_length=50, null=True, blank=True)
+    title = models.CharField("Titulo da caixinha", max_length=100)
     data_type = models.CharField(
+        "Tipo de caixinha",
         max_length=50,
         choices=REPR_CHOICES,
         default=TEXT_GDE,
@@ -113,10 +117,12 @@ class Dado(OrderedModel):
     entity_type = models.ForeignKey(
         Entidade,
         on_delete=models.CASCADE,
-        related_name="data_list"
+        related_name="data_list",
+        verbose_name="Entidade relacionada"
     )
 
     database = models.CharField(
+        'Banco de dados',
         max_length=3,
         choices=DATABASE_CHOICES,
         default=POSTGRES,
@@ -126,18 +132,43 @@ class Dado(OrderedModel):
         Icone,
         null=True,
         blank=True,
-        on_delete=models.SET_NULL
+        on_delete=models.SET_NULL,
+        verbose_name="Ícone"
     )
 
-    schema = models.CharField(max_length=100)
-    table = models.CharField(max_length=100)
-    id_column = models.CharField(max_length=200)
-    data_column = models.CharField(max_length=200)
-    label_column = models.CharField(max_length=200, null=True, blank=True)
-    source_column = models.CharField(max_length=200, null=True, blank=True)
-    details_column = models.CharField(max_length=200, null=True, blank=True)
-    image_column = models.CharField(max_length=200, null=True, blank=True)
+    schema = models.CharField("Esquema", max_length=100)
+    table = models.CharField("Tabela", max_length=100)
+    id_column = models.CharField("Coluna do ID da Entidade", max_length=200)
+    data_column = models.CharField(
+        "Coluna da informação principal exibida",
+        max_length=200
+    )
+    label_column = models.CharField(
+        "Coluna de rótulo dos dados",
+        max_length=200,
+        null=True,
+        blank=True
+    )
+    source_column = models.CharField(
+        "Coluna de fonte dos dados",
+        max_length=200,
+        null=True,
+        blank=True
+    )
+    details_column = models.CharField(
+        "Coluna de detalhes sobre os dados",
+        max_length=200,
+        null=True,
+        blank=True
+    )
+    image_column = models.CharField(
+        "Coluna de imagem",
+        max_length=200,
+        null=True,
+        blank=True
+    )
     external_link_column = models.CharField(
+        "Coluna de link externo",
         max_length=200,
         null=True,
         blank=True
@@ -147,10 +178,12 @@ class Dado(OrderedModel):
         Entidade,
         on_delete=models.SET_NULL,
         null=True,
-        blank=True
+        blank=True,
+        verbose_name="Entidade apontada em link interno"
     )
 
     entity_link_id_column = models.CharField(
+        "Coluna de ID da entidade apontada",
         max_length=200,
         null=True,
         blank=True

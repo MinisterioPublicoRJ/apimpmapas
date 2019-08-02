@@ -144,8 +144,8 @@ class DadoSerializer(serializers.ModelSerializer):
         model = Dado
         fields = [
             'id',
+            'title',
             'external_data',
-            'exibition_field',
             'data_type',
             'icon'
         ]
