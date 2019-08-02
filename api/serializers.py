@@ -17,6 +17,7 @@ from api.models import (
     GRAPH_BAR_VERT,
     GRAPH_BAR_HORI,
     GRAPH_BAR_HORI_STACK,
+    GRAPH_LINE_HORI,
     GRAPH_PIZZA
 )
 
@@ -135,6 +136,7 @@ class DadoSerializer(serializers.ModelSerializer):
         GRAPH_BAR_VERT,
         GRAPH_BAR_HORI,
         GRAPH_BAR_HORI_STACK,
+        GRAPH_LINE_HORI,
         GRAPH_PIZZA
     ]
 

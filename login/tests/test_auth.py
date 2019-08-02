@@ -16,7 +16,7 @@ class ScaTest(TestCase):
         self.return_ok = 200
         self.return_forbidden = 403
         self.return_teapot = 418
-        self.permission_ok = {'permissions': {'ROLE_mp_plus_admin': True}}
+        self.permission_ok = {'permissions': {config('LOGIN_ROLE'): True}}
         self.permission_bad = {'permissions': {'ROLE_anyotherrole': True}}
 
     @mock.patch('login.sca.login')

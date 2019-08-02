@@ -20,6 +20,7 @@ LIST_PERSON = 'lista_pessoa'
 GRAPH_BAR_VERT = 'grafico_barra_vertical'
 GRAPH_BAR_HORI = 'grafico_barra_horizontal'
 GRAPH_BAR_HORI_STACK = 'grafico_barra_horizontal_agrupado'
+GRAPH_LINE_HORI = 'grafico_linha_horizontal'
 GRAPH_PIZZA = 'grafico_pizza'
 REPR_CHOICES = [
     (TEXT_GDE, 'Texto em coluna dupla'),
@@ -32,6 +33,7 @@ REPR_CHOICES = [
     (GRAPH_BAR_VERT, 'Gráfico de barras verticais'),
     (GRAPH_BAR_HORI, 'Gráfico de barras horizontais'),
     (GRAPH_BAR_HORI_STACK, 'Gráfico de barras horizontais agrupadas'),
+    (GRAPH_LINE_HORI, 'Gráfico de linha horizontal'),
     (GRAPH_PIZZA, 'Gráfico de pizza'),
 ]
 
