@@ -13,3 +13,4 @@ psycopg2-binary
 pyjwt
 python-decouple
 requests
+git+https://github.com/MinisterioPublicoRJ/login-sca
