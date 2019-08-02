@@ -12,8 +12,11 @@ from api.models import (
     TEXT_PEQ_DEST,
     LIST_UNRANK,
     LIST_RANKED,
+    LIST_FILTER,
+    LIST_PERSON,
     GRAPH_BAR_VERT,
     GRAPH_BAR_HORI,
+    GRAPH_BAR_HORI_STACK,
     GRAPH_PIZZA
 )
 
@@ -159,8 +162,13 @@ class DadoSerializer(serializers.ModelSerializer):
     exibition_field = serializers.SerializerMethodField()
 
     singleton_data = [TEXT_GDE, TEXT_PEQ, TEXT_PEQ_DEST]
-    list_data = [LIST_UNRANK, LIST_RANKED]
-    graph_data = [GRAPH_BAR_VERT, GRAPH_BAR_HORI, GRAPH_PIZZA]
+    list_data = [LIST_UNRANK, LIST_RANKED, LIST_FILTER, LIST_PERSON]
+    graph_data = [
+        GRAPH_BAR_VERT,
+        GRAPH_BAR_HORI,
+        GRAPH_BAR_HORI_STACK,
+        GRAPH_PIZZA
+    ]
 
     class Meta:
         model = Dado
@@ -198,6 +206,9 @@ class DadoSerializer(serializers.ModelSerializer):
             if obj.external_link_column
             else 'NULL as link_externo'
         )
+        columns.append(
+            obj.image_column if obj.image_column else 'NULL as imagem'
+        )
         try:
             db_result = execute(
                 obj.database,
@@ -218,7 +229,11 @@ class DadoSerializer(serializers.ModelSerializer):
                     'rotulo': result[1],
                     'fonte': result[2],
                     'detalhes': result[3],
-                    'link_interno_entidade': obj.entity_link_type,
+                    'imagem': result[6],
+                    'link_interno_entidade':
+                        obj.entity_link_type.abreviation
+                        if obj.entity_link_type
+                        else None,
                     'link_interno_id': result[4],
                     'link_externo': result[5]
                 }
@@ -232,7 +247,11 @@ class DadoSerializer(serializers.ModelSerializer):
                         'rotulo': result[1],
                         'fonte': result[2],
                         'detalhes': result[3],
-                        'link_interno_entidade': obj.entity_link_type,
+                        'imagem': result[6],
+                        'link_interno_entidade':
+                            obj.entity_link_type.abreviation
+                            if obj.entity_link_type
+                            else None,
                         'link_interno_id': result[4],
                         'link_externo': result[5]
                     }
