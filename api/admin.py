@@ -22,18 +22,6 @@ class EntidadeAdmin(admin.ModelAdmin):
                 'table',
                 'id_column',
                 'name_column')
-        }),
-        ('Mapa', {
-            'classes': ('collapse', ),
-            'fields': (
-                'database_mapa',
-                'schema_mapa',
-                'table_mapa',
-                'id_column_mapa',
-                'name_column_mapa',
-                'geom_column_mapa',
-                'entity_link_type',
-                'entity_link_id_column')
         })
     )
     inlines = [MapaAdminInline]
