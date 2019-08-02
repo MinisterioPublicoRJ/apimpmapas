@@ -1,9 +1,79 @@
+from collections import namedtuple
 from unittest import mock
 
+from decouple import config
 from django.test import TestCase
 from django.urls import reverse
 
 from login.decorators import auth_required
+from login.sca import authenticate
+
+
+class ScaTest(TestCase):
+    def setUp(self):
+        self.username = 'usuario'
+        self.password = 'senha'
+        self.return_ok = 200
+        self.return_forbidden = 403
+        self.return_teapot = 418
+        self.permission_ok = {'permissions': {'ROLE_mp_plus_admin': True}}
+        self.permission_bad = {'permissions': {'ROLE_anyotherrole': True}}
+
+    @mock.patch('login.sca.login')
+    def test_login_correct(self, _login):
+        respwrapper = namedtuple('Response', ['auth', 'info'])
+        mock_auth = mock.MagicMock()
+        mock_info = mock.MagicMock()
+        mock_auth.status_code = self.return_ok
+        mock_info.json.return_value = self.permission_ok
+        _login.return_value = respwrapper(mock_auth, mock_info)
+
+        auth_data = authenticate(self.username, self.password)
+
+        _login.assert_called_once_with(
+            self.username,
+            bytes(self.password, 'utf-8'),
+            config('SCA_AUTH'),
+            config('SCA_CHECK')
+        )
+        self.assertEqual(auth_data, self.return_ok)
+
+    @mock.patch('login.sca.login')
+    def test_login_incorrect(self, _login):
+        respwrapper = namedtuple('Response', ['auth', 'info'])
+        mock_auth = mock.MagicMock()
+        mock_info = None
+        mock_auth.status_code = self.return_teapot
+        _login.return_value = respwrapper(mock_auth, mock_info)
+
+        auth_data = authenticate(self.username, self.password)
+
+        _login.assert_called_once_with(
+            self.username,
+            bytes(self.password, 'utf-8'),
+            config('SCA_AUTH'),
+            config('SCA_CHECK')
+        )
+        self.assertEqual(auth_data, self.return_forbidden)
+
+    @mock.patch('login.sca.login')
+    def test_login_denied(self, _login):
+        respwrapper = namedtuple('Response', ['auth', 'info'])
+        mock_auth = mock.MagicMock()
+        mock_info = mock.MagicMock()
+        mock_auth.status_code = self.return_teapot
+        mock_info.json.return_value = self.permission_bad
+        _login.return_value = respwrapper(mock_auth, mock_info)
+
+        auth_data = authenticate(self.username, self.password)
+
+        _login.assert_called_once_with(
+            self.username,
+            bytes(self.password, 'utf-8'),
+            config('SCA_AUTH'),
+            config('SCA_CHECK')
+        )
+        self.assertEqual(auth_data, self.return_forbidden)
 
 
 class LoginTest(TestCase):
