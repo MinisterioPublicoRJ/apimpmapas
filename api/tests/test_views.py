@@ -123,6 +123,7 @@ class DetailDadosViewTest(TestCase):
         self.external_ent_id = None
         self.text_type = 'texto_pequeno_destaque'
         self.icon_file = 'icones/python.svg'
+        self.image = None
 
     @mock.patch('api.serializers.execute')
     def test_dado_ok(self, _execute):
@@ -132,6 +133,7 @@ class DetailDadosViewTest(TestCase):
                 'dado': self.external_data,
                 'rotulo': self.external_label,
                 'fonte': self.external_source,
+                'imagem': self.image,
                 'detalhes': self.external_description,
                 'link_interno_entidade': self.external_entity,
                 'link_interno_id': self.external_ent_id,
@@ -148,7 +150,8 @@ class DetailDadosViewTest(TestCase):
             self.external_source,
             self.external_description,
             self.external_ent_id,
-            self.external_link
+            self.external_link,
+            self.image
         )]
 
         entidade = make(

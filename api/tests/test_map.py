@@ -3,7 +3,7 @@ from unittest import mock
 
 from django.test import TestCase
 
-from api.serializers import EntidadeSerializer
+from api.serializers import EntidadeSerializer, QueryError
 
 from model_mommy.mommy import make
 
@@ -14,9 +14,9 @@ class MapTest(TestCase):
     def test_map_json(self, _execute):
         entidade = make(
             'api.Entidade',
-            abreviation='ORG',
-            geom_column_mapa='geom'
+            abreviation='ORG'
         )
+        make('api.Mapa', entity=entidade)
 
         coord = {
             "type": "Point",
@@ -40,9 +40,19 @@ class MapTest(TestCase):
             [('mock_name', )],
             [(json.dumps(coord), 'Name', 'CRA', '2')],
         ]
-        # import ipdb; ipdb.set_trace()
 
         ent_ser = EntidadeSerializer(entidade, domain_id='99').data
         self.assertEqual(ent_ser['geojson'], features)
 
-    # TODO: Teste para caso de erro
+    @mock.patch('api.serializers.execute')
+    def test_map_error(self, _execute):
+        _execute.side_effect = QueryError('test error')
+
+        entidade = make(
+            'api.Entidade',
+            abreviation='ORG'
+        )
+        make('api.Mapa', entity=entidade)
+
+        ent_ser = EntidadeSerializer(entidade, domain_id='99').data
+        self.assertEqual(ent_ser['geojson'], None)

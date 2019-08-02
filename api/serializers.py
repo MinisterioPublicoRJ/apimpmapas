@@ -55,8 +55,7 @@ class EntidadeSerializer(serializers.ModelSerializer):
     def get_base_data(self, tipo_entidade, domain_id):
         data = {
             'domain_id': domain_id,
-            'exibition_field': None,
-            'features': None
+            'exibition_field': None
         }
 
         db_result = None
@@ -75,37 +74,6 @@ class EntidadeSerializer(serializers.ModelSerializer):
             main_result = db_result[0]
             data['exibition_field'] = main_result[0]
 
-        if tipo_entidade.geom_column_mapa:
-            db_result = None
-            try:
-                columns = [
-                    tipo_entidade.geom_column_mapa,
-                    tipo_entidade.name_column_mapa,
-                    tipo_entidade.entity_link_type,
-                    tipo_entidade.entity_link_id_column
-                ]
-                db_result = execute(
-                    tipo_entidade.database_mapa,
-                    tipo_entidade.schema_mapa,
-                    tipo_entidade.table_mapa,
-                    columns,
-                    tipo_entidade.id_column_mapa,
-                    domain_id
-                )
-            except QueryError:
-                pass
-            if db_result:
-                features = []
-                for main_result in db_result:
-                    feature = {}
-                    feature['geometry'] = json.loads(main_result[0])
-                    feature['type'] = 'Feature'
-                    feature['properties'] = {}
-                    feature['properties']['name'] = main_result[1]
-                    feature['properties']['entity_link_type'] = main_result[2]
-                    feature['properties']['entity_link_id'] = main_result[3]
-                    features.append(feature)
-                data['features'] = features
         return data
 
     def get_exibition_field(self, obj):
@@ -146,7 +114,7 @@ class EntidadeSerializer(serializers.ModelSerializer):
                     feature['properties']['entity_link_id'] = main_result[3]
                     features.append(feature)
                 return features
-        return self.base_data['features']
+        return None
 
     def get_data_list(self, obj):
         data_list = obj.data_list.all()
