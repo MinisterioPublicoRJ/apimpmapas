@@ -37,6 +37,29 @@ REPR_CHOICES = [
     (GRAPH_PIZZA, 'Gráfico de pizza'),
 ]
 
+SINGLETON_DATA = 'Singleton'
+LIST_DATA = 'List'
+GRAPH_DATA = 'Graph'
+SERIALIZATION_CHOICES = [
+    (SINGLETON_DATA, 'Serialização por dado único'),
+    (LIST_DATA, 'Serialização por lista de dados'),
+    (GRAPH_DATA, 'Serialização por gráfico'),
+]
+
+
+class TipoDado(models.Model):
+    name = models.CharField('Tipo de dado', max_length=20)
+    serialization = models.CharField(
+        'Forma de serialização',
+        max_length=20,
+        choices=SERIALIZATION_CHOICES,
+        default=SINGLETON_DATA,
+    )
+
+    def __str__(self):
+        if self:
+            return self.name
+
 
 class Icone(models.Model):
     name = models.CharField('Título do ícone', max_length=20)
@@ -107,11 +130,18 @@ class Mapa(models.Model):
 
 class Dado(OrderedModel):
     title = models.CharField("Titulo da caixinha", max_length=100)
-    data_type = models.CharField(
+    data_type_old = models.CharField(
         "Tipo de caixinha",
         max_length=50,
         choices=REPR_CHOICES,
         default=TEXT_GDE,
+    )
+
+    data_type_new = models.ForeignKey(
+        TipoDado,
+        on_delete=models.PROTECT,
+        related_name="data_type",
+        verbose_name="Tipo da caixinha"
     )
 
     entity_type = models.ForeignKey(
