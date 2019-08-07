@@ -156,6 +156,12 @@ class Dado(OrderedModel):
         blank=True
     )
 
+    limit_fetch = models.IntegerField(
+        'Máximo de dados a serem mostrados',
+        default=0,
+        help_text='0 = sem limite'
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 
