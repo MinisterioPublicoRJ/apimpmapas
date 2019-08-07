@@ -54,6 +54,23 @@ class DataTypeViewTest(TestCase):
         self.assertEqual(dado_ser['external_data'], self.expected_value)
 
     @mock.patch('api.serializers.execute')
+    def test_dado_list_limit(self, _execute):
+        _execute.return_value = self.return_execute
+        fetch = 2
+
+        dado = make(
+            'api.Dado',
+            data_type='lista_sem_ordenacao',
+            limit_fetch=fetch
+        )
+        dado_ser = DadoSerializer(dado, domain_id='00').data
+
+        self.assertEqual(
+            dado_ser['external_data'],
+            self.expected_value[:fetch]
+        )
+
+    @mock.patch('api.serializers.execute')
     def test_dado_graph(self, _execute):
         _execute.return_value = self.return_execute
 

@@ -226,6 +226,8 @@ class DadoSerializer(serializers.ModelSerializer):
                         'link_externo': result[5]
                     }
                     data.append(data_dict)
+                if obj.limit_fetch > 0:
+                    return data[:obj.limit_fetch]
                 return data
         return {}
 
