@@ -117,16 +117,23 @@ class DetailDadosViewTest(TestCase):
         self.external_description = None
         self.external_label = None
         self.external_link = None
-        self.exibition_field = 'Abrigos para crianças e adolescentes'
+        self.title = 'Abrigos para crianças e adolescentes'
         self.domain_id = '33'
         self.external_entity = None
         self.external_ent_id = None
-        self.text_type = 'texto_pequeno_destaque'
         self.icon_file = 'icones/python.svg'
         self.image = None
 
+        self.data_type = 'texto_pequeno_destaque'
+        self.data_type_obj = make(
+            'api.TipoDado',
+            name=self.data_type,
+            serialization='Singleton'
+        )
+
     @mock.patch('api.serializers.execute')
     def test_dado_ok(self, _execute):
+
         expected_response = {
             'id': self.data_id,
             'external_data': {
@@ -139,8 +146,8 @@ class DetailDadosViewTest(TestCase):
                 'link_interno_id': self.external_ent_id,
                 'link_externo': self.external_link
             },
-            'exibition_field': self.exibition_field,
-            'data_type': self.text_type,
+            'title': self.title,
+            'data_type': self.data_type,
             'icon': settings.MEDIA_URL + self.icon_file
         }
 
@@ -162,9 +169,9 @@ class DetailDadosViewTest(TestCase):
         make(
             'api.Dado',
             id=self.data_id,
-            data_type=self.text_type,
+            data_type_new=self.data_type_obj,
             entity_type=entidade,
-            exibition_field=self.exibition_field,
+            title=self.title,
             icon__file_path=self.icon_file
         )
 
@@ -187,12 +194,14 @@ class DetailDadosViewTest(TestCase):
             id=self.entity_id,
             abreviation=self.entity_abrv,
         )
+
         make(
             'api.Dado',
             id=self.data_id,
-            data_type=self.text_type,
             entity_type=entidade,
-            exibition_field=self.exibition_field
+            title=self.title,
+            data_type_old=self.data_type,
+            data_type_new=self.data_type_obj
         )
 
         url = reverse(
@@ -212,9 +221,7 @@ class DetailDadosViewTest(TestCase):
         make(
             'api.Dado',
             id=self.data_id_alt,
-            data_type=self.text_type,
-            entity_type=entidade,
-            exibition_field=self.exibition_field
+            entity_type=entidade
         )
 
         url = reverse(
@@ -237,9 +244,7 @@ class DetailDadosViewTest(TestCase):
         make(
             'api.Dado',
             id=self.data_id,
-            data_type=self.text_type,
-            entity_type=entidade,
-            exibition_field=self.exibition_field
+            entity_type=entidade
         )
 
         url = reverse(
