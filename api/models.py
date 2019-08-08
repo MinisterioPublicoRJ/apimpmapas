@@ -41,9 +41,9 @@ SINGLETON_DATA = 'Singleton'
 LIST_DATA = 'List'
 GRAPH_DATA = 'Graph'
 SERIALIZATION_CHOICES = [
-    (SINGLETON_DATA, 'Serialização por dado único'),
-    (LIST_DATA, 'Serialização por lista de dados'),
-    (GRAPH_DATA, 'Serialização por gráfico'),
+    (SINGLETON_DATA, 'Serialização para dado único'),
+    (LIST_DATA, 'Serialização para lista de dados'),
+    (GRAPH_DATA, 'Serialização para gráfico'),
 ]
 
 
@@ -55,6 +55,14 @@ class TipoDado(models.Model):
         choices=SERIALIZATION_CHOICES,
         default=SINGLETON_DATA,
     )
+
+    def __str__(self):
+        if self:
+            return self.name
+
+
+class TemaDado(models.Model):
+    name = models.CharField('Tema do dado', max_length=50)
 
     def __str__(self):
         if self:
@@ -144,6 +152,14 @@ class Dado(OrderedModel):
         verbose_name="Tipo da caixinha"
     )
 
+    theme = models.ForeignKey(
+        TemaDado,
+        on_delete=models.SET_NULL,
+        related_name="data_by_theme",
+        verbose_name="Tema da caixinha",
+        null=True
+    )
+
     entity_type = models.ForeignKey(
         Entidade,
         on_delete=models.CASCADE,
@@ -224,6 +240,8 @@ class Dado(OrderedModel):
         default=0,
         help_text='0 = sem limite'
     )
+
+    order_with_respect_to = ('entity_type', 'theme')
 
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
