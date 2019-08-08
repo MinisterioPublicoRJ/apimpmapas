@@ -1,0 +1,98 @@
+[
+    {
+        "model": "api.tipoDado",
+        "pk": 1,
+        "fields":{
+            "name": "texto_grande",
+            "serialization": "Singleton"
+        }
+    },
+    {
+        "model": "api.tipoDado",
+        "pk": 2,
+        "fields":{
+            "name": "texto_pequeno",
+            "serialization": "Singleton"
+        }
+    },
+    {
+        "model": "api.tipoDado",
+        "pk": 3,
+        "fields":{
+            "name": "texto_pequeno_destaque",
+            "serialization": "Singleton"
+        }
+    },
+    {
+        "model": "api.tipoDado",
+        "pk": 4,
+        "fields":{
+            "name": "lista_sem_ordenacao",
+            "serialization": "List"
+        }
+    },
+    {
+        "model": "api.tipoDado",
+        "pk": 5,
+        "fields":{
+            "name": "lista_ordenada",
+            "serialization": "List"
+        }
+    },
+    {
+        "model": "api.tipoDado",
+        "pk": 6,
+        "fields":{
+            "name": "lista_filtrada",
+            "serialization": "List"
+        }
+    },
+    {
+        "model": "api.tipoDado",
+        "pk": 7,
+        "fields":{
+            "name": "lista_pessoa",
+            "serialization": "List"
+        }
+    },
+    {
+        "model": "api.tipoDado",
+        "pk": 8,
+        "fields":{
+            "name": "grafico_barra_vertical",
+            "serialization": "Graph"
+        }
+    },
+    {
+        "model": "api.tipoDado",
+        "pk": 9,
+        "fields":{
+            "name": "grafico_barra_horizontal",
+            "serialization": "Graph"
+        }
+    },
+    {
+        "model": "api.tipoDado",
+        "pk": 10,
+        "fields":{
+            "name": "grafico_barra_horizontal_agrupado",
+            "serialization": "Graph"
+        }
+    },
+    {
+        "model": "api.tipoDado",
+        "pk": 11,
+        "fields":{
+            "name": "grafico_linha_horizontal",
+            "serialization": "Graph"
+        }
+    },
+    {
+        "model": "api.tipoDado",
+        "pk": 12,
+        "fields":{
+            "name": "grafico_pizza",
+            "serialization": "Graph"
+        }
+    }
+]

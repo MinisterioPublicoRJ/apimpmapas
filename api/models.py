@@ -48,7 +48,7 @@ SERIALIZATION_CHOICES = [
 
 
 class TipoDado(models.Model):
-    name = models.CharField('Tipo de dado', max_length=20)
+    name = models.CharField('Tipo de dado', max_length=50)
     serialization = models.CharField(
         'Forma de serialização',
         max_length=20,
