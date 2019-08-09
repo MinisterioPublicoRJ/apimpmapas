@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'ordered_model',
     'corsheaders',
+    'colorfield',
 
     'api',
     'login',

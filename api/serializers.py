@@ -7,25 +7,29 @@ from api.exceptions import QueryError
 from api.models import (
     Entidade,
     Dado,
-    TEXT_GDE,
-    TEXT_PEQ,
-    TEXT_PEQ_DEST,
-    LIST_UNRANK,
-    LIST_RANKED,
-    LIST_FILTER,
-    LIST_PERSON,
-    GRAPH_BAR_VERT,
-    GRAPH_BAR_HORI,
-    GRAPH_BAR_HORI_STACK,
-    GRAPH_LINE_HORI,
-    GRAPH_PIZZA
+    SINGLETON_DATA,
+    LIST_DATA,
+    GRAPH_DATA
 )
 
 
 class DadoInternalSerializer(serializers.ModelSerializer):
+    theme_name = serializers.SerializerMethodField()
+    theme_color = serializers.SerializerMethodField()
+
     class Meta:
         model = Dado
-        fields = ['id', ]
+        fields = ['id', 'theme_name', 'theme_color']
+
+    def get_theme_name(self, obj):
+        if obj.theme:
+            return obj.theme.name
+        return None
+
+    def get_theme_color(self, obj):
+        if obj.theme:
+            return obj.theme.color
+        return None
 
 
 class EntidadeSerializer(serializers.ModelSerializer):
@@ -33,7 +37,7 @@ class EntidadeSerializer(serializers.ModelSerializer):
     domain_id = serializers.SerializerMethodField()
     exibition_field = serializers.SerializerMethodField()
     geojson = serializers.SerializerMethodField()
-    data_list = serializers.SerializerMethodField()
+    theme_list = serializers.SerializerMethodField()
 
     class Meta:
         model = Entidade
@@ -42,7 +46,7 @@ class EntidadeSerializer(serializers.ModelSerializer):
             'entity_type',
             'exibition_field',
             'geojson',
-            'data_list',
+            'theme_list',
         ]
 
     def __init__(self, *args, **kwargs):
@@ -117,41 +121,53 @@ class EntidadeSerializer(serializers.ModelSerializer):
                 return features
         return None
 
-    def get_data_list(self, obj):
-        data_list = obj.data_list.all()
-        return DadoInternalSerializer(
-            data_list,
+    def get_theme_list(self, obj):
+        data_list = DadoInternalSerializer(
+            obj.data_list.all(),
             many=True,
-            read_only=True).data
+            read_only=True
+        ).data
+
+        theme_list = []
+        theme = None
+
+        for data in data_list:
+            if not theme or theme['tema'] != data['theme_name']:
+                if theme:
+                    theme_list.append(theme)
+                theme = {
+                    'tema': data['theme_name'],
+                    'cor': data['theme_color'],
+                    'data_list': []
+                }
+            data_id = {}
+            data_id['id'] = data['id']
+            theme['data_list'].append(data_id)
+        theme_list.append(theme)
+
+        return theme_list
 
 
 class DadoSerializer(serializers.ModelSerializer):
     external_data = serializers.SerializerMethodField()
     icon = serializers.SerializerMethodField()
-    exibition_field = serializers.SerializerMethodField()
-
-    singleton_data = [TEXT_GDE, TEXT_PEQ, TEXT_PEQ_DEST]
-    list_data = [LIST_UNRANK, LIST_RANKED, LIST_FILTER, LIST_PERSON]
-    graph_data = [
-        GRAPH_BAR_VERT,
-        GRAPH_BAR_HORI,
-        GRAPH_BAR_HORI_STACK,
-        GRAPH_LINE_HORI,
-        GRAPH_PIZZA
-    ]
+    data_type = serializers.SerializerMethodField()
 
     class Meta:
         model = Dado
         fields = [
             'id',
-            'external_data',
             'exibition_field',
+            'external_data',
             'data_type',
             'icon'
         ]
 
     def __init__(self, *args, **kwargs):
         self.domain_id = str(kwargs.pop('domain_id'))
+
+        dado = args[0]
+        self.data_type = dado.data_type.name
         super().__init__(*args, **kwargs)
 
     def get_external_data(self, obj):
@@ -192,7 +208,7 @@ class DadoSerializer(serializers.ModelSerializer):
             return {}
 
         if db_result:
-            if obj.data_type in self.singleton_data:
+            if obj.data_type.serialization == SINGLETON_DATA:
                 result = db_result[0]
                 data = {
                     'dado': result[0],
@@ -208,8 +224,8 @@ class DadoSerializer(serializers.ModelSerializer):
                     'link_externo': result[5]
                 }
                 return data
-            elif (obj.data_type in self.list_data or
-                  obj.data_type in self.graph_data):
+            elif (obj.data_type.serialization == LIST_DATA or
+                  obj.data_type.serialization == GRAPH_DATA):
                 data = []
                 for result in db_result:
                     data_dict = {
@@ -237,7 +253,5 @@ class DadoSerializer(serializers.ModelSerializer):
             return icon_url
         return None
 
-    def get_exibition_field(self, obj):
-        if obj.exibition_field:
-            return obj.exibition_field
-        return obj.title
+    def get_data_type(self, obj):
+        return obj.data_type.name

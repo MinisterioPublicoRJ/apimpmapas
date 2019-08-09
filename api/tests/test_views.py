@@ -18,9 +18,37 @@ class EntidadeViewTest(TestCase):
             'entity_type': 'Estado',
             'exibition_field': 'Rio de Janeiro',
             'geojson': None,
-            'data_list': [
-                {'id': 1},
-                {'id': 7},
+            'theme_list': [
+                {
+                    'tema': None,
+                    'cor': None,
+                    'data_list': [
+                        {'id': 4}
+                    ]
+                },
+                {
+                    'tema': 'Segurança',
+                    'cor': '#223478',
+                    'data_list': [
+                        {'id': 1},
+                        {'id': 7}
+                    ]
+                },
+                {
+                    'tema': None,
+                    'cor': None,
+                    'data_list': [
+                        {'id': 8},
+                        {'id': 2}
+                    ]
+                },
+                {
+                    'tema': 'Saúde',
+                    'cor': '#223578',
+                    'data_list': [
+                        {'id': 5}
+                    ]
+                }
             ]
         }
 
@@ -29,14 +57,23 @@ class EntidadeViewTest(TestCase):
         estado = make('api.Entidade', name='Estado', abreviation='EST')
         municipio = make('api.Entidade', abreviation='MUN')
 
-        make('api.Dado', id=1, entity_type=estado, order=1)
-        make('api.Dado', id=7, entity_type=estado, order=3)
-        make('api.Dado', id=9, entity_type=municipio, order=2)
+        seguranca = make('api.TemaDado', name='Segurança', color='#223478')
+        saude = make('api.TemaDado', name='Saúde', color='#223578')
+
+        make('api.Dado', id=1, entity_type=estado, theme=seguranca, order=2)
+        make('api.Dado', id=2, entity_type=estado, theme=None, order=5)
+        make('api.Dado', id=3, entity_type=municipio, order=7)
+        make('api.Dado', id=4, entity_type=estado, theme=None, order=1)
+        make('api.Dado', id=5, entity_type=estado, theme=saude, order=8)
+        make('api.Dado', id=6, entity_type=municipio, order=6)
+        make('api.Dado', id=7, entity_type=estado, theme=seguranca, order=3)
+        make('api.Dado', id=8, entity_type=estado, theme=None, order=4)
 
         url = reverse('api:detail_entidade', args=('EST', '33',))
 
         resp = self.client.get(url)
         resp_json = resp.json()
+        # import ipdb; ipdb.set_trace()
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp_json, expected_answer)
@@ -80,11 +117,13 @@ class ListDadosViewTest(TestCase):
         dado_object_mun_0 = make(
             'api.Dado',
             entity_type=ent_municipio,
+            theme=None,
             order=1
         )
         dado_object_mun_1 = make(
             'api.Dado',
             entity_type=ent_municipio,
+            theme=None,
             order=2
         )
         expected_datalist = [
@@ -98,9 +137,9 @@ class ListDadosViewTest(TestCase):
         resp_json = resp.json()
 
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(len(resp_json['data_list']), 2)
+        self.assertEqual(len(resp_json['theme_list'][0]['data_list']), 2)
         self.assertEqual(
-            resp_json['data_list'],
+            resp_json['theme_list'][0]['data_list'],
             expected_datalist
         )
 
@@ -121,12 +160,19 @@ class DetailDadosViewTest(TestCase):
         self.domain_id = '33'
         self.external_entity = None
         self.external_ent_id = None
-        self.text_type = 'texto_pequeno_destaque'
         self.icon_file = 'icones/python.svg'
         self.image = None
 
+        self.data_type = 'texto_pequeno_destaque'
+        self.data_type_obj = make(
+            'api.TipoDado',
+            name=self.data_type,
+            serialization='Singleton'
+        )
+
     @mock.patch('api.serializers.execute')
     def test_dado_ok(self, _execute):
+
         expected_response = {
             'id': self.data_id,
             'external_data': {
@@ -140,7 +186,7 @@ class DetailDadosViewTest(TestCase):
                 'link_externo': self.external_link
             },
             'exibition_field': self.exibition_field,
-            'data_type': self.text_type,
+            'data_type': self.data_type,
             'icon': settings.MEDIA_URL + self.icon_file
         }
 
@@ -162,7 +208,7 @@ class DetailDadosViewTest(TestCase):
         make(
             'api.Dado',
             id=self.data_id,
-            data_type=self.text_type,
+            data_type=self.data_type_obj,
             entity_type=entidade,
             exibition_field=self.exibition_field,
             icon__file_path=self.icon_file
@@ -187,12 +233,12 @@ class DetailDadosViewTest(TestCase):
             id=self.entity_id,
             abreviation=self.entity_abrv,
         )
+
         make(
             'api.Dado',
             id=self.data_id,
-            data_type=self.text_type,
             entity_type=entidade,
-            exibition_field=self.exibition_field
+            data_type=self.data_type_obj
         )
 
         url = reverse(
@@ -212,9 +258,7 @@ class DetailDadosViewTest(TestCase):
         make(
             'api.Dado',
             id=self.data_id_alt,
-            data_type=self.text_type,
-            entity_type=entidade,
-            exibition_field=self.exibition_field
+            entity_type=entidade
         )
 
         url = reverse(
@@ -237,9 +281,7 @@ class DetailDadosViewTest(TestCase):
         make(
             'api.Dado',
             id=self.data_id,
-            data_type=self.text_type,
-            entity_type=entidade,
-            exibition_field=self.exibition_field
+            entity_type=entidade
         )
 
         url = reverse(

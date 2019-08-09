@@ -1,7 +1,7 @@
 from django.contrib import admin
 from ordered_model.admin import OrderedModelAdmin
 
-from api.models import Dado, Icone, Entidade, Mapa
+from api.models import Dado, Icone, Entidade, Mapa, TipoDado, TemaDado
 
 
 class MapaAdminInline(admin.StackedInline):
@@ -29,8 +29,36 @@ class EntidadeAdmin(admin.ModelAdmin):
 
 @admin.register(Dado)
 class DadoAdmin(OrderedModelAdmin):
-    list_display = ('title', 'entity_type', 'move_up_down_links')
+    list_display = ('title', 'entity_type', 'theme', 'move_up_down_links')
     list_filter = ('entity_type__name',)
+    fieldsets = (
+        (None, {
+            'fields': (
+                'title',
+                'data_type',
+                'entity_type',
+                'theme',
+                'icon'
+            )
+        }),
+        ('Dados exibidos', {
+            'fields': (
+                'database',
+                'schema',
+                'table',
+                'id_column',
+                'data_column',
+                'label_column',
+                'source_column',
+                'details_column',
+                'image_column',
+                'external_link_column',
+                'entity_link_type',
+                'entity_link_id_column')
+        })
+    )
 
 
 admin.site.register(Icone)
+admin.site.register(TipoDado)
+admin.site.register(TemaDado)

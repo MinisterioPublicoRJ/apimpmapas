@@ -4,6 +4,7 @@ from django.test import TestCase
 
 from model_mommy.mommy import make
 
+from api.models import GRAPH_DATA, LIST_DATA
 from api.serializers import DadoSerializer
 
 
@@ -48,7 +49,12 @@ class DataTypeViewTest(TestCase):
     def test_dado_list(self, _execute):
         _execute.return_value = self.return_execute
 
-        dado = make('api.Dado', data_type='lista_sem_ordenacao')
+        tipo_dado = make(
+            'api.TipoDado',
+            name='lista_sem_ordenacao',
+            serialization=LIST_DATA
+        )
+        dado = make('api.Dado', data_type=tipo_dado)
         dado_ser = DadoSerializer(dado, domain_id='00').data
 
         self.assertEqual(dado_ser['external_data'], self.expected_value)
@@ -58,9 +64,15 @@ class DataTypeViewTest(TestCase):
         _execute.return_value = self.return_execute
         fetch = 2
 
+        tipo_dado = make(
+            'api.TipoDado',
+            name='lista_sem_ordenacao',
+            serialization=LIST_DATA
+        )
+
         dado = make(
             'api.Dado',
-            data_type='lista_sem_ordenacao',
+            data_type=tipo_dado,
             limit_fetch=fetch
         )
         dado_ser = DadoSerializer(dado, domain_id='00').data
@@ -74,7 +86,12 @@ class DataTypeViewTest(TestCase):
     def test_dado_graph(self, _execute):
         _execute.return_value = self.return_execute
 
-        dado = make('api.Dado', data_type='grafico_barra_vertical')
+        tipo_dado = make(
+            'api.TipoDado',
+            name='grafico_barra_vertical',
+            serialization=GRAPH_DATA
+        )
+        dado = make('api.Dado', data_type=tipo_dado)
         dado_ser = DadoSerializer(dado, domain_id='00').data
 
         self.assertEqual(dado_ser['external_data'], self.expected_value)

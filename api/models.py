@@ -1,4 +1,5 @@
 from django.db import models
+from colorfield.fields import ColorField
 from ordered_model.models import OrderedModel
 
 POSTGRES = 'PG'
@@ -10,37 +11,60 @@ DATABASE_CHOICES = [
     (BDA, 'Oracle BDA'),
 ]
 
-TEXT_GDE = 'texto_grande'
-TEXT_PEQ = 'texto_pequeno'
-TEXT_PEQ_DEST = 'texto_pequeno_destaque'
-LIST_UNRANK = 'lista_sem_ordenacao'
-LIST_RANKED = 'lista_ordenada'
-LIST_FILTER = 'lista_filtrada'
-LIST_PERSON = 'lista_pessoa'
-GRAPH_BAR_VERT = 'grafico_barra_vertical'
-GRAPH_BAR_HORI = 'grafico_barra_horizontal'
-GRAPH_BAR_HORI_STACK = 'grafico_barra_horizontal_agrupado'
-GRAPH_LINE_HORI = 'grafico_linha_horizontal'
-GRAPH_PIZZA = 'grafico_pizza'
-REPR_CHOICES = [
-    (TEXT_GDE, 'Texto em coluna dupla'),
-    (TEXT_PEQ, 'Texto em coluna simples'),
-    (TEXT_PEQ_DEST, 'Texto destacado em coluna simples'),
-    (LIST_UNRANK, 'Lista sem ordenação'),
-    (LIST_RANKED, 'Lista ordenada'),
-    (LIST_FILTER, 'Lista sem ordenação com filtro de busca'),
-    (LIST_PERSON, 'Lista de pessoas'),
-    (GRAPH_BAR_VERT, 'Gráfico de barras verticais'),
-    (GRAPH_BAR_HORI, 'Gráfico de barras horizontais'),
-    (GRAPH_BAR_HORI_STACK, 'Gráfico de barras horizontais agrupadas'),
-    (GRAPH_LINE_HORI, 'Gráfico de linha horizontal'),
-    (GRAPH_PIZZA, 'Gráfico de pizza'),
+SINGLETON_DATA = 'Singleton'
+LIST_DATA = 'List'
+GRAPH_DATA = 'Graph'
+SERIALIZATION_CHOICES = [
+    (SINGLETON_DATA, 'Serialização para dado único'),
+    (LIST_DATA, 'Serialização para lista de dados'),
+    (GRAPH_DATA, 'Serialização para gráfico'),
 ]
 
 
+class TipoDado(models.Model):
+    name = models.CharField(
+        verbose_name='tipo de dado',
+        max_length=50
+    )
+
+    serialization = models.CharField(
+        verbose_name='forma de serialização',
+        max_length=20,
+        choices=SERIALIZATION_CHOICES,
+        default=SINGLETON_DATA,
+    )
+
+    def __str__(self):
+        if self:
+            return self.name
+
+
+class TemaDado(models.Model):
+    name = models.CharField(
+        verbose_name='tema do dado',
+        max_length=50
+    )
+
+    color = ColorField(
+        verbose_name='cor das caixinhas',
+        default='#FFFFFF'
+    )
+
+    def __str__(self):
+        if self:
+            return self.name
+
+
 class Icone(models.Model):
-    name = models.CharField(max_length=20)
-    file_path = models.FileField(upload_to='icones')
+    name = models.CharField(
+        verbose_name='título do ícone',
+        max_length=20
+    )
+
+    file_path = models.FileField(
+        verbose_name='arquivo do ícone',
+        upload_to='icones'
+    )
 
     def __str__(self):
         if self:
@@ -48,19 +72,42 @@ class Icone(models.Model):
 
 
 class Entidade(models.Model):
-    name = models.CharField(max_length=25)
-    abreviation = models.CharField(max_length=3)
+    name = models.CharField(
+        verbose_name='nome da entidade',
+        max_length=25
+    )
+
+    abreviation = models.CharField(
+        verbose_name='abreviação da entidade',
+        max_length=5
+    )
 
     database = models.CharField(
+        verbose_name='banco de dados',
         max_length=3,
         choices=DATABASE_CHOICES,
         default=POSTGRES,
     )
 
-    schema = models.CharField(max_length=100)
-    table = models.CharField(max_length=100)
-    id_column = models.CharField(max_length=200)
-    name_column = models.CharField(max_length=200)
+    schema = models.CharField(
+        verbose_name='esquema',
+        max_length=100
+    )
+
+    table = models.CharField(
+        verbose_name='tabela',
+        max_length=100
+    )
+
+    id_column = models.CharField(
+        verbose_name='coluna de ID da entidade',
+        max_length=200
+    )
+
+    name_column = models.CharField(
+        verbose_name='coluna de nome da entidade',
+        max_length=200
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
@@ -77,46 +124,88 @@ class Mapa(models.Model):
         primary_key=True,
         related_name='map_info'
     )
+
     database = models.CharField(
-        'Banco de dados',
+        verbose_name='banco de dados',
         max_length=3,
         choices=DATABASE_CHOICES,
         default=POSTGRES,
     )
-    schema = models.CharField('Esquema', max_length=50)
-    table = models.CharField('Tabela', max_length=50)
+
+    schema = models.CharField(
+        verbose_name='esquema',
+        max_length=50
+    )
+
+    table = models.CharField(
+        verbose_name='tabela',
+        max_length=50
+    )
+
     entity_id_column = models.CharField(
-        'Coluna do ID da entidade',
+        verbose_name='coluna do ID da entidade',
         max_length=50
     )
-    label_column = models.CharField('Coluna do label do mapa', max_length=50)
-    geom_column = models.CharField('Coluna do json do mapa', max_length=50)
+
+    label_column = models.CharField(
+        verbose_name='coluna do label do mapa',
+        max_length=50
+    )
+
+    geom_column = models.CharField(
+        verbose_name='coluna do json do mapa',
+        max_length=50
+    )
+
     related_entity_column = models.CharField(
-        'Coluna da entidade apontada',
+        verbose_name='coluna da entidade apontada',
         max_length=50
     )
+
     related_id_column = models.CharField(
-        'Coluna do ID apontado',
+        verbose_name='coluna do ID apontado',
         max_length=50
     )
 
 
 class Dado(OrderedModel):
-    title = models.CharField(max_length=100)
-    exibition_field = models.CharField(max_length=50, null=True, blank=True)
-    data_type = models.CharField(
-        max_length=50,
-        choices=REPR_CHOICES,
-        default=TEXT_GDE,
+    title = models.CharField(
+        verbose_name='titulo da caixinha',
+        max_length=100
+    )
+
+    exibition_field = models.CharField(
+        verbose_name='nome de exibição da caixinha',
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text='Não obrigatório'
+    )
+
+    data_type = models.ForeignKey(
+        TipoDado,
+        on_delete=models.PROTECT,
+        related_name="data_type",
+        verbose_name="tipo da caixinha"
+    )
+
+    theme = models.ForeignKey(
+        TemaDado,
+        on_delete=models.SET_NULL,
+        related_name="data_by_theme",
+        verbose_name="tema da caixinha",
+        null=True
     )
 
     entity_type = models.ForeignKey(
         Entidade,
         on_delete=models.CASCADE,
-        related_name="data_list"
+        related_name="data_list",
+        verbose_name="entidade relacionada"
     )
 
     database = models.CharField(
+        verbose_name='banco de dados',
         max_length=3,
         choices=DATABASE_CHOICES,
         default=POSTGRES,
@@ -126,18 +215,60 @@ class Dado(OrderedModel):
         Icone,
         null=True,
         blank=True,
-        on_delete=models.SET_NULL
+        on_delete=models.SET_NULL,
+        verbose_name="ícone"
     )
 
-    schema = models.CharField(max_length=100)
-    table = models.CharField(max_length=100)
-    id_column = models.CharField(max_length=200)
-    data_column = models.CharField(max_length=200)
-    label_column = models.CharField(max_length=200, null=True, blank=True)
-    source_column = models.CharField(max_length=200, null=True, blank=True)
-    details_column = models.CharField(max_length=200, null=True, blank=True)
-    image_column = models.CharField(max_length=200, null=True, blank=True)
+    schema = models.CharField(
+        verbose_name='esquema',
+        max_length=100
+    )
+
+    table = models.CharField(
+        verbose_name='tabela',
+        max_length=100
+    )
+
+    id_column = models.CharField(
+        verbose_name='coluna do ID da Entidade',
+        max_length=200
+    )
+
+    data_column = models.CharField(
+        verbose_name='coluna da informação principal exibida',
+        max_length=200
+    )
+
+    label_column = models.CharField(
+        verbose_name='coluna de rótulo dos dados',
+        max_length=200,
+        null=True,
+        blank=True
+    )
+
+    source_column = models.CharField(
+        verbose_name='coluna de fonte dos dados',
+        max_length=200,
+        null=True,
+        blank=True
+    )
+
+    details_column = models.CharField(
+        verbose_name='coluna de detalhes sobre os dados',
+        max_length=200,
+        null=True,
+        blank=True
+    )
+
+    image_column = models.CharField(
+        verbose_name='coluna de imagem',
+        max_length=200,
+        null=True,
+        blank=True
+    )
+
     external_link_column = models.CharField(
+        verbose_name='coluna de link externo',
         max_length=200,
         null=True,
         blank=True
@@ -147,20 +278,24 @@ class Dado(OrderedModel):
         Entidade,
         on_delete=models.SET_NULL,
         null=True,
-        blank=True
+        blank=True,
+        verbose_name="entidade apontada em link interno"
     )
 
     entity_link_id_column = models.CharField(
+        verbose_name='coluna de ID da entidade apontada',
         max_length=200,
         null=True,
         blank=True
     )
 
     limit_fetch = models.IntegerField(
-        'Máximo de dados a serem mostrados',
+        verbose_name='máximo de dados a serem mostrados',
         default=0,
         help_text='0 = sem limite'
     )
+
+    order_with_respect_to = 'entity_type'
 
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
