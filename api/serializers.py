@@ -129,25 +129,21 @@ class EntidadeSerializer(serializers.ModelSerializer):
         ).data
 
         theme_list = []
+        theme = None
+
         for data in data_list:
-            if not any(d['tema'] == data['theme_name'] for d in theme_list):
+            if not theme or theme['tema'] != data['theme_name']:
+                if theme:
+                    theme_list.append(theme)
                 theme = {
                     'tema': data['theme_name'],
                     'cor': data['theme_color'],
                     'data_list': []
                 }
-                theme_list.append(theme)
             data_id = {}
             data_id['id'] = data['id']
-            theme_id = next(
-                (
-                    index
-                    for (index, d) in enumerate(theme_list)
-                    if d['tema'] == data['theme_name']
-                ),
-                None
-            )
-            theme_list[theme_id]['data_list'].append(data_id)
+            theme['data_list'].append(data_id)
+        theme_list.append(theme)
 
         return theme_list
 

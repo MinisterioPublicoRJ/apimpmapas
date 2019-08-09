@@ -20,11 +20,26 @@ class EntidadeViewTest(TestCase):
             'geojson': None,
             'theme_list': [
                 {
+                    'tema': None,
+                    'cor': None,
+                    'data_list': [
+                        {'id': 4}
+                    ]
+                },
+                {
                     'tema': 'Segurança',
                     'cor': '#223478',
                     'data_list': [
                         {'id': 1},
                         {'id': 7}
+                    ]
+                },
+                {
+                    'tema': None,
+                    'cor': None,
+                    'data_list': [
+                        {'id': 8},
+                        {'id': 2}
                     ]
                 },
                 {
@@ -45,15 +60,20 @@ class EntidadeViewTest(TestCase):
         seguranca = make('api.TemaDado', name='Segurança', color='#223478')
         saude = make('api.TemaDado', name='Saúde', color='#223578')
 
-        make('api.Dado', id=1, entity_type=estado, theme=seguranca, order=1)
-        make('api.Dado', id=5, entity_type=estado, theme=saude, order=2)
+        make('api.Dado', id=1, entity_type=estado, theme=seguranca, order=2)
+        make('api.Dado', id=2, entity_type=estado, theme=None, order=5)
+        make('api.Dado', id=3, entity_type=municipio, order=7)
+        make('api.Dado', id=4, entity_type=estado, theme=None, order=1)
+        make('api.Dado', id=5, entity_type=estado, theme=saude, order=8)
+        make('api.Dado', id=6, entity_type=municipio, order=6)
         make('api.Dado', id=7, entity_type=estado, theme=seguranca, order=3)
-        make('api.Dado', id=9, entity_type=municipio, order=2)
+        make('api.Dado', id=8, entity_type=estado, theme=None, order=4)
 
         url = reverse('api:detail_entidade', args=('EST', '33',))
 
         resp = self.client.get(url)
         resp_json = resp.json()
+        # import ipdb; ipdb.set_trace()
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp_json, expected_answer)
