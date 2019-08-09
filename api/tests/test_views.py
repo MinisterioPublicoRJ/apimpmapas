@@ -208,7 +208,7 @@ class DetailDadosViewTest(TestCase):
         make(
             'api.Dado',
             id=self.data_id,
-            data_type_new=self.data_type_obj,
+            data_type=self.data_type_obj,
             entity_type=entidade,
             title=self.title,
             icon__file_path=self.icon_file
@@ -239,8 +239,7 @@ class DetailDadosViewTest(TestCase):
             id=self.data_id,
             entity_type=entidade,
             title=self.title,
-            data_type_old=self.data_type,
-            data_type_new=self.data_type_obj
+            data_type=self.data_type_obj
         )
 
         url = reverse(

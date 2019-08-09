@@ -11,33 +11,6 @@ DATABASE_CHOICES = [
     (BDA, 'Oracle BDA'),
 ]
 
-TEXT_GDE = 'texto_grande'
-TEXT_PEQ = 'texto_pequeno'
-TEXT_PEQ_DEST = 'texto_pequeno_destaque'
-LIST_UNRANK = 'lista_sem_ordenacao'
-LIST_RANKED = 'lista_ordenada'
-LIST_FILTER = 'lista_filtrada'
-LIST_PERSON = 'lista_pessoa'
-GRAPH_BAR_VERT = 'grafico_barra_vertical'
-GRAPH_BAR_HORI = 'grafico_barra_horizontal'
-GRAPH_BAR_HORI_STACK = 'grafico_barra_horizontal_agrupado'
-GRAPH_LINE_HORI = 'grafico_linha_horizontal'
-GRAPH_PIZZA = 'grafico_pizza'
-REPR_CHOICES = [
-    (TEXT_GDE, 'Texto em coluna dupla'),
-    (TEXT_PEQ, 'Texto em coluna simples'),
-    (TEXT_PEQ_DEST, 'Texto destacado em coluna simples'),
-    (LIST_UNRANK, 'Lista sem ordenação'),
-    (LIST_RANKED, 'Lista ordenada'),
-    (LIST_FILTER, 'Lista sem ordenação com filtro de busca'),
-    (LIST_PERSON, 'Lista de pessoas'),
-    (GRAPH_BAR_VERT, 'Gráfico de barras verticais'),
-    (GRAPH_BAR_HORI, 'Gráfico de barras horizontais'),
-    (GRAPH_BAR_HORI_STACK, 'Gráfico de barras horizontais agrupadas'),
-    (GRAPH_LINE_HORI, 'Gráfico de linha horizontal'),
-    (GRAPH_PIZZA, 'Gráfico de pizza'),
-]
-
 SINGLETON_DATA = 'Singleton'
 LIST_DATA = 'List'
 GRAPH_DATA = 'Graph'
@@ -140,14 +113,8 @@ class Mapa(models.Model):
 
 class Dado(OrderedModel):
     title = models.CharField("Titulo da caixinha", max_length=100)
-    data_type_old = models.CharField(
-        "Tipo de caixinha",
-        max_length=50,
-        choices=REPR_CHOICES,
-        default=TEXT_GDE,
-    )
 
-    data_type_new = models.ForeignKey(
+    data_type = models.ForeignKey(
         TipoDado,
         on_delete=models.PROTECT,
         related_name="data_type",
@@ -243,7 +210,7 @@ class Dado(OrderedModel):
         help_text='0 = sem limite'
     )
 
-    order_with_respect_to = ('entity_type', 'theme')
+    order_with_respect_to = 'entity_type'
 
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)

@@ -167,7 +167,7 @@ class DadoSerializer(serializers.ModelSerializer):
         self.domain_id = str(kwargs.pop('domain_id'))
 
         dado = args[0]
-        self.data_type = dado.data_type_new.name
+        self.data_type = dado.data_type.name
         super().__init__(*args, **kwargs)
 
     def get_external_data(self, obj):
@@ -208,7 +208,7 @@ class DadoSerializer(serializers.ModelSerializer):
             return {}
 
         if db_result:
-            if obj.data_type_new.serialization == SINGLETON_DATA:
+            if obj.data_type.serialization == SINGLETON_DATA:
                 result = db_result[0]
                 data = {
                     'dado': result[0],
@@ -224,8 +224,8 @@ class DadoSerializer(serializers.ModelSerializer):
                     'link_externo': result[5]
                 }
                 return data
-            elif (obj.data_type_new.serialization == LIST_DATA or
-                  obj.data_type_new.serialization == GRAPH_DATA):
+            elif (obj.data_type.serialization == LIST_DATA or
+                  obj.data_type.serialization == GRAPH_DATA):
                 data = []
                 for result in db_result:
                     data_dict = {
@@ -254,4 +254,4 @@ class DadoSerializer(serializers.ModelSerializer):
         return None
 
     def get_data_type(self, obj):
-        return obj.data_type_new.name
+        return obj.data_type.name

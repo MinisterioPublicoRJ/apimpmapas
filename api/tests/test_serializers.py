@@ -54,7 +54,7 @@ class DataTypeViewTest(TestCase):
             name='lista_sem_ordenacao',
             serialization=LIST_DATA
         )
-        dado = make('api.Dado', data_type_new=tipo_dado)
+        dado = make('api.Dado', data_type=tipo_dado)
         dado_ser = DadoSerializer(dado, domain_id='00').data
 
         self.assertEqual(dado_ser['external_data'], self.expected_value)
@@ -72,7 +72,7 @@ class DataTypeViewTest(TestCase):
 
         dado = make(
             'api.Dado',
-            data_type_new=tipo_dado,
+            data_type=tipo_dado,
             limit_fetch=fetch
         )
         dado_ser = DadoSerializer(dado, domain_id='00').data
@@ -91,7 +91,7 @@ class DataTypeViewTest(TestCase):
             name='grafico_barra_vertical',
             serialization=GRAPH_DATA
         )
-        dado = make('api.Dado', data_type_new=tipo_dado)
+        dado = make('api.Dado', data_type=tipo_dado)
         dado_ser = DadoSerializer(dado, domain_id='00').data
 
         self.assertEqual(dado_ser['external_data'], self.expected_value)
