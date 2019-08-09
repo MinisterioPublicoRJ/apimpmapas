@@ -14,9 +14,22 @@ from api.models import (
 
 
 class DadoInternalSerializer(serializers.ModelSerializer):
+    theme_name = serializers.SerializerMethodField()
+    theme_color = serializers.SerializerMethodField()
+
     class Meta:
         model = Dado
-        fields = ['id', ]
+        fields = ['id', 'theme_name', 'theme_color']
+
+    def get_theme_name(self, obj):
+        if obj.theme:
+            return obj.theme.name
+        return None
+
+    def get_theme_color(self, obj):
+        if obj.theme:
+            return obj.theme.color
+        return None
 
 
 class EntidadeSerializer(serializers.ModelSerializer):
@@ -24,7 +37,7 @@ class EntidadeSerializer(serializers.ModelSerializer):
     domain_id = serializers.SerializerMethodField()
     exibition_field = serializers.SerializerMethodField()
     geojson = serializers.SerializerMethodField()
-    data_list = serializers.SerializerMethodField()
+    theme_list = serializers.SerializerMethodField()
 
     class Meta:
         model = Entidade
@@ -33,7 +46,7 @@ class EntidadeSerializer(serializers.ModelSerializer):
             'entity_type',
             'exibition_field',
             'geojson',
-            'data_list',
+            'theme_list',
         ]
 
     def __init__(self, *args, **kwargs):
@@ -108,12 +121,35 @@ class EntidadeSerializer(serializers.ModelSerializer):
                 return features
         return None
 
-    def get_data_list(self, obj):
-        data_list = obj.data_list.all()
-        return DadoInternalSerializer(
-            data_list,
+    def get_theme_list(self, obj):
+        data_list = DadoInternalSerializer(
+            obj.data_list.all(),
             many=True,
-            read_only=True).data
+            read_only=True
+        ).data
+
+        theme_list = []
+        for data in data_list:
+            if not any(d['tema'] == data['theme_name'] for d in theme_list):
+                theme = {
+                    'tema': data['theme_name'],
+                    'cor': data['theme_color'],
+                    'data_list': []
+                }
+                theme_list.append(theme)
+            data_id = {}
+            data_id['id'] = data['id']
+            theme_id = next(
+                (
+                    index
+                    for (index, d) in enumerate(theme_list)
+                    if d['tema'] == data['theme_name']
+                ),
+                None
+            )
+            theme_list[theme_id]['data_list'].append(data_id)
+
+        return theme_list
 
 
 class DadoSerializer(serializers.ModelSerializer):

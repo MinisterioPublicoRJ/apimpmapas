@@ -1,4 +1,5 @@
 from django.db import models
+from colorfield.fields import ColorField
 from ordered_model.models import OrderedModel
 
 POSTGRES = 'PG'
@@ -63,6 +64,7 @@ class TipoDado(models.Model):
 
 class TemaDado(models.Model):
     name = models.CharField('Tema do dado', max_length=50)
+    color = ColorField(default='#FFFFFF')
 
     def __str__(self):
         if self:

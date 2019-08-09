@@ -26,3 +26,8 @@ class TestStringRepresentation(TestCase):
         obj = make('api.TipoDado', name='teste_nome')
 
         self.assertEqual(obj.__str__(), 'teste_nome')
+
+    def test_string_tema_dado(self):
+        obj = make('api.TemaDado', name='teste_nome')
+
+        self.assertEqual(obj.__str__(), 'teste_nome')
