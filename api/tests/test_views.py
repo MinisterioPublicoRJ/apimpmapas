@@ -156,7 +156,7 @@ class DetailDadosViewTest(TestCase):
         self.external_description = None
         self.external_label = None
         self.external_link = None
-        self.title = 'Abrigos para crianças e adolescentes'
+        self.exibition_field = 'Abrigos para crianças e adolescentes'
         self.domain_id = '33'
         self.external_entity = None
         self.external_ent_id = None
@@ -185,7 +185,7 @@ class DetailDadosViewTest(TestCase):
                 'link_interno_id': self.external_ent_id,
                 'link_externo': self.external_link
             },
-            'title': self.title,
+            'exibition_field': self.exibition_field,
             'data_type': self.data_type,
             'icon': settings.MEDIA_URL + self.icon_file
         }
@@ -210,7 +210,7 @@ class DetailDadosViewTest(TestCase):
             id=self.data_id,
             data_type=self.data_type_obj,
             entity_type=entidade,
-            title=self.title,
+            exibition_field=self.exibition_field,
             icon__file_path=self.icon_file
         )
 
@@ -238,7 +238,6 @@ class DetailDadosViewTest(TestCase):
             'api.Dado',
             id=self.data_id,
             entity_type=entidade,
-            title=self.title,
             data_type=self.data_type_obj
         )
 

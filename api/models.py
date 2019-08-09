@@ -22,9 +22,13 @@ SERIALIZATION_CHOICES = [
 
 
 class TipoDado(models.Model):
-    name = models.CharField('Tipo de dado', max_length=50)
+    name = models.CharField(
+        verbose_name='tipo de dado',
+        max_length=50
+    )
+
     serialization = models.CharField(
-        'Forma de serialização',
+        verbose_name='forma de serialização',
         max_length=20,
         choices=SERIALIZATION_CHOICES,
         default=SINGLETON_DATA,
@@ -36,8 +40,15 @@ class TipoDado(models.Model):
 
 
 class TemaDado(models.Model):
-    name = models.CharField('Tema do dado', max_length=50)
-    color = ColorField(default='#FFFFFF')
+    name = models.CharField(
+        verbose_name='tema do dado',
+        max_length=50
+    )
+
+    color = ColorField(
+        verbose_name='cor das caixinhas',
+        default='#FFFFFF'
+    )
 
     def __str__(self):
         if self:
@@ -45,8 +56,15 @@ class TemaDado(models.Model):
 
 
 class Icone(models.Model):
-    name = models.CharField('Título do ícone', max_length=20)
-    file_path = models.FileField('Arquivo do ícone', upload_to='icones')
+    name = models.CharField(
+        verbose_name='título do ícone',
+        max_length=20
+    )
+
+    file_path = models.FileField(
+        verbose_name='arquivo do ícone',
+        upload_to='icones'
+    )
 
     def __str__(self):
         if self:
@@ -54,21 +72,40 @@ class Icone(models.Model):
 
 
 class Entidade(models.Model):
-    name = models.CharField('Nome da entidade', max_length=25)
-    abreviation = models.CharField('Abreviação da entidade', max_length=5)
+    name = models.CharField(
+        verbose_name='nome da entidade',
+        max_length=25
+    )
+
+    abreviation = models.CharField(
+        verbose_name='abreviação da entidade',
+        max_length=5
+    )
 
     database = models.CharField(
-        'Banco de dados',
+        verbose_name='banco de dados',
         max_length=3,
         choices=DATABASE_CHOICES,
         default=POSTGRES,
     )
 
-    schema = models.CharField('Esquema', max_length=100)
-    table = models.CharField('Tabela', max_length=100)
-    id_column = models.CharField('Coluna de ID da entidade', max_length=200)
+    schema = models.CharField(
+        verbose_name='esquema',
+        max_length=100
+    )
+
+    table = models.CharField(
+        verbose_name='tabela',
+        max_length=100
+    )
+
+    id_column = models.CharField(
+        verbose_name='coluna de ID da entidade',
+        max_length=200
+    )
+
     name_column = models.CharField(
-        'Coluna de nome da entidade',
+        verbose_name='coluna de nome da entidade',
         max_length=200
     )
 
@@ -87,45 +124,76 @@ class Mapa(models.Model):
         primary_key=True,
         related_name='map_info'
     )
+
     database = models.CharField(
-        'Banco de dados',
+        verbose_name='banco de dados',
         max_length=3,
         choices=DATABASE_CHOICES,
         default=POSTGRES,
     )
-    schema = models.CharField('Esquema', max_length=50)
-    table = models.CharField('Tabela', max_length=50)
+
+    schema = models.CharField(
+        verbose_name='esquema',
+        max_length=50
+    )
+
+    table = models.CharField(
+        verbose_name='tabela',
+        max_length=50
+    )
+
     entity_id_column = models.CharField(
-        'Coluna do ID da entidade',
+        verbose_name='coluna do ID da entidade',
         max_length=50
     )
-    label_column = models.CharField('Coluna do label do mapa', max_length=50)
-    geom_column = models.CharField('Coluna do json do mapa', max_length=50)
+
+    label_column = models.CharField(
+        verbose_name='coluna do label do mapa',
+        max_length=50
+    )
+
+    geom_column = models.CharField(
+        verbose_name='coluna do json do mapa',
+        max_length=50
+    )
+
     related_entity_column = models.CharField(
-        'Coluna da entidade apontada',
+        verbose_name='coluna da entidade apontada',
         max_length=50
     )
+
     related_id_column = models.CharField(
-        'Coluna do ID apontado',
+        verbose_name='coluna do ID apontado',
         max_length=50
     )
 
 
 class Dado(OrderedModel):
-    title = models.CharField("Titulo da caixinha", max_length=100)
+    title = models.CharField(
+        verbose_name='titulo da caixinha',
+        max_length=100
+    )
+
+    exibition_field = models.CharField(
+        verbose_name='nome de exibição da caixinha',
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text='Não obrigatório'
+    )
 
     data_type = models.ForeignKey(
         TipoDado,
         on_delete=models.PROTECT,
         related_name="data_type",
-        verbose_name="Tipo da caixinha"
+        verbose_name="tipo da caixinha"
     )
 
     theme = models.ForeignKey(
         TemaDado,
         on_delete=models.SET_NULL,
         related_name="data_by_theme",
-        verbose_name="Tema da caixinha",
+        verbose_name="tema da caixinha",
         null=True
     )
 
@@ -133,11 +201,11 @@ class Dado(OrderedModel):
         Entidade,
         on_delete=models.CASCADE,
         related_name="data_list",
-        verbose_name="Entidade relacionada"
+        verbose_name="entidade relacionada"
     )
 
     database = models.CharField(
-        'Banco de dados',
+        verbose_name='banco de dados',
         max_length=3,
         choices=DATABASE_CHOICES,
         default=POSTGRES,
@@ -148,42 +216,59 @@ class Dado(OrderedModel):
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        verbose_name="Ícone"
+        verbose_name="ícone"
     )
 
-    schema = models.CharField("Esquema", max_length=100)
-    table = models.CharField("Tabela", max_length=100)
-    id_column = models.CharField("Coluna do ID da Entidade", max_length=200)
-    data_column = models.CharField(
-        "Coluna da informação principal exibida",
+    schema = models.CharField(
+        verbose_name='esquema',
+        max_length=100
+    )
+
+    table = models.CharField(
+        verbose_name='tabela',
+        max_length=100
+    )
+
+    id_column = models.CharField(
+        verbose_name='coluna do ID da Entidade',
         max_length=200
     )
+
+    data_column = models.CharField(
+        verbose_name='coluna da informação principal exibida',
+        max_length=200
+    )
+
     label_column = models.CharField(
-        "Coluna de rótulo dos dados",
+        verbose_name='coluna de rótulo dos dados',
         max_length=200,
         null=True,
         blank=True
     )
+
     source_column = models.CharField(
-        "Coluna de fonte dos dados",
+        verbose_name='coluna de fonte dos dados',
         max_length=200,
         null=True,
         blank=True
     )
+
     details_column = models.CharField(
-        "Coluna de detalhes sobre os dados",
+        verbose_name='coluna de detalhes sobre os dados',
         max_length=200,
         null=True,
         blank=True
     )
+
     image_column = models.CharField(
-        "Coluna de imagem",
+        verbose_name='coluna de imagem',
         max_length=200,
         null=True,
         blank=True
     )
+
     external_link_column = models.CharField(
-        "Coluna de link externo",
+        verbose_name='coluna de link externo',
         max_length=200,
         null=True,
         blank=True
@@ -194,18 +279,18 @@ class Dado(OrderedModel):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name="Entidade apontada em link interno"
+        verbose_name="entidade apontada em link interno"
     )
 
     entity_link_id_column = models.CharField(
-        "Coluna de ID da entidade apontada",
+        verbose_name='coluna de ID da entidade apontada',
         max_length=200,
         null=True,
         blank=True
     )
 
     limit_fetch = models.IntegerField(
-        'Máximo de dados a serem mostrados',
+        verbose_name='máximo de dados a serem mostrados',
         default=0,
         help_text='0 = sem limite'
     )
