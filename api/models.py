@@ -11,17 +11,19 @@ DATABASE_CHOICES = [
     (BDA, 'Oracle BDA'),
 ]
 
-SINGLETON_DATA = 'Singleton'
-LIST_DATA = 'List'
-GRAPH_DATA = 'Graph'
-SERIALIZATION_CHOICES = [
-    (SINGLETON_DATA, 'Serialização para dado único'),
-    (LIST_DATA, 'Serialização para lista de dados'),
-    (GRAPH_DATA, 'Serialização para gráfico'),
-]
-
 
 class TipoDado(models.Model):
+    # CHOICES
+    SINGLETON_DATA = 'Singleton'
+    LIST_DATA = 'List'
+    GRAPH_DATA = 'Graph'
+    SERIALIZATION_CHOICES = [
+        (SINGLETON_DATA, 'Serialização para dado único'),
+        (LIST_DATA, 'Serialização para lista de dados'),
+        (GRAPH_DATA, 'Serialização para gráfico'),
+    ]
+
+    # DATABASE FIELDS
     name = models.CharField(
         verbose_name='tipo de dado',
         max_length=50
@@ -34,12 +36,19 @@ class TipoDado(models.Model):
         default=SINGLETON_DATA,
     )
 
+    # META CLASS
+    class Meta:
+        verbose_name = 'tipo de dados'
+        verbose_name_plural = 'tipos de dados'
+
+    # TO STRING METHOD
     def __str__(self):
         if self:
             return self.name
 
 
 class TemaDado(models.Model):
+    # DATABASE FIELDS
     name = models.CharField(
         verbose_name='tema do dado',
         max_length=50
@@ -50,12 +59,19 @@ class TemaDado(models.Model):
         default='#FFFFFF'
     )
 
+    # META CLASS
+    class Meta:
+        verbose_name = 'tema de dados'
+        verbose_name_plural = 'temas de dados'
+
+    # TO STRING METHOD
     def __str__(self):
         if self:
             return self.name
 
 
 class Icone(models.Model):
+    # DATABASE FIELDS
     name = models.CharField(
         verbose_name='título do ícone',
         max_length=20
@@ -66,12 +82,18 @@ class Icone(models.Model):
         upload_to='icones'
     )
 
+    # META CLASS
+    class Meta:
+        verbose_name = 'ícone'
+
+    # TO STRING METHOD
     def __str__(self):
         if self:
             return self.name
 
 
 class Entidade(models.Model):
+    # DATABASE FIELDS
     name = models.CharField(
         verbose_name='nome da entidade',
         max_length=25
@@ -112,12 +134,14 @@ class Entidade(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 
+    # TO STRING METHOD
     def __str__(self):
         if self:
             return self.name
 
 
 class Mapa(models.Model):
+    # DATABASE FIELDS
     entity = models.OneToOneField(
         Entidade,
         on_delete=models.CASCADE,
@@ -169,6 +193,7 @@ class Mapa(models.Model):
 
 
 class Dado(OrderedModel):
+    # DATABASE FIELDS
     title = models.CharField(
         verbose_name='titulo da caixinha',
         max_length=100
@@ -185,7 +210,7 @@ class Dado(OrderedModel):
     data_type = models.ForeignKey(
         TipoDado,
         on_delete=models.PROTECT,
-        related_name="data_type",
+        related_name="data_by_type",
         verbose_name="tipo da caixinha"
     )
 
@@ -295,11 +320,13 @@ class Dado(OrderedModel):
         help_text='0 = sem limite'
     )
 
-    order_with_respect_to = 'entity_type'
-
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 
+    # CONFIG FIELDS
+    order_with_respect_to = 'entity_type'
+
+    # TO STRING METHOD
     def __str__(self):
         if self:
             return self.title

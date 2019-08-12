@@ -4,7 +4,7 @@ from django.test import TestCase
 
 from model_mommy.mommy import make
 
-from api.models import GRAPH_DATA, LIST_DATA
+from api.models import TipoDado
 from api.serializers import DadoSerializer
 
 
@@ -52,7 +52,7 @@ class DataTypeViewTest(TestCase):
         tipo_dado = make(
             'api.TipoDado',
             name='lista_sem_ordenacao',
-            serialization=LIST_DATA
+            serialization=TipoDado.LIST_DATA
         )
         dado = make('api.Dado', data_type=tipo_dado)
         dado_ser = DadoSerializer(dado, domain_id='00').data
@@ -67,7 +67,7 @@ class DataTypeViewTest(TestCase):
         tipo_dado = make(
             'api.TipoDado',
             name='lista_sem_ordenacao',
-            serialization=LIST_DATA
+            serialization=TipoDado.LIST_DATA
         )
 
         dado = make(
@@ -89,7 +89,7 @@ class DataTypeViewTest(TestCase):
         tipo_dado = make(
             'api.TipoDado',
             name='grafico_barra_vertical',
-            serialization=GRAPH_DATA
+            serialization=TipoDado.GRAPH_DATA
         )
         dado = make('api.Dado', data_type=tipo_dado)
         dado_ser = DadoSerializer(dado, domain_id='00').data

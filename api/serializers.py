@@ -4,13 +4,7 @@ from rest_framework import serializers
 
 from api.db_connectors import execute
 from api.exceptions import QueryError
-from api.models import (
-    Entidade,
-    Dado,
-    SINGLETON_DATA,
-    LIST_DATA,
-    GRAPH_DATA
-)
+from api.models import Entidade, Dado, TipoDado
 
 
 class DadoInternalSerializer(serializers.ModelSerializer):
@@ -208,7 +202,7 @@ class DadoSerializer(serializers.ModelSerializer):
             return {}
 
         if db_result:
-            if obj.data_type.serialization == SINGLETON_DATA:
+            if obj.data_type.serialization == TipoDado.SINGLETON_DATA:
                 result = db_result[0]
                 data = {
                     'dado': result[0],
@@ -224,8 +218,8 @@ class DadoSerializer(serializers.ModelSerializer):
                     'link_externo': result[5]
                 }
                 return data
-            elif (obj.data_type.serialization == LIST_DATA or
-                  obj.data_type.serialization == GRAPH_DATA):
+            elif (obj.data_type.serialization == TipoDado.LIST_DATA or
+                  obj.data_type.serialization == TipoDado.GRAPH_DATA):
                 data = []
                 for result in db_result:
                     data_dict = {
