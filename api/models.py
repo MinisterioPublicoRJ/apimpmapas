@@ -16,11 +16,13 @@ class TipoDado(models.Model):
     # CHOICES
     SINGLETON_DATA = 'Singleton'
     LIST_DATA = 'List'
-    GRAPH_DATA = 'Graph'
+    XY_GRAPH_DATA = 'Graph'
+    PIZZA_GRAPH_DATA = 'Pizza'
     SERIALIZATION_CHOICES = [
         (SINGLETON_DATA, 'Serialização para dado único'),
         (LIST_DATA, 'Serialização para lista de dados'),
-        (GRAPH_DATA, 'Serialização para gráfico'),
+        (XY_GRAPH_DATA, 'Serialização para gráfico cartesiano'),
+        (PIZZA_GRAPH_DATA, 'Serialização para gráfico de pizza'),
     ]
 
     # DATABASE FIELDS
