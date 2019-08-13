@@ -219,7 +219,7 @@ class DadoSerializer(serializers.ModelSerializer):
                 }
                 return data
             elif (obj.data_type.serialization == TipoDado.LIST_DATA or
-                  obj.data_type.serialization == TipoDado.GRAPH_DATA):
+                  obj.data_type.serialization == TipoDado.XY_GRAPH_DATA):
                 data = []
                 for result in db_result:
                     data_dict = {
@@ -239,6 +239,49 @@ class DadoSerializer(serializers.ModelSerializer):
                 if obj.limit_fetch > 0:
                     return data[:obj.limit_fetch]
                 return data
+            elif obj.data_type.serialization == TipoDado.PIZZA_GRAPH_DATA:
+                data = []
+                total = 0
+                for result in db_result:
+                    data_dict = {
+                        'dado': result[0],
+                        'rotulo': result[1],
+                        'fonte': result[2],
+                        'detalhes': result[3],
+                        'imagem': result[6],
+                        'link_interno_entidade':
+                            obj.entity_link_type.abreviation
+                            if obj.entity_link_type
+                            else None,
+                        'link_interno_id': result[4],
+                        'link_externo': result[5]
+                    }
+                    if type(result[0]) == int or type(result[0]) == float:
+                        total += result[0]
+                    data.append(data_dict)
+
+                outros = None
+                data_rev = []
+                for line in data:
+                    if line['dado']/total <= 0.03:
+                        if outros:
+                            outros['dado'] += line['dado']
+                        else:
+                            outros = {
+                                'dado': line['dado'],
+                                'rotulo': 'Outros',
+                                'fonte': line['fonte'],
+                                'detalhes': None,
+                                'imagem': None,
+                                'link_interno_entidade': None,
+                                'link_interno_id': None,
+                                'link_externo': None
+                            }
+                    else:
+                        data_rev.append(line)
+                if outros:
+                    data_rev.append(outros)
+                return data_rev
         return {}
 
     def get_icon(self, obj):

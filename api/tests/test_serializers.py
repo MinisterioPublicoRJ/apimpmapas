@@ -89,9 +89,60 @@ class DataTypeViewTest(TestCase):
         tipo_dado = make(
             'api.TipoDado',
             name='grafico_barra_vertical',
-            serialization=TipoDado.GRAPH_DATA
+            serialization=TipoDado.XY_GRAPH_DATA
         )
         dado = make('api.Dado', data_type=tipo_dado)
         dado_ser = DadoSerializer(dado, domain_id='00').data
 
         self.assertEqual(dado_ser['external_data'], self.expected_value)
+
+    @mock.patch('api.serializers.execute')
+    def test_dado_graph_outros(self, _execute):
+        _execute.return_value = [
+            (70, 'dado1', 'fonte', None, None, 'link1', None),
+            (25, 'dado2', 'fonte', None, None, 'link2', None),
+            (1, 'dado3', 'fonte', None, None, 'link3', None),
+            (1, 'dado4', 'fonte', None, None, 'link4', None),
+            (1, 'dado5', 'fonte', None, None, 'link5', None),
+            (1, 'dado6', 'fonte', None, None, 'link6', None),
+            (1, 'dado7', 'fonte', None, None, 'link7', None),
+        ]
+
+        expected_value = [{
+            'dado': 70,
+            'rotulo': 'dado1',
+            'fonte': 'fonte',
+            'imagem': None,
+            'detalhes': None,
+            'link_interno_entidade': None,
+            'link_interno_id': None,
+            'link_externo': 'link1'
+        }, {
+            'dado': 25,
+            'rotulo': 'dado2',
+            'fonte': 'fonte',
+            'imagem': None,
+            'detalhes': None,
+            'link_interno_entidade': None,
+            'link_interno_id': None,
+            'link_externo': 'link2'
+        }, {
+            'dado': 5,
+            'rotulo': 'Outros',
+            'fonte': 'fonte',
+            'imagem': None,
+            'detalhes': None,
+            'link_interno_entidade': None,
+            'link_interno_id': None,
+            'link_externo': None
+        }]
+
+        tipo_dado = make(
+            'api.TipoDado',
+            name='grafico_pizza',
+            serialization=TipoDado.PIZZA_GRAPH_DATA
+        )
+        dado = make('api.Dado', data_type=tipo_dado)
+        dado_ser = DadoSerializer(dado, domain_id='00').data
+
+        self.assertEqual(dado_ser['external_data'], expected_value)
