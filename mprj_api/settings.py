@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'colorfield',
 
-    'api',
+    'lupa',
     'login',
 ]
 

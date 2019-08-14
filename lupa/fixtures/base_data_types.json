@@ -1,0 +1,98 @@
+[
+    {
+        "model": "lupa.tipoDado",
+        "pk": 1,
+        "fields":{
+            "name": "texto_grande",
+            "serialization": "Singleton"
+        }
+    },
+    {
+        "model": "lupa.tipoDado",
+        "pk": 2,
+        "fields":{
+            "name": "texto_pequeno",
+            "serialization": "Singleton"
+        }
+    },
+    {
+        "model": "lupa.tipoDado",
+        "pk": 3,
+        "fields":{
+            "name": "texto_pequeno_destaque",
+            "serialization": "Singleton"
+        }
+    },
+    {
+        "model": "lupa.tipoDado",
+        "pk": 4,
+        "fields":{
+            "name": "lista_sem_ordenacao",
+            "serialization": "List"
+        }
+    },
+    {
+        "model": "lupa.tipoDado",
+        "pk": 5,
+        "fields":{
+            "name": "lista_ordenada",
+            "serialization": "List"
+        }
+    },
+    {
+        "model": "lupa.tipoDado",
+        "pk": 6,
+        "fields":{
+            "name": "lista_filtrada",
+            "serialization": "List"
+        }
+    },
+    {
+        "model": "lupa.tipoDado",
+        "pk": 7,
+        "fields":{
+            "name": "lista_pessoa",
+            "serialization": "List"
+        }
+    },
+    {
+        "model": "lupa.tipoDado",
+        "pk": 8,
+        "fields":{
+            "name": "grafico_barra_vertical",
+            "serialization": "Graph"
+        }
+    },
+    {
+        "model": "lupa.tipoDado",
+        "pk": 9,
+        "fields":{
+            "name": "grafico_barra_horizontal",
+            "serialization": "Graph"
+        }
+    },
+    {
+        "model": "lupa.tipoDado",
+        "pk": 10,
+        "fields":{
+            "name": "grafico_barra_horizontal_agrupado",
+            "serialization": "Graph"
+        }
+    },
+    {
+        "model": "lupa.tipoDado",
+        "pk": 11,
+        "fields":{
+            "name": "grafico_linha_horizontal",
+            "serialization": "Graph"
+        }
+    },
+    {
+        "model": "lupa.tipoDado",
+        "pk": 12,
+        "fields":{
+            "name": "grafico_pizza",
+            "serialization": "Graph"
+        }
+    }
+]
