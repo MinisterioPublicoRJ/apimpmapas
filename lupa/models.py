@@ -12,70 +12,6 @@ DATABASE_CHOICES = [
 ]
 
 
-class Coluna(models.Model):
-    # CHOICES
-    ID_COLUMN = 'id'
-    LABEL_COLUMN = 'label'
-    INTERNAL_ENTITY_COLUMN = 'entidade interna'
-    INTERNAL_ID_COLUMN = 'id interna'
-    BASE_CHOICES = [
-        (ID_COLUMN, 'Coluna de ID da entidade'),
-        (LABEL_COLUMN, 'Coluna de rótulo dos dados'),
-        (INTERNAL_ENTITY_COLUMN, 'Coluna de tipo de entidade vinculada'),
-        (INTERNAL_ID_COLUMN, 'Coluna de id de entidade vinculada'),
-    ]
-    INFO_CHOICES = []
-
-    # DATABASE FIELDS
-    name = models.CharField(
-        verbose_name='nome da coluna na tabela',
-        max_length=200,
-    )
-
-    info_type = models.CharField(
-        verbose_name='tipo de informação da coluna',
-        max_length=50,
-        choices=INFO_CHOICES,
-        default=ID_COLUMN,
-        blank=False,
-        help_text='''<pre>Toda caixinha e mapa precisa de uma coluna de id
-        Toda caixinha precisa de uma coluna de dados
-        Todo mapa precisa de uma coluna de geojson, contendo um mapa em formato geojson
-        Caixinhas de gráficos precisam de uma coluna do tipo label
-        Colunas de imagem precisam referenciar um campo do tipo "BLOB"
-        Colunas de tipo e id de entidade vinculada precisam existir aos pares</pre>'''
-    )
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    last_modified = models.DateTimeField(auto_now=True)
-
-    # META CLASS
-    class Meta:
-        abstract = True
-
-
-class ColunaDado(Coluna):
-    # CHOICES
-    DATA_COLUMN = 'data'
-    SOURCE_COLUMN = 'source'
-    IMAGE_COLUMN = 'image'
-    EXTERNAL_LINK_COLUMN = 'link externo'
-    INFO_CHOICES = Coluna.BASE_CHOICES + [
-        (DATA_COLUMN, 'Coluna de dados principais'),
-        (SOURCE_COLUMN, 'Coluna de fonte dos dados'),
-        (IMAGE_COLUMN, 'Coluna de imagem'),
-        (EXTERNAL_LINK_COLUMN, 'Coluna de link externo'),
-    ]
-
-
-class ColunaMapa(Coluna):
-    # CHOICES
-    GEOJSON_COLUMN = 'geojson'
-    INFO_CHOICES = Coluna.BASE_CHOICES + [
-        (GEOJSON_COLUMN, 'Coluna de json do mapa'),
-    ]
-
-
 class TipoDado(models.Model):
     # CHOICES
     SINGLETON_DATA = 'Singleton'
@@ -232,8 +168,6 @@ class Mapa(models.Model):
         max_length=50
     )
 
-    columns = models.ManyToManyField(ColunaMapa)
-
     entity_id_column = models.CharField(
         verbose_name='coluna do ID da entidade',
         max_length=50
@@ -322,8 +256,6 @@ class Dado(OrderedModel):
         max_length=100
     )
 
-    columns = models.ManyToManyField(ColunaDado)
-
     id_column = models.CharField(
         verbose_name='coluna do ID da Entidade',
         max_length=200
@@ -400,3 +332,79 @@ class Dado(OrderedModel):
     def __str__(self):
         if self:
             return self.title
+
+
+class Coluna(models.Model):
+    # CLASS FIELDS
+    help_info_type = '''<pre>Toda caixinha e mapa precisa de uma coluna de id
+Toda caixinha precisa de uma coluna de dados
+Todo mapa precisa de uma coluna de geojson, contendo a string json de um mapa
+Caixinhas de gráficos precisam de uma coluna do tipo label
+Colunas de imagem precisam referenciar um campo do tipo "BLOB"
+Colunas de tipo e id de entidade vinculada precisam existir aos pares</pre>'''
+
+    # CHOICES
+    ID_COLUMN = 'id'
+    LABEL_COLUMN = 'label'
+    INTERNAL_ENTITY_COLUMN = 'entidade interna'
+    INTERNAL_ID_COLUMN = 'id interna'
+    BASE_CHOICES = [
+        (ID_COLUMN, 'Coluna de ID da entidade'),
+        (LABEL_COLUMN, 'Coluna de rótulo dos dados'),
+        (INTERNAL_ENTITY_COLUMN, 'Coluna de tipo de entidade vinculada'),
+        (INTERNAL_ID_COLUMN, 'Coluna de id de entidade vinculada'),
+    ]
+    INFO_CHOICES = []
+
+    # DATABASE FIELDS
+    name = models.CharField(
+        verbose_name='nome da coluna na tabela',
+        max_length=200,
+    )
+
+    info_type = models.CharField(
+        verbose_name='tipo de informação da coluna',
+        max_length=50,
+        choices=INFO_CHOICES,
+        default=ID_COLUMN,
+        blank=False
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
+
+    # META CLASS
+    class Meta:
+        abstract = True
+
+
+class ColunaDado(Coluna):
+    # CHOICES
+    DATA_COLUMN = 'data'
+    SOURCE_COLUMN = 'source'
+    IMAGE_COLUMN = 'image'
+    EXTERNAL_LINK_COLUMN = 'link externo'
+    INFO_CHOICES = Coluna.BASE_CHOICES + [
+        (DATA_COLUMN, 'Coluna de dados principais'),
+        (SOURCE_COLUMN, 'Coluna de fonte dos dados'),
+        (IMAGE_COLUMN, 'Coluna de imagem'),
+        (EXTERNAL_LINK_COLUMN, 'Coluna de link externo'),
+    ]
+
+    dado = models.ForeignKey(
+        Dado,
+        on_delete=models.CASCADE
+    )
+
+
+class ColunaMapa(Coluna):
+    # CHOICES
+    GEOJSON_COLUMN = 'geojson'
+    INFO_CHOICES = Coluna.BASE_CHOICES + [
+        (GEOJSON_COLUMN, 'Coluna de json do mapa'),
+    ]
+
+    mapa = models.ForeignKey(
+        Mapa,
+        on_delete=models.CASCADE
+    )

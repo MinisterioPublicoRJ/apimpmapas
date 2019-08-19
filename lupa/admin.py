@@ -1,11 +1,32 @@
 from django.contrib import admin
+from django import forms
 from ordered_model.admin import OrderedModelAdmin
 
-from .models import Dado, Icone, Entidade, Mapa, TipoDado, TemaDado
+from .models import (
+    Dado,
+    Icone,
+    Entidade,
+    Mapa,
+    TipoDado,
+    TemaDado,
+    ColunaDado
+)
 
 
 class MapaAdminInline(admin.StackedInline):
     model = Mapa
+
+
+class ColunaDadoForm(forms.ModelForm):
+    info_type = forms.ChoiceField(
+        choices=ColunaDado.INFO_CHOICES,
+        help_text=ColunaDado.help_info_type
+    )
+
+
+class ColunaDadoAdminInline(admin.TabularInline):
+    model = ColunaDado
+    form = ColunaDadoForm
 
 
 @admin.register(Entidade)
@@ -57,6 +78,7 @@ class DadoAdmin(OrderedModelAdmin):
                 'entity_link_id_column')
         })
     )
+    inlines = [ColunaDadoAdminInline]
 
 
 admin.site.register(Icone)
