@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.gis',
 
     'rest_framework',
+    'nested_admin',
     'ordered_model',
     'corsheaders',
     'colorfield',

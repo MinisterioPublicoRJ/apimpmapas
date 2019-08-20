@@ -4,6 +4,7 @@ Django>=2.2
 django-colorfield
 django-cors-headers
 django-filter
+django-nested-admin
 djangorestframework>=3.9
 impyla
 django-ordered-model

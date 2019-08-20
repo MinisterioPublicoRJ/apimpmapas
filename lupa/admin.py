@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django import forms
+import nested_admin
 from ordered_model.admin import OrderedModelAdmin
 
 from .models import (
@@ -9,12 +10,9 @@ from .models import (
     Mapa,
     TipoDado,
     TemaDado,
-    ColunaDado
+    ColunaDado,
+    ColunaMapa
 )
-
-
-class MapaAdminInline(admin.StackedInline):
-    model = Mapa
 
 
 class ColunaDadoForm(forms.ModelForm):
@@ -24,13 +22,30 @@ class ColunaDadoForm(forms.ModelForm):
     )
 
 
+class ColunaMapaForm(forms.ModelForm):
+    info_type = forms.ChoiceField(
+        choices=ColunaMapa.INFO_CHOICES,
+        help_text=ColunaMapa.help_info_type
+    )
+
+
 class ColunaDadoAdminInline(admin.TabularInline):
     model = ColunaDado
     form = ColunaDadoForm
 
 
+class ColunaMapaAdminInline(nested_admin.NestedTabularInline):
+    model = ColunaMapa
+    form = ColunaMapaForm
+
+
+class MapaAdminInline(nested_admin.NestedStackedInline):
+    model = Mapa
+    inlines = [ColunaMapaAdminInline]
+
+
 @admin.register(Entidade)
-class EntidadeAdmin(admin.ModelAdmin):
+class EntidadeAdmin(nested_admin.NestedModelAdmin):
     list_display = ('name', 'abreviation')
     fieldsets = (
         (None, {
