@@ -168,31 +168,6 @@ class Mapa(models.Model):
         max_length=50
     )
 
-    entity_id_column = models.CharField(
-        verbose_name='coluna do ID da entidade',
-        max_length=50
-    )
-
-    label_column = models.CharField(
-        verbose_name='coluna do label do mapa',
-        max_length=50
-    )
-
-    geom_column = models.CharField(
-        verbose_name='coluna do json do mapa',
-        max_length=50
-    )
-
-    related_entity_column = models.CharField(
-        verbose_name='coluna da entidade apontada',
-        max_length=50
-    )
-
-    related_id_column = models.CharField(
-        verbose_name='coluna do ID apontado',
-        max_length=50
-    )
-
 
 class Dado(OrderedModel):
     # DATABASE FIELDS
@@ -254,66 +229,6 @@ class Dado(OrderedModel):
     table = models.CharField(
         verbose_name='tabela',
         max_length=100
-    )
-
-    id_column = models.CharField(
-        verbose_name='coluna do ID da Entidade',
-        max_length=200
-    )
-
-    data_column = models.CharField(
-        verbose_name='coluna da informação principal exibida',
-        max_length=200
-    )
-
-    label_column = models.CharField(
-        verbose_name='coluna de rótulo dos dados',
-        max_length=200,
-        null=True,
-        blank=True
-    )
-
-    source_column = models.CharField(
-        verbose_name='coluna de fonte dos dados',
-        max_length=200,
-        null=True,
-        blank=True
-    )
-
-    details_column = models.CharField(
-        verbose_name='coluna de detalhes sobre os dados',
-        max_length=200,
-        null=True,
-        blank=True
-    )
-
-    image_column = models.CharField(
-        verbose_name='coluna de imagem',
-        max_length=200,
-        null=True,
-        blank=True
-    )
-
-    external_link_column = models.CharField(
-        verbose_name='coluna de link externo',
-        max_length=200,
-        null=True,
-        blank=True
-    )
-
-    entity_link_type = models.ForeignKey(
-        Entidade,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        verbose_name="entidade apontada em link interno"
-    )
-
-    entity_link_id_column = models.CharField(
-        verbose_name='coluna de ID da entidade apontada',
-        max_length=200,
-        null=True,
-        blank=True
     )
 
     limit_fetch = models.IntegerField(

@@ -81,16 +81,7 @@ class DadoAdmin(OrderedModelAdmin):
             'fields': (
                 'database',
                 'schema',
-                'table',
-                'id_column',
-                'data_column',
-                'label_column',
-                'source_column',
-                'details_column',
-                'image_column',
-                'external_link_column',
-                'entity_link_type',
-                'entity_link_id_column')
+                'table')
         })
     )
     inlines = [ColunaDadoAdminInline]
