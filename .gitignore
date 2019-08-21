@@ -118,3 +118,6 @@ media/
 
 # Ubuntu
 .directory
+
+# Scripts
+scripts/
