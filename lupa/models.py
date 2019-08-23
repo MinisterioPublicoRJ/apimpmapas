@@ -38,6 +38,9 @@ class TipoDado(models.Model):
         default=SINGLETON_DATA,
     )
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
+
     # META CLASS
     class Meta:
         verbose_name = 'tipo de dados'
@@ -61,6 +64,9 @@ class TemaDado(models.Model):
         default='#FFFFFF'
     )
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
+
     # META CLASS
     class Meta:
         verbose_name = 'tema de dados'
@@ -83,6 +89,9 @@ class Icone(models.Model):
         verbose_name='arquivo do ícone',
         upload_to='icones'
     )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
 
     # META CLASS
     class Meta:
@@ -167,6 +176,9 @@ class Mapa(models.Model):
         verbose_name='tabela',
         max_length=50
     )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
 
 
 class Dado(OrderedModel):
@@ -308,7 +320,9 @@ class ColunaDado(Coluna):
 
     dado = models.ForeignKey(
         Dado,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name="column_list",
+        verbose_name="dado"
     )
 
 
@@ -321,5 +335,7 @@ class ColunaMapa(Coluna):
 
     mapa = models.ForeignKey(
         Mapa,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name="column_list",
+        verbose_name="mapa"
     )

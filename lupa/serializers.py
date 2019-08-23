@@ -4,7 +4,35 @@ from rest_framework import serializers
 
 from .db_connectors import execute
 from .exceptions import QueryError
-from .models import Entidade, Dado, TipoDado
+from .models import Entidade, Dado, TipoDado, ColunaDado, ColunaMapa
+
+
+def calculate_total(data_list):
+    total = 0
+    for data in data_list:
+        if data['dado']:
+            total += float(data['dado'])
+    return total
+
+
+def rowToExternalData(row, column_list):
+    data = {}
+    for i, item in enumerate(column_list):
+        data[item['info_type']] = row[i]
+    return data
+
+
+def rowToMapData(row, column_list):
+    feature = {}
+    feature['type'] = 'Feature'
+    feature['properties'] = {}
+
+    for i, item in enumerate(column_list):
+        if item['info_type'] == 'geojson':
+            feature['geometry'] = json.loads(row[i])
+        else:
+            feature['properties'][item['info_type']] = row[i]
+    return feature
 
 
 class DadoInternalSerializer(serializers.ModelSerializer):
@@ -24,6 +52,18 @@ class DadoInternalSerializer(serializers.ModelSerializer):
         if obj.theme:
             return obj.theme.color
         return None
+
+
+class DataColumnSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ColunaDado
+        fields = ['name', 'info_type']
+
+
+class MapColumnSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ColunaMapa
+        fields = ['name', 'info_type']
 
 
 class EntidadeSerializer(serializers.ModelSerializer):
@@ -83,34 +123,38 @@ class EntidadeSerializer(serializers.ModelSerializer):
 
     def get_geojson(self, obj):
         if hasattr(obj, 'map_info') and obj.map_info:
-            db_result = None
+            column_list = MapColumnSerializer(
+                obj.map_info.column_list.all(),
+                many=True,
+                read_only=True
+            ).data
+
+            columns = []
+            id_column = None
+            for column in column_list:
+                columns.append('{} as {}'.format(
+                    column['name'],
+                    column['info_type']
+                ))
+                if column['info_type'] == 'id':
+                    id_column = column['name']
+
             try:
-                columns = [
-                    obj.map_info.geom_column,
-                    obj.map_info.label_column,
-                    obj.map_info.related_entity_column,
-                    obj.map_info.related_id_column
-                ]
                 db_result = execute(
                     obj.map_info.database,
                     obj.map_info.schema,
                     obj.map_info.table,
                     columns,
-                    obj.map_info.entity_id_column,
+                    id_column,
                     self.base_data['domain_id']
                 )
             except QueryError:
                 return None
+
             if db_result:
                 features = []
                 for main_result in db_result:
-                    feature = {}
-                    feature['geometry'] = json.loads(main_result[0])
-                    feature['type'] = 'Feature'
-                    feature['properties'] = {}
-                    feature['properties']['name'] = main_result[1]
-                    feature['properties']['entity_link_type'] = main_result[2]
-                    feature['properties']['entity_link_id'] = main_result[3]
+                    feature = rowToMapData(main_result, column_list)
                     features.append(feature)
                 return features
         return None
@@ -165,37 +209,29 @@ class DadoSerializer(serializers.ModelSerializer):
         super().__init__(*args, **kwargs)
 
     def get_external_data(self, obj):
+        column_list = DataColumnSerializer(
+            obj.column_list.all(),
+            many=True,
+            read_only=True
+        ).data
+
         columns = []
-        columns.append(obj.data_column)
-        columns.append(
-            obj.label_column if obj.label_column else 'NULL as rotulo'
-        )
-        columns.append(
-            obj.source_column if obj.source_column else 'NULL as fonte'
-        )
-        columns.append(
-            obj.details_column if obj.details_column else 'NULL as detalhes'
-        )
-        columns.append(
-            obj.entity_link_id_column
-            if obj.entity_link_id_column
-            else 'NULL as link_interno_id'
-        )
-        columns.append(
-            obj.external_link_column
-            if obj.external_link_column
-            else 'NULL as link_externo'
-        )
-        columns.append(
-            obj.image_column if obj.image_column else 'NULL as imagem'
-        )
+        id_column = None
+        for column in column_list:
+            columns.append('{} as {}'.format(
+                column['name'],
+                column['info_type']
+            ))
+            if column['info_type'] == 'id':
+                id_column = column['name']
+
         try:
             db_result = execute(
                 obj.database,
                 obj.schema,
                 obj.table,
                 columns,
-                obj.id_column,
+                id_column,
                 self.domain_id
             )
         except QueryError:
@@ -203,62 +239,29 @@ class DadoSerializer(serializers.ModelSerializer):
 
         if db_result:
             if obj.data_type.serialization == TipoDado.SINGLETON_DATA:
-                result = db_result[0]
-                data = {
-                    'dado': result[0],
-                    'rotulo': result[1],
-                    'fonte': result[2],
-                    'detalhes': result[3],
-                    'imagem': result[6],
-                    'link_interno_entidade':
-                        obj.entity_link_type.abreviation
-                        if obj.entity_link_type
-                        else None,
-                    'link_interno_id': result[4],
-                    'link_externo': result[5]
-                }
+                data = rowToExternalData(
+                    row=db_result[0],
+                    column_list=column_list
+                )
                 return data
             elif (obj.data_type.serialization == TipoDado.LIST_DATA or
                   obj.data_type.serialization == TipoDado.XY_GRAPH_DATA):
                 data = []
                 for result in db_result:
-                    data_dict = {
-                        'dado': result[0],
-                        'rotulo': result[1],
-                        'fonte': result[2],
-                        'detalhes': result[3],
-                        'imagem': result[6],
-                        'link_interno_entidade':
-                            obj.entity_link_type.abreviation
-                            if obj.entity_link_type
-                            else None,
-                        'link_interno_id': result[4],
-                        'link_externo': result[5]
-                    }
-                    data.append(data_dict)
+                    data.append(
+                        rowToExternalData(row=result, column_list=column_list)
+                    )
                 if obj.limit_fetch > 0:
                     return data[:obj.limit_fetch]
                 return data
             elif obj.data_type.serialization == TipoDado.PIZZA_GRAPH_DATA:
                 data = []
-                total = 0
                 for result in db_result:
-                    data_dict = {
-                        'dado': result[0],
-                        'rotulo': result[1],
-                        'fonte': result[2],
-                        'detalhes': result[3],
-                        'imagem': result[6],
-                        'link_interno_entidade':
-                            obj.entity_link_type.abreviation
-                            if obj.entity_link_type
-                            else None,
-                        'link_interno_id': result[4],
-                        'link_externo': result[5]
-                    }
-                    if type(result[0]) == int or type(result[0]) == float:
-                        total += result[0]
-                    data.append(data_dict)
+                    data.append(
+                        rowToExternalData(row=result, column_list=column_list)
+                    )
+
+                total = calculate_total(data)
 
                 outros = None
                 data_rev = []
@@ -269,13 +272,7 @@ class DadoSerializer(serializers.ModelSerializer):
                         else:
                             outros = {
                                 'dado': line['dado'],
-                                'rotulo': 'Outros',
-                                'fonte': line['fonte'],
-                                'detalhes': None,
-                                'imagem': None,
-                                'link_interno_entidade': None,
-                                'link_interno_id': None,
-                                'link_externo': None
+                                'rotulo': 'Outros'
                             }
                     else:
                         data_rev.append(line)

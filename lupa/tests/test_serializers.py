@@ -12,36 +12,24 @@ class DataTypeViewTest(TestCase):
 
     def setUp(self):
         self.return_execute = [
-            ('dado1', None, 'fonte', None, None, 'link1', None),
-            ('dado2', None, 'fonte', None, None, 'link2', None),
-            ('dado3', None, 'fonte', None, None, 'link3', None),
+            ('dado1', 'rotulo1', 'fonte', 'link1'),
+            ('dado2', 'rotulo2', 'fonte', 'link2'),
+            ('dado3', 'rotulo3', 'fonte', 'link3'),
         ]
         self.expected_value = [{
             'dado': 'dado1',
-            'rotulo': None,
+            'rotulo': 'rotulo1',
             'fonte': 'fonte',
-            'imagem': None,
-            'detalhes': None,
-            'link_interno_entidade': None,
-            'link_interno_id': None,
             'link_externo': 'link1'
         }, {
             'dado': 'dado2',
-            'rotulo': None,
+            'rotulo': 'rotulo2',
             'fonte': 'fonte',
-            'imagem': None,
-            'detalhes': None,
-            'link_interno_entidade': None,
-            'link_interno_id': None,
             'link_externo': 'link2'
         }, {
             'dado': 'dado3',
-            'rotulo': None,
+            'rotulo': 'rotulo3',
             'fonte': 'fonte',
-            'imagem': None,
-            'detalhes': None,
-            'link_interno_entidade': None,
-            'link_interno_id': None,
             'link_externo': 'link3'
         }]
 
@@ -55,6 +43,10 @@ class DataTypeViewTest(TestCase):
             serialization=TipoDado.LIST_DATA
         )
         dado = make('lupa.Dado', data_type=tipo_dado)
+        make('lupa.ColunaDado', info_type='link_externo', name='ln', dado=dado)
+        make('lupa.ColunaDado', info_type='fonte', name='fon', dado=dado)
+        make('lupa.ColunaDado', info_type='rotulo', name='lb', dado=dado)
+        make('lupa.ColunaDado', info_type='dado', name='data', dado=dado)
         dado_ser = DadoSerializer(dado, domain_id='00').data
 
         self.assertEqual(dado_ser['external_data'], self.expected_value)
@@ -75,6 +67,10 @@ class DataTypeViewTest(TestCase):
             data_type=tipo_dado,
             limit_fetch=fetch
         )
+        make('lupa.ColunaDado', info_type='link_externo', name='ln', dado=dado)
+        make('lupa.ColunaDado', info_type='fonte', name='fon', dado=dado)
+        make('lupa.ColunaDado', info_type='rotulo', name='lb', dado=dado)
+        make('lupa.ColunaDado', info_type='dado', name='data', dado=dado)
         dado_ser = DadoSerializer(dado, domain_id='00').data
 
         self.assertEqual(
@@ -92,6 +88,10 @@ class DataTypeViewTest(TestCase):
             serialization=TipoDado.XY_GRAPH_DATA
         )
         dado = make('lupa.Dado', data_type=tipo_dado)
+        make('lupa.ColunaDado', info_type='link_externo', name='ln', dado=dado)
+        make('lupa.ColunaDado', info_type='fonte', name='fon', dado=dado)
+        make('lupa.ColunaDado', info_type='rotulo', name='fon', dado=dado)
+        make('lupa.ColunaDado', info_type='dado', name='data', dado=dado)
         dado_ser = DadoSerializer(dado, domain_id='00').data
 
         self.assertEqual(dado_ser['external_data'], self.expected_value)
@@ -99,42 +99,28 @@ class DataTypeViewTest(TestCase):
     @mock.patch('lupa.serializers.execute')
     def test_dado_graph_outros(self, _execute):
         _execute.return_value = [
-            (70, 'dado1', 'fonte', None, None, 'link1', None),
-            (25, 'dado2', 'fonte', None, None, 'link2', None),
-            (1, 'dado3', 'fonte', None, None, 'link3', None),
-            (1, 'dado4', 'fonte', None, None, 'link4', None),
-            (1, 'dado5', 'fonte', None, None, 'link5', None),
-            (1, 'dado6', 'fonte', None, None, 'link6', None),
-            (1, 'dado7', 'fonte', None, None, 'link7', None),
+            (70, 'dado1', 'fonte', 'link1'),
+            (25, 'dado2', 'fonte', 'link2'),
+            (1, 'dado3', 'fonte', 'link3'),
+            (1, 'dado4', 'fonte', 'link4'),
+            (1, 'dado5', 'fonte', 'link5'),
+            (1, 'dado6', 'fonte', 'link6'),
+            (1, 'dado7', 'fonte', 'link7'),
         ]
 
         expected_value = [{
             'dado': 70,
             'rotulo': 'dado1',
             'fonte': 'fonte',
-            'imagem': None,
-            'detalhes': None,
-            'link_interno_entidade': None,
-            'link_interno_id': None,
             'link_externo': 'link1'
         }, {
             'dado': 25,
             'rotulo': 'dado2',
             'fonte': 'fonte',
-            'imagem': None,
-            'detalhes': None,
-            'link_interno_entidade': None,
-            'link_interno_id': None,
             'link_externo': 'link2'
         }, {
             'dado': 5,
-            'rotulo': 'Outros',
-            'fonte': 'fonte',
-            'imagem': None,
-            'detalhes': None,
-            'link_interno_entidade': None,
-            'link_interno_id': None,
-            'link_externo': None
+            'rotulo': 'Outros'
         }]
 
         tipo_dado = make(
@@ -143,6 +129,10 @@ class DataTypeViewTest(TestCase):
             serialization=TipoDado.PIZZA_GRAPH_DATA
         )
         dado = make('lupa.Dado', data_type=tipo_dado)
+        make('lupa.ColunaDado', info_type='link_externo', name='ln', dado=dado)
+        make('lupa.ColunaDado', info_type='fonte', name='fon', dado=dado)
+        make('lupa.ColunaDado', info_type='rotulo', name='fon', dado=dado)
+        make('lupa.ColunaDado', info_type='dado', name='data', dado=dado)
         dado_ser = DadoSerializer(dado, domain_id='00').data
 
         self.assertEqual(dado_ser['external_data'], expected_value)

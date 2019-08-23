@@ -73,7 +73,6 @@ class EntidadeViewTest(TestCase):
 
         resp = self.client.get(url)
         resp_json = resp.json()
-        # import ipdb; ipdb.set_trace()
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp_json, expected_answer)
@@ -153,15 +152,9 @@ class DetailDadosViewTest(TestCase):
         self.data_id_alt = 9
         self.external_data = '202'
         self.external_source = 'http://mca.mp.rj.gov.br/'
-        self.external_description = None
-        self.external_label = None
-        self.external_link = None
         self.exibition_field = 'Abrigos para crianças e adolescentes'
         self.domain_id = '33'
-        self.external_entity = None
-        self.external_ent_id = None
         self.icon_file = 'icones/python.svg'
-        self.image = None
 
         self.data_type = 'texto_pequeno_destaque'
         self.data_type_obj = make(
@@ -177,13 +170,8 @@ class DetailDadosViewTest(TestCase):
             'id': self.data_id,
             'external_data': {
                 'dado': self.external_data,
-                'rotulo': self.external_label,
                 'fonte': self.external_source,
-                'imagem': self.image,
-                'detalhes': self.external_description,
-                'link_interno_entidade': self.external_entity,
-                'link_interno_id': self.external_ent_id,
-                'link_externo': self.external_link
+                'id': self.data_id
             },
             'exibition_field': self.exibition_field,
             'data_type': self.data_type,
@@ -192,12 +180,8 @@ class DetailDadosViewTest(TestCase):
 
         _execute.return_value = [(
             self.external_data,
-            self.external_label,
             self.external_source,
-            self.external_description,
-            self.external_ent_id,
-            self.external_link,
-            self.image
+            self.data_id
         )]
 
         entidade = make(
@@ -205,7 +189,7 @@ class DetailDadosViewTest(TestCase):
             id=self.entity_id,
             abreviation=self.entity_abrv,
         )
-        make(
+        dado = make(
             'lupa.Dado',
             id=self.data_id,
             data_type=self.data_type_obj,
@@ -213,6 +197,9 @@ class DetailDadosViewTest(TestCase):
             exibition_field=self.exibition_field,
             icon__file_path=self.icon_file
         )
+        make('lupa.ColunaDado', info_type='id', name='identi', dado=dado)
+        make('lupa.ColunaDado', info_type='fonte', name='fon', dado=dado)
+        make('lupa.ColunaDado', info_type='dado', name='data', dado=dado)
 
         url = reverse(
             'lupa:detail_dado',

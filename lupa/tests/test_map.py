@@ -16,7 +16,22 @@ class MapTest(TestCase):
             'lupa.Entidade',
             abreviation='ORG'
         )
-        make('lupa.Mapa', entity=entidade)
+        mapa = make('lupa.Mapa', entity=entidade)
+        make(
+            'lupa.ColunaMapa',
+            info_type='entity_link_id',
+            name='link',
+            mapa=mapa
+        )
+        make(
+            'lupa.ColunaMapa',
+            info_type='entity_link_type',
+            name='ent',
+            mapa=mapa
+        )
+        make('lupa.ColunaMapa', info_type='name', name='name', mapa=mapa)
+        make('lupa.ColunaMapa', info_type='id', name='map', mapa=mapa)
+        make('lupa.ColunaMapa', info_type='geojson', name='map', mapa=mapa)
 
         coord = {
             "type": "Point",
@@ -30,6 +45,7 @@ class MapTest(TestCase):
             "type": "Feature",
             "properties": {
                 'name': 'Name',
+                'id': '99',
                 'entity_link_type': 'CRA',
                 'entity_link_id': '2'
             },
@@ -38,7 +54,7 @@ class MapTest(TestCase):
 
         _execute.side_effect = [
             [('mock_name', )],
-            [(json.dumps(coord), 'Name', 'CRA', '2')],
+            [(json.dumps(coord), '99', 'Name', 'CRA', '2')],
         ]
 
         ent_ser = EntidadeSerializer(entidade, domain_id='99').data
