@@ -7,7 +7,7 @@ from cx_Oracle import connect as ora_connect, DatabaseError as ORA_Error
 from impala.dbapi import connect as bda_connect
 from impala.error import HiveServer2Error as BDA_Error
 
-from api.exceptions import QueryError
+from lupa.exceptions import QueryError
 
 
 logger = logging.getLogger(__name__)

@@ -6,12 +6,12 @@ from django.urls import reverse
 
 from model_mommy.mommy import make
 
-from api.exceptions import QueryError
+from lupa.exceptions import QueryError
 
 
 class EntidadeViewTest(TestCase):
 
-    @mock.patch('api.serializers.execute')
+    @mock.patch('lupa.serializers.execute')
     def test_entidade_ok(self, _execute):
         expected_answer = {
             'domain_id': '33',
@@ -54,47 +54,46 @@ class EntidadeViewTest(TestCase):
 
         _execute.return_value = [('Rio de Janeiro', 'mock_geo')]
 
-        estado = make('api.Entidade', name='Estado', abreviation='EST')
-        municipio = make('api.Entidade', abreviation='MUN')
+        estado = make('lupa.Entidade', name='Estado', abreviation='EST')
+        municipio = make('lupa.Entidade', abreviation='MUN')
 
-        seguranca = make('api.TemaDado', name='Segurança', color='#223478')
-        saude = make('api.TemaDado', name='Saúde', color='#223578')
+        seguranca = make('lupa.TemaDado', name='Segurança', color='#223478')
+        saude = make('lupa.TemaDado', name='Saúde', color='#223578')
 
-        make('api.Dado', id=1, entity_type=estado, theme=seguranca, order=2)
-        make('api.Dado', id=2, entity_type=estado, theme=None, order=5)
-        make('api.Dado', id=3, entity_type=municipio, order=7)
-        make('api.Dado', id=4, entity_type=estado, theme=None, order=1)
-        make('api.Dado', id=5, entity_type=estado, theme=saude, order=8)
-        make('api.Dado', id=6, entity_type=municipio, order=6)
-        make('api.Dado', id=7, entity_type=estado, theme=seguranca, order=3)
-        make('api.Dado', id=8, entity_type=estado, theme=None, order=4)
+        make('lupa.Dado', id=1, entity_type=estado, theme=seguranca, order=2)
+        make('lupa.Dado', id=2, entity_type=estado, theme=None, order=5)
+        make('lupa.Dado', id=3, entity_type=municipio, order=7)
+        make('lupa.Dado', id=4, entity_type=estado, theme=None, order=1)
+        make('lupa.Dado', id=5, entity_type=estado, theme=saude, order=8)
+        make('lupa.Dado', id=6, entity_type=municipio, order=6)
+        make('lupa.Dado', id=7, entity_type=estado, theme=seguranca, order=3)
+        make('lupa.Dado', id=8, entity_type=estado, theme=None, order=4)
 
-        url = reverse('api:detail_entidade', args=('EST', '33',))
+        url = reverse('lupa:detail_entidade', args=('EST', '33',))
 
         resp = self.client.get(url)
         resp_json = resp.json()
-        # import ipdb; ipdb.set_trace()
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp_json, expected_answer)
 
-    @mock.patch('api.serializers.execute')
+    @mock.patch('lupa.serializers.execute')
     def test_entidade_nao_existente(self, _execute):
-        make('api.Entidade', abreviation='MUN')
+        make('lupa.Entidade', abreviation='MUN')
         _execute.return_value = []
 
-        url = reverse('api:detail_entidade', args=('MUN', '1',))
+        url = reverse('lupa:detail_entidade', args=('MUN', '1',))
 
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 404)
 
-    @mock.patch('api.serializers.execute')
+    @mock.patch('lupa.serializers.execute')
     def test_entidade_com_erro(self, _execute):
         _execute.side_effect = QueryError('test error')
 
-        make('api.Entidade', id=1, abreviation='MUN')
-        url = reverse('api:detail_entidade', args=('MUN', '1',))
+        make('lupa.Entidade', id=1, abreviation='MUN')
+        url = reverse('lupa:detail_entidade', args=('MUN', '1',))
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 404)
@@ -102,7 +101,7 @@ class EntidadeViewTest(TestCase):
 
 class ListDadosViewTest(TestCase):
 
-    @mock.patch('api.serializers.execute')
+    @mock.patch('lupa.serializers.execute')
     def test_get_lista_dados(self, _execute):
         """Deve retornar dados referentes ao tipo de entidade chamado"""
         _execute.side_effect = [
@@ -110,18 +109,18 @@ class ListDadosViewTest(TestCase):
             None,
         ]
 
-        ent_estado = make('api.Entidade', abreviation='EST')
-        ent_municipio = make('api.Entidade', abreviation='MUN')
+        ent_estado = make('lupa.Entidade', abreviation='EST')
+        ent_municipio = make('lupa.Entidade', abreviation='MUN')
 
-        make('api.Dado', entity_type=ent_estado, _quantity=2)
+        make('lupa.Dado', entity_type=ent_estado, _quantity=2)
         dado_object_mun_0 = make(
-            'api.Dado',
+            'lupa.Dado',
             entity_type=ent_municipio,
             theme=None,
             order=1
         )
         dado_object_mun_1 = make(
-            'api.Dado',
+            'lupa.Dado',
             entity_type=ent_municipio,
             theme=None,
             order=2
@@ -131,7 +130,7 @@ class ListDadosViewTest(TestCase):
             {"id": dado_object_mun_1.id}
         ]
 
-        url = reverse('api:detail_entidade', args=('MUN', '1',))
+        url = reverse('lupa:detail_entidade', args=('MUN', '1',))
 
         resp = self.client.get(url)
         resp_json = resp.json()
@@ -153,37 +152,26 @@ class DetailDadosViewTest(TestCase):
         self.data_id_alt = 9
         self.external_data = '202'
         self.external_source = 'http://mca.mp.rj.gov.br/'
-        self.external_description = None
-        self.external_label = None
-        self.external_link = None
         self.exibition_field = 'Abrigos para crianças e adolescentes'
         self.domain_id = '33'
-        self.external_entity = None
-        self.external_ent_id = None
         self.icon_file = 'icones/python.svg'
-        self.image = None
 
         self.data_type = 'texto_pequeno_destaque'
         self.data_type_obj = make(
-            'api.TipoDado',
+            'lupa.TipoDado',
             name=self.data_type,
             serialization='Singleton'
         )
 
-    @mock.patch('api.serializers.execute')
+    @mock.patch('lupa.serializers.execute')
     def test_dado_ok(self, _execute):
 
         expected_response = {
             'id': self.data_id,
             'external_data': {
                 'dado': self.external_data,
-                'rotulo': self.external_label,
                 'fonte': self.external_source,
-                'imagem': self.image,
-                'detalhes': self.external_description,
-                'link_interno_entidade': self.external_entity,
-                'link_interno_id': self.external_ent_id,
-                'link_externo': self.external_link
+                'id': self.data_id
             },
             'exibition_field': self.exibition_field,
             'data_type': self.data_type,
@@ -192,30 +180,29 @@ class DetailDadosViewTest(TestCase):
 
         _execute.return_value = [(
             self.external_data,
-            self.external_label,
             self.external_source,
-            self.external_description,
-            self.external_ent_id,
-            self.external_link,
-            self.image
+            self.data_id
         )]
 
         entidade = make(
-            'api.Entidade',
+            'lupa.Entidade',
             id=self.entity_id,
             abreviation=self.entity_abrv,
         )
-        make(
-            'api.Dado',
+        dado = make(
+            'lupa.Dado',
             id=self.data_id,
             data_type=self.data_type_obj,
             entity_type=entidade,
             exibition_field=self.exibition_field,
             icon__file_path=self.icon_file
         )
+        make('lupa.ColunaDado', info_type='id', name='identi', dado=dado)
+        make('lupa.ColunaDado', info_type='fonte', name='fon', dado=dado)
+        make('lupa.ColunaDado', info_type='dado', name='data', dado=dado)
 
         url = reverse(
-            'api:detail_dado',
+            'lupa:detail_dado',
             args=(self.entity_abrv, self.domain_id, self.data_id)
         )
         resp = self.client.get(url)
@@ -224,25 +211,25 @@ class DetailDadosViewTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp_json, expected_response)
 
-    @mock.patch('api.serializers.execute')
+    @mock.patch('lupa.serializers.execute')
     def test_dado_sem_retorno_db(self, _execute):
         _execute.return_value = []
 
         entidade = make(
-            'api.Entidade',
+            'lupa.Entidade',
             id=self.entity_id,
             abreviation=self.entity_abrv,
         )
 
         make(
-            'api.Dado',
+            'lupa.Dado',
             id=self.data_id,
             entity_type=entidade,
             data_type=self.data_type_obj
         )
 
         url = reverse(
-            'api:detail_dado',
+            'lupa:detail_dado',
             args=(self.entity_abrv, self.domain_id, self.data_id)
         )
         resp = self.client.get(url)
@@ -251,41 +238,41 @@ class DetailDadosViewTest(TestCase):
 
     def test_dado_nao_existente(self):
         entidade = make(
-            'api.Entidade',
+            'lupa.Entidade',
             id=self.entity_id,
             abreviation=self.entity_abrv,
         )
         make(
-            'api.Dado',
+            'lupa.Dado',
             id=self.data_id_alt,
             entity_type=entidade
         )
 
         url = reverse(
-            'api:detail_dado',
+            'lupa:detail_dado',
             args=(self.entity_abrv, self.domain_id, self.data_id)
         )
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 404)
 
-    @mock.patch('api.serializers.execute')
+    @mock.patch('lupa.serializers.execute')
     def test_dado_com_erro(self, _execute):
         _execute.side_effect = QueryError('test error')
 
         entidade = make(
-            'api.Entidade',
+            'lupa.Entidade',
             id=self.entity_id,
             abreviation=self.entity_abrv,
         )
         make(
-            'api.Dado',
+            'lupa.Dado',
             id=self.data_id,
             entity_type=entidade
         )
 
         url = reverse(
-            'api:detail_dado',
+            'lupa:detail_dado',
             args=(self.entity_abrv, self.domain_id, self.data_id)
         )
         resp = self.client.get(url)

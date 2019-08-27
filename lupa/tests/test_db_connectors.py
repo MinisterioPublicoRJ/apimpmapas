@@ -2,7 +2,7 @@ from unittest import TestCase, mock
 
 from decouple import config
 
-from api.db_connectors import (
+from lupa.db_connectors import (
     bda_access,
     execute as db_execute,
     oracle_access,
@@ -33,7 +33,7 @@ class PostgresAccess(CommonSetup):
                      'col_id = %s'
         self.db = 'PG'
 
-    @mock.patch('api.db_connectors.pg_connect')
+    @mock.patch('lupa.db_connectors.pg_connect')
     def test_connect_postgres(self, _pg_connect):
 
         postgres_access(self.query, self.domain_id)
@@ -56,10 +56,10 @@ class PostgresAccess(CommonSetup):
         self.assertEqual(gen_query, self.query)
 
     @mock.patch(
-        'api.db_connectors.generate_query',
+        'lupa.db_connectors.generate_query',
         return_value='generated_query'
     )
-    @mock.patch('api.db_connectors.postgres_access')
+    @mock.patch('lupa.db_connectors.postgres_access')
     def test_call_correct_pg(self, _postgres_access, _generate_query):
         db_execute(
             self.db,
@@ -82,7 +82,7 @@ class PostgresAccess(CommonSetup):
             self.domain_id
         )
 
-    @mock.patch('api.db_connectors.pg_connect')
+    @mock.patch('lupa.db_connectors.pg_connect')
     def test_execute_postgres(self, _pg_connect):
 
         cursor = mock.MagicMock()
@@ -95,7 +95,7 @@ class PostgresAccess(CommonSetup):
         cursor.execute.assert_called_once_with(self.query, (self.domain_id,))
         cursor.fetchall.assert_called_once_with()
 
-    @mock.patch('api.db_connectors.pg_connect')
+    @mock.patch('lupa.db_connectors.pg_connect')
     def test_query_wrong_postgres(self, _pg_connect):
         cursor = mock.MagicMock()
         cursor.execute.side_effect = PG_Error('test error')
@@ -116,7 +116,7 @@ class OracleAccess(CommonSetup):
         self.query = 'SELECT col1, col2 FROM schema.tabela WHERE '\
                      'col_id = :1'
 
-    @mock.patch('api.db_connectors.ora_connect')
+    @mock.patch('lupa.db_connectors.ora_connect')
     def test_connect_oracle(self, _ora_connect):
         oracle_access(self.query, self.domain_id)
 
@@ -138,10 +138,10 @@ class OracleAccess(CommonSetup):
         self.assertEqual(gen_query, self.query)
 
     @mock.patch(
-        'api.db_connectors.generate_query',
+        'lupa.db_connectors.generate_query',
         return_value='generated_query'
     )
-    @mock.patch('api.db_connectors.oracle_access')
+    @mock.patch('lupa.db_connectors.oracle_access')
     def test_call_correct_pg(self, _oracle_access, _generate_query):
         db_execute(
             self.db,
@@ -164,7 +164,7 @@ class OracleAccess(CommonSetup):
             self.domain_id
         )
 
-    @mock.patch('api.db_connectors.ora_connect')
+    @mock.patch('lupa.db_connectors.ora_connect')
     def test_execute_oracle(self, _ora_connect):
         cursor = mock.MagicMock()
         _ora_connect.return_value.__enter__\
@@ -176,7 +176,7 @@ class OracleAccess(CommonSetup):
         cursor.execute.assert_called_once_with(self.query, (self.domain_id,))
         cursor.fetchall.assert_called_once_with()
 
-    @mock.patch('api.db_connectors.ora_connect')
+    @mock.patch('lupa.db_connectors.ora_connect')
     def test_query_wrong_oracle(self, _ora_connect):
         cursor = mock.MagicMock()
         cursor.execute.side_effect = ORA_Error('test error')
@@ -197,7 +197,7 @@ class BdaAccess(CommonSetup):
         self.query = 'SELECT col1, col2 FROM schema.tabela WHERE '\
                      'col_id = :1'
 
-    @mock.patch('api.db_connectors.bda_connect')
+    @mock.patch('lupa.db_connectors.bda_connect')
     def test_connect_dba(self, _bda_connect):
         bda_access(self.query, self.domain_id)
 
@@ -218,10 +218,10 @@ class BdaAccess(CommonSetup):
         self.assertEqual(gen_query, self.query)
 
     @mock.patch(
-        'api.db_connectors.generate_query',
+        'lupa.db_connectors.generate_query',
         return_value='generated_query'
     )
-    @mock.patch('api.db_connectors.bda_access')
+    @mock.patch('lupa.db_connectors.bda_access')
     def test_call_correct_pg(self, _bda_access, _generate_query):
         db_execute(
             self.db,
@@ -244,7 +244,7 @@ class BdaAccess(CommonSetup):
             self.domain_id
         )
 
-    @mock.patch('api.db_connectors.bda_connect')
+    @mock.patch('lupa.db_connectors.bda_connect')
     def test_execute_dba(self, _bda_connect):
         cursor = mock.MagicMock()
         _bda_connect.return_value.__enter__\
@@ -256,7 +256,7 @@ class BdaAccess(CommonSetup):
         cursor.execute.assert_called_once_with(self.query, (self.domain_id,))
         cursor.fetchall.assert_called_once_with()
 
-    @mock.patch('api.db_connectors.bda_connect')
+    @mock.patch('lupa.db_connectors.bda_connect')
     def test_query_wrong_bda(self, _bda_connect):
         cursor = mock.MagicMock()
         cursor.execute.side_effect = BDA_Error('test error')

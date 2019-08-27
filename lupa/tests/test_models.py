@@ -8,26 +8,26 @@ from model_mommy.mommy import make
 class TestStringRepresentation(TestCase):
 
     def test_string_entidade(self):
-        obj = make('api.Entidade', name='teste_nome')
+        obj = make('lupa.Entidade', name='teste_nome')
 
         self.assertEqual(obj.__str__(), 'teste_nome')
 
     def test_string_dado(self):
-        obj = make('api.Dado', title='teste_nome')
+        obj = make('lupa.Dado', title='teste_nome')
 
         self.assertEqual(obj.__str__(), 'teste_nome')
 
     def test_string_icone(self):
-        obj = make('api.Icone', name='teste_nome')
+        obj = make('lupa.Icone', name='teste_nome')
 
         self.assertEqual(obj.__str__(), 'teste_nome')
 
     def test_string_tipo_dado(self):
-        obj = make('api.TipoDado', name='teste_nome')
+        obj = make('lupa.TipoDado', name='teste_nome')
 
         self.assertEqual(obj.__str__(), 'teste_nome')
 
     def test_string_tema_dado(self):
-        obj = make('api.TemaDado', name='teste_nome')
+        obj = make('lupa.TemaDado', name='teste_nome')
 
         self.assertEqual(obj.__str__(), 'teste_nome')

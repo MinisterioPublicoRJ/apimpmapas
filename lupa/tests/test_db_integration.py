@@ -15,7 +15,7 @@ class IntegrationTest(TestCase):
 
     def test_integration_view_postgres(self):
         make(
-            'api.Dado',
+            'lupa.Dado',
             id=1,
             database='PG',
             columns=['total_homens', 'total_mulheres'],
@@ -24,7 +24,7 @@ class IntegrationTest(TestCase):
             table='populacao_censo_est'
         )
         url = reverse(
-            'api:detail_dado',
+            'lupa:detail_dado',
             kwargs={
                 'domain_id': 33,
                 'pk': 1
@@ -39,7 +39,7 @@ class IntegrationTest(TestCase):
 
     def test_integration_view_oracle(self):
         make(
-            'api.Dado',
+            'lupa.Dado',
             id=3,
             database='ORA',
             columns=['ORGI_NM_ORGAO'],
@@ -48,7 +48,7 @@ class IntegrationTest(TestCase):
             table='ORGI_ORGAO'
         )
         url = reverse(
-            'api:detail_dado',
+            'lupa:detail_dado',
             kwargs={
                 'domain_id': 200493,
                 'pk': 3
@@ -67,7 +67,7 @@ class IntegrationTest(TestCase):
 
     def test_integration_view_bda(self):
         make(
-            'api.Dado',
+            'lupa.Dado',
             id=3,
             database='BDA',
             columns=['orgi_nm_orgao'],
@@ -76,7 +76,7 @@ class IntegrationTest(TestCase):
             table='orgi_orgao'
         )
         url = reverse(
-            'api:detail_dado',
+            'lupa:detail_dado',
             kwargs={
                 'domain_id': 200493,
                 'pk': 3

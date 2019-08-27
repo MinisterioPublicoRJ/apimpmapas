@@ -1,15 +1,51 @@
 from django.contrib import admin
+from django import forms
+import nested_admin
 from ordered_model.admin import OrderedModelAdmin
 
-from api.models import Dado, Icone, Entidade, Mapa, TipoDado, TemaDado
+from .models import (
+    Dado,
+    Icone,
+    Entidade,
+    Mapa,
+    TipoDado,
+    TemaDado,
+    ColunaDado,
+    ColunaMapa
+)
 
 
-class MapaAdminInline(admin.StackedInline):
+class ColunaDadoForm(forms.ModelForm):
+    info_type = forms.ChoiceField(
+        choices=ColunaDado.INFO_CHOICES,
+        help_text=ColunaDado.help_info_type
+    )
+
+
+class ColunaMapaForm(forms.ModelForm):
+    info_type = forms.ChoiceField(
+        choices=ColunaMapa.INFO_CHOICES,
+        help_text=ColunaMapa.help_info_type
+    )
+
+
+class ColunaDadoAdminInline(admin.TabularInline):
+    model = ColunaDado
+    form = ColunaDadoForm
+
+
+class ColunaMapaAdminInline(nested_admin.NestedTabularInline):
+    model = ColunaMapa
+    form = ColunaMapaForm
+
+
+class MapaAdminInline(nested_admin.NestedStackedInline):
     model = Mapa
+    inlines = [ColunaMapaAdminInline]
 
 
 @admin.register(Entidade)
-class EntidadeAdmin(admin.ModelAdmin):
+class EntidadeAdmin(nested_admin.NestedModelAdmin):
     list_display = ('name', 'abreviation')
     fieldsets = (
         (None, {
@@ -45,18 +81,10 @@ class DadoAdmin(OrderedModelAdmin):
             'fields': (
                 'database',
                 'schema',
-                'table',
-                'id_column',
-                'data_column',
-                'label_column',
-                'source_column',
-                'details_column',
-                'image_column',
-                'external_link_column',
-                'entity_link_type',
-                'entity_link_id_column')
+                'table')
         })
     )
+    inlines = [ColunaDadoAdminInline]
 
 
 admin.site.register(Icone)

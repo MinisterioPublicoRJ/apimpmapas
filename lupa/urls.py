@@ -1,9 +1,9 @@
 from django.urls import path
 
-from api.views import EntidadeView, DadoView
+from .views import EntidadeView, DadoView
 
 
-app_name = 'api'
+app_name = 'lupa'
 
 urlpatterns = [
     path(

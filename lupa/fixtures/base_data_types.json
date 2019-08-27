@@ -1,6 +1,6 @@
 [
     {
-        "model": "api.tipoDado",
+        "model": "lupa.tipoDado",
         "pk": 1,
         "fields":{
             "name": "texto_grande",
@@ -8,7 +8,7 @@
         }
     },
     {
-        "model": "api.tipoDado",
+        "model": "lupa.tipoDado",
         "pk": 2,
         "fields":{
             "name": "texto_pequeno",
@@ -16,7 +16,7 @@
         }
     },
     {
-        "model": "api.tipoDado",
+        "model": "lupa.tipoDado",
         "pk": 3,
         "fields":{
             "name": "texto_pequeno_destaque",
@@ -24,7 +24,7 @@
         }
     },
     {
-        "model": "api.tipoDado",
+        "model": "lupa.tipoDado",
         "pk": 4,
         "fields":{
             "name": "lista_sem_ordenacao",
@@ -32,7 +32,7 @@
         }
     },
     {
-        "model": "api.tipoDado",
+        "model": "lupa.tipoDado",
         "pk": 5,
         "fields":{
             "name": "lista_ordenada",
@@ -40,7 +40,7 @@
         }
     },
     {
-        "model": "api.tipoDado",
+        "model": "lupa.tipoDado",
         "pk": 6,
         "fields":{
             "name": "lista_filtrada",
@@ -48,7 +48,7 @@
         }
     },
     {
-        "model": "api.tipoDado",
+        "model": "lupa.tipoDado",
         "pk": 7,
         "fields":{
             "name": "lista_pessoa",
@@ -56,7 +56,7 @@
         }
     },
     {
-        "model": "api.tipoDado",
+        "model": "lupa.tipoDado",
         "pk": 8,
         "fields":{
             "name": "grafico_barra_vertical",
@@ -64,7 +64,7 @@
         }
     },
     {
-        "model": "api.tipoDado",
+        "model": "lupa.tipoDado",
         "pk": 9,
         "fields":{
             "name": "grafico_barra_horizontal",
@@ -72,7 +72,7 @@
         }
     },
     {
-        "model": "api.tipoDado",
+        "model": "lupa.tipoDado",
         "pk": 10,
         "fields":{
             "name": "grafico_barra_horizontal_agrupado",
@@ -80,7 +80,7 @@
         }
     },
     {
-        "model": "api.tipoDado",
+        "model": "lupa.tipoDado",
         "pk": 11,
         "fields":{
             "name": "grafico_linha_horizontal",
@@ -88,7 +88,7 @@
         }
     },
     {
-        "model": "api.tipoDado",
+        "model": "lupa.tipoDado",
         "pk": 12,
         "fields":{
             "name": "grafico_pizza",
