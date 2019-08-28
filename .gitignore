@@ -120,4 +120,4 @@ media/
 .directory
 
 # Scripts
-scripts/
+scripts/*
