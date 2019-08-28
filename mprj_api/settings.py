@@ -49,6 +49,7 @@ INSTALLED_APPS = [
 
     'lupa',
     'login',
+    'mprj_plus',
 ]
 
 MIDDLEWARE = [
