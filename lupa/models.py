@@ -275,7 +275,7 @@ Colunas de tipo e id de entidade vinculada precisam existir aos pares</pre>'''
 
     # CHOICES
     ID_COLUMN = 'id'
-    LABEL_COLUMN = 'label'
+    LABEL_COLUMN = 'rotulo'
     INTERNAL_ENTITY_COLUMN = 'entidade interna'
     INTERNAL_ID_COLUMN = 'id interna'
     BASE_CHOICES = [
