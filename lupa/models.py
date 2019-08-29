@@ -210,7 +210,8 @@ class Dado(OrderedModel):
         on_delete=models.SET_NULL,
         related_name="data_by_theme",
         verbose_name="tema da caixinha",
-        null=True
+        null=True,
+        blank=True
     )
 
     entity_type = models.ForeignKey(
