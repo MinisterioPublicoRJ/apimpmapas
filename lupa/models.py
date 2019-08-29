@@ -276,8 +276,8 @@ Colunas de tipo e id de entidade vinculada precisam existir aos pares</pre>'''
     # CHOICES
     ID_COLUMN = 'id'
     LABEL_COLUMN = 'rotulo'
-    INTERNAL_ENTITY_COLUMN = 'entidade interna'
-    INTERNAL_ID_COLUMN = 'id interna'
+    INTERNAL_ENTITY_COLUMN = 'entidade_interna'
+    INTERNAL_ID_COLUMN = 'id_interna'
     BASE_CHOICES = [
         BLANK,
         (ID_COLUMN, 'Coluna de ID da entidade'),
@@ -314,7 +314,7 @@ class ColunaDado(Coluna):
     DATA_COLUMN = 'data'
     SOURCE_COLUMN = 'source'
     IMAGE_COLUMN = 'image'
-    EXTERNAL_LINK_COLUMN = 'link externo'
+    EXTERNAL_LINK_COLUMN = 'link_externo'
     INFO_CHOICES = Coluna.BASE_CHOICES + [
         (DATA_COLUMN, 'Coluna de dados principais'),
         (SOURCE_COLUMN, 'Coluna de fonte dos dados'),
