@@ -11,6 +11,8 @@ DATABASE_CHOICES = [
     (BDA, 'Oracle BDA'),
 ]
 
+BLANK = ('', '--------')
+
 
 class TipoDado(models.Model):
     # CHOICES
@@ -276,6 +278,7 @@ Colunas de tipo e id de entidade vinculada precisam existir aos pares</pre>'''
     INTERNAL_ENTITY_COLUMN = 'entidade interna'
     INTERNAL_ID_COLUMN = 'id interna'
     BASE_CHOICES = [
+        BLANK,
         (ID_COLUMN, 'Coluna de ID da entidade'),
         (LABEL_COLUMN, 'Coluna de rótulo dos dados'),
         (INTERNAL_ENTITY_COLUMN, 'Coluna de tipo de entidade vinculada'),
