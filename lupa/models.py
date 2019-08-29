@@ -311,7 +311,7 @@ Colunas de tipo e id de entidade vinculada precisam existir aos pares</pre>'''
 
 class ColunaDado(Coluna):
     # CHOICES
-    DATA_COLUMN = 'data'
+    DATA_COLUMN = 'dado'
     SOURCE_COLUMN = 'source'
     IMAGE_COLUMN = 'image'
     EXTERNAL_LINK_COLUMN = 'link_externo'
