@@ -11,18 +11,8 @@ ERRORS = {
     'SVG_FILE_ABSENT': 'É necessário prover um ícone no formato SVG',
     'NOT_SVG': 'O arquivo submetido não é um SVG',
     'BLANK_FIELD': 'O campo não deve estar em branco',
-<<<<<<< HEAD
-<<<<<<< HEAD
     'NOT_COLOR': 'O campo deve conter uma string de cor válida no '
                  'formato #FFFFFF'
-=======
-    'NOT_COLOR': 'O campo deve conter uma string de cor válida no formato #FFFFFF'
->>>>>>> Mprj + funcional
-=======
-    'NOT_COLOR': 'O campo deve conter uma string de cor válida no '
-                 'formato #FFFFFF'
->>>>>>> Correção de flake8
-}
 
 
 class IconeForm(forms.ModelForm):

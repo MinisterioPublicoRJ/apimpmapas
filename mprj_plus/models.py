@@ -14,15 +14,7 @@ class Icone(models.Model):
 
 
 class Area(models.Model):
-<<<<<<< HEAD
-<<<<<<< HEAD
-    nome = models.CharField(max_length=255)
-=======
     nome = models.CharField(max_length=255) 
->>>>>>> Mprj + funcional
-=======
-    nome = models.CharField(max_length=255)
->>>>>>> Correção de flake8
     cor = ColorField(default='#FF0000')
     icone = models.ForeignKey(
         Icone,
