@@ -19,6 +19,7 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', include('login.urls', namespace='login')),
-    path('lupa/', include('lupa.urls', namespace='lupa')),
     path('nested_admin/', include('nested_admin.urls')),
+    path('mpplus/', include('mprj_plus.urls')),
+    path('lupa/', include('lupa.urls', namespace='lupa')),
 ]
