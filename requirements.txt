@@ -10,7 +10,6 @@ impyla
 django-ordered-model
 gunicorn==19.9.0
 Markdown
-psycopg2
 psycopg2-binary
 pyjwt
 python-decouple
