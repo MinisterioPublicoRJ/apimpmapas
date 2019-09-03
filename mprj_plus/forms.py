@@ -14,6 +14,7 @@ ERRORS = {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     'NOT_COLOR': 'O campo deve conter uma string de cor válida no '
                  'formato #FFFFFF'
 =======
@@ -26,6 +27,10 @@ ERRORS = {
 =======
     'NOT_COLOR': 'O campo deve conter uma string de cor válida no formato #FFFFFF'
 >>>>>>> Mprj + funcional
+=======
+    'NOT_COLOR': 'O campo deve conter uma string de cor válida no '
+                 'formato #FFFFFF'
+>>>>>>> Correção de flake8
 }
 
 
