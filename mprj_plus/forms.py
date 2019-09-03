@@ -13,6 +13,7 @@ ERRORS = {
     'BLANK_FIELD': 'O campo não deve estar em branco',
     'NOT_COLOR': 'O campo deve conter uma string de cor válida no '
                  'formato #FFFFFF'
+}
 
 
 class IconeForm(forms.ModelForm):
