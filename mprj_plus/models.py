@@ -19,6 +19,7 @@ class Area(models.Model):
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> Mprj + funcional
     nome = models.CharField(max_length=255)
@@ -27,6 +28,8 @@ class Area(models.Model):
 >>>>>>> Mprj + funcional
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> Correção de flake8
     nome = models.CharField(max_length=255)
 >>>>>>> Correção de flake8
 =======
@@ -35,8 +38,11 @@ class Area(models.Model):
 =======
     nome = models.CharField(max_length=255)
 >>>>>>> Correção de flake8
+<<<<<<< HEAD
 =======
 >>>>>>> Mprj + funcional
+=======
+>>>>>>> Correção de flake8
     cor = ColorField(default='#FF0000')
     icone = models.ForeignKey(
         Icone,
