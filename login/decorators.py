@@ -19,10 +19,8 @@ def auth_required(func):
                 config('SECRET_KEY'),
                 algorithms=["HS256"]
             )
-            print(token)
+            return func(*args, **kwargs)
         except (InvalidSignatureError, DecodeError):
             return Response({}, status=403)
-
-        return func(*args, **kwargs)
 
     return inner_func
