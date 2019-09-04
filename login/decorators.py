@@ -14,11 +14,12 @@ def auth_required(func):
         token = request.GET.get('auth_token')
 
         try:
-            jwt.decode(
+            token = jwt.decode(
                 token,
                 config('SECRET_KEY'),
                 algorithms=["HS256"]
             )
+            print(token)
         except (InvalidSignatureError, DecodeError):
             return Response({}, status=403)
 

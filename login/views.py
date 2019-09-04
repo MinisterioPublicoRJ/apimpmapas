@@ -16,9 +16,11 @@ class LoginView(APIView):
 
         sca_response = authenticate(username, password)
 
-        if sca_response == 200:
+        if sca_response['logged_in']:
+            print(sca_response)
             payload = {
-                'uid': username
+                'uid': username,
+                'permissions': sca_response['permissions']
             }
             secret = config('SECRET_KEY')
             token = jwt.encode(payload, secret, algorithm="HS256")
