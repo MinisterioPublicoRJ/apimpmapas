@@ -19,5 +19,12 @@ def authenticate(username, password):
             'ROLE_mp_plus_admin' in permissions
             and permissions['ROLE_mp_plus_admin']
         ):
-            return 200
-    return 403
+            permission_list = []
+            for permission, status in permissions.items():
+                if status:
+                    permission_list.append(permission)
+            return {
+                'logged_in': True,
+                'permissions': permission_list
+            }
+    return {'logged_in': False}
