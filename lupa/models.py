@@ -80,6 +80,32 @@ class TemaDado(models.Model):
             return self.name
 
 
+class Grupo(models.Model):
+    # DATABASE FIELDS
+    name = models.CharField(
+        verbose_name='nome do grupo',
+        max_length=50
+    )
+
+    role = models.CharField(
+        verbose_name='role no SCA',
+        max_length=100
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
+
+    # META CLASS
+    class Meta:
+        verbose_name = 'grupo de usuários'
+        verbose_name_plural = 'grupos de usuários'
+
+    # TO STRING METHOD
+    def __str__(self):
+        if self:
+            return self.name
+
+
 class Icone(models.Model):
     # DATABASE FIELDS
     name = models.CharField(
@@ -226,6 +252,14 @@ class Dado(OrderedModel):
         max_length=3,
         choices=DATABASE_CHOICES,
         default=POSTGRES,
+    )
+
+    roles_allowed = models.ManyToManyField(
+        Grupo,
+        related_name="data_allowed",
+        verbose_name="grupos com acesso",
+        blank=True,
+        help_text='Deixar em branco para todos',
     )
 
     icon = models.ForeignKey(

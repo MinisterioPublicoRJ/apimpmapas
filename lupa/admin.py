@@ -7,6 +7,7 @@ from .models import (
     Dado,
     Icone,
     Entidade,
+    Grupo,
     Mapa,
     TipoDado,
     TemaDado,
@@ -75,19 +76,22 @@ class DadoAdmin(OrderedModelAdmin):
                 'data_type',
                 'entity_type',
                 'theme',
-                'icon'
+                'icon',
+                'roles_allowed'
             )
         }),
         ('Dados exibidos', {
             'fields': (
                 'database',
                 'schema',
-                'table')
+                'table'
+            )
         })
     )
     inlines = [ColunaDadoAdminInline]
 
 
 admin.site.register(Icone)
+admin.site.register(Grupo)
 admin.site.register(TipoDado)
 admin.site.register(TemaDado)
