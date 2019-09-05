@@ -5,6 +5,7 @@ from rest_framework.response import Response
 
 from .models import Entidade, Dado
 from .serializers import EntidadeSerializer, DadoSerializer
+from login.decorators import auth_required
 
 
 class EntidadeView(GenericAPIView):
@@ -27,6 +28,7 @@ class DadoView(RetrieveAPIView):
     serializer_class = DadoSerializer
     queryset = Dado.objects.all()
 
+    @auth_required
     def get(self, request, *args, **kwargs):
         obj = get_object_or_404(
             self.queryset,
