@@ -41,7 +41,8 @@ class PostgresAccess(CommonSetup):
         _pg_connect.assert_called_once_with(
             host=config('PG_HOST'),
             dbname=config('PG_BASE'),
-            user=config('PG_USER')
+            user=config('PG_USER'),
+            password=''
         )
 
     def test_generate_query_postgres(self):
