@@ -61,7 +61,8 @@ def postgres_access(query, domain_id):
     with pg_connect(
         host=config('PG_HOST'),
         dbname=config('PG_BASE'),
-        user=config('PG_USER')
+        user=config('PG_USER'),
+        password=config('PG_PASSWORD', "")
     ) as conn:
         with conn.cursor() as curs:
             try:
