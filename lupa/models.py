@@ -315,11 +315,13 @@ class ColunaDado(Coluna):
     SOURCE_COLUMN = 'source'
     IMAGE_COLUMN = 'image'
     EXTERNAL_LINK_COLUMN = 'link_externo'
+    TITLE_SUFFIX_COLUMN = 'sufixo_titulo'
     INFO_CHOICES = Coluna.BASE_CHOICES + [
         (DATA_COLUMN, 'Coluna de dados principais'),
         (SOURCE_COLUMN, 'Coluna de fonte dos dados'),
         (IMAGE_COLUMN, 'Coluna de imagem'),
         (EXTERNAL_LINK_COLUMN, 'Coluna de link externo'),
+        (TITLE_SUFFIX_COLUMN, 'Coluna de sufixo no titulo'),
     ]
 
     dado = models.ForeignKey(
