@@ -1,9 +1,10 @@
 from unittest import mock
 
+from decouple import config
 from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
-
+import jwt
 from model_mommy.mommy import make
 
 from lupa.exceptions import QueryError
@@ -278,3 +279,92 @@ class DetailDadosViewTest(TestCase):
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 404)
+
+
+class AuthDadosViewTest(TestCase):
+
+    def setUp(self):
+        self.role_allowed = 'role_allowed'
+        self.role_forbidden = 'role_not_allowed'
+        self.entity_abrv = 'ENT'
+        self.entity_id = 1
+        self.data_id = 1
+        self.dado_title = 'dado_teste'
+        self.external_data = 'dado'
+        self.data_type = 'texto_pequeno_destaque'
+
+        self.data_type_obj = make(
+            'lupa.TipoDado',
+            name=self.data_type,
+            serialization='Singleton'
+        )
+        self.entidade = make(
+            'lupa.Entidade',
+            id=self.entity_id,
+            abreviation=self.entity_abrv
+        )
+        self.grupo_allowed = make(
+            'lupa.Grupo',
+            role=self.role_allowed
+        )
+        self.dado = make(
+            'lupa.Dado',
+            title=self.dado_title,
+            roles_allowed=[self.grupo_allowed],
+            id=self.data_id,
+            entity_type=self.entidade,
+            data_type=self.data_type_obj,
+            make_m2m=True
+        )
+        make('lupa.ColunaDado', info_type='id', name='identi', dado=self.dado)
+        make('lupa.ColunaDado', info_type='dado', name='data', dado=self.dado)
+
+    @mock.patch('lupa.serializers.execute')
+    def test_dado_permission_ok(self, _execute):
+        payload = {'permissions': [self.role_allowed]}
+        token = jwt.encode(payload, config('SECRET_KEY'), algorithm="HS256")
+
+        _execute.return_value = [(
+            self.external_data,
+            self.data_id
+        )]
+
+        url = reverse(
+            'lupa:detail_dado',
+            args=(self.entity_abrv, self.entity_id, self.data_id)
+        )
+        resp = self.client.get(url, {'auth_token': token})
+        resp_json = resp.json()
+
+        expected_response = {
+            'id': self.data_id,
+            'icon': None,
+            'exibition_field': None,
+            'data_type': self.data_type,
+            'external_data': {
+                'dado': self.external_data,
+                'id': self.data_id
+            }
+        }
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp_json, expected_response)
+
+    def test_dado_missing_token(self):
+        url = reverse(
+            'lupa:detail_dado',
+            args=(self.entity_abrv, self.entity_id, self.data_id)
+        )
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 403)
+
+    def test_dado_permission_failed(self):
+        payload = {'permissions': [self.role_forbidden]}
+        token = jwt.encode(payload, config('SECRET_KEY'), algorithm="HS256")
+
+        url = reverse(
+            'lupa:detail_dado',
+            args=(self.entity_abrv, self.entity_id, self.data_id)
+        )
+        resp = self.client.get(url, {'auth_token': token})
+        self.assertEqual(resp.status_code, 403)
