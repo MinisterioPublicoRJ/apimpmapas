@@ -16,6 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+admin.AdminSite.site_header = 'Painel administrativo MP em Mapas'
+admin.AdminSite.index_title = 'Administração das APIs do MP em Mapas'
+admin.AdminSite.site_title = 'MPRJ'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', include('login.urls', namespace='login')),
