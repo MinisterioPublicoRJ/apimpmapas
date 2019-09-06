@@ -71,6 +71,7 @@ class DadoAdmin(OrderedModelAdmin):
         (None, {
             'fields': (
                 'title',
+                'exibition_field',
                 'data_type',
                 'entity_type',
                 'theme',
