@@ -5,7 +5,6 @@ from decouple import config
 from django.test import TestCase
 from django.urls import reverse
 
-from login.decorators import auth_required
 from login.sca import authenticate
 
 
@@ -111,44 +110,5 @@ class LoginTest(TestCase):
                 'password': 'senhaqq',
             }
         )
-
-        self.assertEqual(resp.status_code, 403)
-
-
-class JWTDecoratorTest(TestCase):
-
-    def test_valid_token(self):
-        token = {'auth_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.'
-                 'eyJ1aWQiOiJkZXZlbG9wZXIiLCJwZXJtaXNzaW9ucyI6WyJkYV9kZXZfUk9MRSJdfQ.'
-                 'I-OyqA4YXmvatNyG2-1W6cLUUN5zyHgoWVNdTtWnCjw'
-                 }
-        mock_request = mock.MagicMock()
-        mock_request.GET.get.return_value = token['auth_token']
-
-        def mock_config(*args, **kwargs):
-            if args[0] == 'SECRET_KEY':
-                return 'sfdfsdf'
-
-        @auth_required
-        def mock_view(*args, **kwargs):
-            return True
-
-        with mock.patch('login.decorators.config', side_effect=mock_config):
-            resp = mock_view('args1', mock_request)
-
-        self.assertEqual(resp, True)
-
-    def test_invalid_token(self):
-        token = {'auth_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.'
-                 'c3RldmFuI.SSpuJdvxa3'
-                 }
-        mock_request = mock.MagicMock()
-        mock_request.GET.return_value = token
-
-        @auth_required
-        def mock_view(*args, **kwargs):
-            return True
-
-        resp = mock_view('args1', mock_request)
 
         self.assertEqual(resp.status_code, 403)

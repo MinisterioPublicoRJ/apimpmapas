@@ -31,3 +31,8 @@ class TestStringRepresentation(TestCase):
         obj = make('lupa.TemaDado', name='teste_nome')
 
         self.assertEqual(obj.__str__(), 'teste_nome')
+
+    def test_string_grupo(self):
+        obj = make('lupa.Grupo', name='teste_nome')
+
+        self.assertEqual(obj.__str__(), 'teste_nome')
