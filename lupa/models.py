@@ -63,7 +63,7 @@ class TemaDado(models.Model):
 
     color = ColorField(
         verbose_name='cor das caixinhas',
-        default='#FFFFFF'
+        default='#000000'
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
