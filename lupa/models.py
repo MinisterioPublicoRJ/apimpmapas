@@ -63,7 +63,7 @@ class TemaDado(models.Model):
 
     color = ColorField(
         verbose_name='cor das caixinhas',
-        default='#FFFFFF'
+        default='#000000'
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -73,6 +73,32 @@ class TemaDado(models.Model):
     class Meta:
         verbose_name = 'tema de dados'
         verbose_name_plural = 'temas de dados'
+
+    # TO STRING METHOD
+    def __str__(self):
+        if self:
+            return self.name
+
+
+class Grupo(models.Model):
+    # DATABASE FIELDS
+    name = models.CharField(
+        verbose_name='nome do grupo',
+        max_length=50
+    )
+
+    role = models.CharField(
+        verbose_name='role no SCA',
+        max_length=100
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
+
+    # META CLASS
+    class Meta:
+        verbose_name = 'grupo de usuários'
+        verbose_name_plural = 'grupos de usuários'
 
     # TO STRING METHOD
     def __str__(self):
@@ -115,6 +141,14 @@ class Entidade(models.Model):
     abreviation = models.CharField(
         verbose_name='abreviação da entidade',
         max_length=5
+    )
+
+    roles_allowed = models.ManyToManyField(
+        Grupo,
+        related_name="entity_allowed",
+        verbose_name="grupos com acesso",
+        blank=True,
+        help_text='Deixar em branco para todos',
     )
 
     database = models.CharField(
@@ -228,6 +262,14 @@ class Dado(OrderedModel):
         default=POSTGRES,
     )
 
+    roles_allowed = models.ManyToManyField(
+        Grupo,
+        related_name="data_allowed",
+        verbose_name="grupos com acesso",
+        blank=True,
+        help_text='Deixar em branco para todos',
+    )
+
     icon = models.ForeignKey(
         Icone,
         null=True,
@@ -313,13 +355,17 @@ class ColunaDado(Coluna):
     # CHOICES
     DATA_COLUMN = 'dado'
     SOURCE_COLUMN = 'source'
-    IMAGE_COLUMN = 'image'
+    IMAGE_COLUMN = 'imagem'
     EXTERNAL_LINK_COLUMN = 'link_externo'
+    TITLE_SUFFIX_COLUMN = 'sufixo_titulo'
+    DETAIL_COLUMN = 'details'
     INFO_CHOICES = Coluna.BASE_CHOICES + [
         (DATA_COLUMN, 'Coluna de dados principais'),
         (SOURCE_COLUMN, 'Coluna de fonte dos dados'),
         (IMAGE_COLUMN, 'Coluna de imagem'),
         (EXTERNAL_LINK_COLUMN, 'Coluna de link externo'),
+        (TITLE_SUFFIX_COLUMN, 'Coluna de sufixo no titulo'),
+        (DETAIL_COLUMN, 'Detalhes')
     ]
 
     dado = models.ForeignKey(

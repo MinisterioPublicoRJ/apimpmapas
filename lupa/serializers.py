@@ -181,7 +181,8 @@ class EntidadeSerializer(serializers.ModelSerializer):
             data_id = {}
             data_id['id'] = data['id']
             theme['data_list'].append(data_id)
-        theme_list.append(theme)
+        if theme:
+            theme_list.append(theme)
 
         return theme_list
 

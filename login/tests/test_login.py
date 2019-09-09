@@ -5,7 +5,6 @@ from decouple import config
 from django.test import TestCase
 from django.urls import reverse
 
-from login.decorators import auth_required
 from login.sca import authenticate
 
 
@@ -13,9 +12,13 @@ class ScaTest(TestCase):
     def setUp(self):
         self.username = 'usuario'
         self.password = 'senha'
-        self.return_ok = 200
-        self.return_forbidden = 403
+        self.return_ok = {
+            'logged_in': True,
+            'permissions': [config('LOGIN_ROLE')]
+        }
+        self.return_forbidden = {'logged_in': False}
         self.return_teapot = 418
+        self.code_ok = 200
         self.permission_ok = {'permissions': {config('LOGIN_ROLE'): True}}
         self.permission_bad = {'permissions': {'ROLE_anyotherrole': True}}
 
@@ -24,7 +27,7 @@ class ScaTest(TestCase):
         respwrapper = namedtuple('Response', ['auth', 'info'])
         mock_auth = mock.MagicMock()
         mock_info = mock.MagicMock()
-        mock_auth.status_code = self.return_ok
+        mock_auth.status_code = self.code_ok
         mock_info.json.return_value = self.permission_ok
         _login.return_value = respwrapper(mock_auth, mock_info)
 
@@ -81,7 +84,7 @@ class LoginTest(TestCase):
     @mock.patch('login.views.jwt')
     @mock.patch('login.views.authenticate')
     def test_login_user(self, _auth, _jwt):
-        _auth.return_value = 200
+        _auth.return_value = {'logged_in': True, 'permissions': ['test_ROLE']}
         _jwt.encode.return_value = 'eyJ0eXAiOi'
 
         url = reverse('login:login')
@@ -98,7 +101,7 @@ class LoginTest(TestCase):
 
     @mock.patch('login.views.authenticate')
     def test_login_sca_failed(self, _auth):
-        _auth.return_value = 403
+        _auth.return_value = {'logged_in': False}
         url = reverse('login:login')
         resp = self.client.post(
             url,
@@ -107,44 +110,5 @@ class LoginTest(TestCase):
                 'password': 'senhaqq',
             }
         )
-
-        self.assertEqual(resp.status_code, 403)
-
-
-class JWTDecoratorTest(TestCase):
-
-    def test_valid_token(self):
-        token = {'auth_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.'
-                 'eyJ1aWQiOiJFc3RldmFuIn0.'
-                 'QsoGOa0S89KYUUpuwQ-QPq9cSSpuJdvxa3zYBeWcN1o'
-                 }
-        mock_request = mock.MagicMock()
-        mock_request.GET.get.return_value = token['auth_token']
-
-        def mock_config(*args, **kwargs):
-            if args[0] == 'SECRET_KEY':
-                return 'sfdfsdf'
-
-        @auth_required
-        def mock_view(*args, **kwargs):
-            return True
-
-        with mock.patch('login.decorators.config', side_effect=mock_config):
-            resp = mock_view('args1', mock_request)
-
-        self.assertEqual(resp, True)
-
-    def test_invalid_token(self):
-        token = {'auth_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.'
-                 'c3RldmFuI.SSpuJdvxa3'
-                 }
-        mock_request = mock.MagicMock()
-        mock_request.GET.return_value = token
-
-        @auth_required
-        def mock_view(*args, **kwargs):
-            return True
-
-        resp = mock_view('args1', mock_request)
 
         self.assertEqual(resp.status_code, 403)
