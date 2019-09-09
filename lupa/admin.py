@@ -7,6 +7,7 @@ from .models import (
     Dado,
     Icone,
     Entidade,
+    Grupo,
     Mapa,
     TipoDado,
     TemaDado,
@@ -49,7 +50,7 @@ class EntidadeAdmin(nested_admin.NestedModelAdmin):
     list_display = ('name', 'abreviation')
     fieldsets = (
         (None, {
-            'fields': ('name', 'abreviation')
+            'fields': ('name', 'abreviation', 'roles_allowed')
         }),
         ('Dados principais', {
             'fields': (
@@ -60,6 +61,7 @@ class EntidadeAdmin(nested_admin.NestedModelAdmin):
                 'name_column')
         })
     )
+    filter_horizontal = ('roles_allowed', )
     inlines = [MapaAdminInline]
 
 
@@ -76,19 +78,23 @@ class DadoAdmin(OrderedModelAdmin):
                 'entity_type',
                 'theme',
                 'icon',
-                'limit_fetch'
+                'limit_fetch',
+                'roles_allowed'
             )
         }),
         ('Dados exibidos', {
             'fields': (
                 'database',
                 'schema',
-                'table')
+                'table'
+            )
         })
     )
+    filter_horizontal = ('roles_allowed', )
     inlines = [ColunaDadoAdminInline]
 
 
 admin.site.register(Icone)
+admin.site.register(Grupo)
 admin.site.register(TipoDado)
 admin.site.register(TemaDado)
