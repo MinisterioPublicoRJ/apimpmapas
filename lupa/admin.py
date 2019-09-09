@@ -78,6 +78,7 @@ class DadoAdmin(OrderedModelAdmin):
                 'entity_type',
                 'theme',
                 'icon',
+                'limit_fetch',
                 'roles_allowed'
             )
         }),
