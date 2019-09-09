@@ -143,6 +143,14 @@ class Entidade(models.Model):
         max_length=5
     )
 
+    roles_allowed = models.ManyToManyField(
+        Grupo,
+        related_name="entity_allowed",
+        verbose_name="grupos com acesso",
+        blank=True,
+        help_text='Deixar em branco para todos',
+    )
+
     database = models.CharField(
         verbose_name='banco de dados',
         max_length=3,

@@ -100,6 +100,73 @@ class EntidadeViewTest(TestCase):
         self.assertEqual(resp.status_code, 404)
 
 
+class AuthEntidadeViewTest(TestCase):
+
+    def setUp(self):
+        self.role_allowed = 'role_allowed'
+        self.role_forbidden = 'role_not_allowed'
+        self.entity_abrv = 'EST'
+        self.entity_type = 'Estado'
+        self.entity_name = 'Rio de Janeiro'
+        self.entity_id = '1'
+
+        self.grupo_allowed = make(
+            'lupa.Grupo',
+            role=self.role_allowed
+        )
+        self.entidade = make(
+            'lupa.Entidade',
+            id=self.entity_id,
+            roles_allowed=[self.grupo_allowed],
+            name=self.entity_type,
+            abreviation=self.entity_abrv
+        )
+
+    @mock.patch('lupa.serializers.execute')
+    def test_entidade_permission_ok(self, _execute):
+        payload = {'permissions': [self.role_allowed]}
+        token = jwt.encode(payload, config('SECRET_KEY'), algorithm="HS256")
+
+        _execute.return_value = [(self.entity_name, 'mock_geo')]
+
+        url = reverse(
+            'lupa:detail_entidade',
+            args=(self.entity_abrv, self.entity_id)
+        )
+        resp = self.client.get(url, {'auth_token': token})
+        resp_json = resp.json()
+
+        expected_response = {
+            'domain_id': self.entity_id,
+            'entity_type': self.entity_type,
+            'exibition_field': self.entity_name,
+            'geojson': None,
+            'theme_list': []
+        }
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp_json, expected_response)
+
+    def test_entidade_missing_token(self):
+        url = reverse(
+            'lupa:detail_entidade',
+            args=(self.entity_abrv, self.entity_id)
+        )
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 403)
+
+    def test_entidade_permission_failed(self):
+        payload = {'permissions': [self.role_forbidden]}
+        token = jwt.encode(payload, config('SECRET_KEY'), algorithm="HS256")
+
+        url = reverse(
+            'lupa:detail_entidade',
+            args=(self.entity_abrv, self.entity_id)
+        )
+        resp = self.client.get(url, {'auth_token': token})
+        self.assertEqual(resp.status_code, 403)
+
+
 class ListDadosViewTest(TestCase):
 
     @mock.patch('lupa.serializers.execute')

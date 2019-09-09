@@ -20,6 +20,22 @@ class EntidadeView(GenericAPIView):
             abreviation=self.kwargs['entity_type']
         )
 
+        roles = obj.roles_allowed.all().values_list('role', flat=True)
+        if roles:
+            token = request.GET.get('auth_token')
+            try:
+                payload = jwt.decode(
+                    token,
+                    config('SECRET_KEY'),
+                    algorithms=["HS256"]
+                )
+            except (InvalidSignatureError, DecodeError):
+                return Response({}, status=403)
+            permissions = payload['permissions']
+            allowed = [role for role in roles if role in permissions]
+            if not allowed:
+                return Response({}, status=403)
+
         data = EntidadeSerializer(obj, domain_id=self.kwargs['domain_id']).data
         if not data['exibition_field']:
             raise Http404

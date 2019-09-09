@@ -50,7 +50,7 @@ class EntidadeAdmin(nested_admin.NestedModelAdmin):
     list_display = ('name', 'abreviation')
     fieldsets = (
         (None, {
-            'fields': ('name', 'abreviation')
+            'fields': ('name', 'abreviation', 'roles_allowed')
         }),
         ('Dados principais', {
             'fields': (
