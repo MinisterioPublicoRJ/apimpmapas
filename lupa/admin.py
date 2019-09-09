@@ -75,7 +75,8 @@ class DadoAdmin(OrderedModelAdmin):
                 'data_type',
                 'entity_type',
                 'theme',
-                'icon'
+                'icon',
+                'limit_fetch'
             )
         }),
         ('Dados exibidos', {
