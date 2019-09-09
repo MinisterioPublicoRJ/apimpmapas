@@ -61,6 +61,7 @@ class EntidadeAdmin(nested_admin.NestedModelAdmin):
                 'name_column')
         })
     )
+    filter_horizontal = ('roles_allowed', )
     inlines = [MapaAdminInline]
 
 
@@ -88,6 +89,7 @@ class DadoAdmin(OrderedModelAdmin):
             )
         })
     )
+    filter_horizontal = ('roles_allowed', )
     inlines = [ColunaDadoAdminInline]
 
 
