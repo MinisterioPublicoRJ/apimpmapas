@@ -1,10 +1,7 @@
 import responses
 
 from django.test import TestCase
-from lupa.osmapi import (
-    OsmQuery,
-    OSM_APY
-)
+from lupa import osmapi
 from unittest import mock
 from .fixtures.osmapi import twoinoneout
 
@@ -23,27 +20,27 @@ class TestQuery(TestCase):
             json=qjson
         )
 
-        response = OsmQuery.objects._query("ilha do governador")
+        response = osmapi._query("ilha do governador")
 
         self.assertEqual(response, qjson)
         self.assertEqual(
             responses.calls[0].request.url,
-            OSM_APY + "?q=ilha+do+governador"
+            osmapi.OSM_APY + "?q=ilha+do+governador"
         )
 
     def test_filter(self):
         self.assertEqual(
             len(
-                OsmQuery.objects._filter_response(
+                osmapi._filter_response(
                     twoinoneout["features"]
                 )
             ),
             2
         )
 
-    @mock.patch.object(OsmQuery.objects, '_query', return_value=twoinoneout)
+    @mock.patch('lupa.osmapi._query', return_value=twoinoneout)
     def test_query_final(self, _query):
-        querys = OsmQuery.objects.query("ilha do governador")
+        querys = osmapi.query("ilha do governador")
 
         _query.assert_called_with("ilha do governador")
 

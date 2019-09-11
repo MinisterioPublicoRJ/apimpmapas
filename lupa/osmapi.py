@@ -13,39 +13,27 @@ MIN_LON = -23.3668677850202
 MAX_LON = -20.7649623309468
 
 
-class QueryController:
-    def _query(self, terms):
-        basereq = BASE_PROPS.copy()
-        basereq['q'] = terms
+def _query(terms):
+    basereq = BASE_PROPS.copy()
+    basereq['q'] = terms
 
-        basereq = urllib.parse.urlencode(basereq)
+    basereq = urllib.parse.urlencode(basereq)
 
-        response = requests.get(OSM_APY + "?" + basereq)
+    response = requests.get(OSM_APY + "?" + basereq)
 
-        return response.json()
+    return response.json()
 
-    def _filter_response(self, features):
-        def filter_bbox(feature):
-            coords = feature['geometry']['coordinates']
-            return MIN_LAT <= coords[0] <= MAX_LAT and\
-                MIN_LON <= coords[1] <= MAX_LON
+def _filter_response(features):
+    def filter_bbox(feature):
+        coords = feature['geometry']['coordinates']
+        return MIN_LAT <= coords[0] <= MAX_LAT and\
+            MIN_LON <= coords[1] <= MAX_LON
 
-        return list(filter(filter_bbox, features))
+    return list(filter(filter_bbox, features))
 
-    def query(self, terms):
-        return [
-            OsmQuery(item)
-            for item in
-            self._filter_response(
-                self._query(
-                    terms
-                )["features"]
-            )
-        ]
-
-
-class OsmQuery:
-    objects = QueryController()
-
-    def __init__(self, feature):
-        self.feature = feature
+def query(terms):
+    return _filter_response(
+        _query(
+            terms
+        )["features"]
+    )
