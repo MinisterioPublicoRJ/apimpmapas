@@ -3,6 +3,9 @@
  - Inclusão da API do MPRJ Digital no sistema
  - Controle de alterações por meio de CHANGELOG
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Migrações e configurações de teste para o MPRJ+
  - Configurações diferenciadas para teste
 ## [1.1.0] - 2019-09-09
 ### Added
@@ -25,8 +28,11 @@
  - BUGFIX - Configurações de CORS
 ### Removed
  - Removido pacote não binário do psycopg2 - acesso concentrado no binário
+<<<<<<< HEAD
 =======
 >>>>>>> Adição de Changelog
+=======
+>>>>>>> Migrações e configurações de teste para o MPRJ+
 ## [1.0.1] - 2019-08-29
 ### Added
  - BUGFIX - Permitido tema em branco no painel administrativo
