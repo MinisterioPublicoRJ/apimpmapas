@@ -3,11 +3,16 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 import jwt
 from jwt.exceptions import InvalidSignatureError, DecodeError
-from rest_framework.generics import GenericAPIView, RetrieveAPIView
+from rest_framework.generics import (
+    GenericAPIView,
+    RetrieveAPIView,
+    ListAPIView
+)
 from rest_framework.response import Response
 
 from .models import Entidade, Dado
 from .serializers import EntidadeSerializer, DadoSerializer
+from .osmapi import query as osmquery
 
 
 class EntidadeView(GenericAPIView):
@@ -73,3 +78,10 @@ class DadoView(RetrieveAPIView):
         if not data['external_data']:
             raise Http404
         return Response(data)
+
+
+class OsmQueryView(ListAPIView):
+    queryset = []
+
+    def get(self, request, *args, **kwargs):
+        return Response(osmquery(self.kwargs['terms']))
