@@ -6,8 +6,11 @@ from django.test import TestCase
 from django.urls import reverse
 import jwt
 from model_mommy.mommy import make
+import responses
 
 from lupa.exceptions import QueryError
+from lupa import osmapi
+from .fixtures.osmapi import default_response
 
 
 class EntidadeViewTest(TestCase):
@@ -435,3 +438,39 @@ class AuthDadosViewTest(TestCase):
         )
         resp = self.client.get(url, {'auth_token': token})
         self.assertEqual(resp.status_code, 403)
+
+
+class OsmQueryViewTest(TestCase):
+
+    @responses.activate
+    def test_query_return(self):
+        responses.add(
+            "GET",
+            osmapi.OSM_APY,
+            json=default_response
+        )
+        url = reverse(
+            'lupa:mapsearch',
+            args=('tijuca',)
+        )
+
+        resp = self.client.get(url).json()
+        self.assertEqual(len(resp), 3)
+
+    @responses.activate
+    @mock.patch('lupa.views.osmquery', return_value=[])
+    def test_query_correct_parameter(self, _query):
+        parameters = 'tijuquistão do norte  xablauzinho'
+        responses.add(
+            "GET",
+            osmapi.OSM_APY,
+            json=default_response
+        )
+        url = reverse(
+            'lupa:mapsearch',
+            args=(parameters,)
+        )
+
+        self.client.get(url).json()
+
+        _query.assert_called_once_with(parameters)

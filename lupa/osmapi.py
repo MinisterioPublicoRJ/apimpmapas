@@ -23,6 +23,7 @@ def _query(terms):
 
     return response.json()
 
+
 def _filter_response(features):
     def filter_bbox(feature):
         coords = feature['geometry']['coordinates']
@@ -30,6 +31,7 @@ def _filter_response(features):
             MIN_LON <= coords[1] <= MAX_LON
 
     return list(filter(filter_bbox, features))
+
 
 def query(terms):
     return _filter_response(

@@ -16,7 +16,7 @@ class TestQuery(TestCase):
 
         responses.add(
             "GET",
-            "http://photon.komoot.de/api/",
+            osmapi.OSM_APY,
             json=qjson
         )
 
