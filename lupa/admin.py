@@ -58,7 +58,11 @@ class EntidadeAdmin(nested_admin.NestedModelAdmin):
                 'schema',
                 'table',
                 'id_column',
-                'name_column')
+                'name_column',
+                'geojson_column',
+                'osm_value_attached',
+                'osm_default_level'
+            )
         })
     )
     filter_horizontal = ('roles_allowed', )
