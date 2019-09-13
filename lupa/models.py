@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from colorfield.fields import ColorField
 from ordered_model.models import OrderedModel
@@ -12,6 +13,29 @@ DATABASE_CHOICES = [
 ]
 
 BLANK = ('', '--------')
+
+SUBURB = 'suburb'
+MUNICIPALITY = 'municipality'
+OSM_VALUES_CHOICES = (
+    (SUBURB, 'Bairro'),
+    (MUNICIPALITY, 'Município')
+)
+
+HAS_OSM_VALUE = 'A Entidade %s já possui a propriedade %s'
+HAS_OSM_DEFAULT = (
+    'A Entidade %s já responde pela '
+    'busca padrão de geolocalização')
+MANDATORY_OSM_PARAMETERS = (
+    'Para informar parâmetros de busca OSM é necessário '
+    'informar a Coluna de Dados GEOJSON'
+)
+MANDATORY_GEOJSON_COLUMN = (
+    'Para informar coluna GEOJSON é necessário informar '
+    'corretamente os parâmetros OSM'
+)
+ONLY_POSTGIS_SUPORTED = (
+    'Apenas a engine PostgreSQL Opengeo suporta busca geolocalizada'
+)
 
 
 class TipoDado(models.Model):
@@ -177,6 +201,77 @@ class Entidade(models.Model):
         verbose_name='coluna de nome da entidade',
         max_length=200
     )
+
+    geojson_column = models.CharField(
+        verbose_name='coluna de dados GEOJSON da entidade',
+        max_length=200,
+        null=True,
+        blank=True
+    )
+
+    osm_value_attached = models.CharField(
+        verbose_name='TAG osm_values atrelada',
+        max_length=50,
+        null=True,
+        blank=True,
+        choices=OSM_VALUES_CHOICES
+    )
+
+    osm_default_level = models.BooleanField(
+        verbose_name='busca de geolocalização padrão',
+        default=False
+    )
+
+    def clean(self):
+        errors = {}
+
+        if not self.geojson_column and (
+                    self.osm_value_attached or self.osm_default_level
+                ):
+            errors['geojson_column'] = ValidationError(
+                MANDATORY_OSM_PARAMETERS,
+                code="invalid"
+            )
+
+        if self.geojson_column and not (
+                    self.osm_value_attached or self.osm_default_level
+                ):
+            errors['geojson_column'] = ValidationError(
+                MANDATORY_GEOJSON_COLUMN,
+                code="invalid"
+            )
+
+        if self.osm_value_attached:
+            pc = Entidade.objects.filter(
+                osm_value_attached=self.osm_value_attached
+            ).first()
+            if pc:
+                errors['osm_value_attached'] = ValidationError(
+                    HAS_OSM_VALUE % (
+                        pc.name,
+                        dict(OSM_VALUES_CHOICES)[pc.osm_value_attached]
+                    ),
+                    code="invalid"
+                )
+
+        if self.osm_default_level:
+            pc = Entidade.objects.filter(
+                osm_default_level=True
+            ).first()
+            if pc:
+                errors['osm_default_level'] = ValidationError(
+                    HAS_OSM_DEFAULT % pc.name,
+                    code="invalid"
+                )
+
+        if self.geojson_column and self.database != POSTGRES:
+            errors['geojson_column'] = ValidationError(
+                ONLY_POSTGIS_SUPORTED,
+                code="invalid"
+            )
+
+        if errors:
+            raise ValidationError(errors)
 
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
