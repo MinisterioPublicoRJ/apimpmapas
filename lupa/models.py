@@ -21,6 +21,22 @@ OSM_VALUES_CHOICES = (
     (MUNICIPALITY, 'Município')
 )
 
+HAS_OSM_VALUE = 'A Entidade %s já possui a propriedade %s'
+HAS_OSM_DEFAULT = (
+    'A Entidade %s já responde pela '
+    'busca padrão de geolocalização')
+MANDATORY_OSM_PARAMETERS = (
+    'Para informar parâmetros de busca OSM é necessário '
+    'informar a Coluna de Dados GEOJSON'
+)
+MANDATORY_GEOJSON_COLUMN = (
+    'Para informar coluna GEOJSON é necessário informar '
+    'corretamente os parâmetros OSM'
+)
+ONLY_POSTGIS_SUPORTED = (
+    'Apenas a engine PostgreSQL Opengeo suporta busca geolocalizada'
+)
+
 
 class TipoDado(models.Model):
     # CHOICES
@@ -187,7 +203,7 @@ class Entidade(models.Model):
     )
 
     geojson_column = models.CharField(
-        verbose_name='coluna de dados geojson da entidade',
+        verbose_name='coluna de dados GEOJSON da entidade',
         max_length=200,
         null=True,
         blank=True
@@ -208,9 +224,22 @@ class Entidade(models.Model):
 
     def clean(self):
         errors = {}
-        has_osm_value = 'A Entidade %s já possui a propriedade %s'
-        has_osm_default = ('A Entidade %s já responde pela'
-                           ' busca padrão de geolocalização')
+
+        if not self.geojson_column and (
+                    self.osm_value_attached or self.osm_default_level
+                ):
+            errors['geojson_column'] = ValidationError(
+                MANDATORY_OSM_PARAMETERS,
+                code="invalid"
+            )
+
+        if self.geojson_column and not (
+                    self.osm_value_attached or self.osm_default_level
+                ):
+            errors['geojson_column'] = ValidationError(
+                MANDATORY_GEOJSON_COLUMN,
+                code="invalid"
+            )
 
         if self.osm_value_attached:
             pc = Entidade.objects.filter(
@@ -218,7 +247,10 @@ class Entidade(models.Model):
             ).first()
             if pc:
                 errors['osm_value_attached'] = ValidationError(
-                    has_osm_value % (pc.name, pc.osm_value_attached),
+                    HAS_OSM_VALUE % (
+                        pc.name,
+                        dict(OSM_VALUES_CHOICES)[pc.osm_value_attached]
+                    ),
                     code="invalid"
                 )
 
@@ -228,9 +260,15 @@ class Entidade(models.Model):
             ).first()
             if pc:
                 errors['osm_default_level'] = ValidationError(
-                    has_osm_default % pc.name,
+                    HAS_OSM_DEFAULT % pc.name,
                     code="invalid"
                 )
+
+        if self.geojson_column and self.database != POSTGRES:
+            errors['geojson_column'] = ValidationError(
+                ONLY_POSTGIS_SUPORTED,
+                code="invalid"
+            )
 
         if errors:
             raise ValidationError(errors)
