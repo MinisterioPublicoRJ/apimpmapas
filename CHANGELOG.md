@@ -2,10 +2,6 @@
 ### Added
  - Inclusão da API do MPRJ Digital no sistema
  - Controle de alterações por meio de CHANGELOG
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> Migrações e configurações de teste para o MPRJ+
  - Configurações diferenciadas para teste
 ## [1.1.1] - 2019-09-16
 ### Added
