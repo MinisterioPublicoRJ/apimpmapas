@@ -27,11 +27,6 @@
  - BUGFIX - Configurações de CORS
 ### Removed
  - Removido pacote não binário do psycopg2 - acesso concentrado no binário
-<<<<<<< HEAD
-=======
->>>>>>> Adição de Changelog
-=======
->>>>>>> Migrações e configurações de teste para o MPRJ+
 ## [1.0.1] - 2019-08-29
 ### Added
  - BUGFIX - Permitido tema em branco no painel administrativo
