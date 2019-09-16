@@ -13,6 +13,10 @@ from lupa.exceptions import QueryError
 logger = logging.getLogger(__name__)
 os.environ['NLS_LANG'] = 'American_America.UTF8'
 
+PG = 'PG'
+ORA = 'ORA'
+BDA = 'BDA'
+
 
 def execute(
     db_name,
@@ -24,10 +28,10 @@ def execute(
     *args,
     **kwargs
 ):
-    conns = {
-        'PG': postgres_access,
-        'ORA': oracle_access,
-        'BDA': bda_access,
+    CONNS = {
+        PG: postgres_access,
+        ORA: oracle_access,
+        BDA: bda_access,
     }
 
     query = generate_query(
@@ -37,7 +41,36 @@ def execute(
         columns,
         id_column
     )
-    return conns[db_name](query, domain_id)
+    return CONNS[db_name](query, (domain_id,))
+
+
+def execute_geospatial(
+    db_name,
+    schema,
+    table,
+    geojson_column,
+    id_column,
+    point
+):
+    if db_name != PG:
+        raise NotImplementedError(
+            "Queries Geoespaciais são suportadas apenas por Postgres")
+
+    CONNS = {
+        PG: postgres_access,
+        ORA: oracle_access,
+        BDA: bda_access,
+    }
+
+    query = generate_geospatial_query(
+        schema,
+        table,
+        geojson_column,
+        id_column,
+        point
+    )
+
+    return CONNS[db_name](query, [])
 
 
 def generate_query(db_name, schema, table, columns, id_column):
@@ -77,7 +110,7 @@ def generate_geospatial_query(schema, table, geojson_column,
     return query
 
 
-def postgres_access(query, domain_id):
+def postgres_access(query, extra_parameters):
     with pg_connect(
         host=config('PG_HOST'),
         dbname=config('PG_BASE'),
@@ -86,14 +119,14 @@ def postgres_access(query, domain_id):
     ) as conn:
         with conn.cursor() as curs:
             try:
-                curs.execute(query, (domain_id,))
+                curs.execute(query, extra_parameters)
                 return curs.fetchall()
             except PG_Error as e:
                 logger.error("Error on query: " + str(e))
                 raise QueryError(str(e)) from e
 
 
-def oracle_access(query, domain_id):
+def oracle_access(query, extra_parameters):
     with ora_connect(
         user=config('ORA_USER'),
         password=config('ORA_PASS'),
@@ -101,21 +134,21 @@ def oracle_access(query, domain_id):
     ) as conn:
         with conn.cursor() as curs:
             try:
-                curs.execute(query, (domain_id, ))
+                curs.execute(query, extra_parameters)
                 return curs.fetchall()
             except ORA_Error as e:
                 logger.error("Error on query: " + str(e))
                 raise QueryError(str(e)) from e
 
 
-def bda_access(query, domain_id):
+def bda_access(query, extra_parameters):
     with bda_connect(
         host=config('IMPALA_HOST'),
         port=config('IMPALA_PORT', cast=int)
     ) as conn:
         with conn.cursor() as curs:
             try:
-                curs.execute(query, (domain_id, ))
+                curs.execute(query, extra_parameters)
                 return curs.fetchall()
             except BDA_Error as e:
                 logger.error("Error on query: " + str(e))
