@@ -8,10 +8,11 @@ from lupa.db_connectors import (
     oracle_access,
     postgres_access,
     generate_query,
+    generate_geospatial_query,
     BDA_Error,
     ORA_Error,
     PG_Error,
-    QueryError
+    QueryError,
 )
 
 
@@ -268,3 +269,34 @@ class BdaAccess(CommonSetup):
                 .return_value = cursor
 
             bda_access(self.query, self.domain_id)
+
+
+class Geospatial(CommonSetup):
+    def test_geospatial_build_query(self):
+        expected_qeuery = (
+            'select col_id\n'
+            '               from schema.tabela\n'
+            '               where ST_Contains(\n'
+            '                    st_geomfromgeojson(geo_json),\n'
+            "                    st_geomfromtext('POINT(-43.2 -22.4)')\n"
+            '               )')
+
+        query = generate_geospatial_query(
+            self.schema,
+            self.table,
+            "geo_json",
+            self.id_column,
+            [-43.2, -22.4]
+        )
+
+        self.assertSequenceEqual(query, expected_qeuery)
+
+    def test_avoid_geospatial_injection(self):
+        with self.assertRaises(ValueError):
+            generate_geospatial_query(
+                self.schema,
+                self.table,
+                "geo_json",
+                self.id_column,
+                ['(;-43.2', -22.4]
+            )

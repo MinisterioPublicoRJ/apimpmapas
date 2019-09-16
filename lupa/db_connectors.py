@@ -57,6 +57,26 @@ def generate_query(db_name, schema, table, columns, id_column):
     return query
 
 
+def generate_geospatial_query(schema, table, geojson_column,
+                              id_column, point):
+    point = [float(p) for p in point]
+    query = """select {id_column}
+               from {schema}.{table}
+               where ST_Contains(
+                    st_geomfromgeojson({geojson_column}),
+                    st_geomfromtext('POINT({lat} {lon})')
+               )""".format(
+                   id_column=id_column,
+                   schema=schema,
+                   table=table,
+                   geojson_column=geojson_column,
+                   lat=point[0],
+                   lon=point[1]
+               )
+
+    return query
+
+
 def postgres_access(query, domain_id):
     with pg_connect(
         host=config('PG_HOST'),
