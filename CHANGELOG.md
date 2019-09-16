@@ -7,6 +7,9 @@
 =======
 >>>>>>> Migrações e configurações de teste para o MPRJ+
  - Configurações diferenciadas para teste
+## [1.1.1] - 2019-09-16
+### Added
+ - Inclusão de testes automatizados com Travis CI
 ## [1.1.0] - 2019-09-09
 ### Added
  - Permissões de acesso - Entidades e dados podem ser configurados com grupos específicos de acesso, sendo bloqueado o acesso por usuários não pertencentes a estes grupos.
