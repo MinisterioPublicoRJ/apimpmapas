@@ -90,7 +90,7 @@ WSGI_APPLICATION = 'mprj_api.wsgi.application'
 
 DATABASES = {
     'default': config(
-        'DATABASE_URL',
+        'DATABASE_TEST',
         default='sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3'),
         cast=db_url
     )
