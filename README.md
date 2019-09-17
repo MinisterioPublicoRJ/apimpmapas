@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.com/MinisterioPublicoRJ/apimpmapas.svg?branch=develop)](https://travis-ci.com/MinisterioPublicoRJ/apimpmapas)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/83cecc0446464afc91bfa1efb5e46878)](https://www.codacy.com/manual/SamambaMan/apimpmapas?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=MinisterioPublicoRJ/apimpmapas&amp;utm_campaign=Badge_Grade)
+[![codecov](https://codecov.io/gh/ministeriopublicorj/apimpmapas/branch/develop/graph/badge.svg)](https://codecov.io/gh/ministeriopublicorj/apimpmapas)
 
 # Configurar o projeto
 
