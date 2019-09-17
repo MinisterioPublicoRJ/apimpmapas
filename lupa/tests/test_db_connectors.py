@@ -279,7 +279,7 @@ class Geospatial(CommonSetup):
             '               from schema.tabela\n'
             '               where ST_Contains(\n'
             '                    st_geomfromgeojson(geo_json),\n'
-            "                    st_geomfromtext('POINT(-43.2 -22.4)')\n"
+            "                    st_geomfromtext('POINT(-22.4 -43.2)')\n"
             '               )')
 
         query = generate_geospatial_query(

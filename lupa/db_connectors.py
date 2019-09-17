@@ -97,7 +97,7 @@ def generate_geospatial_query(schema, table, geojson_column,
                from {schema}.{table}
                where ST_Contains(
                     st_geomfromgeojson({geojson_column}),
-                    st_geomfromtext('POINT({lat} {lon})')
+                    st_geomfromtext('POINT({lon} {lat})')
                )""".format(
                    id_column=id_column,
                    schema=schema,
@@ -106,7 +106,6 @@ def generate_geospatial_query(schema, table, geojson_column,
                    lat=point[0],
                    lon=point[1]
                )
-
     return query
 
 
