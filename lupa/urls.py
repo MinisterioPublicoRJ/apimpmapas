@@ -3,7 +3,8 @@ from django.urls import path
 from .views import (
     EntidadeView,
     DadoView,
-    OsmQueryView
+    OsmQueryView,
+    GeoSpatialQueryView
 )
 
 
@@ -11,12 +12,12 @@ app_name = 'lupa'
 
 urlpatterns = [
     path(
-        '<str:entity_type>/<str:domain_id>',
+        'entidade/<str:entity_type>/<str:domain_id>',
         EntidadeView.as_view(),
         name='detail_entidade'
     ),
     path(
-        '<str:entity_type>/<str:domain_id>/<int:pk>',
+        'dado/<str:entity_type>/<str:domain_id>/<int:pk>',
         DadoView.as_view(),
         name='detail_dado'
     ),
@@ -24,5 +25,10 @@ urlpatterns = [
         'search/mapsearch/<str:terms>',
         OsmQueryView.as_view(),
         name="mapsearch"
+    ),
+    path(
+        'geospatial/entity/<str:lat>/<str:lon>/<str:value>',
+        GeoSpatialQueryView.as_view(),
+        name="geospatial_entity"
     ),
 ]
