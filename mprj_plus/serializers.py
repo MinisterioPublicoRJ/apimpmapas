@@ -2,7 +2,6 @@
 from rest_framework import serializers
 
 from .models import Area, Tema
-from lupa.models import Icone
 
 
 class AreaSerializer(serializers.ModelSerializer):
