@@ -1,17 +1,8 @@
 
 from rest_framework import serializers
 
-from .models import Area, Icone, Tema
-
-
-class IconeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Icone
-        fields = (
-            'id',
-            'nome',
-            'image',
-        )
+from .models import Area, Tema
+from lupa.models import Icone
 
 
 class AreaSerializer(serializers.ModelSerializer):

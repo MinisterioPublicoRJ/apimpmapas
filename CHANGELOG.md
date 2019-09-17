@@ -6,6 +6,8 @@
 ## [1.1.1] - 2019-09-16
 ### Added
  - Inclusão de testes automatizados com Travis CI
+### Changed
+ - BUGFIX - Correção na lógica de busca espacial
 ## [1.1.0] - 2019-09-09
 ### Added
  - Permissões de acesso - Entidades e dados podem ser configurados com grupos específicos de acesso, sendo bloqueado o acesso por usuários não pertencentes a estes grupos.

@@ -2,13 +2,12 @@ from django.urls import path, include
 
 from rest_framework import routers
 
-from .views import AreaViewSet, TemaViewSet, IconeViewSet
+from .views import AreaViewSet, TemaViewSet
 
 
 router = routers.DefaultRouter()
 router.register('areas', AreaViewSet)
 router.register('temas', TemaViewSet)
-router.register('icones', IconeViewSet)
 
 
 urlpatterns = [

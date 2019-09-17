@@ -93,16 +93,8 @@ DATABASES = {
         'DATABASE_URL',
         default='sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3'),
         cast=db_url
-    ),
-    'mprj_plus': config(
-        'MPRJ_PLUS_DB',
-        default='sqlite:///' + os.path.join(BASE_DIR, 'mpp.sqlite3'),
-        cast=db_url
     )
 }
-
-DATABASE_ROUTERS = ['mprj_api.router.Router']
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators

@@ -7,7 +7,6 @@ from mprj_plus.serializers import AreaSerializer, TemaSerializer
 
 
 class AreaSerializeTest(TestCase):
-    databases = ['mprj_plus', ]
 
     def test_area_count(self):
         area_1 = make('mprj_plus.Area', created_at=datetime.now())
@@ -45,7 +44,6 @@ class AreaSerializeTest(TestCase):
 
 
 class TemaSerializeTest(TestCase):
-    databases = ['mprj_plus', ]
 
     def test_tema_endpoint(self):
         titulo = 'titulo tema'
