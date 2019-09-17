@@ -290,3 +290,21 @@ class DadoSerializer(serializers.ModelSerializer):
 
     def get_data_type(self, obj):
         return obj.data_type.name
+
+
+class EntidadeIdSerializer(serializers.ModelSerializer):
+    entity_id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Entidade
+        fields = [
+            'abreviation',
+            'entity_id'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        self._entity_id = kwargs.pop('entity_id')
+        super().__init__(*args, **kwargs)
+
+    def get_entity_id(self, obj):
+        return str(self._entity_id)

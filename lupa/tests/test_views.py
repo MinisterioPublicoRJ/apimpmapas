@@ -5,6 +5,7 @@ from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 import jwt
+import pytest
 from model_mommy.mommy import make
 import responses
 
@@ -474,3 +475,133 @@ class OsmQueryViewTest(TestCase):
         self.client.get(url).json()
 
         _query.assert_called_once_with(parameters)
+
+
+@pytest.mark.django_db(transaction=True)
+class GeoSpatialQueryViewTest(TestCase):
+
+    @mock.patch('lupa.views.execute_geospatial', return_value=((33345,),))
+    def test_happy_path(self, _egsp):
+        make(
+            'lupa.Entidade',
+            abreviation='MUN',
+            geojson_column="geojson_column",
+            osm_value_attached="municipality",
+        )
+        make(
+            'lupa.Entidade',
+            abreviation='BAI',
+            geojson_column="geojson_column",
+            osm_value_attached="suburb",
+        )
+
+        url = reverse(
+            "lupa:geospatial_entity",
+            kwargs={
+                'lat': '-22.000',
+                'lon': '-43.000',
+                'value': 'municipality'
+            }
+        )
+
+        response = self.client.get(url).json()
+
+        self.assertEqual(response['abreviation'], 'MUN')
+        self.assertEqual(response['entity_id'], '33345')
+        _egsp.assert_called()
+
+    @mock.patch('lupa.views.execute_geospatial', return_value=((33345,),))
+    def test_no_entity_responsible(self, _egsp):
+        make(
+            'lupa.Entidade',
+            abreviation='MUN',
+            geojson_column="geojson_column",
+            osm_value_attached="municipality",
+            osm_default_level=False
+        )
+        make(
+            'lupa.Entidade',
+            abreviation='BAI',
+            geojson_column="geojson_column",
+            osm_value_attached="suburb",
+            osm_default_level=False
+        )
+
+        url = reverse(
+            "lupa:geospatial_entity",
+            kwargs={
+                'lat': '-22.000',
+                'lon': '-43.000',
+                'value': 'house'
+            }
+        )
+
+        _egsp.assert_not_called()
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+    @mock.patch(
+        'lupa.views.execute_geospatial',
+        return_value=(('minhacasa',),))
+    def test_default_entity_responsible(self, _egsp):
+        make(
+            'lupa.Entidade',
+            abreviation='MUN',
+            geojson_column="geojson_column",
+            osm_value_attached="municipality",
+            osm_default_level=False
+        )
+        make(
+            'lupa.Entidade',
+            abreviation='BAI',
+            geojson_column="geojson_column",
+            osm_value_attached="suburb",
+            osm_default_level=True
+        )
+
+        url = reverse(
+            "lupa:geospatial_entity",
+            kwargs={
+                'lat': '-22.000',
+                'lon': '-43.000',
+                'value': 'house'
+            }
+        )
+
+        response = self.client.get(url).json()
+
+        self.assertEqual(response['abreviation'], 'BAI')
+        self.assertEqual(response['entity_id'], 'minhacasa')
+        _egsp.assert_called()
+
+    @mock.patch('lupa.views.execute_geospatial', return_value=[])
+    def test_empty_geospatial_response(self, _egsp):
+        make(
+            'lupa.Entidade',
+            abreviation='MUN',
+            geojson_column="geojson_column",
+            osm_value_attached="municipality",
+            osm_default_level=False
+        )
+        make(
+            'lupa.Entidade',
+            abreviation='BAI',
+            geojson_column="geojson_column",
+            osm_value_attached="suburb",
+            osm_default_level=True
+        )
+
+        url = reverse(
+            "lupa:geospatial_entity",
+            kwargs={
+                'lat': '-22.000',
+                'lon': '-43.000',
+                'value': 'house'
+            }
+        )
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 404)
+        _egsp.assert_called()

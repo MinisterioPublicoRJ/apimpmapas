@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/MinisterioPublicoRJ/apimpmapas.svg?branch=develop)](https://travis-ci.com/MinisterioPublicoRJ/apimpmapas)
+
 # Configurar o projeto
 
 Para rodar este projeto localmente você deve criar um ambiente virtual (i.e: [virtualenv](https://virtualenv.pypa.io/en/latest/)).

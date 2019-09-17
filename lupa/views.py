@@ -11,8 +11,13 @@ from rest_framework.generics import (
 from rest_framework.response import Response
 
 from .models import Entidade, Dado
-from .serializers import EntidadeSerializer, DadoSerializer
+from .serializers import (
+    EntidadeSerializer,
+    DadoSerializer,
+    EntidadeIdSerializer
+)
 from .osmapi import query as osmquery
+from .db_connectors import execute_geospatial
 
 
 class EntityDataView:
@@ -81,3 +86,39 @@ class OsmQueryView(ListAPIView):
 
     def get(self, request, *args, **kwargs):
         return Response(osmquery(self.kwargs['terms']))
+
+
+class GeoSpatialQueryView(ListAPIView):
+    serializer_class = EntidadeIdSerializer
+    queryset = []
+
+    def get(self, request, lat, lon, value):
+        entity_type = Entidade.objects.filter(
+            osm_value_attached=value).first()
+
+        if not entity_type:
+            entity_type = Entidade.objects.filter(
+                osm_default_level=True).first()
+
+        if not entity_type:
+            raise Http404
+
+        entity = execute_geospatial(
+            entity_type.database,
+            entity_type.schema,
+            entity_type.table,
+            entity_type.geojson_column,
+            entity_type.id_column,
+            [lat, lon]
+        )
+
+        if not entity:
+            raise Http404
+
+        entity = entity[0][0]
+
+        serializer = EntidadeIdSerializer(
+                entity_type,
+                entity_id=entity
+            )
+        return Response(serializer.data)
