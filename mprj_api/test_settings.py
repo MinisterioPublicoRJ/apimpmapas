@@ -95,7 +95,7 @@ DATABASES = {
         cast=db_url
     ),
     'mprj_plus': config(
-        'DATABASE_TEST',
+        'MPRJ_PLUS_TEST',
         default='sqlite:///' + os.path.join(BASE_DIR, 'mpp.sqlite3'),
         cast=db_url
     )

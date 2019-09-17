@@ -1,5 +1,3 @@
-import re
-
 import xml.etree.cElementTree as et
 
 from django import forms
@@ -62,12 +60,6 @@ class AreaForm(forms.ModelForm):
         if self.nome.isspace():
             raise forms.ValidationError(ERRORS['BLANK_FIELD'])
         return self.nome
-
-    def clean_cor(self):
-        color_regex = r'^#([a-f0-9]{6})$'
-        if re.match(color_regex, self.cor, re.IGNORECASE):
-            return self.cor
-        raise forms.ValidationError(ERRORS['NOT_COLOR'])
 
 
 class TemaForm(forms.ModelForm):

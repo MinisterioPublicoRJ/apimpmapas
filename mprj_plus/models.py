@@ -28,15 +28,6 @@ class Area(models.Model):
         if self:
             return self.nome
 
-    def color_display(self):
-        return format_html(
-            '<span class="color-box" style="background-color: {};">\
-            </span>\
-            {}',
-            self.cor,
-            self.cor,
-        )
-
 
 class Tema(models.Model):
     titulo = models.CharField(max_length=255)

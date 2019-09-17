@@ -24,7 +24,7 @@ class AreaAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'nome',
-        'color_display',
+        'cor',
         'icone',
         'prioridade',
         'updated_at'
