@@ -1,14 +1,12 @@
 from django.db import models
 from colorfield.fields import ColorField
 
-from lupa.models import Icone as lupa_icone
-
 
 class Area(models.Model):
     nome = models.CharField(max_length=255)
     cor = ColorField(default='#FF0000')
     icone = models.ForeignKey(
-        lupa_icone,
+        'icones.Icone',
         on_delete=models.PROTECT,
     )
     prioridade = models.IntegerField(default=1)
@@ -23,12 +21,12 @@ class Area(models.Model):
 class Tema(models.Model):
     titulo = models.CharField(max_length=255)
     area_mae = models.ForeignKey(
-        Area,
+        'Area',
         on_delete=models.PROTECT,
         related_name='temas',
     )
     areas_correlatas = models.ManyToManyField(
-        Area,
+        'Area',
         related_name='temas_correlatos',
         blank=True
     )
