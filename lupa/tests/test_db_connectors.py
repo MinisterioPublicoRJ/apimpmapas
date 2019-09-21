@@ -9,6 +9,7 @@ from lupa.db_connectors import (
     oracle_access,
     postgres_access,
     generate_query,
+    generate_query_sample,
     generate_geospatial_query,
     BDA_Error,
     ORA_Error,
@@ -336,3 +337,29 @@ class Geospatial(CommonSetup):
         )
 
         _pga.assert_called_once_with("generated_query", [])
+
+    def test_call_build_sample_common(self):
+        query = generate_query_sample(
+            'PG',
+            'SCHEMA',
+            'TABLE',
+            ['C1', 'C2']
+        )
+
+        self.assertEqual(
+            query,
+            'SELECT C1, C2 FROM SCHEMA.TABLE limit 10'
+        )
+
+    def test_call_build_sample_oracle(self):
+        query = generate_query_sample(
+            'ORA',
+            'SCHEMA',
+            'TABLE',
+            ['C1', 'C2']
+        )
+
+        self.assertEqual(
+            query,
+            'SELECT C1, C2 FROM SCHEMA.TABLE WHERE and rownum < 10'
+        )
