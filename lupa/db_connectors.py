@@ -25,6 +25,7 @@ def execute(
     columns,
     id_column,
     domain_id,
+    sample=False,
     *args,
     **kwargs
 ):
@@ -34,14 +35,24 @@ def execute(
         BDA: bda_access,
     }
 
-    query = generate_query(
-        db_name,
-        schema,
-        table,
-        columns,
-        id_column
-    )
-    return CONNS[db_name](query, (domain_id,))
+    if not sample:
+        query = generate_query(
+            db_name,
+            schema,
+            table,
+            columns,
+            id_column
+        )
+        return CONNS[db_name](query, (domain_id,))
+    else:
+        query = generate_query_sample(
+            db_name,
+            schema,
+            table,
+            columns
+        )
+        return CONNS[db_name](query, [])
+
 
 
 def execute_geospatial(
@@ -71,6 +82,21 @@ def execute_geospatial(
     )
 
     return CONNS[db_name](query, [])
+
+
+def generate_query_sample(db_name, schema, table, columns):
+    query = "SELECT {columns} FROM {schema}.{table}"\
+        .format(
+            columns=', '.join(columns),
+            schema=schema,
+            table=table
+        )
+
+    if db_name in ('PG', 'BDA'):
+        query += ' limit 10'
+    else:
+        query += ' WHERE and rownum < 10'
+    return query
 
 
 def generate_query(db_name, schema, table, columns, id_column):
