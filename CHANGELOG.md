@@ -1,4 +1,8 @@
 ## [Unreleased]
+## [1.1.3] - 2019-09-20
+### Changed
+ - Extração de ícones de apps diferentes para uma app unificada
+## [1.1.2] - 2019-09-17
 ### Added
  - Inclusão da API do MPRJ Digital no sistema
  - Controle de alterações por meio de CHANGELOG

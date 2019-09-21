@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'colorfield',
 
+    'icones',
     'lupa',
     'login',
     'mprj_plus',

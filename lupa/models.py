@@ -130,31 +130,6 @@ class Grupo(models.Model):
             return self.name
 
 
-class Icone(models.Model):
-    # DATABASE FIELDS
-    name = models.CharField(
-        verbose_name='título do ícone',
-        max_length=20
-    )
-
-    file_path = models.FileField(
-        verbose_name='arquivo do ícone',
-        upload_to='icones'
-    )
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    last_modified = models.DateTimeField(auto_now=True)
-
-    # META CLASS
-    class Meta:
-        verbose_name = 'ícone'
-
-    # TO STRING METHOD
-    def __str__(self):
-        if self:
-            return self.name
-
-
 class Entidade(models.Model):
     # DATABASE FIELDS
     name = models.CharField(
@@ -168,7 +143,7 @@ class Entidade(models.Model):
     )
 
     roles_allowed = models.ManyToManyField(
-        Grupo,
+        'Grupo',
         related_name="entity_allowed",
         verbose_name="grupos com acesso",
         blank=True,
@@ -285,7 +260,7 @@ class Entidade(models.Model):
 class Mapa(models.Model):
     # DATABASE FIELDS
     entity = models.OneToOneField(
-        Entidade,
+        'Entidade',
         on_delete=models.CASCADE,
         primary_key=True,
         related_name='map_info'
@@ -328,14 +303,14 @@ class Dado(OrderedModel):
     )
 
     data_type = models.ForeignKey(
-        TipoDado,
+        'TipoDado',
         on_delete=models.PROTECT,
         related_name="data_by_type",
         verbose_name="tipo da caixinha"
     )
 
     theme = models.ForeignKey(
-        TemaDado,
+        'TemaDado',
         on_delete=models.SET_NULL,
         related_name="data_by_theme",
         verbose_name="tema da caixinha",
@@ -344,7 +319,7 @@ class Dado(OrderedModel):
     )
 
     entity_type = models.ForeignKey(
-        Entidade,
+        'Entidade',
         on_delete=models.CASCADE,
         related_name="data_list",
         verbose_name="entidade relacionada"
@@ -358,7 +333,7 @@ class Dado(OrderedModel):
     )
 
     roles_allowed = models.ManyToManyField(
-        Grupo,
+        'Grupo',
         related_name="data_allowed",
         verbose_name="grupos com acesso",
         blank=True,
@@ -366,7 +341,7 @@ class Dado(OrderedModel):
     )
 
     icon = models.ForeignKey(
-        Icone,
+        'icones.Icone',
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -464,7 +439,7 @@ class ColunaDado(Coluna):
     ]
 
     dado = models.ForeignKey(
-        Dado,
+        'Dado',
         on_delete=models.CASCADE,
         related_name="column_list",
         verbose_name="dado"
@@ -479,7 +454,7 @@ class ColunaMapa(Coluna):
     ]
 
     mapa = models.ForeignKey(
-        Mapa,
+        'Mapa',
         on_delete=models.CASCADE,
         related_name="column_list",
         verbose_name="mapa"
