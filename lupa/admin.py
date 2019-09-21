@@ -5,7 +5,6 @@ from ordered_model.admin import OrderedModelAdmin
 
 from .models import (
     Dado,
-    Icone,
     Entidade,
     Grupo,
     Mapa,
@@ -98,7 +97,6 @@ class DadoAdmin(OrderedModelAdmin):
     inlines = [ColunaDadoAdminInline]
 
 
-admin.site.register(Icone)
 admin.site.register(Grupo)
 admin.site.register(TipoDado)
 admin.site.register(TemaDado)

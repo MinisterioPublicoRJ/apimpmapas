@@ -26,11 +26,6 @@ class TestStringRepresentation(TestCase):
 
         self.assertEqual(obj.__str__(), 'teste_nome')
 
-    def test_string_icone(self):
-        obj = make('lupa.Icone', name='teste_nome')
-
-        self.assertEqual(obj.__str__(), 'teste_nome')
-
     def test_string_tipo_dado(self):
         obj = make('lupa.TipoDado', name='teste_nome')
 
