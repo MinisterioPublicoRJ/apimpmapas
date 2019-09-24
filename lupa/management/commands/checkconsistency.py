@@ -40,7 +40,7 @@ class Command(BaseCommand):
             self.printok('')
 
     def process_data(self, dado):
-        self.printstatus("Dado: %s id=%s - " % (dado, dado.id), end=' ')
+        self.printstatus(f'Dado: {dado} id={dado.id} - ', end=' ')
         columns = dado.column_list.all()
         columns = parsecolumns(columns)
         try:
@@ -67,4 +67,4 @@ class Command(BaseCommand):
         self.printstatus(
             "Verificando Dado(caixinhas) para entidade %s" % entidade
         )
-        map(self.process_data, dados)
+        list(map(self.process_data, dados))

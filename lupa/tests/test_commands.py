@@ -1,5 +1,6 @@
 from django.core.management import call_command
 from django.test import TestCase
+from model_mommy.mommy import make
 from unittest import mock
 from unittest.mock import call
 from lupa.management.commands.checkconsistency import (
@@ -49,8 +50,8 @@ class TestCheckConsistency(TestCase):
     def test_parse_columns(self):
         builder = [
             [
-                ColunaDado(name='N%s' % i, info_type='I%s' % i),
-                'N%s as I%s' % (i, i)
+                ColunaDado(name=f'N{i}', info_type=f'I{i}'),
+                f'N{i} as I{i}'
             ]
             for i in range(3)
         ]
@@ -128,3 +129,37 @@ class TestCheckConsistency(TestCase):
             self.dadosimples.table,
             self.columns
         )
+
+    @mock.patch.object(Command, 'printnok')
+    @mock.patch.object(Command, 'printstatus')
+    @mock.patch(
+        'lupa.management.commands.checkconsistency.execute_sample',
+        side_effect=Exception("QUERY ERROR")
+    )
+    def test_process_data_error(self, _excs, _ptst, _ptnok):
+        mdado = make(
+            'lupa.Dado',
+            title='Bairro',
+            id=3,
+            database='DB',
+            schema='SCHM',
+            table='TBL'
+        )
+
+        make('lupa.ColunaDado', dado=mdado, name='A', info_type='CA'),
+        make('lupa.ColunaDado', dado=mdado, name='B', info_type='CB')
+        make('lupa.ColunaDado', dado=mdado, name='C', info_type='CC')
+        make('lupa.ColunaDado', dado=mdado, name='D', info_type='CD')
+        make('lupa.ColunaDado', dado=mdado, name='E', info_type='CE')
+
+        command = Command()
+        command.process_data(mdado)
+
+        _ptst.assert_called_once_with(
+            f'Dado: Bairro id=3 - ',
+            end=' '
+        )
+        _ptnok.assert_called_once_with(
+            'NOK - DB - SCHM - TBL', Exception('QUERY ERROR')
+        )
+        _excs.assert_called_once_with('a')
