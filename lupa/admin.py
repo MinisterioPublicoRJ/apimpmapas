@@ -70,8 +70,14 @@ class EntidadeAdmin(nested_admin.NestedModelAdmin):
 
 @admin.register(Dado)
 class DadoAdmin(OrderedModelAdmin):
-    list_display = ('title', 'entity_type', 'theme', 'move_up_down_links')
-    list_filter = ('entity_type__name',)
+    list_display = (
+        'title',
+        'entity_type',
+        'theme',
+        'show_box',
+        'move_up_down_links',
+    )
+    list_filter = ('entity_type__name', 'show_box',)
     fieldsets = (
         (None, {
             'fields': (
@@ -82,7 +88,8 @@ class DadoAdmin(OrderedModelAdmin):
                 'theme',
                 'icon',
                 'limit_fetch',
-                'roles_allowed'
+                'roles_allowed',
+                'show_box',
             )
         }),
         ('Dados exibidos', {
