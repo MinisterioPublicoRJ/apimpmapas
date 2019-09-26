@@ -1,4 +1,6 @@
 ## [Unreleased]
+###Changed
+ - Adição de seletor de exibição nas caixinhas
 ## [1.1.4] - 2019-09-25
 ### Changed
  - BUGFIX - Correção na validação de OSM: Entidades causam erro de entidade OSM já vinculada ao serem editadas
