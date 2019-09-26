@@ -1,4 +1,7 @@
 ## [Unreleased]
+## [1.1.4] - 2019-09-25
+### Changed
+ - BUGFIX - Correção na validação de OSM: Entidades causam erro de entidade OSM já vinculada ao serem editadas
 ## [1.1.3] - 2019-09-20
 ### Changed
  - Extração de ícones de apps diferentes para uma app unificada

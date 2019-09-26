@@ -219,7 +219,7 @@ class Entidade(models.Model):
         if self.osm_value_attached:
             pc = Entidade.objects.filter(
                 osm_value_attached=self.osm_value_attached
-            ).first()
+            ).exclude(id=self.id).first()
             if pc:
                 errors['osm_value_attached'] = ValidationError(
                     HAS_OSM_VALUE % (
