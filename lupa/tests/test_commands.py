@@ -132,11 +132,7 @@ class TestCheckConsistency(TestCase):
 
     @mock.patch.object(Command, 'printnok')
     @mock.patch.object(Command, 'printstatus')
-    @mock.patch(
-        'lupa.management.commands.checkconsistency.execute_sample',
-        side_effect=Exception("QUERY ERROR")
-    )
-    def test_process_data_error(self, _excs, _ptst, _ptnok):
+    def test_process_data_error(self, _ptst, _ptnok):
         mdado = make(
             'lupa.Dado',
             title='Bairro',
@@ -152,14 +148,31 @@ class TestCheckConsistency(TestCase):
         make('lupa.ColunaDado', dado=mdado, name='D', info_type='CD')
         make('lupa.ColunaDado', dado=mdado, name='E', info_type='CE')
 
+        error = Exception("QUERY ERROR")
         command = Command()
-        command.process_data(mdado)
+        with mock.patch(
+            'lupa.management.commands.checkconsistency.execute_sample',
+            side_effect=error
+        ) as _excs:
+            command.process_data(mdado)
+            _excs.assert_called_once_with(
+                'DB',
+                'SCHM',
+                'TBL',
+                [
+                    'E as CE',
+                    'D as CD',
+                    'C as CC',
+                    'B as CB',
+                    'A as CA'
+                ]
+            )
 
         _ptst.assert_called_once_with(
             f'Dado: Bairro id=3 - ',
             end=' '
         )
+
         _ptnok.assert_called_once_with(
-            'NOK - DB - SCHM - TBL', Exception('QUERY ERROR')
+            'NOK - DB - SCHM - TBL', error
         )
-        _excs.assert_called_once_with('a')
