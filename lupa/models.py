@@ -364,6 +364,11 @@ class Dado(OrderedModel):
         help_text='0 = sem limite'
     )
 
+    show_box = models.BooleanField(
+        verbose_name='Exibir dado',
+        default=True
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 
