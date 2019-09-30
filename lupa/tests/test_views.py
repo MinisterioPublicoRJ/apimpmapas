@@ -216,8 +216,8 @@ class ListDadosViewTest(TestCase):
 
     @mock.patch('lupa.serializers.execute')
     def test_get_lista_com_dados_ocultos(self, _execute):
-        """Deve retornar somente dados não ocultos referentes """
-        """ao tipo de entidade chamado"""
+        """Deve retornar somente dados não ocultos referentes
+ ao tipo de entidade chamado"""
         _execute.side_effect = [
             [('mock_name', )],
             None,
