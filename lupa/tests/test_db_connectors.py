@@ -44,7 +44,7 @@ class PostgresAccess(CommonSetup):
             host=config('PG_HOST'),
             dbname=config('PG_BASE'),
             user=config('PG_USER'),
-            password=''
+            password=config('PG_PASSWORD')
         )
 
     def test_generate_query_postgres(self):

@@ -183,6 +183,14 @@ class TestEntityModel(TestCase):
              'busca padrão de geolocalização')
         )
 
+    def test_self_exclude(self):
+        entity = make('lupa.Entidade', name='Primeiro')
+        entity.geojson_column = 'column'
+        entity.osm_value_attached = SUBURB
+        entity.database = POSTGRES
+
+        self.assertEqual(entity.clean(), None)
+
     def test_validate_mandatory_osm_map_with_different_database(self):
         entity = make('lupa.Entidade', name="Primeiro")
         entity.geojson_column = 'column'

@@ -161,7 +161,7 @@ class EntidadeSerializer(serializers.ModelSerializer):
 
     def get_theme_list(self, obj):
         data_list = DadoInternalSerializer(
-            obj.data_list.all(),
+            obj.data_list.filter(show_box=True),
             many=True,
             read_only=True
         ).data
