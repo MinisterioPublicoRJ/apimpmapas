@@ -1,5 +1,6 @@
 ## [Unreleased]
-###Changed
+## [1.1.5]
+### Added
  - Adição de seletor de exibição nas caixinhas
 ## [1.1.4] - 2019-09-25
 ### Changed
