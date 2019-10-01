@@ -1,4 +1,7 @@
 ## [Unreleased]
+## [1.1.6]
+### Changed
+ - BUGFIX - Correção na validação de OSM: Entidades causam erro de entidade OSM já vinculada ao serem editadas (de novo)
 ## [1.1.5]
 ### Added
  - Adição de seletor de exibição nas caixinhas
