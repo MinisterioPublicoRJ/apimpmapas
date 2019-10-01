@@ -232,7 +232,7 @@ class Entidade(models.Model):
         if self.osm_default_level:
             pc = Entidade.objects.filter(
                 osm_default_level=True
-            ).first()
+            ).exclude(id=self.id).first()
             if pc:
                 errors['osm_default_level'] = ValidationError(
                     HAS_OSM_DEFAULT % pc.name,
