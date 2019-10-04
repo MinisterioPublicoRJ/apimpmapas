@@ -214,6 +214,44 @@ class ListDadosViewTest(TestCase):
             expected_datalist
         )
 
+    @mock.patch('lupa.serializers.execute')
+    def test_get_lista_com_dados_ocultos(self, _execute):
+        """Deve retornar somente dados não ocultos referentes
+ ao tipo de entidade chamado"""
+        _execute.side_effect = [
+            [('mock_name', )],
+            None,
+        ]
+
+        ent_municipio = make('lupa.Entidade', abreviation='MUN')
+
+        make(
+            'lupa.Dado',
+            entity_type=ent_municipio,
+            show_box=False
+        )
+        dado_object_mun_1 = make(
+            'lupa.Dado',
+            entity_type=ent_municipio,
+            theme=None,
+            show_box=True
+        )
+        expected_datalist = [
+            {"id": dado_object_mun_1.id}
+        ]
+
+        url = reverse('lupa:detail_entidade', args=('MUN', '1',))
+
+        resp = self.client.get(url)
+        resp_json = resp.json()
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(len(resp_json['theme_list'][0]['data_list']), 1)
+        self.assertEqual(
+            resp_json['theme_list'][0]['data_list'],
+            expected_datalist
+        )
+
 
 class DetailDadosViewTest(TestCase):
 

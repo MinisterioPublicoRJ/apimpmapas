@@ -232,7 +232,7 @@ class Entidade(models.Model):
         if self.osm_default_level:
             pc = Entidade.objects.filter(
                 osm_default_level=True
-            ).first()
+            ).exclude(id=self.id).first()
             if pc:
                 errors['osm_default_level'] = ValidationError(
                     HAS_OSM_DEFAULT % pc.name,
@@ -362,6 +362,11 @@ class Dado(OrderedModel):
         verbose_name='máximo de dados a serem mostrados',
         default=0,
         help_text='0 = sem limite'
+    )
+
+    show_box = models.BooleanField(
+        verbose_name='Exibir dado',
+        default=True
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
