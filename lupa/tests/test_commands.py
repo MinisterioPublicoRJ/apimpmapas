@@ -2,7 +2,7 @@ from django.core.management import call_command
 from django.test import TestCase
 from model_mommy.mommy import make
 from unittest import mock
-from unittest.mock import call
+from unittest.mock import call, MagicMock
 from lupa.management.commands.checkconsistency import (
     Command,
     parsecolumns
@@ -20,12 +20,12 @@ class TestCheckConsistency(TestCase):
         self.dadosimples = dadosimples
         self.columns = ['a', 'b']
 
-    @mock.patch.object(Command, 'stdout.write')
-    def simpleprinttest(self, _wrt):
+    def test_simpleprint(self):
         command = Command()
+        command.stdout.write = MagicMock()
         command.printok("OKMSG", "OKEND")
-        command.printok("NOKMSG", "NOKEND")
-        command.printok("STATUSMSG", "STATUSEND")
+        command.printnok("NOKMSG", None, "NOKEND")
+        command.printstatus("STATUSMSG", "STATUSEND")
 
         expected = [
             call(
@@ -43,7 +43,7 @@ class TestCheckConsistency(TestCase):
         ]
 
         self.assertEqual(
-            _wrt.call_args_list,
+            command.stdout.write.call_args_list,
             expected
         )
 
@@ -175,4 +175,69 @@ class TestCheckConsistency(TestCase):
 
         _ptnok.assert_called_once_with(
             'NOK - DB - SCHM - TBL', error
+        )
+
+    @mock.patch.object(Command, 'printnok')
+    @mock.patch.object(Command, 'printstatus')
+    @mock.patch(
+        'lupa.management.commands.checkconsistency.execute_sample',
+        return_value=[
+            ('a', 'b'),
+            ('c', 'd')
+        ]
+    )
+    def test_process_data(self, _excs, _ptst, _prok):
+        command = Command()
+        mdado = make(
+            'lupa.Dado',
+            title='Bairro',
+            id=3,
+            database='DB',
+            schema='SCHM',
+            table='TBL'
+        )
+
+        make('lupa.ColunaDado', dado=mdado, name='A', info_type='CA'),
+        make('lupa.ColunaDado', dado=mdado, name='B', info_type='CB')
+        make('lupa.ColunaDado', dado=mdado, name='C', info_type='CC')
+        make('lupa.ColunaDado', dado=mdado, name='D', info_type='CD')
+        make('lupa.ColunaDado', dado=mdado, name='E', info_type='CE')
+        command.process_data(mdado)
+        _excs.assert_called_once_with(
+            'DB',
+            'SCHM',
+            'TBL',
+            [
+                'E as CE',
+                'D as CD',
+                'C as CC',
+                'B as CB',
+                'A as CA'
+            ]
+        )
+
+        _ptst.assert_called_once_with('Dado: Bairro id=3 - ', end=' ')
+
+    @mock.patch.object(Command, 'process_data')
+    @mock.patch.object(Command, 'printstatus')
+    def test_handle_happy_path(self, _prtst, _prd):
+        mentidade = make(
+            'lupa.Entidade',
+            id=4,
+            name="Entidade Teste"
+        )
+        mdado = make(
+            'lupa.Dado',
+            title='Bairro',
+            id=3,
+            database='DB',
+            schema='SCHM',
+            table='TBL',
+            entity_type=mentidade
+        )
+
+        call_command('checkconsistency', 4)
+        _prd.assert_called_with(mdado)
+        _prtst.assert_called_once_with(
+            "Verificando Dado(caixinhas) para entidade Entidade Teste"
         )

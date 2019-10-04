@@ -19,7 +19,7 @@ lint:
 
 test: clean-pyc
 	py.test --verbose --color=yes -s $(TEST_PATH)
-	coverage report
+	coverage report -m
 
 run:
 	python manage.py runserver
