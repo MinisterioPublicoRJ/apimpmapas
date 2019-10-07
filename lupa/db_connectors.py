@@ -18,6 +18,30 @@ ORA = 'ORA'
 BDA = 'BDA'
 
 
+def conns(db_name):
+    CONNS = {
+        PG: postgres_access,
+        ORA: oracle_access,
+        BDA: bda_access,
+    }
+    return CONNS[db_name]
+
+
+def execute_sample(
+    db_name,
+    schema,
+    table,
+    columns
+):
+    query = generate_query_sample(
+        db_name,
+        schema,
+        table,
+        columns
+    )
+    return conns(db_name)(query, [])
+
+
 def execute(
     db_name,
     schema,
@@ -28,12 +52,6 @@ def execute(
     *args,
     **kwargs
 ):
-    CONNS = {
-        PG: postgres_access,
-        ORA: oracle_access,
-        BDA: bda_access,
-    }
-
     query = generate_query(
         db_name,
         schema,
@@ -41,7 +59,7 @@ def execute(
         columns,
         id_column
     )
-    return CONNS[db_name](query, (domain_id,))
+    return conns(db_name)(query, (domain_id,))
 
 
 def execute_geospatial(
@@ -56,12 +74,6 @@ def execute_geospatial(
         raise NotImplementedError(
             "Queries Geoespaciais são suportadas apenas por Postgres")
 
-    CONNS = {
-        PG: postgres_access,
-        ORA: oracle_access,
-        BDA: bda_access,
-    }
-
     query = generate_geospatial_query(
         schema,
         table,
@@ -70,7 +82,22 @@ def execute_geospatial(
         point
     )
 
-    return CONNS[db_name](query, [])
+    return conns(db_name)(query, [])
+
+
+def generate_query_sample(db_name, schema, table, columns):
+    query = "SELECT {columns} FROM {schema}.{table}"\
+        .format(
+            columns=', '.join(columns),
+            schema=schema,
+            table=table
+        )
+
+    if db_name in ('PG', 'BDA'):
+        query += ' limit 10'
+    else:
+        query += ' WHERE rownum < 10'
+    return query
 
 
 def generate_query(db_name, schema, table, columns, id_column):
