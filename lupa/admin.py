@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
 from django import forms
 import nested_admin
 from ordered_model.admin import OrderedModelAdmin
@@ -75,6 +77,7 @@ class DadoAdmin(OrderedModelAdmin):
         'entity_type',
         'theme',
         'show_box',
+        'order',
         'move_up_down_links',
     )
     list_filter = ('entity_type__name', 'show_box',)
@@ -102,6 +105,28 @@ class DadoAdmin(OrderedModelAdmin):
     )
     filter_horizontal = ('roles_allowed', )
     inlines = [ColunaDadoAdminInline]
+
+    def move_dado_to_position(self, request, queryset):
+        if 'apply' in request.POST:
+            dado = queryset[0]
+            print(request.POST['new_order'])
+            dado.to(int(request.POST['new_order']))
+
+            self.message_user(
+                request,
+                f'Atualizei a ordem da caixinha {dado}'
+            )
+
+            return HttpResponseRedirect(request.get_full_path())
+        return render(
+            request,
+            'lupa/move_to_position.html',
+            context={
+                'dado': queryset[0]
+            })
+
+    move_dado_to_position.short_description = "Mover para Posição..."
+    actions = ['move_dado_to_position']
 
 
 admin.site.register(Grupo)
