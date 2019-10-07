@@ -11,7 +11,7 @@ def parsecolumns(columns):
 
 
 class Command(BaseCommand):
-    help = 'Verififca a integridade mínima das views usadas pelo Lupa'
+    help = 'Verifica a integridade mínima das views usadas pelo Lupa'
 
     def printok(self, message, end='\n'):
         self.stdout.write(self.style.SUCCESS(message), ending=end)

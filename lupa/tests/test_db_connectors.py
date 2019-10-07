@@ -364,7 +364,7 @@ class SampleQuery(CommonSetup):
 
         self.assertEqual(
             query,
-            'SELECT C1, C2 FROM SCHEMA.TABLE WHERE and rownum < 10'
+            'SELECT C1, C2 FROM SCHEMA.TABLE WHERE rownum < 10'
         )
 
     @mock.patch('lupa.db_connectors.postgres_access')

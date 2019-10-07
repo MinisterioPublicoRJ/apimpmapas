@@ -96,7 +96,7 @@ def generate_query_sample(db_name, schema, table, columns):
     if db_name in ('PG', 'BDA'):
         query += ' limit 10'
     else:
-        query += ' WHERE and rownum < 10'
+        query += ' WHERE rownum < 10'
     return query
 
 
