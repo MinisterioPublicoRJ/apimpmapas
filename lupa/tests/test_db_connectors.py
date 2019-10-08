@@ -5,10 +5,12 @@ from decouple import config
 from lupa.db_connectors import (
     bda_access,
     execute as db_execute,
+    execute_sample,
     execute_geospatial,
     oracle_access,
     postgres_access,
     generate_query,
+    generate_query_sample,
     generate_geospatial_query,
     BDA_Error,
     ORA_Error,
@@ -336,3 +338,45 @@ class Geospatial(CommonSetup):
         )
 
         _pga.assert_called_once_with("generated_query", [])
+
+
+class SampleQuery(CommonSetup):
+    def test_call_build_sample_common(self):
+        query = generate_query_sample(
+            'PG',
+            'SCHEMA',
+            'TABLE',
+            ['C1', 'C2']
+        )
+
+        self.assertEqual(
+            query,
+            'SELECT C1, C2 FROM SCHEMA.TABLE limit 10'
+        )
+
+    def test_call_build_sample_oracle(self):
+        query = generate_query_sample(
+            'ORA',
+            'SCHEMA',
+            'TABLE',
+            ['C1', 'C2']
+        )
+
+        self.assertEqual(
+            query,
+            'SELECT C1, C2 FROM SCHEMA.TABLE WHERE rownum < 10'
+        )
+
+    @mock.patch('lupa.db_connectors.postgres_access')
+    def test_execute_sample_happypath(self, _pga):
+        execute_sample(
+            'PG',
+            'SCHEMA',
+            'TABLE',
+            ['C1', 'C2']
+        )
+
+        _pga.assert_called_once_with(
+            'SELECT C1, C2 FROM SCHEMA.TABLE limit 10',
+            []
+        )

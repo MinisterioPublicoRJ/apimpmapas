@@ -1,4 +1,8 @@
 ## [Unreleased]
+## [1.1.7]
+### Changed
+ - Data Check Feature - command para verificação básica de integridade de Caixinhas por Entidade
+ - Move To Position - Possibilidade de mover uma caixinha para uma posição específica na ordem de caixinhas através de django admin actions
 ## [1.1.6]
 ### Changed
  - BUGFIX - Correção na validação de OSM: Entidades causam erro de entidade OSM já vinculada ao serem editadas (de novo)
