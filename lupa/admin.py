@@ -109,7 +109,6 @@ class DadoAdmin(OrderedModelAdmin):
     def move_dado_to_position(self, request, queryset):
         if 'apply' in request.POST:
             dado = queryset[0]
-            print(request.POST['new_order'])
             dado.to(int(request.POST['new_order']))
 
             self.message_user(
