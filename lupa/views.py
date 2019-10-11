@@ -1,7 +1,10 @@
+import jwt
+
 from decouple import config
 from django.http import Http404
 from django.shortcuts import get_object_or_404
-import jwt
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 from jwt.exceptions import InvalidSignatureError, DecodeError
 from rest_framework.generics import (
     GenericAPIView,
@@ -44,6 +47,7 @@ class EntityDataView:
         return Response(data)
 
 
+@method_decorator(cache_page(600, key_prefix='lupa_entidade'), name='dispatch')
 class EntidadeView(GenericAPIView, EntityDataView):
     serializer_class = EntidadeSerializer
     queryset = Entidade.objects.all()
@@ -62,6 +66,7 @@ class EntidadeView(GenericAPIView, EntityDataView):
         )
 
 
+@method_decorator(cache_page(600, key_prefix='lupa_dado'), name='dispatch')
 class DadoView(RetrieveAPIView, EntityDataView):
     serializer_class = DadoSerializer
     queryset = Dado.objects.all()
@@ -81,6 +86,7 @@ class DadoView(RetrieveAPIView, EntityDataView):
         )
 
 
+@method_decorator(cache_page(600, key_prefix='lupa_osm'), name='dispatch')
 class OsmQueryView(ListAPIView):
     queryset = []
 
@@ -88,6 +94,7 @@ class OsmQueryView(ListAPIView):
         return Response(osmquery(self.kwargs['terms']))
 
 
+@method_decorator(cache_page(600, key_prefix='lupa_geospat'), name='dispatch')
 class GeoSpatialQueryView(ListAPIView):
     serializer_class = EntidadeIdSerializer
     queryset = []
