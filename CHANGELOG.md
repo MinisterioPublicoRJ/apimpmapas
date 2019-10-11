@@ -1,4 +1,7 @@
 ## [Unreleased]
+## [1.1.8]
+### Changed
+ - Alteracão para permitir discrição entre link de imagem e campo base64 para lista de pessoas
 ## [1.1.7]
 ### Changed
  - Data Check Feature - command para verificação básica de integridade de Caixinhas por Entidade
