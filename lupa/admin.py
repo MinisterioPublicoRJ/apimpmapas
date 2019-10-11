@@ -105,6 +105,10 @@ class DadoAdmin(OrderedModelAdmin):
     )
     filter_horizontal = ('roles_allowed', )
     inlines = [ColunaDadoAdminInline]
+    search_fields = [
+        'title',
+        'exibition_field'
+    ]
 
     def move_dado_to_position(self, request, queryset):
         if 'apply' in request.POST:
