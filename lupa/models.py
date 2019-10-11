@@ -431,6 +431,7 @@ class ColunaDado(Coluna):
     DATA_COLUMN = 'dado'
     SOURCE_COLUMN = 'source'
     IMAGE_COLUMN = 'imagem'
+    IMAGE_LINK_COLUMN = 'linkimagem'
     EXTERNAL_LINK_COLUMN = 'link_externo'
     TITLE_SUFFIX_COLUMN = 'sufixo_titulo'
     DETAIL_COLUMN = 'details'
@@ -438,6 +439,7 @@ class ColunaDado(Coluna):
         (DATA_COLUMN, 'Coluna de dados principais'),
         (SOURCE_COLUMN, 'Coluna de fonte dos dados'),
         (IMAGE_COLUMN, 'Coluna de imagem'),
+        (IMAGE_LINK_COLUMN, 'Coluna de Link de Imagem'),
         (EXTERNAL_LINK_COLUMN, 'Coluna de link externo'),
         (TITLE_SUFFIX_COLUMN, 'Coluna de sufixo no titulo'),
         (DETAIL_COLUMN, 'Detalhes')
