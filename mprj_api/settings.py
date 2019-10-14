@@ -165,6 +165,16 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 CACHES = {
     'default': {
         'BACKEND': 'redis_cache.RedisCache',
-        'LOCATION': config('CACHE_LOCATION', default='127.0.0.1:6379'),
+        'LOCATION': config(
+            'CACHE_LOCATION',
+            default='localhost:6379'
+        ),
+        'OPTIONS': {
+            'DB': 1,
+            'PASSWORD': config(
+                'CACHE_PASSWORD',
+                default=''
+            )
+        }
     }
 }
