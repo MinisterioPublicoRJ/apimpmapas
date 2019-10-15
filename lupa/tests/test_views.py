@@ -2,6 +2,7 @@ from unittest import mock
 
 from decouple import config
 from django.conf import settings
+from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 import jwt
@@ -12,6 +13,11 @@ import responses
 from lupa.exceptions import QueryError
 from lupa import osmapi
 from .fixtures.osmapi import default_response
+
+
+class NoCacheTestCase:
+    def teardown_method(self, method):
+        cache.clear()
 
 
 class EntidadeViewTest(TestCase):
@@ -171,7 +177,7 @@ class AuthEntidadeViewTest(TestCase):
         self.assertEqual(resp.status_code, 403)
 
 
-class ListDadosViewTest(TestCase):
+class ListDadosViewTest(TestCase, NoCacheTestCase):
 
     @mock.patch('lupa.serializers.execute')
     def test_get_lista_dados(self, _execute):
@@ -253,7 +259,7 @@ class ListDadosViewTest(TestCase):
         )
 
 
-class DetailDadosViewTest(TestCase):
+class DetailDadosViewTest(TestCase, NoCacheTestCase):
 
     def setUp(self):
         self.entity_id = 1
@@ -516,7 +522,7 @@ class OsmQueryViewTest(TestCase):
 
 
 @pytest.mark.django_db(transaction=True)
-class GeoSpatialQueryViewTest(TestCase):
+class GeoSpatialQueryViewTest(TestCase, NoCacheTestCase):
 
     @mock.patch('lupa.views.execute_geospatial', return_value=((33345,),))
     def test_happy_path(self, _egsp):

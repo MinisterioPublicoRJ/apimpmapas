@@ -159,3 +159,22 @@ CSRF_TRUSTED_ORIGINS = ['*']
 
 # E-mail
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+# CACHE Configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'redis_cache.RedisCache',
+        'LOCATION': config(
+            'CACHE_LOCATION',
+            default='localhost:6379'
+        ),
+        'OPTIONS': {
+            'DB': 1,
+            'PASSWORD': config(
+                'CACHE_PASSWORD',
+                default=''
+            )
+        }
+    }
+}
