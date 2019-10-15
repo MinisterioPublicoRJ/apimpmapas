@@ -1,4 +1,7 @@
 ## [Unreleased]
+## [1.1.9]
+### Changed
+ - Adição de sistema de cache para as visualizações
 ## [1.1.8]
 ### Changed
  - Alteracão para permitir discrição entre link de imagem e campo base64 para lista de pessoas
