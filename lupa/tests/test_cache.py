@@ -37,3 +37,24 @@ class Cache(TestCase):
 
         _django_cache.set.assert_called_once_with('abcde', {'data': '12345'})
         self.assertIsInstance(response, Response)
+
+    @mock.patch('lupa.cache.cache_key', return_value='abcde')
+    @mock.patch('lupa.cache.django_cache')
+    def test_get_data_in_cache(self, _django_cache, _cache_key):
+        request_mock = mock.MagicMock()
+        request_mock.GET.return_value = {'auth_token': 1234}
+        kwargs = {'entity_type': 'MUN'}
+        _django_cache.get.return_value = {'data': '12345'}
+        _django_cache.__contains__.return_value = True
+
+        def mock_view_get(self, request, *args, **kwargs):
+            return None  # If everything works this func won't be called
+
+        decorated_mock_view = custom_cache(
+            mock_view_get
+        )
+        response = decorated_mock_view(None, request_mock, **kwargs)
+
+        _django_cache.get.assert_called_once_with('abcde')
+        self.assertIsInstance(response, Response)
+        self.assertEqual(response.data, {'data': '12345'})

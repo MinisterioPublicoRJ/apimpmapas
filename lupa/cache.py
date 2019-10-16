@@ -1,6 +1,7 @@
 from hashlib import md5
 
 from django.core.cache import cache as django_cache
+from rest_framework.response import Response
 
 
 def cache_key(args_list, kwargs, token):
@@ -18,6 +19,11 @@ def custom_cache(func):
         token = request.GET.get('auth_token', '')
         args_list = ['entity_type']
         hash_key = cache_key(args_list, kwargs, token)
+
+        if hash_key in django_cache:
+            data = django_cache.get(hash_key)
+            return Response(data)
+
         response = func(*args, **kwargs)
         django_cache.set(hash_key, response.data)
 
