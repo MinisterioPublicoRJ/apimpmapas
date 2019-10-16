@@ -21,7 +21,7 @@ class Cache(TestCase):
     @mock.patch('lupa.cache.django_cache')
     def test_insert_data_in_cache(self, _django_cache, _cache_key):
         request_mock = mock.MagicMock()
-        request_mock.GET.return_value = {'auth_token': 1234}
+        request_mock.GET = {'auth_token': 1234}
         kwargs = {'entity_type': 'MUN'}
 
         def mock_view_get(self, request, *args, **kwargs):
@@ -46,7 +46,7 @@ class Cache(TestCase):
     @mock.patch('lupa.cache.django_cache')
     def test_get_data_in_cache(self, _django_cache, _cache_key):
         request_mock = mock.MagicMock()
-        request_mock.GET.return_value = {'auth_token': 1234}
+        request_mock.GET = {'auth_token': 1234}
         kwargs = {'entity_type': 'MUN'}
         _django_cache.get.return_value = {'data': '12345'}
         _django_cache.__contains__.return_value = True
@@ -67,7 +67,7 @@ class Cache(TestCase):
     @mock.patch('lupa.cache.django_cache')
     def test_set_cache_timeout(self, _django_cache, _cache_key):
         request_mock = mock.MagicMock()
-        request_mock.GET.return_value = {'auth_token': 1234}
+        request_mock.GET = {'auth_token': 1234}
         kwargs = {'entity_type': 'MUN'}
 
         # TODO: move this mock function outside tests
