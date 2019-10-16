@@ -197,6 +197,9 @@ class Entidade(models.Model):
         default=False
     )
 
+    def obter_dados(self):
+        return self.data_list.order_by('order')
+
     def clean(self):
         errors = {}
 
@@ -302,13 +305,6 @@ class Dado(OrderedModel):
         help_text='Não obrigatório'
     )
 
-    data_type = models.ForeignKey(
-        'TipoDado',
-        on_delete=models.PROTECT,
-        related_name="data_by_type",
-        verbose_name="tipo da caixinha"
-    )
-
     database = models.CharField(
         verbose_name='banco de dados',
         max_length=3,
@@ -343,11 +339,8 @@ class Dado(OrderedModel):
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(OrderedModel.Meta):
         abstract = True
-
-    # CONFIG FIELDS
-    order_with_respect_to = 'entity_type'
 
     # TO STRING METHOD
     def __str__(self):
@@ -356,6 +349,13 @@ class Dado(OrderedModel):
 
 
 class DadoEntidade(Dado):
+    data_type = models.ForeignKey(
+        'TipoDado',
+        on_delete=models.PROTECT,
+        related_name="data_by_type",
+        verbose_name="tipo da caixinha"
+    )
+
     entity_type = models.ForeignKey(
         'Entidade',
         on_delete=models.CASCADE,
@@ -381,9 +381,34 @@ class DadoEntidade(Dado):
     )
 
     show_box = models.BooleanField(
-        verbose_name='Exibir dado',
+        verbose_name='exibir dado',
         default=True
     )
+
+    # CONFIG FIELDS
+    order_with_respect_to = 'entity_type'
+
+    class Meta:
+        verbose_name = 'dado'
+
+
+class DadoDetalhe(Dado):
+    data_type = models.ForeignKey(
+        'TipoDado',
+        on_delete=models.PROTECT,
+        related_name="details_by_type",
+        verbose_name="tipo do detalhe"
+    )
+
+    dado_main = models.ForeignKey(
+        'DadoEntidade',
+        on_delete=models.CASCADE,
+        related_name='data_details',
+        verbose_name='detalhes'
+    )
+
+    # CONFIG FIELDS
+    order_with_respect_to = 'dado_main'
 
 
 class Coluna(models.Model):

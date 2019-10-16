@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from lupa.models import Dado, Entidade
+from lupa.models import DadoEntidade, Entidade
 from lupa.db_connectors import execute_sample
 
 
@@ -60,7 +60,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         entity_id = options['entity_id']
-        dados = Dado.objects.filter(entity_type__id=entity_id)
+        dados = DadoEntidade.objects.filter(entity_type__id=entity_id)
         entidade = Entidade.objects.get(id=entity_id)
 
         self.printstatus(

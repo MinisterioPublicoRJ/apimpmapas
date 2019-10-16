@@ -161,7 +161,7 @@ class EntidadeSerializer(serializers.ModelSerializer):
 
     def get_theme_list(self, obj):
         data_list = DadoEntidadeInternalSerializer(
-            obj.data_list.filter(show_box=True),
+            obj.obter_dados().filter(show_box=True),
             many=True,
             read_only=True
         ).data

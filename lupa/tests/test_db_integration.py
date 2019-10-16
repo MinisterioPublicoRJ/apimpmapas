@@ -15,7 +15,7 @@ class IntegrationTest(TestCase):
 
     def test_integration_view_postgres(self):
         make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             id=1,
             database='PG',
             columns=['total_homens', 'total_mulheres'],
@@ -39,7 +39,7 @@ class IntegrationTest(TestCase):
 
     def test_integration_view_oracle(self):
         make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             id=3,
             database='ORA',
             columns=['ORGI_NM_ORGAO'],
@@ -67,7 +67,7 @@ class IntegrationTest(TestCase):
 
     def test_integration_view_bda(self):
         make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             id=3,
             database='BDA',
             columns=['orgi_nm_orgao'],
