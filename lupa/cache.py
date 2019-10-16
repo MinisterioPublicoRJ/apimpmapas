@@ -1,16 +1,13 @@
-from hashlib import md5
-
 from django.core.cache import cache as django_cache
 from rest_framework.response import Response
 
 
-def cache_key(args_list, kwargs, token, key_prefix):
-    ctx = md5()
-    for arg in args_list:
-        ctx.update(str(kwargs[arg]).encode('ascii'))
+def cache_key(key_prefix, kwargs):
+    kwargs_key = ':'.join(
+        str(val) for val in kwargs.values()
+    )
 
-    token_ctx = md5(str(token).encode('ascii'))
-    return '%s_%s_%s' % (key_prefix, ctx.hexdigest(), token_ctx.hexdigest())
+    return '%s:%s' % (key_prefix, kwargs_key)
 
 
 def custom_cache(func=None, timeout=300, key_args=['entity_type'],

@@ -7,14 +7,21 @@ from lupa.tests.test_views import NoCacheTestCase
 
 
 class Cache(NoCacheTestCase, TestCase):
-    def test_create_querystring_hash(self):
-        token = 1234
-        args_list = ['key 1']
-        kwargs = {'key 1': 'MUN', 'key 2': 56789}
+    def test_create_querystring_entidade(self):
+        kwargs = {'entity_type': 'EST', 'domain_id': '33'}
+        key_prefix = 'key_prefix'
 
-        key = cache_key(args_list, kwargs, token, key_prefix='key_prefix')
-        expected_key = 'key_prefix_50491abb929620e598b27d56d101eef2_'\
-            '81dc9bdb52d04dc20036dbd8313ed055'
+        key = cache_key(key_prefix, kwargs)
+        expected_key = 'key_prefix:EST:33'
+
+        self.assertEqual(key, expected_key)
+
+    def test_create_querystring_dados(self):
+        kwargs = {'entity_type': 'MUN', 'domain_id': '33600', 'pk': '71'}
+        key_prefix = 'key_prefix'
+
+        key = cache_key(key_prefix, kwargs)
+        expected_key = 'key_prefix:MUN:33600:71'
 
         self.assertEqual(key, expected_key)
 
