@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from .db_connectors import execute
 from .exceptions import QueryError
-from .models import Entidade, Dado, TipoDado, ColunaDado, ColunaMapa
+from .models import Entidade, DadoEntidade, TipoDado, ColunaDado, ColunaMapa
 
 
 def calculate_total(data_list):
@@ -35,12 +35,12 @@ def rowToMapData(row, column_list):
     return feature
 
 
-class DadoInternalSerializer(serializers.ModelSerializer):
+class DadoEntidadeInternalSerializer(serializers.ModelSerializer):
     theme_name = serializers.SerializerMethodField()
     theme_color = serializers.SerializerMethodField()
 
     class Meta:
-        model = Dado
+        model = DadoEntidade
         fields = ['id', 'theme_name', 'theme_color']
 
     def get_theme_name(self, obj):
@@ -160,7 +160,7 @@ class EntidadeSerializer(serializers.ModelSerializer):
         return None
 
     def get_theme_list(self, obj):
-        data_list = DadoInternalSerializer(
+        data_list = DadoEntidadeInternalSerializer(
             obj.data_list.filter(show_box=True),
             many=True,
             read_only=True
@@ -187,13 +187,13 @@ class EntidadeSerializer(serializers.ModelSerializer):
         return theme_list
 
 
-class DadoSerializer(serializers.ModelSerializer):
+class DadoEntidadeSerializer(serializers.ModelSerializer):
     external_data = serializers.SerializerMethodField()
     icon = serializers.SerializerMethodField()
     data_type = serializers.SerializerMethodField()
 
     class Meta:
-        model = Dado
+        model = DadoEntidade
         fields = [
             'id',
             'exibition_field',

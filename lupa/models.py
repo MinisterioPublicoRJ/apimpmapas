@@ -309,35 +309,11 @@ class Dado(OrderedModel):
         verbose_name="tipo da caixinha"
     )
 
-    theme = models.ForeignKey(
-        'TemaDado',
-        on_delete=models.SET_NULL,
-        related_name="data_by_theme",
-        verbose_name="tema da caixinha",
-        null=True,
-        blank=True
-    )
-
-    entity_type = models.ForeignKey(
-        'Entidade',
-        on_delete=models.CASCADE,
-        related_name="data_list",
-        verbose_name="entidade relacionada"
-    )
-
     database = models.CharField(
         verbose_name='banco de dados',
         max_length=3,
         choices=DATABASE_CHOICES,
         default=POSTGRES,
-    )
-
-    roles_allowed = models.ManyToManyField(
-        'Grupo',
-        related_name="data_allowed",
-        verbose_name="grupos com acesso",
-        blank=True,
-        help_text='Deixar em branco para todos',
     )
 
     icon = models.ForeignKey(
@@ -364,13 +340,11 @@ class Dado(OrderedModel):
         help_text='0 = sem limite'
     )
 
-    show_box = models.BooleanField(
-        verbose_name='Exibir dado',
-        default=True
-    )
-
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
 
     # CONFIG FIELDS
     order_with_respect_to = 'entity_type'
@@ -379,6 +353,37 @@ class Dado(OrderedModel):
     def __str__(self):
         if self:
             return self.title
+
+
+class DadoEntidade(Dado):
+    entity_type = models.ForeignKey(
+        'Entidade',
+        on_delete=models.CASCADE,
+        related_name="data_list",
+        verbose_name="entidade relacionada"
+    )
+
+    theme = models.ForeignKey(
+        'TemaDado',
+        on_delete=models.SET_NULL,
+        related_name="data_by_theme",
+        verbose_name="tema da caixinha",
+        null=True,
+        blank=True
+    )
+
+    roles_allowed = models.ManyToManyField(
+        'Grupo',
+        related_name="data_allowed",
+        verbose_name="grupos com acesso",
+        blank=True,
+        help_text='Deixar em branco para todos',
+    )
+
+    show_box = models.BooleanField(
+        verbose_name='Exibir dado',
+        default=True
+    )
 
 
 class Coluna(models.Model):
@@ -446,7 +451,7 @@ class ColunaDado(Coluna):
     ]
 
     dado = models.ForeignKey(
-        'Dado',
+        'DadoEntidade',
         on_delete=models.CASCADE,
         related_name="column_list",
         verbose_name="dado"
