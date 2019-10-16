@@ -112,3 +112,28 @@ class Cache(TestCase):
             {'data': '12345'},
             timeout=300
         )
+
+    @mock.patch('lupa.cache.django_cache')
+    def test_set_cache_args_list(self, _django_cache):
+        request_mock = mock.MagicMock()
+        request_mock.GET = {'auth_token': 1234}
+        kwargs = {'entity_type': 'MUN', 'pk': 1}
+
+        # TODO: move this mock function outside tests
+        def mock_view_get(self, request, *args, **kwargs):
+            # spec: force mock to be Response class
+            response_mock = mock.MagicMock(spec=Response)
+            response_mock.data = {'data': '12345'}
+            return response_mock
+
+        decorated_mock_view = custom_cache(key_args=['entity_type', 'pk'])(
+            mock_view_get
+        )
+        decorated_mock_view(None, request_mock, **kwargs)
+
+        _django_cache.set.assert_called_once_with(
+            '_b0a722932845b0c6871f6323fff36dd2_'
+            '81dc9bdb52d04dc20036dbd8313ed055',
+            {'data': '12345'},
+            timeout=300
+        )

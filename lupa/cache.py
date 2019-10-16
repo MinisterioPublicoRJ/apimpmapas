@@ -13,13 +13,15 @@ def cache_key(args_list, kwargs, token, key_prefix):
     return '%s_%s_%s' % (key_prefix, ctx.hexdigest(), token_ctx.hexdigest())
 
 
-def custom_cache(func=None, timeout=300, key_prefix=''):
+def custom_cache(func=None, timeout=300, key_args=['entity_type'],
+                 key_prefix=''):
+
     def _custom_cache(func):
+
         def wrapper(*args, **kwargs):
             request = args[1]
             token = request.GET.get('auth_token', '')
-            args_list = ['entity_type']
-            hash_key = cache_key(args_list, kwargs, token, key_prefix)
+            hash_key = cache_key(key_args, kwargs, token, key_prefix)
 
             if hash_key in django_cache:
                 data = django_cache.get(hash_key)
