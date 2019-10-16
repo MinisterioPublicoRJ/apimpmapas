@@ -1,6 +1,8 @@
 from unittest import TestCase, mock
 
-from lupa.cache import cache_key
+from rest_framework.response import Response
+
+from lupa.cache import cache_key, custom_cache
 
 
 class Cache(TestCase):
@@ -14,3 +16,24 @@ class Cache(TestCase):
             '81dc9bdb52d04dc20036dbd8313ed055'
 
         self.assertEqual(key, expected_key)
+
+    @mock.patch('lupa.cache.cache_key', return_value='abcde')
+    @mock.patch('lupa.cache.django_cache')
+    def test_insert_data_in_cache(self, _django_cache, _cache_key):
+        request_mock = mock.MagicMock()
+        request_mock.GET.return_value = {'auth_token': 1234}
+        kwargs = {'entity_type': 'MUN'}
+
+        def mock_view_get(self, request, *args, **kwargs):
+            # spec: force mock to be Response class
+            response_mock = mock.MagicMock(spec=Response)
+            response_mock.data = {'data': '12345'}
+            return response_mock
+
+        decorated_mock_view = custom_cache(
+            mock_view_get
+        )
+        response = decorated_mock_view(None, request_mock, **kwargs)
+
+        _django_cache.set.assert_called_once_with('abcde', {'data': '12345'})
+        self.assertIsInstance(response, Response)
