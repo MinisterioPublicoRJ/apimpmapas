@@ -20,7 +20,7 @@ class NoCacheTestCase:
         cache.clear()
 
 
-class EntidadeViewTest(TestCase):
+class EntidadeViewTest(NoCacheTestCase, TestCase):
 
     @mock.patch('lupa.serializers.execute')
     def test_entidade_ok(self, _execute):
@@ -110,7 +110,7 @@ class EntidadeViewTest(TestCase):
         self.assertEqual(resp.status_code, 404)
 
 
-class AuthEntidadeViewTest(TestCase):
+class AuthEntidadeViewTest(NoCacheTestCase, TestCase):
 
     def setUp(self):
         self.role_allowed = 'role_allowed'
@@ -396,7 +396,7 @@ class DetailDadosViewTest(TestCase, NoCacheTestCase):
         self.assertEqual(resp.status_code, 404)
 
 
-class AuthDadosViewTest(TestCase):
+class AuthDadosViewTest(NoCacheTestCase, TestCase):
 
     def setUp(self):
         self.role_allowed = 'role_allowed'

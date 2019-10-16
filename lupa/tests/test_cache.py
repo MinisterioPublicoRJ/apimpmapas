@@ -3,9 +3,10 @@ from unittest import TestCase, mock
 from rest_framework.response import Response
 
 from lupa.cache import cache_key, custom_cache
+from lupa.tests.test_views import NoCacheTestCase
 
 
-class Cache(TestCase):
+class Cache(NoCacheTestCase, TestCase):
     def test_create_querystring_hash(self):
         token = 1234
         args_list = ['key 1']
