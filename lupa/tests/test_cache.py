@@ -462,3 +462,30 @@ class ModelCache(TestCase):
 
         _django_cache.set.assert_not_called()
         self.assertIsInstance(response, Response)
+
+    @mock.patch('lupa.cache.django_cache')
+    def test_cache_cacheable_object(self, _django_cache):
+        request_mock = mock.MagicMock()
+        request_mock.GET = {'auth_token': 'abc1234'}
+        class_mock = mock.MagicMock()
+        class_mock.queryset = Entidade.objects.all()
+        kwargs = {'entity_type': 'EST', 'domain_id': '1'}
+
+        def mock_view_get(self, request, *args, **kwargs):
+            # spec: force mock to be Response class
+            response_mock = mock.MagicMock(spec=Response)
+            response_mock.data = {'data': '12345'}
+            response_mock.status_code = 200
+            return response_mock
+
+        decorated_mock_view = custom_cache(
+            key_prefix='prefix', model_kwargs={'abreviation': 'entity_type'})(
+            mock_view_get
+        )
+
+        response = decorated_mock_view(class_mock, request_mock, **kwargs)
+
+        _django_cache.set.assert_called_once_with(
+            'prefix:EST:1', {'data': '12345'}
+        )
+        self.assertIsInstance(response, Response)
