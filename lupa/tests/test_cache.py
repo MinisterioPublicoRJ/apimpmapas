@@ -328,7 +328,8 @@ class DecoratorCache(TestCase):
             response_mock.data = {'data': '12345'}
             return response_mock
 
-        decorated_mock_view = custom_cache(key_prefix='prefix')(
+        decorated_mock_view = custom_cache(
+            key_prefix='prefix', model_kwargs={'abreviation': 'entity_type'})(
             mock_view_get
         )
 
@@ -361,7 +362,8 @@ class DecoratorCache(TestCase):
         def mock_view_get(self, request, *args, **kwargs):
             return None
 
-        decorated_mock_view = custom_cache(key_prefix='prefix')(
+        decorated_mock_view = custom_cache(
+            key_prefix='prefix', model_kwargs={'abreviation': 'entity_type'})(
             mock_view_get
         )
 
@@ -397,7 +399,8 @@ class DecoratorCache(TestCase):
             response_mock.data = {'data': '12345'}
             return response_mock
 
-        decorated_mock_view = custom_cache(key_prefix='prefix')(
+        decorated_mock_view = custom_cache(
+            key_prefix='prefix', model_kwargs={'abreviation': 'entity_type'})(
             mock_view_get
         )
 
@@ -409,3 +412,41 @@ class DecoratorCache(TestCase):
         )
         self.assertIsInstance(response, Response)
         self.assertEqual(response.data, {'data': '12345'})
+
+    @mock.patch('lupa.cache.get_object_or_404')
+    @mock.patch('lupa.cache.django_cache')
+    def test_set_custom_model_fields(self, _django_cache, _get_obj_or_404):
+        kwargs = {'entity_type': 'EST', 'domain_id': '1', 'pk': '17'}
+        request_mock = mock.MagicMock()
+
+        payload = {
+            'uid': 'username',
+            'permissions': 'role_not_allowed'
+        }
+        secret = config('SECRET_KEY')
+        token = jwt.encode(payload, secret, algorithm="HS256")
+
+        request_mock.GET = {'auth_token': token}
+
+        class_mock = mock.MagicMock()
+        class_mock.queryset = ['queryset']
+
+        def mock_view_get(self, request, *args, **kwargs):
+            response_mock = mock.MagicMock(spec=Response)
+            response_mock.data = {'data': '12345'}
+            return response_mock
+
+        decorated_mock_view = custom_cache(
+            key_prefix='prefix',
+            model_kwargs={
+                'entity_type__abreviation': 'entity_type',
+                'pk': 'pk'
+            }
+        )(mock_view_get)
+
+        decorated_mock_view(class_mock, request_mock, **kwargs)
+        _get_obj_or_404.assert_called_once_with(
+            ['queryset'],
+            entity_type__abreviation='EST',
+            pk='17'
+        )

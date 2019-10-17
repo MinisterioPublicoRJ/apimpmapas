@@ -35,16 +35,14 @@ def cache_key(key_prefix, kwargs):
     return '%s:%s' % (key_prefix, kwargs_key)
 
 
-def custom_cache(timeout=None, key_prefix=None):
-    key_prefix = '' if key_prefix is None else key_prefix
-
+def custom_cache(key_prefix, model_kwargs=dict()):
     def _custom_cache(func):
         def inner(*args, **kwargs):
             instance = args[0]
             request = args[1]
             obj = get_object_or_404(
                 instance.queryset,
-                abreviation=kwargs['entity_type']
+                **{k: kwargs[v] for k, v in model_kwargs.items()}
             )
 
             token = request.GET.get('auth_token')
