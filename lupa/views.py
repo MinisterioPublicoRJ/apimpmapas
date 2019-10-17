@@ -1,7 +1,6 @@
 import jwt
 
 from decouple import config
-from django.core.cache import cache as django_cache
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_page
@@ -14,7 +13,6 @@ from rest_framework.generics import (
 )
 from rest_framework.response import Response
 
-from lupa.cache import cache_key
 from .models import Entidade, Dado
 from .serializers import (
     EntidadeSerializer,
@@ -23,26 +21,6 @@ from .serializers import (
 )
 from .osmapi import query as osmquery
 from .db_connectors import execute_geospatial
-
-
-def _decode_jwt(token):
-    try:
-        payload = jwt.decode(
-            token,
-            config('SECRET_KEY'),
-            algorithms=["HS256"]
-        )
-        return payload['permissions']
-    except (InvalidSignatureError, DecodeError):
-        return []
-
-
-def _has_role(obj, permissions):
-    roles = obj.roles_allowed.all().values_list('role', flat=True)
-    if roles:
-        return [role for role in roles if role in permissions]
-
-    return True
 
 
 class EntityDataView:
@@ -79,14 +57,6 @@ class EntidadeView(GenericAPIView, EntityDataView):
             abreviation=self.kwargs['entity_type']
         )
 
-        token = request.GET.get('auth_token')
-        permissions = _decode_jwt(token)
-
-        key = cache_key(key_prefix='lupa_entidade', kwargs=self.kwargs)
-        if key in django_cache and _has_role(obj, permissions):
-            response_data = django_cache.get(key)
-            return Response(response_data)
-
         response = self.process_request(
             request,
             obj,
@@ -94,8 +64,6 @@ class EntidadeView(GenericAPIView, EntityDataView):
             'exibition_field'
 
         )
-        django_cache.set(key, response.data)
-
         return response
 
 
