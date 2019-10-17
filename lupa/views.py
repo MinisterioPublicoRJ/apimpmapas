@@ -39,7 +39,10 @@ def _decode_jwt(token):
 
 def _has_role(obj, permissions):
     roles = obj.roles_allowed.all().values_list('role', flat=True)
-    return [role for role in roles if role in permissions]
+    if roles:
+        return [role for role in roles if role in permissions]
+
+    return True
 
 
 class EntityDataView:
