@@ -1,6 +1,7 @@
 import jwt
 
 from decouple import config
+from django.core.cache import cache as django_cache
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_page
@@ -13,6 +14,7 @@ from rest_framework.generics import (
 )
 from rest_framework.response import Response
 
+from lupa.cache import cache_key
 from .models import Entidade, Dado
 from .serializers import (
     EntidadeSerializer,
@@ -56,6 +58,15 @@ class EntidadeView(GenericAPIView, EntityDataView):
             self.queryset,
             abreviation=self.kwargs['entity_type']
         )
+        response = self.process_request(
+            request,
+            obj,
+            EntidadeSerializer,
+            'exibition_field'
+
+        )
+        key = cache_key(key_prefix='lupa_entidade', kwargs=self.kwargs)
+        django_cache.set(key, response.data)
 
         return self.process_request(
             request,
