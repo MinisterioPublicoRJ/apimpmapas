@@ -13,60 +13,6 @@ from lupa.models import Entidade
 
 
 class Cache(TestCase):
-    def setUp(self):
-        estado = make('lupa.Entidade', name='Estado', abreviation='EST')
-        municipio = make('lupa.Entidade', abreviation='MUN')
-
-        seguranca = make('lupa.TemaDado', name='Segurança', color='#223478')
-        saude = make('lupa.TemaDado', name='Saúde', color='#223578')
-
-        make('lupa.Dado', id=1, entity_type=estado, theme=seguranca, order=2)
-        make('lupa.Dado', id=2, entity_type=estado, theme=None, order=5)
-        make('lupa.Dado', id=3, entity_type=municipio, order=7)
-        make('lupa.Dado', id=4, entity_type=estado, theme=None, order=1)
-        make('lupa.Dado', id=5, entity_type=estado, theme=saude, order=8)
-        make('lupa.Dado', id=6, entity_type=municipio, order=6)
-        make('lupa.Dado', id=7, entity_type=estado, theme=seguranca, order=3)
-        make('lupa.Dado', id=8, entity_type=estado, theme=None, order=4)
-        self.expected_answer = {
-            'domain_id': '33',
-            'entity_type': 'Estado',
-            'exibition_field': 'Rio de Janeiro',
-            'geojson': None,
-            'theme_list': [
-                {
-                    'tema': None,
-                    'cor': None,
-                    'data_list': [
-                        {'id': 4}
-                    ]
-                },
-                {
-                    'tema': 'Segurança',
-                    'cor': '#223478',
-                    'data_list': [
-                        {'id': 1},
-                        {'id': 7}
-                    ]
-                },
-                {
-                    'tema': None,
-                    'cor': None,
-                    'data_list': [
-                        {'id': 8},
-                        {'id': 2}
-                    ]
-                },
-                {
-                    'tema': 'Saúde',
-                    'cor': '#223578',
-                    'data_list': [
-                        {'id': 5}
-                    ]
-                }
-            ]
-        }
-
     def test_create_querystring_entidade(self):
         kwargs = {'entity_type': 'EST', 'domain_id': '33'}
         key_prefix = 'key_prefix'
