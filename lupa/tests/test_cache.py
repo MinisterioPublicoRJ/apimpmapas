@@ -9,6 +9,7 @@ from model_mommy.mommy import make
 from rest_framework.response import Response
 
 from lupa.cache import cache_key, custom_cache
+from lupa.models import Entidade
 
 
 class Cache(TestCase):
@@ -244,10 +245,81 @@ class PermissionCache(TestCase):
 
 
 class DecoratorCache(TestCase):
+    def setUp(self):
+        self.role_allowed = 'role_allowed'
+        self.entity_abrv = 'EST'
+        self.entity_type = 'Estado'
+        self.entity_name = 'Rio de Janeiro'
+        self.entity_id = '1'
+
+        municipio = make('lupa.Entidade', abreviation='MUN')
+        self.grupo_allowed = make(
+            'lupa.Grupo',
+            role=self.role_allowed
+        )
+        estado = make(
+            'lupa.Entidade',
+            id=self.entity_id,
+            roles_allowed=[self.grupo_allowed],
+            name=self.entity_type,
+            abreviation=self.entity_abrv
+        )
+        seguranca = make('lupa.TemaDado', name='Segurança', color='#223478')
+        saude = make('lupa.TemaDado', name='Saúde', color='#223578')
+
+        make('lupa.Dado', id=1, entity_type=estado, theme=seguranca, order=2)
+        make('lupa.Dado', id=2, entity_type=estado, theme=None, order=5)
+        make('lupa.Dado', id=3, entity_type=municipio, order=7)
+        make('lupa.Dado', id=4, entity_type=estado, theme=None, order=1)
+        make('lupa.Dado', id=5, entity_type=estado, theme=saude, order=8)
+        make('lupa.Dado', id=6, entity_type=municipio, order=6)
+        make('lupa.Dado', id=7, entity_type=estado, theme=seguranca, order=3)
+        make('lupa.Dado', id=8, entity_type=estado, theme=None, order=4)
+        self.expected_answer = {
+            'domain_id': '33',
+            'entity_type': 'Estado',
+            'exibition_field': 'Rio de Janeiro',
+            'geojson': None,
+            'theme_list': [
+                {
+                    'tema': None,
+                    'cor': None,
+                    'data_list': [
+                        {'id': 4}
+                    ]
+                },
+                {
+                    'tema': 'Segurança',
+                    'cor': '#223478',
+                    'data_list': [
+                        {'id': 1},
+                        {'id': 7}
+                    ]
+                },
+                {
+                    'tema': None,
+                    'cor': None,
+                    'data_list': [
+                        {'id': 8},
+                        {'id': 2}
+                    ]
+                },
+                {
+                    'tema': 'Saúde',
+                    'cor': '#223578',
+                    'data_list': [
+                        {'id': 5}
+                    ]
+                }
+            ]
+        }
+
     @mock.patch('lupa.cache.django_cache')
     def test_insert_data_in_cache(self, _django_cache):
         request_mock = mock.MagicMock()
-        request_mock.GET.return_value = {'auth_token': 1234}
+        request_mock.GET = {'auth_token': 'abc1234'}
+        class_mock = mock.MagicMock()
+        class_mock.queryset = Entidade.objects.all()
         kwargs = {'entity_type': 'MUN', 'domain_id': '1'}
 
         def mock_view_get(self, request, *args, **kwargs):
@@ -260,7 +332,7 @@ class DecoratorCache(TestCase):
             mock_view_get
         )
 
-        response = decorated_mock_view(None, request_mock, **kwargs)
+        response = decorated_mock_view(class_mock, request_mock, **kwargs)
 
         _django_cache.set.assert_called_once_with(
             'prefix:MUN:1', {'data': '12345'}
@@ -268,12 +340,23 @@ class DecoratorCache(TestCase):
         self.assertIsInstance(response, Response)
 
     @mock.patch('lupa.cache.django_cache')
-    def test_retrieve_data_from_cache(self, _django_cache):
+    def test_retrieve_data_from_cache_with_permission(self, _django_cache):
         _django_cache.__contains__.return_value = True
         _django_cache.get.return_value = {'data': '12345'}
         request_mock = mock.MagicMock()
-        request_mock.GET.return_value = {'auth_token': 1234}
-        kwargs = {'entity_type': 'MUN', 'domain_id': '1'}
+
+        payload = {
+            'uid': 'username',
+            'permissions': 'role_allowed'
+        }
+        secret = config('SECRET_KEY')
+        token = jwt.encode(payload, secret, algorithm="HS256")
+
+        request_mock.GET = {'auth_token': token}
+
+        class_mock = mock.MagicMock()
+        class_mock.queryset = Entidade.objects.all()
+        kwargs = {'entity_type': 'EST', 'domain_id': '1'}
 
         def mock_view_get(self, request, *args, **kwargs):
             return None
@@ -282,10 +365,10 @@ class DecoratorCache(TestCase):
             mock_view_get
         )
 
-        response = decorated_mock_view(None, request_mock, **kwargs)
+        response = decorated_mock_view(class_mock, request_mock, **kwargs)
 
         _django_cache.get.assert_called_once_with(
-            'prefix:MUN:1'
+            'prefix:EST:1'
         )
         self.assertIsInstance(response, Response)
         self.assertEqual(response.data, {'data': '12345'})
