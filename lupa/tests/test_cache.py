@@ -362,3 +362,103 @@ class DecoratorCache(TestCase):
         _django_cache.set.assert_not_called()
         self.assertIsInstance(response, Response)
 
+
+class ModelCache(TestCase):
+    def setUp(self):
+        self.role_allowed = 'role_allowed'
+        self.entity_abrv = 'EST'
+        self.entity_type = 'Estado'
+        self.entity_name = 'Rio de Janeiro'
+        self.entity_id = '1'
+
+        municipio = make('lupa.Entidade', abreviation='MUN')
+        self.grupo_allowed = make(
+            'lupa.Grupo',
+            role=self.role_allowed
+        )
+        estado = make(
+            'lupa.Entidade',
+            id=self.entity_id,
+            roles_allowed=[self.grupo_allowed],
+            name=self.entity_type,
+            abreviation=self.entity_abrv
+        )
+        seguranca = make('lupa.TemaDado', name='Segurança', color='#223478')
+        saude = make('lupa.TemaDado', name='Saúde', color='#223578')
+
+        make('lupa.Dado', id=1, entity_type=estado, theme=seguranca, order=2)
+        make('lupa.Dado', id=2, entity_type=estado, theme=None, order=5)
+        make('lupa.Dado', id=3, entity_type=municipio, order=7)
+        make('lupa.Dado', id=4, entity_type=estado, theme=None, order=1)
+        make('lupa.Dado', id=5, entity_type=estado, theme=saude, order=8)
+        make('lupa.Dado', id=6, entity_type=municipio, order=6)
+        make('lupa.Dado', id=7, entity_type=estado, theme=seguranca, order=3)
+        make('lupa.Dado', id=8, entity_type=estado, theme=None, order=4)
+        self.expected_answer = {
+            'domain_id': '33',
+            'entity_type': 'Estado',
+            'exibition_field': 'Rio de Janeiro',
+            'geojson': None,
+            'theme_list': [
+                {
+                    'tema': None,
+                    'cor': None,
+                    'data_list': [
+                        {'id': 4}
+                    ]
+                },
+                {
+                    'tema': 'Segurança',
+                    'cor': '#223478',
+                    'data_list': [
+                        {'id': 1},
+                        {'id': 7}
+                    ]
+                },
+                {
+                    'tema': None,
+                    'cor': None,
+                    'data_list': [
+                        {'id': 8},
+                        {'id': 2}
+                    ]
+                },
+                {
+                    'tema': 'Saúde',
+                    'cor': '#223578',
+                    'data_list': [
+                        {'id': 5}
+                    ]
+                }
+            ]
+        }
+        self.estado = estado
+
+    @mock.patch('lupa.cache.django_cache')
+    def test_only_cache_cacheable_objects(self, _django_cache):
+        request_mock = mock.MagicMock()
+        request_mock.GET = {'auth_token': 'abc1234'}
+        class_mock = mock.MagicMock()
+        class_mock.queryset = Entidade.objects.all()
+        kwargs = {'entity_type': 'EST', 'domain_id': '1'}
+
+        # non-cacheable
+        self.estado.is_cacheable = False
+        self.estado.save()
+
+        def mock_view_get(self, request, *args, **kwargs):
+            # spec: force mock to be Response class
+            response_mock = mock.MagicMock(spec=Response)
+            response_mock.data = {'data': '12345'}
+            response_mock.status_code = 200
+            return response_mock
+
+        decorated_mock_view = custom_cache(
+            key_prefix='prefix', model_kwargs={'abreviation': 'entity_type'})(
+            mock_view_get
+        )
+
+        response = decorated_mock_view(class_mock, request_mock, **kwargs)
+
+        _django_cache.set.assert_not_called()
+        self.assertIsInstance(response, Response)

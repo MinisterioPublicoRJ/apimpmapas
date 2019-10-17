@@ -197,6 +197,11 @@ class Entidade(models.Model):
         default=False
     )
 
+    is_cacheable = models.BooleanField(
+        verbose_name='guardar no cache?',
+        default=True
+    )
+
     def clean(self):
         errors = {}
 
