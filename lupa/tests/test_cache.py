@@ -155,6 +155,7 @@ class DecoratorCache(TestCase):
                 }
             ]
         }
+        self.estado = estado
 
     @mock.patch('lupa.cache.django_cache')
     def test_insert_data_in_cache(self, _django_cache):
@@ -292,3 +293,44 @@ class DecoratorCache(TestCase):
             entity_type__abreviation='EST',
             pk='17'
         )
+
+    @mock.patch('lupa.cache.django_cache')
+    def test_retrive_data_from_cache_wo_no_role(self, _django_cache):
+        """Return data from cache if user has no role and data has no
+        group restrictions i.e no roles_allowed"""
+
+        self.estado.roles_allowed.set([])
+        self.estado.save()
+
+        _django_cache.__contains__.return_value = True
+        _django_cache.get.return_value = {'data': '12345'}
+        request_mock = mock.MagicMock()
+
+        payload = {
+            'uid': 'username',
+
+        }
+        secret = config('SECRET_KEY')
+        token = jwt.encode(payload, secret, algorithm="HS256")
+
+        request_mock.GET = {'auth_token': token}
+
+        class_mock = mock.MagicMock()
+        class_mock.queryset = Entidade.objects.all()
+        kwargs = {'entity_type': 'EST', 'domain_id': '1'}
+
+        def mock_view_get(self, request, *args, **kwargs):
+            return None
+
+        decorated_mock_view = custom_cache(
+            key_prefix='prefix', model_kwargs={'abreviation': 'entity_type'})(
+            mock_view_get
+        )
+
+        response = decorated_mock_view(class_mock, request_mock, **kwargs)
+
+        _django_cache.get.assert_called_once_with(
+            'prefix:EST:1'
+        )
+        self.assertIsInstance(response, Response)
+        self.assertEqual(response.data, {'data': '12345'})

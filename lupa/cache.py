@@ -14,7 +14,7 @@ def _decode_jwt(token):
             config('SECRET_KEY'),
             algorithms=["HS256"]
         )
-        return payload['permissions']
+        return payload.get('permissions', [])
     except (InvalidSignatureError, DecodeError):
         return []
 
