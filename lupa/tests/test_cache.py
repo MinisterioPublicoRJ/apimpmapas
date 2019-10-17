@@ -6,8 +6,9 @@ from decouple import config
 from django.test import TestCase
 from django.urls import reverse
 from model_mommy.mommy import make
+from rest_framework.response import Response
 
-from lupa.cache import cache_key
+from lupa.cache import cache_key, custom_cache
 
 
 class Cache(TestCase):
@@ -240,3 +241,28 @@ class PermissionCache(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp_json, self.expected_answer)
         _django_cache.get.assert_called_once_with('lupa_entidade:EST:33')
+
+
+class DecoratorCache(TestCase):
+    @mock.patch('lupa.cache.django_cache')
+    def test_insert_data_in_cache(self, _django_cache):
+        request_mock = mock.MagicMock()
+        request_mock.GET.return_value = {'auth_token': 1234}
+        kwargs = {'entity_type': 'MUN', 'domain_id': '1'}
+
+        def mock_view_get(self, request, *args, **kwargs):
+            # spec: force mock to be Response class
+            response_mock = mock.MagicMock(spec=Response)
+            response_mock.data = {'data': '12345'}
+            return response_mock
+
+        decorated_mock_view = custom_cache(key_prefix='prefix')(
+            mock_view_get
+        )
+
+        response = decorated_mock_view(None, request_mock, **kwargs)
+
+        _django_cache.set.assert_called_once_with(
+            'prefix:MUN:1', {'data': '12345'}
+        )
+        self.assertIsInstance(response, Response)
