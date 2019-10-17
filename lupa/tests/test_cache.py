@@ -216,3 +216,27 @@ class PermissionCache(TestCase):
 
         self.assertEqual(resp.status_code, 403)
         _django_cache.get.assert_not_called()
+
+    @mock.patch('lupa.views.django_cache')
+    @mock.patch('lupa.serializers.execute')
+    def test_retrieve_data_from_cache_with_permission(self, _execute,
+                                                      _django_cache):
+        _django_cache.__contains__.return_value = True
+        _django_cache.get.return_value = self.expected_answer
+        _execute.return_value = [('Rio de Janeiro', 'mock_geo')]
+        payload = {
+            'uid': 'username',
+            'permissions': 'role_allowed'
+        }
+        secret = config('SECRET_KEY')
+        token = jwt.encode(payload, secret, algorithm="HS256")
+
+        url = reverse('lupa:detail_entidade', args=('EST', '33',))
+        url += '?auth_token=' + token.decode()
+
+        resp = self.client.get(url)
+        resp_json = resp.json()
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp_json, self.expected_answer)
+        _django_cache.get.assert_called_once_with('lupa_entidade:EST:33')
