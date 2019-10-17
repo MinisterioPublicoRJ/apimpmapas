@@ -25,6 +25,23 @@ from .osmapi import query as osmquery
 from .db_connectors import execute_geospatial
 
 
+def _decode_jwt(token):
+    try:
+        payload = jwt.decode(
+            token,
+            config('SECRET_KEY'),
+            algorithms=["HS256"]
+        )
+        return payload['permissions']
+    except (InvalidSignatureError, DecodeError):
+        return []
+
+
+def _has_role(obj, permissions):
+    roles = obj.roles_allowed.all().values_list('role', flat=True)
+    return [role for role in roles if role in permissions]
+
+
 class EntityDataView:
     def process_request(self, request, obj, serializer, key_check):
         roles = obj.roles_allowed.all().values_list('role', flat=True)
@@ -59,8 +76,11 @@ class EntidadeView(GenericAPIView, EntityDataView):
             abreviation=self.kwargs['entity_type']
         )
 
+        token = request.GET.get('auth_token')
+        permissions = _decode_jwt(token)
+
         key = cache_key(key_prefix='lupa_entidade', kwargs=self.kwargs)
-        if key in django_cache:
+        if key in django_cache and _has_role(obj, permissions):
             response_data = django_cache.get(key)
             return Response(response_data)
 
@@ -73,12 +93,7 @@ class EntidadeView(GenericAPIView, EntityDataView):
         )
         django_cache.set(key, response.data)
 
-        return self.process_request(
-            request,
-            obj,
-            EntidadeSerializer,
-            'exibition_field'
-        )
+        return response
 
 
 class DadoView(RetrieveAPIView, EntityDataView):
