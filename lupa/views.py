@@ -58,6 +58,12 @@ class EntidadeView(GenericAPIView, EntityDataView):
             self.queryset,
             abreviation=self.kwargs['entity_type']
         )
+
+        key = cache_key(key_prefix='lupa_entidade', kwargs=self.kwargs)
+        if key in django_cache:
+            response_data = django_cache.get(key)
+            return Response(response_data)
+
         response = self.process_request(
             request,
             obj,
@@ -65,7 +71,6 @@ class EntidadeView(GenericAPIView, EntityDataView):
             'exibition_field'
 
         )
-        key = cache_key(key_prefix='lupa_entidade', kwargs=self.kwargs)
         django_cache.set(key, response.data)
 
         return self.process_request(
