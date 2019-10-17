@@ -35,6 +35,15 @@ def cache_key(key_prefix, kwargs):
     return '%s:%s' % (key_prefix, kwargs_key)
 
 
+def wildcard_cache_key(key_prefix, keys, wildcard_pos):
+    keys = keys[:wildcard_pos] + ['*'] + keys[wildcard_pos:]
+    kwargs_key = ':'.join(
+        str(val) for val in keys
+    )
+
+    return '*%s:%s' % (key_prefix, kwargs_key)
+
+
 def custom_cache(key_prefix, model_kwargs=dict()):
     def _custom_cache(func):
         def inner(*args, **kwargs):

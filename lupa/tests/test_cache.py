@@ -4,11 +4,10 @@ from unittest import mock
 
 from decouple import config
 from django.test import TestCase
-from django.urls import reverse
 from model_mommy.mommy import make
 from rest_framework.response import Response
 
-from lupa.cache import cache_key, custom_cache
+from lupa.cache import cache_key, custom_cache, wildcard_cache_key
 from lupa.models import Entidade
 
 
@@ -28,6 +27,15 @@ class Cache(TestCase):
 
         key = cache_key(key_prefix, kwargs)
         expected_key = 'key_prefix:MUN:33600:71'
+
+        self.assertEqual(key, expected_key)
+
+    def test_create_cache_key_for_removal(self):
+        keys = ['MUN', '71']
+        key_prefix = 'prefix'
+
+        key = wildcard_cache_key(key_prefix, keys, wildcard_pos=1)
+        expected_key = '*prefix:MUN:*:71'
 
         self.assertEqual(key, expected_key)
 
