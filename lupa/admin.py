@@ -6,7 +6,7 @@ import nested_admin
 from ordered_model.admin import OrderedModelAdmin
 
 from .models import (
-    Dado,
+    DadoEntidade,
     Entidade,
     Grupo,
     Mapa,
@@ -70,8 +70,8 @@ class EntidadeAdmin(nested_admin.NestedModelAdmin):
     inlines = [MapaAdminInline]
 
 
-@admin.register(Dado)
-class DadoAdmin(OrderedModelAdmin):
+@admin.register(DadoEntidade)
+class DadoEntidadeAdmin(OrderedModelAdmin):
     list_display = (
         'title',
         'entity_type',

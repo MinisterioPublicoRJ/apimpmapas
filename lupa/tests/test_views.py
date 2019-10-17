@@ -71,14 +71,60 @@ class EntidadeViewTest(TestCase):
         seguranca = make('lupa.TemaDado', name='Segurança', color='#223478')
         saude = make('lupa.TemaDado', name='Saúde', color='#223578')
 
-        make('lupa.Dado', id=1, entity_type=estado, theme=seguranca, order=2)
-        make('lupa.Dado', id=2, entity_type=estado, theme=None, order=5)
-        make('lupa.Dado', id=3, entity_type=municipio, order=7)
-        make('lupa.Dado', id=4, entity_type=estado, theme=None, order=1)
-        make('lupa.Dado', id=5, entity_type=estado, theme=saude, order=8)
-        make('lupa.Dado', id=6, entity_type=municipio, order=6)
-        make('lupa.Dado', id=7, entity_type=estado, theme=seguranca, order=3)
-        make('lupa.Dado', id=8, entity_type=estado, theme=None, order=4)
+        make(
+            'lupa.DadoEntidade',
+            id=1,
+            entity_type=estado,
+            theme=seguranca,
+            order=2
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=2,
+            entity_type=estado,
+            theme=None,
+            order=5
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=3,
+            entity_type=municipio,
+            order=7
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=4,
+            entity_type=estado,
+            theme=None,
+            order=1
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=5,
+            entity_type=estado,
+            theme=saude,
+            order=8
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=6,
+            entity_type=municipio,
+            order=6
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=7,
+            entity_type=estado,
+            theme=seguranca,
+            order=3
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=8,
+            entity_type=estado,
+            theme=None,
+            order=4
+        )
 
         url = reverse('lupa:detail_entidade', args=('EST', '33',))
 
@@ -190,15 +236,15 @@ class ListDadosViewTest(TestCase, NoCacheTestCase):
         ent_estado = make('lupa.Entidade', abreviation='EST')
         ent_municipio = make('lupa.Entidade', abreviation='MUN')
 
-        make('lupa.Dado', entity_type=ent_estado, _quantity=2)
+        make('lupa.DadoEntidade', entity_type=ent_estado, _quantity=2)
         dado_object_mun_0 = make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             entity_type=ent_municipio,
             theme=None,
             order=1
         )
         dado_object_mun_1 = make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             entity_type=ent_municipio,
             theme=None,
             order=2
@@ -232,12 +278,12 @@ class ListDadosViewTest(TestCase, NoCacheTestCase):
         ent_municipio = make('lupa.Entidade', abreviation='MUN')
 
         make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             entity_type=ent_municipio,
             show_box=False
         )
         dado_object_mun_1 = make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             entity_type=ent_municipio,
             theme=None,
             show_box=True
@@ -306,7 +352,7 @@ class DetailDadosViewTest(TestCase, NoCacheTestCase):
             abreviation=self.entity_abrv,
         )
         dado = make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             id=self.data_id,
             data_type=self.data_type_obj,
             entity_type=entidade,
@@ -338,7 +384,7 @@ class DetailDadosViewTest(TestCase, NoCacheTestCase):
         )
 
         make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             id=self.data_id,
             entity_type=entidade,
             data_type=self.data_type_obj
@@ -359,7 +405,7 @@ class DetailDadosViewTest(TestCase, NoCacheTestCase):
             abreviation=self.entity_abrv,
         )
         make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             id=self.data_id_alt,
             entity_type=entidade
         )
@@ -382,7 +428,7 @@ class DetailDadosViewTest(TestCase, NoCacheTestCase):
             abreviation=self.entity_abrv,
         )
         make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             id=self.data_id,
             entity_type=entidade
         )
@@ -423,7 +469,7 @@ class AuthDadosViewTest(TestCase):
             role=self.role_allowed
         )
         self.dado = make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             title=self.dado_title,
             roles_allowed=[self.grupo_allowed],
             id=self.data_id,

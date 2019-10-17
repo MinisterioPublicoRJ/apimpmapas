@@ -13,10 +13,10 @@ from rest_framework.generics import (
 )
 from rest_framework.response import Response
 
-from .models import Entidade, Dado
+from .models import Entidade, DadoEntidade
 from .serializers import (
     EntidadeSerializer,
-    DadoSerializer,
+    DadoEntidadeSerializer,
     EntidadeIdSerializer
 )
 from .osmapi import query as osmquery
@@ -67,9 +67,9 @@ class EntidadeView(GenericAPIView, EntityDataView):
 
 
 @method_decorator(cache_page(600, key_prefix='lupa_dado'), name='dispatch')
-class DadoView(RetrieveAPIView, EntityDataView):
-    serializer_class = DadoSerializer
-    queryset = Dado.objects.all()
+class DadoEntidadeView(RetrieveAPIView, EntityDataView):
+    serializer_class = DadoEntidadeSerializer
+    queryset = DadoEntidade.objects.all()
 
     def get(self, request, *args, **kwargs):
         obj = get_object_or_404(
@@ -81,7 +81,7 @@ class DadoView(RetrieveAPIView, EntityDataView):
         return self.process_request(
             request,
             obj,
-            DadoSerializer,
+            DadoEntidadeSerializer,
             'external_data'
         )
 
