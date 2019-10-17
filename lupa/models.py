@@ -374,6 +374,11 @@ class Dado(OrderedModel):
         default=True
     )
 
+    is_cacheable = models.BooleanField(
+        verbose_name='guardar no cache?',
+        default=True
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 
