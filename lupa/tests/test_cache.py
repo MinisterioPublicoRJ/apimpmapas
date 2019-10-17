@@ -372,3 +372,40 @@ class DecoratorCache(TestCase):
         )
         self.assertIsInstance(response, Response)
         self.assertEqual(response.data, {'data': '12345'})
+
+    @mock.patch('lupa.cache.django_cache')
+    def test_donot_retrieve_data_from_cache_wo_permission(self, _django_cache):
+        _django_cache.__contains__.return_value = True
+        _django_cache.get.return_value = {'data': '12345'}
+        request_mock = mock.MagicMock()
+
+        payload = {
+            'uid': 'username',
+            'permissions': 'role_not_allowed'
+        }
+        secret = config('SECRET_KEY')
+        token = jwt.encode(payload, secret, algorithm="HS256")
+
+        request_mock.GET = {'auth_token': token}
+
+        class_mock = mock.MagicMock()
+        class_mock.queryset = Entidade.objects.all()
+        kwargs = {'entity_type': 'EST', 'domain_id': '1'}
+
+        def mock_view_get(self, request, *args, **kwargs):
+            response_mock = mock.MagicMock(spec=Response)
+            response_mock.data = {'data': '12345'}
+            return response_mock
+
+        decorated_mock_view = custom_cache(key_prefix='prefix')(
+            mock_view_get
+        )
+
+        response = decorated_mock_view(class_mock, request_mock, **kwargs)
+
+        _django_cache.get.assert_not_called()
+        _django_cache.set.assert_called_once_with(
+            'prefix:EST:1', {'data': '12345'}
+        )
+        self.assertIsInstance(response, Response)
+        self.assertEqual(response.data, {'data': '12345'})
