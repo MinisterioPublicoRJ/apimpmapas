@@ -180,7 +180,8 @@ class DecoratorCache(TestCase):
         response = decorated_mock_view(class_mock, request_mock, **kwargs)
 
         _django_cache.set.assert_called_once_with(
-            'prefix:MUN:1', {'data': '12345'}
+            'prefix:MUN:1', {'data': '12345'},
+            timeout=None
         )
         self.assertIsInstance(response, Response)
 
@@ -253,7 +254,8 @@ class DecoratorCache(TestCase):
 
         _django_cache.get.assert_not_called()
         _django_cache.set.assert_called_once_with(
-            'prefix:EST:1', {'data': '12345'}
+            'prefix:EST:1', {'data': '12345'},
+            timeout=None
         )
         self.assertIsInstance(response, Response)
         self.assertEqual(response.data, {'data': '12345'})
@@ -486,6 +488,7 @@ class ModelCache(TestCase):
         response = decorated_mock_view(class_mock, request_mock, **kwargs)
 
         _django_cache.set.assert_called_once_with(
-            'prefix:EST:1', {'data': '12345'}
+            'prefix:EST:1', {'data': '12345'},
+            timeout=None
         )
         self.assertIsInstance(response, Response)

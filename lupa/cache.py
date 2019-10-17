@@ -55,7 +55,7 @@ def custom_cache(key_prefix, model_kwargs=dict()):
 
             response = func(*args, **kwargs)
             if response.status_code == 200 and obj.is_cacheable:
-                django_cache.set(key, response.data)
+                django_cache.set(key, response.data, timeout=None)
 
             return response
 
