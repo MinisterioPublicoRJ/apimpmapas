@@ -35,7 +35,8 @@ def cache_key(key_prefix, kwargs):
     return '%s:%s' % (key_prefix, kwargs_key)
 
 
-def wildcard_cache_key(key_prefix, keys, wildcard_pos):
+def wildcard_cache_key(key_prefix, keys):
+    wildcard_pos = 1
     keys = keys[:wildcard_pos] + ['*'] + keys[wildcard_pos:]
     kwargs_key = ':'.join(
         str(val) for val in keys

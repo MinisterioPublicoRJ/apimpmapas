@@ -30,11 +30,20 @@ class Cache(TestCase):
 
         self.assertEqual(key, expected_key)
 
-    def test_create_cache_key_for_removal(self):
+    def test_create_cache_key_for_entity_removal(self):
+        keys = ['MUN']
+        key_prefix = 'prefix'
+
+        key = wildcard_cache_key(key_prefix, keys)
+        expected_key = '*prefix:MUN:*'
+
+        self.assertEqual(key, expected_key)
+
+    def test_create_cache_key_for_data_removal(self):
         keys = ['MUN', '71']
         key_prefix = 'prefix'
 
-        key = wildcard_cache_key(key_prefix, keys, wildcard_pos=1)
+        key = wildcard_cache_key(key_prefix, keys)
         expected_key = '*prefix:MUN:*:71'
 
         self.assertEqual(key, expected_key)
