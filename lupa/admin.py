@@ -1,10 +1,12 @@
 from django.contrib import admin
+from django.core.cache import cache as django_cache
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django import forms
 import nested_admin
 from ordered_model.admin import OrderedModelAdmin
 
+from lupa.cache import wildcard_cache_key
 from .models import (
     Dado,
     Entidade,
@@ -15,6 +17,22 @@ from .models import (
     ColunaDado,
     ColunaMapa
 )
+
+
+def remove_data_from_cache(modeladmin, request, queryset):
+    key_prefix = 'lupa_dado'
+    cache_client = django_cache.get_master_client()
+    for obj in queryset:
+        key_args = [
+            obj.entity_type.abreviation,
+            obj.pk
+        ]
+        key = wildcard_cache_key(key_prefix, key_args)
+        cache_keys = cache_client.keys(key)
+        [cache_client.delete(cache_key) for cache_key in cache_keys]
+
+
+remove_data_from_cache.short_description = 'Remove do cache'
 
 
 class ColunaDadoForm(forms.ModelForm):
@@ -129,7 +147,7 @@ class DadoAdmin(OrderedModelAdmin):
             })
 
     move_dado_to_position.short_description = "Mover para Posição..."
-    actions = ['move_dado_to_position']
+    actions = ['move_dado_to_position', remove_data_from_cache]
 
 
 admin.site.register(Grupo)
