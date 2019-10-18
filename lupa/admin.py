@@ -19,6 +19,18 @@ from .models import (
 )
 
 
+def remove_entity_from_cache(modeladmin, request, queryset):
+    key_prefix = 'lupa_entidade'
+    cache_client = django_cache.get_master_client()
+    for obj in queryset:
+        key_args = [
+            obj.abreviation,
+        ]
+        key = wildcard_cache_key(key_prefix, key_args)
+        cache_keys = cache_client.keys(key)
+        [cache_client.delete(cache_key) for cache_key in cache_keys]
+
+
 def remove_data_from_cache(modeladmin, request, queryset):
     key_prefix = 'lupa_dado'
     cache_client = django_cache.get_master_client()
@@ -33,6 +45,7 @@ def remove_data_from_cache(modeladmin, request, queryset):
 
 
 remove_data_from_cache.short_description = 'Remove do cache'
+remove_entity_from_cache.short_description = 'Remove do cache'
 
 
 class ColunaDadoForm(forms.ModelForm):
@@ -88,6 +101,7 @@ class EntidadeAdmin(nested_admin.NestedModelAdmin):
     )
     filter_horizontal = ('roles_allowed', )
     inlines = [MapaAdminInline]
+    actions = [remove_entity_from_cache]
 
 
 @admin.register(Dado)

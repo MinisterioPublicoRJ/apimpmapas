@@ -1,7 +1,9 @@
 from django.contrib.admin.sites import AdminSite
 from model_mommy.mommy import make
 from unittest import TestCase, mock
-from lupa.admin import DadoAdmin, remove_data_from_cache
+from lupa.admin import (DadoAdmin,
+                        remove_data_from_cache,
+                        remove_entity_from_cache)
 from lupa.models import Dado
 import pytest
 
@@ -121,6 +123,51 @@ class ClearFromCache(TestCase):
             mock.call(
                 '*%s:%s:*:%s'
                 % (key_prefix, dado_2.entity_type.abreviation, dado_2.pk)
+            )
+        ]
+
+        rd_delete_calls = [
+            mock.call('key 1.1'),
+            mock.call('key 1.2'),
+            mock.call('key 2.1'),
+            mock.call('key 2.2')
+        ]
+
+        _django_cache.get_master_client.assert_called_once_with()
+        rd_mock.keys.assert_has_calls(rd_keys_calls)
+        rd_mock.delete.assert_has_calls(rd_delete_calls)
+
+    @mock.patch('lupa.admin.django_cache')
+    def test_clear_entity_from_cache(self, _django_cache):
+        rd_mock = mock.MagicMock()
+        rd_mock.keys.side_effect = [
+            ['key 1.1', 'key 1.2'],
+            ['key 2.1', 'key 2.2']
+        ]
+        _django_cache.get_master_client.return_value = rd_mock
+        modeladmin = None
+        request = None
+
+        entidade_1 = make(
+            'lupa.Entidade',
+        )
+        entidade_2 = make(
+            'lupa.Entidade',
+        )
+
+        queryset = [entidade_1, entidade_2]
+
+        remove_entity_from_cache(modeladmin, request, queryset)
+
+        key_prefix = 'lupa_entidade'
+        rd_keys_calls = [
+            mock.call(
+                '*%s:%s:*'
+                % (key_prefix, entidade_1.abreviation)
+            ),
+            mock.call(
+                '*%s:%s:*'
+                % (key_prefix, entidade_2.abreviation)
             )
         ]
 
