@@ -385,6 +385,9 @@ class DadoEntidade(Dado):
         default=True
     )
 
+    def obter_detalhes(self):
+        return self.data_details.order_by('order')
+
     # CONFIG FIELDS
     order_with_respect_to = 'entity_type'
 
@@ -477,6 +480,37 @@ class ColunaDado(Coluna):
 
     dado = models.ForeignKey(
         'DadoEntidade',
+        on_delete=models.CASCADE,
+        related_name="column_list",
+        verbose_name="dado"
+    )
+
+
+class ColunaDetalhe(Coluna):
+    # Sim, eu sei que essa classe é idêntica à ColunaDado
+    # O que fiz, eu fiz sem escolha. Em nome da paz e da sanidade
+    # Mas não em nome do Doutor
+
+    # CHOICES
+    DATA_COLUMN = 'dado'
+    SOURCE_COLUMN = 'source'
+    IMAGE_COLUMN = 'imagem'
+    IMAGE_LINK_COLUMN = 'linkimagem'
+    EXTERNAL_LINK_COLUMN = 'link_externo'
+    TITLE_SUFFIX_COLUMN = 'sufixo_titulo'
+    DETAIL_COLUMN = 'details'
+    INFO_CHOICES = Coluna.BASE_CHOICES + [
+        (DATA_COLUMN, 'Coluna de dados principais'),
+        (SOURCE_COLUMN, 'Coluna de fonte dos dados'),
+        (IMAGE_COLUMN, 'Coluna de imagem'),
+        (IMAGE_LINK_COLUMN, 'Coluna de Link de Imagem'),
+        (EXTERNAL_LINK_COLUMN, 'Coluna de link externo'),
+        (TITLE_SUFFIX_COLUMN, 'Coluna de sufixo no titulo'),
+        (DETAIL_COLUMN, 'Detalhes')
+    ]
+
+    dado = models.ForeignKey(
+        'DadoDetalhe',
         on_delete=models.CASCADE,
         related_name="column_list",
         verbose_name="dado"

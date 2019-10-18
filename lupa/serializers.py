@@ -191,6 +191,7 @@ class DadoEntidadeSerializer(serializers.ModelSerializer):
     external_data = serializers.SerializerMethodField()
     icon = serializers.SerializerMethodField()
     data_type = serializers.SerializerMethodField()
+    detalhes = serializers.SerializerMethodField()
 
     class Meta:
         model = DadoEntidade
@@ -199,7 +200,8 @@ class DadoEntidadeSerializer(serializers.ModelSerializer):
             'exibition_field',
             'external_data',
             'data_type',
-            'icon'
+            'icon',
+            'detalhes',
         ]
 
     def __init__(self, *args, **kwargs):
@@ -290,6 +292,9 @@ class DadoEntidadeSerializer(serializers.ModelSerializer):
 
     def get_data_type(self, obj):
         return obj.data_type.name
+
+    def get_detalhes(self, obj):
+        return None
 
 
 class EntidadeIdSerializer(serializers.ModelSerializer):
