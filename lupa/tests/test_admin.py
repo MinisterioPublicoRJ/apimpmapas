@@ -101,13 +101,9 @@ class ClearFromCache(TestCase):
 
         dado_1 = make(
             'lupa.Dado',
-            title="Este Dado",
-            order=1
         )
         dado_2 = make(
             'lupa.Dado',
-            title="Este Dado",
-            order=2
         )
 
         queryset = [dado_1, dado_2]
