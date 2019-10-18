@@ -1,3 +1,5 @@
+from operator import attrgetter
+
 from django.contrib import admin
 from django.core.cache import cache as django_cache
 from django.http import HttpResponseRedirect
@@ -19,29 +21,27 @@ from .models import (
 )
 
 
-def remove_entity_from_cache(modeladmin, request, queryset):
-    key_prefix = 'lupa_entidade'
+def _remove_from_cache(key_prefix, model_args, queryset):
     cache_client = django_cache.get_master_client()
     for obj in queryset:
         key_args = [
-            obj.abreviation,
+            attrgetter(arg)(obj) for arg in model_args
         ]
         key = wildcard_cache_key(key_prefix, key_args)
         cache_keys = cache_client.keys(key)
         [cache_client.delete(cache_key) for cache_key in cache_keys]
+
+
+def remove_entity_from_cache(modeladmin, request, queryset):
+    key_prefix = 'lupa_entidade'
+    model_args = ['abreviation']
+    _remove_from_cache(key_prefix, model_args, queryset)
 
 
 def remove_data_from_cache(modeladmin, request, queryset):
     key_prefix = 'lupa_dado'
-    cache_client = django_cache.get_master_client()
-    for obj in queryset:
-        key_args = [
-            obj.entity_type.abreviation,
-            obj.pk
-        ]
-        key = wildcard_cache_key(key_prefix, key_args)
-        cache_keys = cache_client.keys(key)
-        [cache_client.delete(cache_key) for cache_key in cache_keys]
+    model_args = ['entity_type.abreviation', 'pk']
+    _remove_from_cache(key_prefix, model_args, queryset)
 
 
 remove_data_from_cache.short_description = 'Remove do cache'
