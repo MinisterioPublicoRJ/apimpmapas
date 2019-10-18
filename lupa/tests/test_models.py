@@ -214,3 +214,18 @@ class TestEntityModel(TestCase):
         entity.osm_value_attached = SUBURB
         entity.database = POSTGRES
         entity.clean()
+
+
+@pytest.mark.django_db(transaction=True)
+class ConvertCacheTimeout(TestCase):
+    def test_convert_entity_cache_timeout_to_seconds(self):
+        entity = make('lupa.Entidade', cache_timeout=7)
+        seconds = 604800
+
+        self.assertEqual(entity.cache_timeout, seconds)
+
+    def test_convert_data_cache_timeout_to_seconds(self):
+        entity = make('lupa.Dado', cache_timeout=10)
+        seconds = 864000
+
+        self.assertEqual(entity.cache_timeout, seconds)

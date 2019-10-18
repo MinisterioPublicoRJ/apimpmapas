@@ -201,6 +201,10 @@ class Entidade(models.Model):
         verbose_name='guardar no cache?',
         default=True
     )
+    cache_timeout = models.BigIntegerField(
+        verbose_name='Tempo de persistência do cache (em dias)',
+        default=7
+    )
 
     def clean(self):
         errors = {}
@@ -260,6 +264,11 @@ class Entidade(models.Model):
     def __str__(self):
         if self:
             return self.name
+
+    def save(self, *args, **kwargs):
+        seconds_scale = 24 * 60 * 60
+        self.cache_timeout = self.cache_timeout * seconds_scale
+        super().save(*args, **kwargs)
 
 
 class Mapa(models.Model):
@@ -379,6 +388,11 @@ class Dado(OrderedModel):
         default=True
     )
 
+    cache_timeout = models.BigIntegerField(
+        verbose_name='Tempo de persistência do cache (em dias)',
+        default=7
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 
@@ -389,6 +403,11 @@ class Dado(OrderedModel):
     def __str__(self):
         if self:
             return self.title
+
+    def save(self, *args, **kwargs):
+        seconds_scale = 24 * 60 * 60
+        self.cache_timeout = self.cache_timeout * seconds_scale
+        super().save(*args, **kwargs)
 
 
 class Coluna(models.Model):
