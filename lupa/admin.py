@@ -62,7 +62,8 @@ class EntidadeAdmin(nested_admin.NestedModelAdmin):
                 'name_column',
                 'geojson_column',
                 'osm_value_attached',
-                'osm_default_level'
+                'osm_default_level',
+                'is_cacheable'
             )
         })
     )
@@ -99,7 +100,8 @@ class DadoAdmin(OrderedModelAdmin):
             'fields': (
                 'database',
                 'schema',
-                'table'
+                'table',
+                'is_cacheable'
             )
         })
     )
