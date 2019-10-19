@@ -1,10 +1,18 @@
 import json
 
+from django.core.cache import cache
 from rest_framework import serializers
 
 from .db_connectors import execute
 from .exceptions import QueryError
-from .models import Entidade, DadoEntidade, TipoDado, ColunaDado, ColunaMapa
+from .models import (
+    Entidade,
+    DadoEntidade,
+    DadoDetalhe,
+    TipoDado,
+    ColunaDado,
+    ColunaMapa,
+)
 
 
 def calculate_total(data_list):
@@ -52,6 +60,12 @@ class DadoEntidadeInternalSerializer(serializers.ModelSerializer):
         if obj.theme:
             return obj.theme.color
         return None
+
+
+class DadoDetalheInternalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DadoDetalhe
+        fields = ['id']
 
 
 class DataColumnSerializer(serializers.ModelSerializer):
@@ -191,7 +205,7 @@ class DadoEntidadeSerializer(serializers.ModelSerializer):
     external_data = serializers.SerializerMethodField()
     icon = serializers.SerializerMethodField()
     data_type = serializers.SerializerMethodField()
-    detalhes = serializers.SerializerMethodField()
+    detalhe = serializers.SerializerMethodField()
 
     class Meta:
         model = DadoEntidade
@@ -201,10 +215,11 @@ class DadoEntidadeSerializer(serializers.ModelSerializer):
             'external_data',
             'data_type',
             'icon',
-            'detalhes',
+            'detalhe',
         ]
 
     def __init__(self, *args, **kwargs):
+        cache.clear()
         self.domain_id = str(kwargs.pop('domain_id'))
 
         dado = args[0]
@@ -293,8 +308,13 @@ class DadoEntidadeSerializer(serializers.ModelSerializer):
     def get_data_type(self, obj):
         return obj.data_type.name
 
-    def get_detalhes(self, obj):
-        return None
+    def get_detalhe(self, obj):
+        detail_list = DadoDetalheInternalSerializer(
+            obj.data_details.all(),
+            many=True,
+            read_only=True
+        ).data
+        return detail_list
 
 
 class EntidadeIdSerializer(serializers.ModelSerializer):

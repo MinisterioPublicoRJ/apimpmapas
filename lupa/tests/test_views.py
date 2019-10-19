@@ -312,6 +312,7 @@ class DetailDadosViewTest(TestCase, NoCacheTestCase):
         self.entity_abrv = 'EST'
         self.data_id = 7
         self.data_id_alt = 9
+        self.detail_data_id = 23
         self.external_data = '202'
         self.external_source = 'http://mca.mp.rj.gov.br/'
         self.exibition_field = 'Abrigos para crianças e adolescentes'
@@ -337,7 +338,10 @@ class DetailDadosViewTest(TestCase, NoCacheTestCase):
             },
             'exibition_field': self.exibition_field,
             'data_type': self.data_type,
-            'icon': settings.MEDIA_URL + self.icon_file
+            'icon': settings.MEDIA_URL + self.icon_file,
+            'detalhe': [
+                {'id': self.detail_data_id},
+            ]
         }
 
         _execute.return_value = [(
@@ -362,6 +366,7 @@ class DetailDadosViewTest(TestCase, NoCacheTestCase):
         make('lupa.ColunaDado', info_type='id', name='identi', dado=dado)
         make('lupa.ColunaDado', info_type='fonte', name='fon', dado=dado)
         make('lupa.ColunaDado', info_type='dado', name='data', dado=dado)
+        make('lupa.DadoDetalhe', id=self.detail_data_id, dado_main=dado)
 
         url = reverse(
             'lupa:detail_dado',
@@ -502,6 +507,7 @@ class AuthDadosViewTest(TestCase):
             'icon': None,
             'exibition_field': None,
             'data_type': self.data_type,
+            'detalhe': [],
             'external_data': {
                 'dado': self.external_data,
                 'id': self.data_id
