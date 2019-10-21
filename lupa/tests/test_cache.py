@@ -11,9 +11,11 @@ from lupa.cache import (
     cache_key,
     custom_cache,
     wildcard_cache_key,
-    repopulate_cache)
+    _repopulate_cache_data,
+    _repopulate_cache_entity
+)
 from lupa.models import Entidade, Dado
-from lupa.serializers import DadoSerializer
+from lupa.serializers import DadoSerializer, EntidadeSerializer
 
 
 class Cache(TestCase):
@@ -511,7 +513,7 @@ class RepopulateCache(TestCase):
         )
 
         queryset = Dado.objects.all()
-        repopulate_cache(
+        _repopulate_cache_data(
             key_prefix='lupa_dado',
             queryset=queryset,
             serializer=DadoSerializer
@@ -735,3 +737,80 @@ class RepopulateCache(TestCase):
         _execute_sample.assert_has_calls(execute_sample_calls)
         _cache_key.assert_has_calls(cache_key_calls)
         _django_cache.set.assert_has_calls(_django_cache_calls)
+
+    @mock.patch('lupa.serializers.execute', return_value=None)
+    @mock.patch('lupa.cache.execute_sample')
+    @mock.patch('lupa.cache.cache_key')
+    @mock.patch('lupa.cache.django_cache')
+    def test_repopulate_cache_with_lupa_entidades(
+            self,
+            _django_cache,
+            _cache_key,
+            _execute_sample,
+            _execute):
+
+        municipio = make('lupa.Entidade', abreviation='MUN')
+        estado = make(
+            'lupa.Entidade',
+            abreviation='EST'
+        )
+        _cache_key.side_effect = ['key 1', 'key 2']
+        _execute_sample.side_effect = (
+            [('33001',)],
+            [('33010',)],
+        )
+
+        queryset = Entidade.objects.all()
+
+        _repopulate_cache_entity(
+            key_prefix='lupa_entidade',
+            queryset=queryset,
+            serializer=EntidadeSerializer
+        )
+        execute_sample_calls = [
+            mock.call(
+                estado.database,
+                estado.schema,
+                estado.table,
+                [estado.id_column],
+                limit=False
+            ),
+            mock.call(
+                municipio.database,
+                municipio.schema,
+                municipio.table,
+                [municipio.id_column],
+                limit=False
+            )
+
+        ]
+        django_cache_calls = [
+            mock.call('key 1', {'domain_id': ('33001',),
+                                'entity_type': estado.name,
+                                'exibition_field': None,
+                                'geojson': None, 'theme_list': []},
+                      timeout=estado.cache_timeout
+                      ),
+            mock.call('key 2', {'domain_id': ('33010', ),
+                                'entity_type': municipio.name,
+                                'exibition_field': None,
+                                'geojson': None, 'theme_list': []},
+                      timeout=municipio.cache_timeout
+                      ),
+        ]
+        cache_key_calls = [
+            mock.call('lupa_entidade',
+                      {'entity_type': estado.abreviation,
+                       'domain_id': '33001',
+                       }
+                      ),
+            mock.call('lupa_entidade',
+                      {'entity_type': municipio.abreviation,
+                       'domain_id': '33010',
+                       }
+                      )
+        ]
+
+        _execute_sample.assert_has_calls(execute_sample_calls)
+        _cache_key.assert_has_calls(cache_key_calls)
+        _django_cache.set.assert_has_calls(django_cache_calls)

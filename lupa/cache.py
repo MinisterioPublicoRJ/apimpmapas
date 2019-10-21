@@ -76,13 +76,26 @@ def custom_cache(key_prefix, model_kwargs=dict()):
     return _custom_cache
 
 
-def repopulate_cache(key_prefix, queryset, serializer):
-    data = queryset.distinct('entity_type__abreviation').order_by(
+def _repopulate_cache_entity(key_prefix, queryset, serializer):
+    entities = queryset.distinct('abreviation').order_by('abreviation')
+    repopulate_cache(key_prefix, entities, queryset, serializer)
+
+
+def _repopulate_cache_data(key_prefix, queryset, serializer):
+    entities = queryset.distinct('entity_type__abreviation').order_by(
         'entity_type__abreviation'
     )
-    for data_obj in data:
-        entity = data_obj.entity_type
-        objs = queryset.filter(entity_type=entity)
+    entities = [e.entity_type for e in entities]
+    repopulate_cache(key_prefix, entities, queryset, serializer)
+
+
+def repopulate_cache(key_prefix, entities, queryset, serializer):
+    for entity in entities:
+        # Temporary workaround
+        if key_prefix == 'lupa_dado':
+            objs = queryset.filter(entity_type=entity)
+        else:
+            objs = queryset.filter(abreviation=entity.abreviation)
 
         domain_ids = execute_sample(
             entity.database,
@@ -94,12 +107,15 @@ def repopulate_cache(key_prefix, queryset, serializer):
         for obj in objs:
             for domain_id in domain_ids:
                 json_data = serializer(obj, domain_id=domain_id).data
-                key = cache_key(
-                    key_prefix,
-                    {
+                key_kwargs = {
                         'entity_type': entity.abreviation,
                         'domain_id': domain_id[0],
-                        'pk': obj.pk
-                    }
+                }
+                if key_prefix == 'lupa_dado':
+                    key_kwargs['pk'] = obj.pk
+
+                key = cache_key(
+                    key_prefix,
+                    key_kwargs
                 )
                 django_cache.set(key, json_data, timeout=obj.cache_timeout)
