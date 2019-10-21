@@ -6,6 +6,8 @@ from django.shortcuts import get_object_or_404
 from jwt.exceptions import InvalidSignatureError, DecodeError
 from rest_framework.response import Response
 
+from lupa.db_connectors import execute_sample
+
 
 def _decode_jwt(token):
     try:
@@ -72,3 +74,32 @@ def custom_cache(key_prefix, model_kwargs=dict()):
         return inner
 
     return _custom_cache
+
+
+def repopulate_cache(key_prefix, queryset, serializer):
+    data = queryset.distinct('entity_type__abreviation').order_by(
+        'entity_type__abreviation'
+    )
+    for data_obj in data:
+        entity = data_obj.entity_type
+        objs = queryset.filter(entity_type=entity)
+
+        domain_ids = execute_sample(
+            entity.database,
+            entity.schema,
+            entity.table,
+            [entity.id_column],
+            limit=False
+        )
+        for obj in objs:
+            for domain_id in domain_ids:
+                json_data = serializer(obj, domain_id=domain_id).data
+                key = cache_key(
+                    key_prefix,
+                    {
+                        'entity_type': entity.abreviation,
+                        'domain_id': domain_id[0],
+                        'pk': obj.pk
+                    }
+                )
+                django_cache.set(key, json_data)
