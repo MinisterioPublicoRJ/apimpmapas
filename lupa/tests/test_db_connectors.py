@@ -408,3 +408,18 @@ class SampleQuery(CommonSetup):
             'SELECT C1, C2 FROM SCHEMA.TABLE limit 10',
             []
         )
+
+    @mock.patch('lupa.db_connectors.postgres_access')
+    def test_execute_sample_happypath_no_limit(self, _pga):
+        execute_sample(
+            'PG',
+            'SCHEMA',
+            'TABLE',
+            ['C1', 'C2'],
+            limit=False
+        )
+
+        _pga.assert_called_once_with(
+            'SELECT C1, C2 FROM SCHEMA.TABLE',
+            []
+        )

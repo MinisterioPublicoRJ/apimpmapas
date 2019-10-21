@@ -31,13 +31,15 @@ def execute_sample(
     db_name,
     schema,
     table,
-    columns
+    columns,
+    limit=True
 ):
     query = generate_query_sample(
         db_name,
         schema,
         table,
-        columns
+        columns,
+        limit=limit
     )
     return conns(db_name)(query, [])
 
