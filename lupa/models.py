@@ -385,9 +385,6 @@ class DadoEntidade(Dado):
         default=True
     )
 
-    def obter_detalhes(self):
-        return self.data_details.order_by('order')
-
     # CONFIG FIELDS
     order_with_respect_to = 'entity_type'
 

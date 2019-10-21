@@ -5,7 +5,7 @@ from django.test import TestCase
 from model_mommy.mommy import make
 
 from lupa.models import TipoDado
-from lupa.serializers import DadoEntidadeSerializer
+from lupa.serializers import DadoDetalheSerializer, DadoEntidadeSerializer
 
 
 class DataTypeViewTest(TestCase):
@@ -42,6 +42,7 @@ class DataTypeViewTest(TestCase):
             name='lista_sem_ordenacao',
             serialization=TipoDado.LIST_DATA
         )
+
         dado = make('lupa.DadoEntidade', data_type=tipo_dado)
         make('lupa.ColunaDado', info_type='link_externo', name='ln', dado=dado)
         make('lupa.ColunaDado', info_type='fonte', name='fon', dado=dado)
@@ -49,7 +50,20 @@ class DataTypeViewTest(TestCase):
         make('lupa.ColunaDado', info_type='dado', name='data', dado=dado)
         dado_ser = DadoEntidadeSerializer(dado, domain_id='00').data
 
+        detail = make('lupa.DadoDetalhe', data_type=tipo_dado)
+        make(
+            'lupa.ColunaDetalhe',
+            info_type='link_externo',
+            name='ln',
+            dado=detail
+        )
+        make('lupa.ColunaDetalhe', info_type='fonte', name='fon', dado=detail)
+        make('lupa.ColunaDetalhe', info_type='rotulo', name='lb', dado=detail)
+        make('lupa.ColunaDetalhe', info_type='dado', name='data', dado=detail)
+        detail_ser = DadoDetalheSerializer(detail, domain_id='00').data
+
         self.assertEqual(dado_ser['external_data'], self.expected_value)
+        self.assertEqual(detail_ser['external_data'], self.expected_value)
 
     @mock.patch('lupa.serializers.execute')
     def test_dado_list_limit(self, _execute):
@@ -73,8 +87,28 @@ class DataTypeViewTest(TestCase):
         make('lupa.ColunaDado', info_type='dado', name='data', dado=dado)
         dado_ser = DadoEntidadeSerializer(dado, domain_id='00').data
 
+        detalhe = make(
+            'lupa.DadoDetalhe',
+            data_type=tipo_dado,
+            limit_fetch=fetch
+        )
+        make(
+            'lupa.ColunaDetalhe',
+            info_type='link_externo',
+            name='ln',
+            dado=detalhe
+        )
+        make('lupa.ColunaDetalhe', info_type='fonte', name='fon', dado=detalhe)
+        make('lupa.ColunaDetalhe', info_type='rotulo', name='lb', dado=detalhe)
+        make('lupa.ColunaDetalhe', info_type='dado', name='data', dado=detalhe)
+        detalhe_ser = DadoDetalheSerializer(detalhe, domain_id='00').data
+
         self.assertEqual(
             dado_ser['external_data'],
+            self.expected_value[:fetch]
+        )
+        self.assertEqual(
+            detalhe_ser['external_data'],
             self.expected_value[:fetch]
         )
 
@@ -87,6 +121,7 @@ class DataTypeViewTest(TestCase):
             name='grafico_barra_vertical',
             serialization=TipoDado.XY_GRAPH_DATA
         )
+
         dado = make('lupa.DadoEntidade', data_type=tipo_dado)
         make('lupa.ColunaDado', info_type='link_externo', name='ln', dado=dado)
         make('lupa.ColunaDado', info_type='fonte', name='fon', dado=dado)
@@ -94,7 +129,25 @@ class DataTypeViewTest(TestCase):
         make('lupa.ColunaDado', info_type='dado', name='data', dado=dado)
         dado_ser = DadoEntidadeSerializer(dado, domain_id='00').data
 
+        detalhe = make('lupa.DadoDetalhe', data_type=tipo_dado)
+        make(
+            'lupa.ColunaDetalhe',
+            info_type='link_externo',
+            name='ln',
+            dado=detalhe
+        )
+        make('lupa.ColunaDetalhe', info_type='fonte', name='fon', dado=detalhe)
+        make(
+            'lupa.ColunaDetalhe',
+            info_type='rotulo',
+            name='fon',
+            dado=detalhe
+        )
+        make('lupa.ColunaDetalhe', info_type='dado', name='data', dado=detalhe)
+        detalhe_ser = DadoDetalheSerializer(detalhe, domain_id='00').data
+
         self.assertEqual(dado_ser['external_data'], self.expected_value)
+        self.assertEqual(detalhe_ser['external_data'], self.expected_value)
 
     @mock.patch('lupa.serializers.execute')
     def test_dado_graph_outros(self, _execute):
@@ -135,4 +188,27 @@ class DataTypeViewTest(TestCase):
         make('lupa.ColunaDado', info_type='dado', name='data', dado=dado)
         dado_ser = DadoEntidadeSerializer(dado, domain_id='00').data
 
+        tipo_dado = make(
+            'lupa.TipoDado',
+            name='grafico_pizza',
+            serialization=TipoDado.PIZZA_GRAPH_DATA
+        )
+        detalhe = make('lupa.DadoDetalhe', data_type=tipo_dado)
+        make(
+            'lupa.ColunaDetalhe',
+            info_type='link_externo',
+            name='ln',
+            dado=detalhe
+        )
+        make('lupa.ColunaDetalhe', info_type='fonte', name='fon', dado=detalhe)
+        make(
+            'lupa.ColunaDetalhe',
+            info_type='rotulo',
+            name='fon',
+            dado=detalhe
+        )
+        make('lupa.ColunaDetalhe', info_type='dado', name='data', dado=detalhe)
+        detalhe_ser = DadoDetalheSerializer(detalhe, domain_id='00').data
+
         self.assertEqual(dado_ser['external_data'], expected_value)
+        self.assertEqual(detalhe_ser['external_data'], expected_value)

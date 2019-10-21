@@ -13,9 +13,10 @@ from rest_framework.generics import (
 )
 from rest_framework.response import Response
 
-from .models import Entidade, DadoEntidade
+from .models import Entidade, DadoDetalhe, DadoEntidade
 from .serializers import (
     EntidadeSerializer,
+    DadoDetalheSerializer,
     DadoEntidadeSerializer,
     EntidadeIdSerializer
 )
@@ -25,7 +26,15 @@ from .db_connectors import execute_geospatial
 
 class EntityDataView:
     def process_request(self, request, obj, serializer, key_check):
-        roles = obj.roles_allowed.all().values_list('role', flat=True)
+        if isinstance(obj, (Entidade, DadoEntidade)):
+            roles = obj.roles_allowed.all().values_list('role', flat=True)
+        elif isinstance(obj, DadoDetalhe):
+            roles = obj.dado_main.roles_allowed.all().values_list(
+                'role',
+                flat=True
+            )
+        else:
+            return Response({}, status=401)
         if roles:
             token = request.GET.get('auth_token')
             try:
@@ -82,6 +91,26 @@ class DadoEntidadeView(RetrieveAPIView, EntityDataView):
             request,
             obj,
             DadoEntidadeSerializer,
+            'external_data'
+        )
+
+
+@method_decorator(cache_page(600, key_prefix='lupa_detalhe'), name='dispatch')
+class DadoDetalheView(RetrieveAPIView, EntityDataView):
+    serializer_class = DadoDetalheSerializer
+    queryset = DadoDetalhe.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        obj = get_object_or_404(
+            self.queryset,
+            dado_main__entity_type__abreviation=self.kwargs['entity_type'],
+            pk=self.kwargs['pk']
+        )
+
+        return self.process_request(
+            request,
+            obj,
+            DadoDetalheSerializer,
             'external_data'
         )
 

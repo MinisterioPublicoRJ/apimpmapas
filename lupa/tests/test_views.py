@@ -10,9 +10,10 @@ import pytest
 from model_mommy.mommy import make
 import responses
 
-from lupa.exceptions import QueryError
 from lupa import osmapi
+from lupa.exceptions import QueryError
 from .fixtures.osmapi import default_response
+from lupa.views import EntityDataView
 
 
 class NoCacheTestCase:
@@ -154,6 +155,17 @@ class EntidadeViewTest(TestCase):
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 404)
+
+    def test_entidade_nao_autorizavel(self):
+        view = EntityDataView()
+        response = view.process_request(
+            request=None,
+            obj=None,
+            serializer=None,
+            key_check=None
+        )
+
+        self.assertEqual(response.status_code, 401)
 
 
 class AuthEntidadeViewTest(TestCase):
@@ -312,7 +324,9 @@ class DetailDadosViewTest(TestCase, NoCacheTestCase):
         self.entity_abrv = 'EST'
         self.data_id = 7
         self.data_id_alt = 9
-        self.detail_data_id = 23
+        self.detail_data_1_id = 23
+        self.detail_data_2_id = 59
+        self.detail_data_3_id = 102
         self.external_data = '202'
         self.external_source = 'http://mca.mp.rj.gov.br/'
         self.exibition_field = 'Abrigos para crianças e adolescentes'
@@ -340,7 +354,9 @@ class DetailDadosViewTest(TestCase, NoCacheTestCase):
             'data_type': self.data_type,
             'icon': settings.MEDIA_URL + self.icon_file,
             'detalhe': [
-                {'id': self.detail_data_id},
+                {'id': self.detail_data_2_id},
+                {'id': self.detail_data_1_id},
+                {'id': self.detail_data_3_id},
             ]
         }
 
@@ -366,7 +382,24 @@ class DetailDadosViewTest(TestCase, NoCacheTestCase):
         make('lupa.ColunaDado', info_type='id', name='identi', dado=dado)
         make('lupa.ColunaDado', info_type='fonte', name='fon', dado=dado)
         make('lupa.ColunaDado', info_type='dado', name='data', dado=dado)
-        make('lupa.DadoDetalhe', id=self.detail_data_id, dado_main=dado)
+        make(
+            'lupa.DadoDetalhe',
+            id=self.detail_data_1_id,
+            order=1,
+            dado_main=dado
+        )
+        make(
+            'lupa.DadoDetalhe',
+            id=self.detail_data_2_id,
+            order=0,
+            dado_main=dado
+        )
+        make(
+            'lupa.DadoDetalhe',
+            id=self.detail_data_3_id,
+            order=2,
+            dado_main=dado
+        )
 
         url = reverse(
             'lupa:detail_dado',
@@ -535,6 +568,128 @@ class AuthDadosViewTest(TestCase):
         )
         resp = self.client.get(url, {'auth_token': token})
         self.assertEqual(resp.status_code, 403)
+
+
+class DetalhesViewTest(TestCase, NoCacheTestCase):
+    def setUp(self):
+        self.entity_id = 1
+        self.entity_abrv = 'EST'
+        self.data_id = 7
+        self.detail_id = 23
+        self.external_data = '202'
+        self.exibition_field = 'Abrigos para crianças e adolescentes'
+        self.domain_id = '33'
+        self.data_type = 'texto_pequeno_destaque'
+        self.data_type_obj = make(
+            'lupa.TipoDado',
+            name=self.data_type,
+            serialization='Singleton'
+        )
+
+    @mock.patch('lupa.serializers.execute')
+    def test_detalhe_ok(self, _execute):
+
+        expected_response = {
+            'id': self.detail_id,
+            'external_data': {
+                'dado': self.external_data,
+                'id': self.data_id
+            },
+            'exibition_field': self.exibition_field,
+            'data_type': self.data_type,
+        }
+
+        _execute.return_value = [(
+            self.external_data,
+            self.data_id
+        )]
+
+        entidade = make(
+            'lupa.Entidade',
+            id=self.entity_id,
+            abreviation=self.entity_abrv,
+        )
+        dado = make(
+            'lupa.DadoEntidade',
+            id=self.data_id,
+            entity_type=entidade,
+        )
+        detalhe = make(
+            'lupa.DadoDetalhe',
+            id=self.detail_id,
+            exibition_field=self.exibition_field,
+            dado_main=dado,
+            data_type=self.data_type_obj
+        )
+        make('lupa.ColunaDetalhe', info_type='id', name='identi', dado=detalhe)
+        make('lupa.ColunaDetalhe', info_type='dado', name='data', dado=detalhe)
+
+        url = reverse(
+            'lupa:detail_detalhes',
+            args=(self.entity_abrv, self.domain_id, self.detail_id)
+        )
+        resp = self.client.get(url)
+        resp_json = resp.json()
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp_json, expected_response)
+
+    @mock.patch('lupa.serializers.execute')
+    def test_detalhe_sem_retorno_db(self, _execute):
+        _execute.return_value = []
+
+        entidade = make(
+            'lupa.Entidade',
+            id=self.entity_id,
+            abreviation=self.entity_abrv,
+        )
+
+        dado = make(
+            'lupa.DadoEntidade',
+            id=self.data_id,
+            entity_type=entidade,
+        )
+
+        make(
+            'lupa.DadoDetalhe',
+            id=self.detail_id,
+            dado_main=dado,
+            data_type=self.data_type_obj
+        )
+
+        url = reverse(
+            'lupa:detail_detalhes',
+            args=(self.entity_abrv, self.domain_id, self.detail_id)
+        )
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 404)
+
+    @mock.patch('lupa.serializers.execute')
+    def test_dado_com_erro(self, _execute):
+        _execute.side_effect = QueryError('test error')
+
+        entidade = make(
+            'lupa.Entidade',
+            id=self.entity_id,
+            abreviation=self.entity_abrv,
+        )
+        dado = make(
+            'lupa.DadoEntidade',
+            id=self.data_id,
+            entity_type=entidade
+        )
+        make(
+            'lupa.DadoDetalhe',
+            id=self.detail_id,
+            dado_main=dado
+        )
+        url = reverse(
+            'lupa:detail_detalhes',
+            args=(self.entity_abrv, self.domain_id, self.detail_id)
+        )
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)
 
 
 class OsmQueryViewTest(TestCase):
