@@ -248,17 +248,17 @@ class RetrieveExpiringCacheObjects(TestCase):
 
         self.assertEqual(days, expected_days)
 
-    @freeze_time('2019-10-22')
+    @freeze_time('2019-10-22 12:00:00')
     def test_retrieve_expiring_cache_data(self):
         expired_data_obj = make(
             'lupa.Dado',
             cache_timeout=7,
-            last_cache_update=dt(2019, 10, 15)
+            last_cache_update=dt(2019, 10, 15, 12, 0, 0)
         )
         make(
             'lupa.Dado',
             cache_timeout=7,
-            last_cache_update=dt(2019, 10, 20)
+            last_cache_update=dt(2019, 10, 20, 12, 0, 0)
         )
 
         expiring_data = Dado.cache.expiring()
@@ -286,3 +286,14 @@ class RetrieveExpiringCacheObjects(TestCase):
         self.assertEqual(len(expiring_entity), 2)
         self.assertIsInstance(expiring_entity, QuerySet)
         self.assertEqual(expiring_entity[0], expired_entity_obj)
+
+    def test_retrieve_expiring_object_with_null_last_update(self):
+        make(
+            'lupa.Entidade',
+            cache_timeout=7,
+            last_cache_update=None
+        )
+
+        expiring_entity = Entidade.cache.expiring()
+
+        self.assertEqual(expiring_entity.count(), 1)

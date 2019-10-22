@@ -50,7 +50,8 @@ class CacheManager(models.Manager):
         for obj in objs:
             cache_days = self.to_days(obj.cache_timeout)
             timedelta = dt.date.today() - dt.timedelta(days=cache_days)
-            if obj.last_cache_update <= timedelta:
+            if obj.last_cache_update is None\
+                    or obj.last_cache_update <= timedelta:
                 result_ids.append(obj.id)
 
         return objs.filter(id__in=result_ids)
