@@ -205,6 +205,7 @@ class Entidade(models.Model):
         verbose_name='Tempo de persistência do cache (em dias)',
         default=7
     )
+    last_cache_update = models.DateField(null=True)
 
     def clean(self):
         errors = {}
@@ -392,6 +393,8 @@ class Dado(OrderedModel):
         verbose_name='Tempo de persistência do cache (em dias)',
         default=7
     )
+
+    last_cache_update = models.DateField(null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
