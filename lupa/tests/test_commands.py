@@ -271,7 +271,9 @@ class UpdateCache(TestCase):
         self.assertCountEqual(expiring_data, args_queryset)
         self.assertTrue(args_serializer is DadoSerializer)
 
-    @mock.patch('lupa.management.commands.update_cache._repopulate_cache_entity')
+    @mock.patch(
+        'lupa.management.commands.update_cache._repopulate_cache_entity'
+    )
     def test_update_entity_cache(self, _repopulate_cache):
         key_prefix = 'lupa_entidade'
 
