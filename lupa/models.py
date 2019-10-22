@@ -38,6 +38,10 @@ ONLY_POSTGIS_SUPORTED = (
 )
 
 
+class CacheManager(models.Manager):
+    def to_days(self, seconds):
+        return seconds / 60 / 60 / 24
+
 class TipoDado(models.Model):
     # CHOICES
     SINGLETON_DATA = 'Singleton'

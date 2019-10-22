@@ -9,7 +9,8 @@ from lupa.models import (
     SUBURB,
     ORACLE,
     POSTGRES,
-    ONLY_POSTGIS_SUPORTED
+    ONLY_POSTGIS_SUPORTED,
+    CacheManager
 )
 
 
@@ -229,3 +230,15 @@ class ConvertCacheTimeout(TestCase):
         seconds = 864000
 
         self.assertEqual(entity.cache_timeout, seconds)
+
+
+@pytest.mark.django_db(transaction=True)
+class RetrieveExpiringCacheObjects(TestCase):
+    def test_convert_seconds_to_days(self):
+        seconds = 604800
+        manager = CacheManager()
+        days = manager.to_days(seconds)
+        expected_days = 7
+
+        self.assertEqual(days, expected_days)
+
