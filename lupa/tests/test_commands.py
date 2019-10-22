@@ -1,3 +1,5 @@
+from datetime import datetime as dt
+
 from django.core.management import call_command
 from django.test import TestCase
 from model_mommy.mommy import make
@@ -7,7 +9,8 @@ from lupa.management.commands.checkconsistency import (
     Command,
     parsecolumns
 )
-from lupa.models import ColunaDado
+from lupa.models import ColunaDado, Dado
+from lupa.serializers import DadoSerializer
 
 
 class TestCheckConsistency(TestCase):
@@ -241,3 +244,32 @@ class TestCheckConsistency(TestCase):
         _prtst.assert_called_once_with(
             "Verificando Dado(caixinhas) para entidade Entidade Teste"
         )
+
+
+class UpdateCache(TestCase):
+    @mock.patch('lupa.management.commands.update_cache.repopulate_cache')
+    def test_update_data_cache(self, _repopulate_cache):
+        key_prefix = 'lupa_dado'
+        dado_1 = make(
+            'lupa.Dado',
+            cache_timeout=7,
+            last_cache_update=dt(2019, 10, 15, 12, 0, 0),
+        )
+        dado_2 = make(
+            'lupa.Dado',
+            cache_timeout=7,
+            last_cache_update=dt(2019, 10, 14, 12, 0, 0),
+        )
+
+        call_command('update_cache')
+        expiring_data = Dado.cache.expiring()
+        args_prefix, args_entities, args_queryset, args_serializer\
+            = _repopulate_cache.call_args_list[0][0]
+
+        self.assertEqual(args_prefix, key_prefix)
+        self.assertEqual(expiring_data[0].pk, args_queryset[0].pk)
+        self.assertCountEqual(
+            args_entities,
+            [dado_1.entity_type, dado_2.entity_type]
+        )
+        self.assertTrue(args_serializer is DadoSerializer)
