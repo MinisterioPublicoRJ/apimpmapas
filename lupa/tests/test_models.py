@@ -1,7 +1,11 @@
+from datetime import datetime as dt
 from unittest import TestCase
+
+from freezegun import freeze_time
 
 import pytest
 from django.core.exceptions import ValidationError
+from django.db.models.query import QuerySet
 from model_mommy.mommy import make
 from lupa.models import (
     MANDATORY_OSM_PARAMETERS,
@@ -10,6 +14,7 @@ from lupa.models import (
     ORACLE,
     POSTGRES,
     ONLY_POSTGIS_SUPORTED,
+    Dado,
     CacheManager
 )
 
@@ -242,3 +247,21 @@ class RetrieveExpiringCacheObjects(TestCase):
 
         self.assertEqual(days, expected_days)
 
+    @freeze_time('2019-10-22')
+    def test_retrieve_expiring_cache_data(self):
+        expired_data_obj = make(
+            'lupa.Dado',
+            cache_timeout=7,
+            last_cache_update=dt(2019, 10, 15)
+        )
+        make(
+            'lupa.Dado',
+            cache_timeout=7,
+            last_cache_update=dt(2019, 10, 20)
+        )
+
+        expiring_data = Dado.cache.expiring()
+
+        self.assertEqual(len(expiring_data), 1)
+        self.assertIsInstance(expiring_data, QuerySet)
+        self.assertEqual(expiring_data[0], expired_data_obj)

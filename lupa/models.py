@@ -1,3 +1,5 @@
+import datetime as dt
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from colorfield.fields import ColorField
@@ -41,6 +43,18 @@ ONLY_POSTGIS_SUPORTED = (
 class CacheManager(models.Manager):
     def to_days(self, seconds):
         return seconds / 60 / 60 / 24
+
+    def expiring(self):
+        objs = super().get_queryset()
+        result_ids = []
+        for obj in objs:
+            cache_days = self.to_days(obj.cache_timeout)
+            timedelta = dt.date.today() - dt.timedelta(days=cache_days)
+            if obj.last_cache_update <= timedelta:
+                result_ids.append(obj.id)
+
+        return objs.filter(id__in=result_ids)
+
 
 class TipoDado(models.Model):
     # CHOICES
@@ -399,6 +413,7 @@ class Dado(OrderedModel):
     )
 
     last_cache_update = models.DateField(null=True)
+    cache = CacheManager()
 
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
