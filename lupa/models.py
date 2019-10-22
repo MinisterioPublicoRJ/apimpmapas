@@ -224,6 +224,7 @@ class Entidade(models.Model):
         default=7
     )
     last_cache_update = models.DateField(null=True)
+    cache = CacheManager()
 
     def clean(self):
         errors = {}
