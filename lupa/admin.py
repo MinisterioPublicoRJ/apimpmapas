@@ -6,6 +6,7 @@ import nested_admin
 from ordered_model.admin import OrderedModelAdmin
 
 from .models import (
+    DadoDetalhe,
     DadoEntidade,
     Entidade,
     Grupo,
@@ -13,7 +14,8 @@ from .models import (
     TipoDado,
     TemaDado,
     ColunaDado,
-    ColunaMapa
+    ColunaDetalhe,
+    ColunaMapa,
 )
 
 
@@ -24,6 +26,13 @@ class ColunaDadoForm(forms.ModelForm):
     )
 
 
+class ColunaDetalheForm(forms.ModelForm):
+    info_type = forms.ChoiceField(
+        choices=ColunaDetalhe.INFO_CHOICES,
+        help_text=ColunaDetalhe.help_info_type
+    )
+
+
 class ColunaMapaForm(forms.ModelForm):
     info_type = forms.ChoiceField(
         choices=ColunaMapa.INFO_CHOICES,
@@ -31,7 +40,7 @@ class ColunaMapaForm(forms.ModelForm):
     )
 
 
-class ColunaDadoAdminInline(admin.TabularInline):
+class ColunaDadoAdminInline(nested_admin.NestedTabularInline):
     model = ColunaDado
     form = ColunaDadoForm
 
@@ -44,6 +53,16 @@ class ColunaMapaAdminInline(nested_admin.NestedTabularInline):
 class MapaAdminInline(nested_admin.NestedStackedInline):
     model = Mapa
     inlines = [ColunaMapaAdminInline]
+
+
+class ColunaDetalheAdminInline(nested_admin.NestedTabularInline):
+    model = ColunaDetalhe
+    form = ColunaDetalheForm
+
+
+class DadoDetalheAdminInline(nested_admin.NestedStackedInline):
+    model = DadoDetalhe
+    inlines = [ColunaDetalheAdminInline]
 
 
 @admin.register(Entidade)
@@ -71,7 +90,7 @@ class EntidadeAdmin(nested_admin.NestedModelAdmin):
 
 
 @admin.register(DadoEntidade)
-class DadoEntidadeAdmin(OrderedModelAdmin):
+class DadoEntidadeAdmin(nested_admin.NestedModelAdmin, OrderedModelAdmin):
     list_display = (
         'title',
         'entity_type',
@@ -80,6 +99,7 @@ class DadoEntidadeAdmin(OrderedModelAdmin):
         'order',
         'move_up_down_links',
     )
+    ordering = ('order',)
     list_filter = ('entity_type__name', 'show_box',)
     fieldsets = (
         (None, {
@@ -104,7 +124,7 @@ class DadoEntidadeAdmin(OrderedModelAdmin):
         })
     )
     filter_horizontal = ('roles_allowed', )
-    inlines = [ColunaDadoAdminInline]
+    inlines = [ColunaDadoAdminInline, DadoDetalheAdminInline, ]
     search_fields = [
         'title',
         'exibition_field'
