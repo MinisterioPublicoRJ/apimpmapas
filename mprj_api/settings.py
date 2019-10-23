@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'django.contrib.gis',
 
     'rest_framework',
-    'nested_admin',
     'ordered_model',
     'corsheaders',
     'colorfield',
@@ -51,6 +50,7 @@ INSTALLED_APPS = [
     'lupa',
     'login',
     'mprj_plus',
+    'nested_admin',
 ]
 
 MIDDLEWARE = [
