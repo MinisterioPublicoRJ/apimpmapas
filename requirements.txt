@@ -3,6 +3,7 @@ Django>=2.2
 django-colorfield
 django-cors-headers
 django-filter
+django-grappelli
 django-nested-admin
 django-ordered-model
 django-redis-cache==2.1.0
