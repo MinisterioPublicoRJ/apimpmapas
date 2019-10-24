@@ -62,6 +62,23 @@ class ColunaDetalheAdminInline(nested_admin.NestedTabularInline):
 
 class DadoDetalheAdminInline(nested_admin.NestedStackedInline):
     model = DadoDetalhe
+    fieldsets = (
+        (None, {
+            'fields': (
+                'title',
+                'exibition_field',
+                'data_type',
+                'limit_fetch',
+            )
+        }),
+        ('Dados exibidos', {
+            'fields': (
+                'database',
+                'schema',
+                'table'
+            )
+        })
+    )
     inlines = [ColunaDetalheAdminInline]
 
 
