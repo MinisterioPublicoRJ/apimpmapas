@@ -33,6 +33,8 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 # Application definition
 
 INSTALLED_APPS = [
+    'grappelli',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,7 +44,6 @@ INSTALLED_APPS = [
     'django.contrib.gis',
 
     'rest_framework',
-    'nested_admin',
     'ordered_model',
     'corsheaders',
     'colorfield',
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
     'lupa',
     'login',
     'mprj_plus',
+    'nested_admin',
 ]
 
 MIDDLEWARE = [

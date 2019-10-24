@@ -1,10 +1,9 @@
 from django.contrib.admin.sites import AdminSite
 from model_mommy.mommy import make
 from unittest import TestCase, mock
-from lupa.admin import (DadoAdmin,
-                        remove_data_from_cache,
-                        remove_entity_from_cache)
-from lupa.models import Dado
+from lupa.admin import remove_data_from_cache, remove_entity_from_cache
+from lupa.models import DadoEntidade
+from lupa.admin import DadoEntidadeAdmin
 import pytest
 
 
@@ -12,15 +11,15 @@ import pytest
 class TestMoveDadoToPosition(TestCase):
     def setUp(self):
         self.adminsite = AdminSite()
-        self.dadoadmin = DadoAdmin(
-            Dado,
+        self.dadoadmin = DadoEntidadeAdmin(
+            DadoEntidade,
             self.adminsite
         )
 
     def test_correct_render(self):
         request = mock.MagicMock()
         dado = make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             title="Este Dado",
             order=4
         )
@@ -50,11 +49,11 @@ class TestMoveDadoToPosition(TestCase):
             response.content
         )
 
-    @mock.patch.object(DadoAdmin, 'message_user')
-    @mock.patch.object(Dado, 'to')
+    @mock.patch.object(DadoEntidadeAdmin, 'message_user')
+    @mock.patch.object(DadoEntidade, 'to')
     def test_input_move(self, _to, _msu):
         dado = make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             title="Este Dado",
             order=4
         )

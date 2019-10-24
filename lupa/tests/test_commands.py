@@ -137,7 +137,7 @@ class TestCheckConsistency(TestCase):
     @mock.patch.object(Command, 'printstatus')
     def test_process_data_error(self, _ptst, _ptnok):
         mdado = make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             title='Bairro',
             id=3,
             database='DB',
@@ -192,7 +192,7 @@ class TestCheckConsistency(TestCase):
     def test_process_data(self, _excs, _ptst, _prok):
         command = Command()
         mdado = make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             title='Bairro',
             id=3,
             database='DB',
@@ -230,7 +230,7 @@ class TestCheckConsistency(TestCase):
             name="Entidade Teste"
         )
         mdado = make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             title='Bairro',
             id=3,
             database='DB',

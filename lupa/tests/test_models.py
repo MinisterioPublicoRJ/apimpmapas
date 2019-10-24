@@ -29,7 +29,7 @@ class TestStringRepresentation(TestCase):
         self.assertEqual(obj.__str__(), 'teste_nome')
 
     def test_string_dado(self):
-        obj = make('lupa.Dado', title='teste_nome')
+        obj = make('lupa.DadoEntidade', title='teste_nome')
 
         self.assertEqual(obj.__str__(), 'teste_nome')
 

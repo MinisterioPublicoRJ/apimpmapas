@@ -228,6 +228,9 @@ class Entidade(models.Model):
     objects = models.Manager()
     cache = CacheManager()
 
+    def obter_dados(self):
+        return self.data_list.order_by('order')
+
     def clean(self):
         errors = {}
 
@@ -338,42 +341,11 @@ class Dado(OrderedModel):
         help_text='Não obrigatório'
     )
 
-    data_type = models.ForeignKey(
-        'TipoDado',
-        on_delete=models.PROTECT,
-        related_name="data_by_type",
-        verbose_name="tipo da caixinha"
-    )
-
-    theme = models.ForeignKey(
-        'TemaDado',
-        on_delete=models.SET_NULL,
-        related_name="data_by_theme",
-        verbose_name="tema da caixinha",
-        null=True,
-        blank=True
-    )
-
-    entity_type = models.ForeignKey(
-        'Entidade',
-        on_delete=models.CASCADE,
-        related_name="data_list",
-        verbose_name="entidade relacionada"
-    )
-
     database = models.CharField(
         verbose_name='banco de dados',
         max_length=3,
         choices=DATABASE_CHOICES,
         default=POSTGRES,
-    )
-
-    roles_allowed = models.ManyToManyField(
-        'Grupo',
-        related_name="data_allowed",
-        verbose_name="grupos com acesso",
-        blank=True,
-        help_text='Deixar em branco para todos',
     )
 
     icon = models.ForeignKey(
@@ -421,8 +393,8 @@ class Dado(OrderedModel):
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 
-    # CONFIG FIELDS
-    order_with_respect_to = 'entity_type'
+    class Meta(OrderedModel.Meta):
+        abstract = True
 
     # TO STRING METHOD
     def __str__(self):
@@ -433,6 +405,69 @@ class Dado(OrderedModel):
         seconds_scale = 24 * 60 * 60
         self.cache_timeout = self.cache_timeout * seconds_scale
         super().save(*args, **kwargs)
+
+
+class DadoEntidade(Dado):
+    data_type = models.ForeignKey(
+        'TipoDado',
+        on_delete=models.PROTECT,
+        related_name="data_by_type",
+        verbose_name="tipo da caixinha"
+    )
+
+    entity_type = models.ForeignKey(
+        'Entidade',
+        on_delete=models.CASCADE,
+        related_name="data_list",
+        verbose_name="entidade relacionada"
+    )
+
+    theme = models.ForeignKey(
+        'TemaDado',
+        on_delete=models.SET_NULL,
+        related_name="data_by_theme",
+        verbose_name="tema da caixinha",
+        null=True,
+        blank=True
+    )
+
+    roles_allowed = models.ManyToManyField(
+        'Grupo',
+        related_name="data_allowed",
+        verbose_name="grupos com acesso",
+        blank=True,
+        help_text='Deixar em branco para todos',
+    )
+
+    show_box = models.BooleanField(
+        verbose_name='exibir dado',
+        default=True
+    )
+
+    # CONFIG FIELDS
+    order_with_respect_to = 'entity_type'
+
+    class Meta:
+        verbose_name = 'dado'
+
+
+class DadoDetalhe(Dado):
+    data_type = models.ForeignKey(
+        'TipoDado',
+        on_delete=models.PROTECT,
+        related_name="details_by_type",
+        verbose_name="tipo do detalhe"
+    )
+
+    dado_main = models.ForeignKey(
+        'DadoEntidade',
+        on_delete=models.CASCADE,
+        related_name='data_details',
+        verbose_name='detalhes'
+    )
+
+    # CONFIG FIELDS
+    order_with_respect_to = 'dado_main'
 
 
 class Coluna(models.Model):
@@ -485,6 +520,7 @@ class ColunaDado(Coluna):
     DATA_COLUMN = 'dado'
     SOURCE_COLUMN = 'source'
     IMAGE_COLUMN = 'imagem'
+    IMAGE_LINK_COLUMN = 'linkimagem'
     EXTERNAL_LINK_COLUMN = 'link_externo'
     TITLE_SUFFIX_COLUMN = 'sufixo_titulo'
     DETAIL_COLUMN = 'details'
@@ -492,13 +528,45 @@ class ColunaDado(Coluna):
         (DATA_COLUMN, 'Coluna de dados principais'),
         (SOURCE_COLUMN, 'Coluna de fonte dos dados'),
         (IMAGE_COLUMN, 'Coluna de imagem'),
+        (IMAGE_LINK_COLUMN, 'Coluna de Link de Imagem'),
         (EXTERNAL_LINK_COLUMN, 'Coluna de link externo'),
         (TITLE_SUFFIX_COLUMN, 'Coluna de sufixo no titulo'),
         (DETAIL_COLUMN, 'Detalhes')
     ]
 
     dado = models.ForeignKey(
-        'Dado',
+        'DadoEntidade',
+        on_delete=models.CASCADE,
+        related_name="column_list",
+        verbose_name="dado"
+    )
+
+
+class ColunaDetalhe(Coluna):
+    # Sim, eu sei que essa classe é idêntica à ColunaDado
+    # O que fiz, eu fiz sem escolha. Em nome da paz e da sanidade
+    # Mas não em nome do Doutor
+
+    # CHOICES
+    DATA_COLUMN = 'dado'
+    SOURCE_COLUMN = 'source'
+    IMAGE_COLUMN = 'imagem'
+    IMAGE_LINK_COLUMN = 'linkimagem'
+    EXTERNAL_LINK_COLUMN = 'link_externo'
+    TITLE_SUFFIX_COLUMN = 'sufixo_titulo'
+    DETAIL_COLUMN = 'details'
+    INFO_CHOICES = Coluna.BASE_CHOICES + [
+        (DATA_COLUMN, 'Coluna de dados principais'),
+        (SOURCE_COLUMN, 'Coluna de fonte dos dados'),
+        (IMAGE_COLUMN, 'Coluna de imagem'),
+        (IMAGE_LINK_COLUMN, 'Coluna de Link de Imagem'),
+        (EXTERNAL_LINK_COLUMN, 'Coluna de link externo'),
+        (TITLE_SUFFIX_COLUMN, 'Coluna de sufixo no titulo'),
+        (DETAIL_COLUMN, 'Detalhes')
+    ]
+
+    dado = models.ForeignKey(
+        'DadoDetalhe',
         on_delete=models.CASCADE,
         related_name="column_list",
         verbose_name="dado"

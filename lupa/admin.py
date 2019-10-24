@@ -10,14 +10,16 @@ from ordered_model.admin import OrderedModelAdmin
 
 from lupa.cache import wildcard_cache_key
 from .models import (
-    Dado,
+    DadoDetalhe,
+    DadoEntidade,
     Entidade,
     Grupo,
     Mapa,
     TipoDado,
     TemaDado,
     ColunaDado,
-    ColunaMapa
+    ColunaDetalhe,
+    ColunaMapa,
 )
 
 
@@ -55,6 +57,13 @@ class ColunaDadoForm(forms.ModelForm):
     )
 
 
+class ColunaDetalheForm(forms.ModelForm):
+    info_type = forms.ChoiceField(
+        choices=ColunaDetalhe.INFO_CHOICES,
+        help_text=ColunaDetalhe.help_info_type
+    )
+
+
 class ColunaMapaForm(forms.ModelForm):
     info_type = forms.ChoiceField(
         choices=ColunaMapa.INFO_CHOICES,
@@ -62,7 +71,7 @@ class ColunaMapaForm(forms.ModelForm):
     )
 
 
-class ColunaDadoAdminInline(admin.TabularInline):
+class ColunaDadoAdminInline(nested_admin.NestedTabularInline):
     model = ColunaDado
     form = ColunaDadoForm
 
@@ -75,6 +84,33 @@ class ColunaMapaAdminInline(nested_admin.NestedTabularInline):
 class MapaAdminInline(nested_admin.NestedStackedInline):
     model = Mapa
     inlines = [ColunaMapaAdminInline]
+
+
+class ColunaDetalheAdminInline(nested_admin.NestedTabularInline):
+    model = ColunaDetalhe
+    form = ColunaDetalheForm
+
+
+class DadoDetalheAdminInline(nested_admin.NestedStackedInline):
+    model = DadoDetalhe
+    fieldsets = (
+        (None, {
+            'fields': (
+                'title',
+                'exibition_field',
+                'data_type',
+                'limit_fetch',
+            )
+        }),
+        ('Dados exibidos', {
+            'fields': (
+                'database',
+                'schema',
+                'table'
+            )
+        })
+    )
+    inlines = [ColunaDetalheAdminInline]
 
 
 @admin.register(Entidade)
@@ -104,8 +140,8 @@ class EntidadeAdmin(nested_admin.NestedModelAdmin):
     actions = [remove_entity_from_cache]
 
 
-@admin.register(Dado)
-class DadoAdmin(OrderedModelAdmin):
+@admin.register(DadoEntidade)
+class DadoEntidadeAdmin(nested_admin.NestedModelAdmin, OrderedModelAdmin):
     list_display = (
         'title',
         'entity_type',
@@ -114,6 +150,7 @@ class DadoAdmin(OrderedModelAdmin):
         'order',
         'move_up_down_links',
     )
+    ordering = ('order',)
     list_filter = ('entity_type__name', 'show_box',)
     fieldsets = (
         (None, {
@@ -140,7 +177,11 @@ class DadoAdmin(OrderedModelAdmin):
         })
     )
     filter_horizontal = ('roles_allowed', )
-    inlines = [ColunaDadoAdminInline]
+    inlines = [ColunaDadoAdminInline, DadoDetalheAdminInline, ]
+    search_fields = [
+        'title',
+        'exibition_field'
+    ]
 
     def move_dado_to_position(self, request, queryset):
         if 'apply' in request.POST:
