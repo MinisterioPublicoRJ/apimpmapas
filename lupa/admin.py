@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django import forms
@@ -165,8 +165,55 @@ class DadoEntidadeAdmin(nested_admin.NestedModelAdmin, OrderedModelAdmin):
                 'dado': queryset[0]
             })
 
+    def change_to_detail(self, request, queryset):
+        entidades = queryset\
+            .order_by('entity_type__name')\
+            .distinct('entity_type__name')\
+            .values_list('entity_type__name', flat=True)
+        if len(entidades) > 1:
+            messages.error(
+                request,
+                f'Foram selecionados dados de '
+                f'{len(entidades)} entidades diferentes. '
+                f'Selecione apenas dados de uma mesma entidade.'
+            )
+            return
+
+        if 'apply' in request.POST:
+            dado_base = DadoEntidade.objects.filter(
+                id=request.POST['dado_base']
+            )[0]
+            print(dado_base)
+
+            for dado_changer in queryset:
+                pass
+                dado_changer.copy_to_detail(dado_base)
+
+            self.message_user(
+                request,
+                f'Caixinhas alteradas para detalhes de {dado_base}'
+            )
+            return
+
+        entity_id = queryset\
+            .order_by('entity_type')\
+            .distinct('entity_type')\
+            .values_list('entity_type', flat=True)
+        possible = DadoEntidade.objects\
+            .filter(entity_type__in=entity_id)\
+            .exclude(id__in=[q.id for q in queryset])
+        return render(
+            request,
+            'lupa/change_detail.html',
+            context={
+                'entidade': entidades[0],
+                'caixinhas': queryset.all(),
+                'possiveis': possible
+            })
+
     move_dado_to_position.short_description = "Mover para Posição..."
-    actions = ['move_dado_to_position']
+    change_to_detail.short_description = "Transformar em detalhe..."
+    actions = ['change_to_detail']
 
 
 admin.site.register(Grupo)
