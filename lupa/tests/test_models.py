@@ -232,8 +232,14 @@ class ConvertCacheTimeout(TestCase):
 
         self.assertEqual(entity.cache_timeout, seconds)
 
-    def test_convert_data_cache_timeout_to_seconds(self):
+    def test_convert_data_entidade_cache_timeout_to_seconds(self):
         entity = make('lupa.DadoEntidade', cache_timeout=10)
+        seconds = 864000
+
+        self.assertEqual(entity.cache_timeout, seconds)
+
+    def test_convert_data_detalhe_cache_timeout_to_seconds(self):
+        entity = make('lupa.DadoDetalhe', cache_timeout=10)
         seconds = 864000
 
         self.assertEqual(entity.cache_timeout, seconds)
