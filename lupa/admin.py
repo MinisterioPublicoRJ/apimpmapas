@@ -23,8 +23,7 @@ from .models import (
 )
 
 
-def _remove_from_cache(key_prefix, model_args, queryset):
-    cache_client = django_cache.get_master_client()
+def _remove_from_cache(cache_client, key_prefix, model_args, queryset):
     for obj in queryset:
         key_args = [
             attrgetter(arg)(obj) for arg in model_args
@@ -35,15 +34,33 @@ def _remove_from_cache(key_prefix, model_args, queryset):
 
 
 def remove_entity_from_cache(modeladmin, request, queryset):
+    cache_client = django_cache.get_master_client()
+
     key_prefix = 'lupa_entidade'
     model_args = ['abreviation']
-    _remove_from_cache(key_prefix, model_args, queryset)
+    _remove_from_cache(cache_client, key_prefix, model_args, queryset)
 
 
 def remove_data_from_cache(modeladmin, request, queryset):
-    key_prefix = 'lupa_dado_entidade'
+    cache_client = django_cache.get_master_client()
+
+    entity_data_ids = [d.id for d in queryset]
+    entity_key_prefix = 'lupa_dado_entidade'
     model_args = ['entity_type.abreviation', 'pk']
-    _remove_from_cache(key_prefix, model_args, queryset)
+    _remove_from_cache(cache_client, entity_key_prefix, model_args, queryset)
+
+    # Remove related DadoDetalhe from cache
+    detail_queryset = DadoDetalhe.objects.filter(
+        dado_main__id__in=entity_data_ids
+    ).order_by('pk')
+    detail_key_prefix = 'lupa_dado_detalhe'
+    detail_model_args = ['dado_main.entity_type.abreviation', 'pk']
+    _remove_from_cache(
+        cache_client,
+        detail_key_prefix,
+        detail_model_args,
+        detail_queryset
+    )
 
 
 remove_data_from_cache.short_description = 'Remove do cache'

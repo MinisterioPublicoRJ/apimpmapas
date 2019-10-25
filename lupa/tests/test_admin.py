@@ -133,6 +133,129 @@ class ClearFromCache(TestCase):
         rd_mock.delete.assert_has_calls(rd_delete_calls)
 
     @mock.patch('lupa.admin.django_cache')
+    def test_clear_data_and_its_detail_from_cache(self, _django_cache):
+        rd_mock = mock.MagicMock()
+        rd_mock.keys.side_effect = [
+            ['key entidade 1.1', 'key entidade 1.2'],
+            ['key entidade 2.1', 'key entidade 2.2'],
+            ['key detalhe 1.1', 'key detalhe 1.2'],
+            ['key detalhe 2.1', 'key detalhe 2.2'],
+            ['key detalhe 3.1', 'key detalhe 3.2'],
+            ['key detalhe 4.1', 'key detalhe 4.2'],
+        ]
+        _django_cache.get_master_client.return_value = rd_mock
+        modeladmin = None
+        request = None
+
+        dado_entidade_1 = make(
+            'lupa.DadoEntidade',
+        )
+        dado_entidade_2 = make(
+            'lupa.DadoEntidade',
+        )
+        # Thist entity wasn't selected in Admin
+        dado_entidade_3 = make(
+            'lupa.DadoEntidade',
+        )
+        dado_detalhe_1_1 = make(
+            'lupa.DadoDetalhe',
+            dado_main=dado_entidade_1
+        )
+        dado_detalhe_1_2 = make(
+            'lupa.DadoDetalhe',
+            dado_main=dado_entidade_1
+        )
+        dado_detalhe_2_1 = make(
+            'lupa.DadoDetalhe',
+            dado_main=dado_entidade_2
+        )
+        dado_detalhe_2_2 = make(
+            'lupa.DadoDetalhe',
+            dado_main=dado_entidade_2
+        )
+        make(
+            'lupa.DadoDetalhe',
+            dado_main=dado_entidade_3
+        )
+
+        # Only dado_entidade_1 and dado_entidade_2 weere 'selected' in admin
+        queryset = [dado_entidade_1, dado_entidade_2]
+
+        remove_data_from_cache(modeladmin, request, queryset)
+
+        key_prefix_entidade = 'lupa_dado_entidade'
+        key_prefix_detalhe = 'lupa_dado_detalhe'
+        rd_keys_calls = [
+            mock.call(
+                '*%s:%s:*:%s'
+                % (
+                    key_prefix_entidade,
+                    dado_entidade_1.entity_type.abreviation,
+                    dado_entidade_1.pk
+                )
+            ),
+            mock.call(
+                '*%s:%s:*:%s'
+                % (
+                    key_prefix_entidade,
+                    dado_entidade_2.entity_type.abreviation,
+                    dado_entidade_2.pk
+                )
+            ),
+            mock.call(
+                '*%s:%s:*:%s'
+                % (
+                    key_prefix_detalhe,
+                    dado_detalhe_1_1.dado_main.entity_type.abreviation,
+                    dado_detalhe_1_1.pk
+                )
+            ),
+            mock.call(
+                '*%s:%s:*:%s'
+                % (
+                    key_prefix_detalhe,
+                    dado_detalhe_1_2.dado_main.entity_type.abreviation,
+                    dado_detalhe_1_2.pk
+                )
+            ),
+            mock.call(
+                '*%s:%s:*:%s'
+                % (
+                    key_prefix_detalhe,
+                    dado_detalhe_2_1.dado_main.entity_type.abreviation,
+                    dado_detalhe_2_1.pk
+                )
+            ),
+            mock.call(
+                '*%s:%s:*:%s'
+                % (
+                    key_prefix_detalhe,
+                    dado_detalhe_2_2.dado_main.entity_type.abreviation,
+                    dado_detalhe_2_2.pk
+                )
+            ),
+        ]
+
+        rd_delete_calls = [
+            mock.call('key entidade 1.1'),
+            mock.call('key entidade 1.2'),
+            mock.call('key entidade 2.1'),
+            mock.call('key entidade 2.2'),
+            mock.call('key detalhe 1.1'),
+            mock.call('key detalhe 1.2'),
+            mock.call('key detalhe 2.1'),
+            mock.call('key detalhe 2.2'),
+            mock.call('key detalhe 3.1'),
+            mock.call('key detalhe 3.2'),
+            mock.call('key detalhe 4.1'),
+            mock.call('key detalhe 4.2'),
+        ]
+
+        _django_cache.get_master_client.assert_called_once_with()
+        rd_mock.keys.assert_has_calls(rd_keys_calls)
+        rd_mock.delete.assert_has_calls(rd_delete_calls)
+
+    @mock.patch('lupa.admin.django_cache')
     def test_clear_entity_from_cache(self, _django_cache):
         rd_mock = mock.MagicMock()
         rd_mock.keys.side_effect = [
