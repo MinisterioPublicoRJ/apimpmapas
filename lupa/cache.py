@@ -81,11 +81,20 @@ def _repopulate_cache_entity(key_prefix, queryset, serializer):
     repopulate_cache(key_prefix, entities, queryset, serializer)
 
 
-def _repopulate_cache_data(key_prefix, queryset, serializer):
+def _repopulate_cache_data_entity(key_prefix, queryset, serializer):
     entities = queryset.distinct('entity_type__abreviation').order_by(
         'entity_type__abreviation'
     )
     entities = [e.entity_type for e in entities]
+    repopulate_cache(key_prefix, entities, queryset, serializer)
+
+
+def _repopulate_cache_data_detail(key_prefix, queryset, serializer):
+    entities = queryset.distinct(
+        'dado_main__entity_type__abreviation').order_by(
+            'dado_main__entity_type__abreviation'
+    )
+    entities = [e.dado_main.entity_type for e in entities]
     repopulate_cache(key_prefix, entities, queryset, serializer)
 
 
@@ -94,6 +103,8 @@ def repopulate_cache(key_prefix, entities, queryset, serializer):
         # Temporary workaround
         if key_prefix == 'lupa_dado_entidade':
             objs = queryset.filter(entity_type=entity)
+        elif key_prefix == 'lupa_dado_detalhe':
+            objs = queryset.filter(dado_main__entity_type=entity)
         else:
             objs = queryset.filter(abreviation=entity.abreviation)
 
@@ -111,7 +122,7 @@ def repopulate_cache(key_prefix, entities, queryset, serializer):
                         'entity_type': entity.abreviation,
                         'domain_id': domain_id[0],
                 }
-                if key_prefix == 'lupa_dado_entidade':
+                if key_prefix in ('lupa_dado_entidade', 'lupa_dado_detalhe'):
                     key_kwargs['pk'] = obj.pk
 
                 key = cache_key(
