@@ -33,6 +33,8 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 # Application definition
 
 INSTALLED_APPS = [
+    'grappelli',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,7 +44,6 @@ INSTALLED_APPS = [
     'django.contrib.gis',
 
     'rest_framework',
-    'nested_admin',
     'ordered_model',
     'corsheaders',
     'colorfield',
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
     'lupa',
     'login',
     'mprj_plus',
+    'nested_admin',
 ]
 
 MIDDLEWARE = [
@@ -159,3 +161,22 @@ CSRF_TRUSTED_ORIGINS = ['*']
 
 # E-mail
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+# CACHE Configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'redis_cache.RedisCache',
+        'LOCATION': config(
+            'CACHE_LOCATION',
+            default='localhost:6379'
+        ),
+        'OPTIONS': {
+            'DB': 1,
+            'PASSWORD': config(
+                'CACHE_PASSWORD',
+                default=''
+            )
+        }
+    }
+}

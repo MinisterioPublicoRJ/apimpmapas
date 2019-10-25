@@ -2,6 +2,7 @@ from unittest import mock
 
 from decouple import config
 from django.conf import settings
+from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 import jwt
@@ -9,9 +10,15 @@ import pytest
 from model_mommy.mommy import make
 import responses
 
-from lupa.exceptions import QueryError
 from lupa import osmapi
+from lupa.exceptions import QueryError
 from .fixtures.osmapi import default_response
+from lupa.views import EntityDataView
+
+
+class NoCacheTestCase:
+    def teardown_method(self, method):
+        cache.clear()
 
 
 class EntidadeViewTest(TestCase):
@@ -65,14 +72,60 @@ class EntidadeViewTest(TestCase):
         seguranca = make('lupa.TemaDado', name='Segurança', color='#223478')
         saude = make('lupa.TemaDado', name='Saúde', color='#223578')
 
-        make('lupa.Dado', id=1, entity_type=estado, theme=seguranca, order=2)
-        make('lupa.Dado', id=2, entity_type=estado, theme=None, order=5)
-        make('lupa.Dado', id=3, entity_type=municipio, order=7)
-        make('lupa.Dado', id=4, entity_type=estado, theme=None, order=1)
-        make('lupa.Dado', id=5, entity_type=estado, theme=saude, order=8)
-        make('lupa.Dado', id=6, entity_type=municipio, order=6)
-        make('lupa.Dado', id=7, entity_type=estado, theme=seguranca, order=3)
-        make('lupa.Dado', id=8, entity_type=estado, theme=None, order=4)
+        make(
+            'lupa.DadoEntidade',
+            id=1,
+            entity_type=estado,
+            theme=seguranca,
+            order=2
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=2,
+            entity_type=estado,
+            theme=None,
+            order=5
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=3,
+            entity_type=municipio,
+            order=7
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=4,
+            entity_type=estado,
+            theme=None,
+            order=1
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=5,
+            entity_type=estado,
+            theme=saude,
+            order=8
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=6,
+            entity_type=municipio,
+            order=6
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=7,
+            entity_type=estado,
+            theme=seguranca,
+            order=3
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=8,
+            entity_type=estado,
+            theme=None,
+            order=4
+        )
 
         url = reverse('lupa:detail_entidade', args=('EST', '33',))
 
@@ -102,6 +155,17 @@ class EntidadeViewTest(TestCase):
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 404)
+
+    def test_entidade_nao_autorizavel(self):
+        view = EntityDataView()
+        response = view.process_request(
+            request=None,
+            obj=None,
+            serializer=None,
+            key_check=None
+        )
+
+        self.assertEqual(response.status_code, 401)
 
 
 class AuthEntidadeViewTest(TestCase):
@@ -171,7 +235,7 @@ class AuthEntidadeViewTest(TestCase):
         self.assertEqual(resp.status_code, 403)
 
 
-class ListDadosViewTest(TestCase):
+class ListDadosViewTest(TestCase, NoCacheTestCase):
 
     @mock.patch('lupa.serializers.execute')
     def test_get_lista_dados(self, _execute):
@@ -184,15 +248,15 @@ class ListDadosViewTest(TestCase):
         ent_estado = make('lupa.Entidade', abreviation='EST')
         ent_municipio = make('lupa.Entidade', abreviation='MUN')
 
-        make('lupa.Dado', entity_type=ent_estado, _quantity=2)
+        make('lupa.DadoEntidade', entity_type=ent_estado, _quantity=2)
         dado_object_mun_0 = make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             entity_type=ent_municipio,
             theme=None,
             order=1
         )
         dado_object_mun_1 = make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             entity_type=ent_municipio,
             theme=None,
             order=2
@@ -226,12 +290,12 @@ class ListDadosViewTest(TestCase):
         ent_municipio = make('lupa.Entidade', abreviation='MUN')
 
         make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             entity_type=ent_municipio,
             show_box=False
         )
         dado_object_mun_1 = make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             entity_type=ent_municipio,
             theme=None,
             show_box=True
@@ -253,13 +317,16 @@ class ListDadosViewTest(TestCase):
         )
 
 
-class DetailDadosViewTest(TestCase):
+class DetailDadosViewTest(TestCase, NoCacheTestCase):
 
     def setUp(self):
         self.entity_id = 1
         self.entity_abrv = 'EST'
         self.data_id = 7
         self.data_id_alt = 9
+        self.detail_data_1_id = 23
+        self.detail_data_2_id = 59
+        self.detail_data_3_id = 102
         self.external_data = '202'
         self.external_source = 'http://mca.mp.rj.gov.br/'
         self.exibition_field = 'Abrigos para crianças e adolescentes'
@@ -285,7 +352,12 @@ class DetailDadosViewTest(TestCase):
             },
             'exibition_field': self.exibition_field,
             'data_type': self.data_type,
-            'icon': settings.MEDIA_URL + self.icon_file
+            'icon': settings.MEDIA_URL + self.icon_file,
+            'detalhe': [
+                {'id': self.detail_data_2_id},
+                {'id': self.detail_data_1_id},
+                {'id': self.detail_data_3_id},
+            ]
         }
 
         _execute.return_value = [(
@@ -300,7 +372,7 @@ class DetailDadosViewTest(TestCase):
             abreviation=self.entity_abrv,
         )
         dado = make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             id=self.data_id,
             data_type=self.data_type_obj,
             entity_type=entidade,
@@ -310,6 +382,24 @@ class DetailDadosViewTest(TestCase):
         make('lupa.ColunaDado', info_type='id', name='identi', dado=dado)
         make('lupa.ColunaDado', info_type='fonte', name='fon', dado=dado)
         make('lupa.ColunaDado', info_type='dado', name='data', dado=dado)
+        make(
+            'lupa.DadoDetalhe',
+            id=self.detail_data_1_id,
+            order=1,
+            dado_main=dado
+        )
+        make(
+            'lupa.DadoDetalhe',
+            id=self.detail_data_2_id,
+            order=0,
+            dado_main=dado
+        )
+        make(
+            'lupa.DadoDetalhe',
+            id=self.detail_data_3_id,
+            order=2,
+            dado_main=dado
+        )
 
         url = reverse(
             'lupa:detail_dado',
@@ -332,7 +422,7 @@ class DetailDadosViewTest(TestCase):
         )
 
         make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             id=self.data_id,
             entity_type=entidade,
             data_type=self.data_type_obj
@@ -353,7 +443,7 @@ class DetailDadosViewTest(TestCase):
             abreviation=self.entity_abrv,
         )
         make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             id=self.data_id_alt,
             entity_type=entidade
         )
@@ -376,7 +466,7 @@ class DetailDadosViewTest(TestCase):
             abreviation=self.entity_abrv,
         )
         make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             id=self.data_id,
             entity_type=entidade
         )
@@ -417,7 +507,7 @@ class AuthDadosViewTest(TestCase):
             role=self.role_allowed
         )
         self.dado = make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             title=self.dado_title,
             roles_allowed=[self.grupo_allowed],
             id=self.data_id,
@@ -450,6 +540,7 @@ class AuthDadosViewTest(TestCase):
             'icon': None,
             'exibition_field': None,
             'data_type': self.data_type,
+            'detalhe': [],
             'external_data': {
                 'dado': self.external_data,
                 'id': self.data_id
@@ -477,6 +568,128 @@ class AuthDadosViewTest(TestCase):
         )
         resp = self.client.get(url, {'auth_token': token})
         self.assertEqual(resp.status_code, 403)
+
+
+class DetalhesViewTest(TestCase, NoCacheTestCase):
+    def setUp(self):
+        self.entity_id = 1
+        self.entity_abrv = 'EST'
+        self.data_id = 7
+        self.detail_id = 23
+        self.external_data = '202'
+        self.exibition_field = 'Abrigos para crianças e adolescentes'
+        self.domain_id = '33'
+        self.data_type = 'texto_pequeno_destaque'
+        self.data_type_obj = make(
+            'lupa.TipoDado',
+            name=self.data_type,
+            serialization='Singleton'
+        )
+
+    @mock.patch('lupa.serializers.execute')
+    def test_detalhe_ok(self, _execute):
+
+        expected_response = {
+            'id': self.detail_id,
+            'external_data': {
+                'dado': self.external_data,
+                'id': self.data_id
+            },
+            'exibition_field': self.exibition_field,
+            'data_type': self.data_type,
+        }
+
+        _execute.return_value = [(
+            self.external_data,
+            self.data_id
+        )]
+
+        entidade = make(
+            'lupa.Entidade',
+            id=self.entity_id,
+            abreviation=self.entity_abrv,
+        )
+        dado = make(
+            'lupa.DadoEntidade',
+            id=self.data_id,
+            entity_type=entidade,
+        )
+        detalhe = make(
+            'lupa.DadoDetalhe',
+            id=self.detail_id,
+            exibition_field=self.exibition_field,
+            dado_main=dado,
+            data_type=self.data_type_obj
+        )
+        make('lupa.ColunaDetalhe', info_type='id', name='identi', dado=detalhe)
+        make('lupa.ColunaDetalhe', info_type='dado', name='data', dado=detalhe)
+
+        url = reverse(
+            'lupa:detail_detalhes',
+            args=(self.entity_abrv, self.domain_id, self.detail_id)
+        )
+        resp = self.client.get(url)
+        resp_json = resp.json()
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp_json, expected_response)
+
+    @mock.patch('lupa.serializers.execute')
+    def test_detalhe_sem_retorno_db(self, _execute):
+        _execute.return_value = []
+
+        entidade = make(
+            'lupa.Entidade',
+            id=self.entity_id,
+            abreviation=self.entity_abrv,
+        )
+
+        dado = make(
+            'lupa.DadoEntidade',
+            id=self.data_id,
+            entity_type=entidade,
+        )
+
+        make(
+            'lupa.DadoDetalhe',
+            id=self.detail_id,
+            dado_main=dado,
+            data_type=self.data_type_obj
+        )
+
+        url = reverse(
+            'lupa:detail_detalhes',
+            args=(self.entity_abrv, self.domain_id, self.detail_id)
+        )
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 404)
+
+    @mock.patch('lupa.serializers.execute')
+    def test_dado_com_erro(self, _execute):
+        _execute.side_effect = QueryError('test error')
+
+        entidade = make(
+            'lupa.Entidade',
+            id=self.entity_id,
+            abreviation=self.entity_abrv,
+        )
+        dado = make(
+            'lupa.DadoEntidade',
+            id=self.data_id,
+            entity_type=entidade
+        )
+        make(
+            'lupa.DadoDetalhe',
+            id=self.detail_id,
+            dado_main=dado
+        )
+        url = reverse(
+            'lupa:detail_detalhes',
+            args=(self.entity_abrv, self.domain_id, self.detail_id)
+        )
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)
 
 
 class OsmQueryViewTest(TestCase):
@@ -516,7 +729,7 @@ class OsmQueryViewTest(TestCase):
 
 
 @pytest.mark.django_db(transaction=True)
-class GeoSpatialQueryViewTest(TestCase):
+class GeoSpatialQueryViewTest(TestCase, NoCacheTestCase):
 
     @mock.patch('lupa.views.execute_geospatial', return_value=((33345,),))
     def test_happy_path(self, _egsp):

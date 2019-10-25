@@ -2,7 +2,8 @@ from django.urls import path
 
 from .views import (
     EntidadeView,
-    DadoView,
+    DadoDetalheView,
+    DadoEntidadeView,
     OsmQueryView,
     GeoSpatialQueryView
 )
@@ -18,8 +19,13 @@ urlpatterns = [
     ),
     path(
         'dado/<str:entity_type>/<str:domain_id>/<int:pk>',
-        DadoView.as_view(),
+        DadoEntidadeView.as_view(),
         name='detail_dado'
+    ),
+    path(
+        'detalhe/<str:entity_type>/<str:domain_id>/<int:pk>',
+        DadoDetalheView.as_view(),
+        name='detail_detalhes'
     ),
     path(
         'search/mapsearch/<str:terms>',

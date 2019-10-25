@@ -1,7 +1,10 @@
+import jwt
+
 from decouple import config
 from django.http import Http404
 from django.shortcuts import get_object_or_404
-import jwt
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 from jwt.exceptions import InvalidSignatureError, DecodeError
 from rest_framework.generics import (
     GenericAPIView,
@@ -10,10 +13,11 @@ from rest_framework.generics import (
 )
 from rest_framework.response import Response
 
-from .models import Entidade, Dado
+from .models import Entidade, DadoDetalhe, DadoEntidade
 from .serializers import (
     EntidadeSerializer,
-    DadoSerializer,
+    DadoDetalheSerializer,
+    DadoEntidadeSerializer,
     EntidadeIdSerializer
 )
 from .osmapi import query as osmquery
@@ -22,7 +26,15 @@ from .db_connectors import execute_geospatial
 
 class EntityDataView:
     def process_request(self, request, obj, serializer, key_check):
-        roles = obj.roles_allowed.all().values_list('role', flat=True)
+        if isinstance(obj, (Entidade, DadoEntidade)):
+            roles = obj.roles_allowed.all().values_list('role', flat=True)
+        elif isinstance(obj, DadoDetalhe):
+            roles = obj.dado_main.roles_allowed.all().values_list(
+                'role',
+                flat=True
+            )
+        else:
+            return Response({}, status=401)
         if roles:
             token = request.GET.get('auth_token')
             try:
@@ -44,6 +56,7 @@ class EntityDataView:
         return Response(data)
 
 
+@method_decorator(cache_page(600, key_prefix='lupa_entidade'), name='dispatch')
 class EntidadeView(GenericAPIView, EntityDataView):
     serializer_class = EntidadeSerializer
     queryset = Entidade.objects.all()
@@ -62,9 +75,10 @@ class EntidadeView(GenericAPIView, EntityDataView):
         )
 
 
-class DadoView(RetrieveAPIView, EntityDataView):
-    serializer_class = DadoSerializer
-    queryset = Dado.objects.all()
+@method_decorator(cache_page(600, key_prefix='lupa_dado'), name='dispatch')
+class DadoEntidadeView(RetrieveAPIView, EntityDataView):
+    serializer_class = DadoEntidadeSerializer
+    queryset = DadoEntidade.objects.all()
 
     def get(self, request, *args, **kwargs):
         obj = get_object_or_404(
@@ -76,11 +90,32 @@ class DadoView(RetrieveAPIView, EntityDataView):
         return self.process_request(
             request,
             obj,
-            DadoSerializer,
+            DadoEntidadeSerializer,
             'external_data'
         )
 
 
+@method_decorator(cache_page(600, key_prefix='lupa_detalhe'), name='dispatch')
+class DadoDetalheView(RetrieveAPIView, EntityDataView):
+    serializer_class = DadoDetalheSerializer
+    queryset = DadoDetalhe.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        obj = get_object_or_404(
+            self.queryset,
+            dado_main__entity_type__abreviation=self.kwargs['entity_type'],
+            pk=self.kwargs['pk']
+        )
+
+        return self.process_request(
+            request,
+            obj,
+            DadoDetalheSerializer,
+            'external_data'
+        )
+
+
+@method_decorator(cache_page(600, key_prefix='lupa_osm'), name='dispatch')
 class OsmQueryView(ListAPIView):
     queryset = []
 
@@ -88,6 +123,7 @@ class OsmQueryView(ListAPIView):
         return Response(osmquery(self.kwargs['terms']))
 
 
+@method_decorator(cache_page(600, key_prefix='lupa_geospat'), name='dispatch')
 class GeoSpatialQueryView(ListAPIView):
     serializer_class = EntidadeIdSerializer
     queryset = []

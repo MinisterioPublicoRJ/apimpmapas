@@ -4,7 +4,15 @@ from rest_framework import serializers
 
 from .db_connectors import execute
 from .exceptions import QueryError
-from .models import Entidade, Dado, TipoDado, ColunaDado, ColunaMapa
+from .models import (
+    Entidade,
+    DadoEntidade,
+    DadoDetalhe,
+    TipoDado,
+    ColunaDado,
+    ColunaDetalhe,
+    ColunaMapa,
+)
 
 
 def calculate_total(data_list):
@@ -35,12 +43,12 @@ def rowToMapData(row, column_list):
     return feature
 
 
-class DadoInternalSerializer(serializers.ModelSerializer):
+class DadoEntidadeInternalSerializer(serializers.ModelSerializer):
     theme_name = serializers.SerializerMethodField()
     theme_color = serializers.SerializerMethodField()
 
     class Meta:
-        model = Dado
+        model = DadoEntidade
         fields = ['id', 'theme_name', 'theme_color']
 
     def get_theme_name(self, obj):
@@ -54,9 +62,21 @@ class DadoInternalSerializer(serializers.ModelSerializer):
         return None
 
 
+class DadoDetalheInternalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DadoDetalhe
+        fields = ['id']
+
+
 class DataColumnSerializer(serializers.ModelSerializer):
     class Meta:
         model = ColunaDado
+        fields = ['name', 'info_type']
+
+
+class DetailColumnSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ColunaDetalhe
         fields = ['name', 'info_type']
 
 
@@ -160,8 +180,8 @@ class EntidadeSerializer(serializers.ModelSerializer):
         return None
 
     def get_theme_list(self, obj):
-        data_list = DadoInternalSerializer(
-            obj.data_list.filter(show_box=True),
+        data_list = DadoEntidadeInternalSerializer(
+            obj.obter_dados().filter(show_box=True),
             many=True,
             read_only=True
         ).data
@@ -187,19 +207,21 @@ class EntidadeSerializer(serializers.ModelSerializer):
         return theme_list
 
 
-class DadoSerializer(serializers.ModelSerializer):
+class DadoEntidadeSerializer(serializers.ModelSerializer):
     external_data = serializers.SerializerMethodField()
     icon = serializers.SerializerMethodField()
     data_type = serializers.SerializerMethodField()
+    detalhe = serializers.SerializerMethodField()
 
     class Meta:
-        model = Dado
+        model = DadoEntidade
         fields = [
             'id',
             'exibition_field',
             'external_data',
             'data_type',
-            'icon'
+            'icon',
+            'detalhe',
         ]
 
     def __init__(self, *args, **kwargs):
@@ -287,6 +309,111 @@ class DadoSerializer(serializers.ModelSerializer):
             icon_url = obj.icon.file_path.url
             return icon_url
         return None
+
+    def get_data_type(self, obj):
+        return obj.data_type.name
+
+    def get_detalhe(self, obj):
+        detail_list = DadoDetalheInternalSerializer(
+            obj.data_details.all(),
+            many=True,
+            read_only=True
+        ).data
+        return detail_list
+
+
+class DadoDetalheSerializer(serializers.ModelSerializer):
+    external_data = serializers.SerializerMethodField()
+    data_type = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DadoEntidade
+        fields = [
+            'id',
+            'exibition_field',
+            'external_data',
+            'data_type',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        self.domain_id = str(kwargs.pop('domain_id'))
+
+        dado = args[0]
+        self.data_type = dado.data_type.name
+        super().__init__(*args, **kwargs)
+
+    def get_external_data(self, obj):
+        column_list = DetailColumnSerializer(
+            obj.column_list.all(),
+            many=True,
+            read_only=True
+        ).data
+
+        columns = []
+        id_column = None
+        for column in column_list:
+            columns.append('{} as {}'.format(
+                column['name'],
+                column['info_type']
+            ))
+            if column['info_type'] == 'id':
+                id_column = column['name']
+
+        try:
+            db_result = execute(
+                obj.database,
+                obj.schema,
+                obj.table,
+                columns,
+                id_column,
+                self.domain_id
+            )
+        except QueryError:
+            return {}
+
+        if db_result:
+            if obj.data_type.serialization == TipoDado.SINGLETON_DATA:
+                data = rowToExternalData(
+                    row=db_result[0],
+                    column_list=column_list
+                )
+                return data
+            elif (obj.data_type.serialization == TipoDado.LIST_DATA or
+                  obj.data_type.serialization == TipoDado.XY_GRAPH_DATA):
+                data = []
+                for result in db_result:
+                    data.append(
+                        rowToExternalData(row=result, column_list=column_list)
+                    )
+                if obj.limit_fetch > 0:
+                    return data[:obj.limit_fetch]
+                return data
+            elif obj.data_type.serialization == TipoDado.PIZZA_GRAPH_DATA:
+                data = []
+                for result in db_result:
+                    data.append(
+                        rowToExternalData(row=result, column_list=column_list)
+                    )
+
+                total = calculate_total(data)
+
+                outros = None
+                data_rev = []
+                for line in data:
+                    if line['dado']/total <= 0.03:
+                        if outros:
+                            outros['dado'] += line['dado']
+                        else:
+                            outros = {
+                                'dado': line['dado'],
+                                'rotulo': 'Outros'
+                            }
+                    else:
+                        data_rev.append(line)
+                if outros:
+                    data_rev.append(outros)
+                return data_rev
+        return {}
 
     def get_data_type(self, obj):
         return obj.data_type.name

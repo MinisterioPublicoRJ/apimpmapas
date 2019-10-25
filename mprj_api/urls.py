@@ -21,6 +21,7 @@ admin.AdminSite.index_title = 'Administração das APIs do MP em Mapas'
 admin.AdminSite.site_title = 'MPRJ'
 
 urlpatterns = [
+    path('grappelli/', include('grappelli.urls')),  # grappelli URLS
     path('admin/', admin.site.urls),
     path('login/', include('login.urls', namespace='login')),
     path('nested_admin/', include('nested_admin.urls')),
