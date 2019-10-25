@@ -1,4 +1,8 @@
 ## [Unreleased]
+## [1.2.0]
+### Changed
+ - Adição do Detalhe de Caixinha
+ - Grappelli para Django Admin
 ## [1.1.9]
 ### Changed
  - Adição de sistema de cache para as visualizações
