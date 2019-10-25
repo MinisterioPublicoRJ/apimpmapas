@@ -172,7 +172,10 @@ CACHES = {
             default='localhost:6379'
         ),
         'OPTIONS': {
-            'DB': 1,
+            'DB': config(
+                'DATABASE_NUMBER',
+                default=1
+            ),
             'PASSWORD': config(
                 'CACHE_PASSWORD',
                 default=''
