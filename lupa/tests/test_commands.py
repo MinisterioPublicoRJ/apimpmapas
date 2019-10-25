@@ -9,8 +9,8 @@ from lupa.management.commands.checkconsistency import (
     Command,
     parsecolumns
 )
-from lupa.models import ColunaDado, Dado, Entidade
-from lupa.serializers import DadoSerializer, EntidadeSerializer
+from lupa.models import ColunaDado, Entidade, DadoEntidade
+from lupa.serializers import EntidadeSerializer, DadoEntidadeSerializer
 
 
 class TestCheckConsistency(TestCase):
@@ -251,25 +251,25 @@ class UpdateCache(TestCase):
     def test_update_data_cache(self, _repopulate_cache):
         key_prefix = 'lupa_dado'
         make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             cache_timeout=7,
             last_cache_update=dt(2019, 10, 15, 12, 0, 0),
         )
         make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             cache_timeout=7,
             last_cache_update=dt(2019, 10, 14, 12, 0, 0),
         )
 
         call_command('update_cache', 'dado')
 
-        expiring_data = Dado.cache.expiring()
+        expiring_data = DadoEntidade.cache.expiring()
         args_prefix, args_queryset, args_serializer\
             = _repopulate_cache.call_args_list[0][0]
 
         self.assertEqual(args_prefix, key_prefix)
         self.assertCountEqual(expiring_data, args_queryset)
-        self.assertTrue(args_serializer is DadoSerializer)
+        self.assertTrue(args_serializer is DadoEntidadeSerializer)
 
     @mock.patch(
         'lupa.management.commands.update_cache._repopulate_cache_entity'

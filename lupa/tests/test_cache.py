@@ -14,8 +14,8 @@ from lupa.cache import (
     _repopulate_cache_data,
     _repopulate_cache_entity
 )
-from lupa.models import Entidade, Dado
-from lupa.serializers import DadoSerializer, EntidadeSerializer
+from lupa.models import Entidade, DadoEntidade
+from lupa.serializers import EntidadeSerializer, DadoEntidadeSerializer
 
 
 class Cache(TestCase):
@@ -79,14 +79,59 @@ class DecoratorCache(TestCase):
         seguranca = make('lupa.TemaDado', name='Segurança', color='#223478')
         saude = make('lupa.TemaDado', name='Saúde', color='#223578')
 
-        make('lupa.Dado', id=1, entity_type=estado, theme=seguranca, order=2)
-        make('lupa.Dado', id=2, entity_type=estado, theme=None, order=5)
-        make('lupa.Dado', id=3, entity_type=municipio, order=7)
-        make('lupa.Dado', id=4, entity_type=estado, theme=None, order=1)
-        make('lupa.Dado', id=5, entity_type=estado, theme=saude, order=8)
-        make('lupa.Dado', id=6, entity_type=municipio, order=6)
-        make('lupa.Dado', id=7, entity_type=estado, theme=seguranca, order=3)
-        make('lupa.Dado', id=8, entity_type=estado, theme=None, order=4)
+        make(
+            'lupa.DadoEntidade',
+            id=1,
+            entity_type=estado,
+            theme=seguranca,
+            order=2
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=2,
+            entity_type=estado,
+            theme=None,
+            order=5
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=3,
+            entity_type=municipio,
+            order=7
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=4,
+            entity_type=estado,
+            theme=None, order=1
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=5,
+            entity_type=estado,
+            theme=saude,
+            order=8
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=6,
+            entity_type=municipio,
+            order=6
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=7,
+            entity_type=estado,
+            theme=seguranca,
+            order=3
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=8,
+            entity_type=estado,
+            theme=None,
+            order=4
+        )
         self.expected_answer = {
             'domain_id': '33',
             'entity_type': 'Estado',
@@ -358,14 +403,60 @@ class ModelCache(TestCase):
         seguranca = make('lupa.TemaDado', name='Segurança', color='#223478')
         saude = make('lupa.TemaDado', name='Saúde', color='#223578')
 
-        make('lupa.Dado', id=1, entity_type=estado, theme=seguranca, order=2)
-        make('lupa.Dado', id=2, entity_type=estado, theme=None, order=5)
-        make('lupa.Dado', id=3, entity_type=municipio, order=7)
-        make('lupa.Dado', id=4, entity_type=estado, theme=None, order=1)
-        make('lupa.Dado', id=5, entity_type=estado, theme=saude, order=8)
-        make('lupa.Dado', id=6, entity_type=municipio, order=6)
-        make('lupa.Dado', id=7, entity_type=estado, theme=seguranca, order=3)
-        make('lupa.Dado', id=8, entity_type=estado, theme=None, order=4)
+        make(
+            'lupa.DadoEntidade',
+            id=1,
+            entity_type=estado,
+            theme=seguranca,
+            order=2
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=2,
+            entity_type=estado,
+            theme=None,
+            order=5
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=3,
+            entity_type=municipio,
+            order=7
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=4,
+            entity_type=estado,
+            theme=None,
+            order=1
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=5,
+            entity_type=estado,
+            theme=saude,
+            order=8
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=6,
+            entity_type=municipio,
+            order=6
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=7,
+            entity_type=estado,
+            theme=seguranca,
+            order=3
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=8,
+            entity_type=estado,
+            theme=None,
+            order=4
+        )
         self.expected_answer = {
             'domain_id': '33',
             'entity_type': 'Estado',
@@ -469,7 +560,7 @@ class RepopulateCache(TestCase):
     @mock.patch('lupa.cache.execute_sample')
     @mock.patch('lupa.cache.cache_key')
     @mock.patch('lupa.cache.django_cache')
-    def test_repopulate_cache_with_lupa_dados(
+    def test_repopulate_cache_with_lupa_dados_entidade(
             self,
             _django_cache,
             _cache_key,
@@ -488,35 +579,39 @@ class RepopulateCache(TestCase):
         )
 
         dado_1 = make(
-            'lupa.Dado', pk=1, entity_type=estado, order=2, cache_timeout=10
+            'lupa.DadoEntidade',
+            pk=1,
+            entity_type=estado,
+            order=2,
+            cache_timeout=10
         )
         dado_2 = make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             pk=2,
             entity_type=municipio,
             order=7,
             cache_timeout=20
         )
         dado_3 = make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             pk=3,
             entity_type=estado,
             order=1,
             cache_timeout=30
         )
         dado_4 = make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             pk=4,
             entity_type=municipio,
             order=6,
             cache_timeout=40
         )
 
-        queryset = Dado.objects.all()
+        queryset = DadoEntidade.objects.all()
         _repopulate_cache_data(
             key_prefix='lupa_dado',
             queryset=queryset,
-            serializer=DadoSerializer
+            serializer=DadoEntidadeSerializer
         )
 
         execute_sample_calls = [
@@ -639,97 +734,113 @@ class RepopulateCache(TestCase):
             mock.call('key 1', {'id': dado_3.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_3.data_type.name,
-                                'icon': None},
+                                'icon': None,
+                                'detalhe': []},
                       timeout=dado_3.cache_timeout
                       ),
             mock.call('key 2', {'id': dado_3.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_3.data_type.name,
-                                'icon': None},
+                                'icon': None,
+                                'detalhe': []},
                       timeout=dado_3.cache_timeout
                       ),
             mock.call('key 3', {'id': dado_3.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_3.data_type.name,
-                                'icon': None},
+                                'icon': None,
+                                'detalhe': []},
                       timeout=dado_3.cache_timeout
                       ),
             mock.call('key 4', {'id': dado_3.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_3.data_type.name,
-                                'icon': None},
+                                'icon': None,
+                                'detalhe': []},
                       timeout=dado_3.cache_timeout
                       ),
             mock.call('key 5', {'id': dado_1.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_1.data_type.name,
-                                'icon': None},
+                                'icon': None,
+                                'detalhe': []},
                       timeout=dado_1.cache_timeout
                       ),
             mock.call('key 6', {'id': dado_1.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_1.data_type.name,
-                                'icon': None},
+                                'icon': None,
+                                'detalhe': []},
                       timeout=dado_1.cache_timeout
                       ),
             mock.call('key 7', {'id': dado_1.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_1.data_type.name,
-                                'icon': None},
+                                'icon': None,
+                                'detalhe': []},
                       timeout=dado_1.cache_timeout
                       ),
             mock.call('key 8', {'id': dado_1.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_1.data_type.name,
-                                'icon': None},
+                                'icon': None,
+                                'detalhe': []},
                       timeout=dado_1.cache_timeout
                       ),
             mock.call('key 9', {'id': dado_4.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_4.data_type.name,
-                                'icon': None},
+                                'icon': None,
+                                'detalhe': []},
                       timeout=dado_4.cache_timeout
                       ),
             mock.call('key 10', {'id': dado_4.pk, 'exibition_field': None,
                                  'external_data': {},
                                  'data_type': dado_4.data_type.name,
-                                 'icon': None},
+                                 'icon': None,
+                                 'detalhe': []},
                       timeout=dado_4.cache_timeout
                       ),
             mock.call('key 11', {'id': dado_4.pk, 'exibition_field': None,
                                  'external_data': {},
                                  'data_type': dado_4.data_type.name,
-                                 'icon': None},
+                                 'icon': None,
+                                 'detalhe': []},
                       timeout=dado_4.cache_timeout
                       ),
             mock.call('key 12', {'id': dado_4.pk, 'exibition_field': None,
                                  'external_data': {},
                                  'data_type': dado_4.data_type.name,
-                                 'icon': None},
+                                 'icon': None,
+                                 'detalhe': []},
                       timeout=dado_4.cache_timeout
                       ),
             mock.call('key 13', {'id': dado_2.pk, 'exibition_field': None,
                                  'external_data': {},
                                  'data_type': dado_2.data_type.name,
-                                 'icon': None},
+                                 'icon': None,
+                                 'detalhe': []},
                       timeout=dado_2.cache_timeout
                       ),
             mock.call('key 14', {'id': dado_2.pk, 'exibition_field': None,
                                  'external_data': {},
                                  'data_type': dado_2.data_type.name,
-                                 'icon': None},
+                                 'icon': None,
+                                 'detalhe': []},
                       timeout=dado_2.cache_timeout
                       ),
             mock.call('key 15', {'id': dado_2.pk, 'exibition_field': None,
                                  'external_data': {},
                                  'data_type': dado_2.data_type.name,
-                                 'icon': None},
+                                 'icon': None,
+                                 'detalhe': []},
                       timeout=dado_2.cache_timeout
                       ),
             mock.call('key 16', {'id': dado_2.pk, 'exibition_field': None,
                                  'external_data': {},
                                  'data_type': dado_2.data_type.name,
-                                 'icon': None},
+                                 'icon': None,
+                                 'detalhe': []},
                       timeout=dado_2.cache_timeout
                       ),
         ]

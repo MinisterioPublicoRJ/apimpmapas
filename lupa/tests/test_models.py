@@ -14,8 +14,8 @@ from lupa.models import (
     ORACLE,
     POSTGRES,
     ONLY_POSTGIS_SUPORTED,
-    Dado,
     Entidade,
+    DadoEntidade,
     CacheManager
 )
 
@@ -232,7 +232,7 @@ class ConvertCacheTimeout(TestCase):
         self.assertEqual(entity.cache_timeout, seconds)
 
     def test_convert_data_cache_timeout_to_seconds(self):
-        entity = make('lupa.Dado', cache_timeout=10)
+        entity = make('lupa.DadoEntidade', cache_timeout=10)
         seconds = 864000
 
         self.assertEqual(entity.cache_timeout, seconds)
@@ -251,17 +251,17 @@ class RetrieveExpiringCacheObjects(TestCase):
     @freeze_time('2019-10-22 12:00:00')
     def test_retrieve_expiring_cache_data(self):
         expired_data_obj = make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             cache_timeout=7,
             last_cache_update=dt(2019, 10, 15, 12, 0, 0)
         )
         make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
             cache_timeout=7,
             last_cache_update=dt(2019, 10, 20, 12, 0, 0)
         )
 
-        expiring_data = Dado.cache.expiring()
+        expiring_data = DadoEntidade.cache.expiring()
 
         self.assertEqual(len(expiring_data), 1)
         self.assertIsInstance(expiring_data, QuerySet)

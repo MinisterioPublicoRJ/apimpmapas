@@ -99,10 +99,10 @@ class ClearFromCache(TestCase):
         request = None
 
         dado_1 = make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
         )
         dado_2 = make(
-            'lupa.Dado',
+            'lupa.DadoEntidade',
         )
 
         queryset = [dado_1, dado_2]
