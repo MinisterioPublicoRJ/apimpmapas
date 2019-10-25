@@ -173,7 +173,7 @@ CACHES = {
         ),
         'OPTIONS': {
             'DB': config(
-                'DATABASE_NUMBER',
+                'CACHE_DATABASE_NUMBER',
                 default=1
             ),
             'PASSWORD': config(
