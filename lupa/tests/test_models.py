@@ -16,6 +16,7 @@ from lupa.models import (
     ONLY_POSTGIS_SUPORTED,
     Entidade,
     DadoEntidade,
+    DadoDetalhe,
     CacheManager
 )
 
@@ -262,6 +263,25 @@ class RetrieveExpiringCacheObjects(TestCase):
         )
 
         expiring_data = DadoEntidade.cache.expiring()
+
+        self.assertEqual(len(expiring_data), 1)
+        self.assertIsInstance(expiring_data, QuerySet)
+        self.assertEqual(expiring_data[0], expired_data_obj)
+
+    @freeze_time('2019-10-22 12:00:00')
+    def test_retrieve_expiring_cache_data_detalhe(self):
+        expired_data_obj = make(
+            'lupa.DadoDetalhe',
+            cache_timeout=7,
+            last_cache_update=dt(2019, 10, 15, 12, 0, 0)
+        )
+        make(
+            'lupa.DadoDetalhe',
+            cache_timeout=7,
+            last_cache_update=dt(2019, 10, 20, 12, 0, 0)
+        )
+
+        expiring_data = DadoDetalhe.cache.expiring()
 
         self.assertEqual(len(expiring_data), 1)
         self.assertIsInstance(expiring_data, QuerySet)
