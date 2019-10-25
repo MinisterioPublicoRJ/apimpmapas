@@ -249,7 +249,7 @@ class TestCheckConsistency(TestCase):
 class UpdateCache(TestCase):
     @mock.patch('lupa.management.commands.update_cache._repopulate_cache_data')
     def test_update_data_cache(self, _repopulate_cache):
-        key_prefix = 'lupa_dado'
+        key_prefix = 'lupa_dado_entidade'
         make(
             'lupa.DadoEntidade',
             cache_timeout=7,

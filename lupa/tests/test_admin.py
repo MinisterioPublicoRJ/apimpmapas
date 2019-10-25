@@ -109,7 +109,7 @@ class ClearFromCache(TestCase):
 
         remove_data_from_cache(modeladmin, request, queryset)
 
-        key_prefix = 'lupa_dado'
+        key_prefix = 'lupa_dado_entidade'
         rd_keys_calls = [
             mock.call(
                 '*%s:%s:*:%s'

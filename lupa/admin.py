@@ -41,7 +41,7 @@ def remove_entity_from_cache(modeladmin, request, queryset):
 
 
 def remove_data_from_cache(modeladmin, request, queryset):
-    key_prefix = 'lupa_dado'
+    key_prefix = 'lupa_dado_entidade'
     model_args = ['entity_type.abreviation', 'pk']
     _remove_from_cache(key_prefix, model_args, queryset)
 

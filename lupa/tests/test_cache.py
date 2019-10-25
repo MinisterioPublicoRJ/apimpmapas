@@ -609,7 +609,7 @@ class RepopulateCache(TestCase):
 
         queryset = DadoEntidade.objects.all()
         _repopulate_cache_data(
-            key_prefix='lupa_dado',
+            key_prefix='lupa_dado_entidade',
             queryset=queryset,
             serializer=DadoEntidadeSerializer
         )
@@ -633,97 +633,97 @@ class RepopulateCache(TestCase):
         ]
 
         cache_key_calls = [
-            mock.call('lupa_dado',
+            mock.call('lupa_dado_entidade',
                       {'entity_type': dado_3.entity_type.abreviation,
                        'domain_id': '33001',
                        'pk': 3
                        }
                       ),
-            mock.call('lupa_dado',
+            mock.call('lupa_dado_entidade',
                       {'entity_type': dado_3.entity_type.abreviation,
                        'domain_id': '33002',
                        'pk': 3
                        }
                       ),
-            mock.call('lupa_dado',
+            mock.call('lupa_dado_entidade',
                       {'entity_type': dado_3.entity_type.abreviation,
                        'domain_id': '33003',
                        'pk': 3
                        }
                       ),
-            mock.call('lupa_dado',
+            mock.call('lupa_dado_entidade',
                       {'entity_type': dado_3.entity_type.abreviation,
                        'domain_id': '33004',
                        'pk': 3
                        }
                       ),
-            mock.call('lupa_dado',
+            mock.call('lupa_dado_entidade',
                       {'entity_type': dado_1.entity_type.abreviation,
                        'domain_id': '33001',
                        'pk': 1
                        }
                       ),
-            mock.call('lupa_dado',
+            mock.call('lupa_dado_entidade',
                       {'entity_type': dado_1.entity_type.abreviation,
                        'domain_id': '33002',
                        'pk': 1
                        }
                       ),
-            mock.call('lupa_dado',
+            mock.call('lupa_dado_entidade',
                       {'entity_type': dado_1.entity_type.abreviation,
                        'domain_id': '33003',
                        'pk': 1
                        }
                       ),
-            mock.call('lupa_dado',
+            mock.call('lupa_dado_entidade',
                       {'entity_type': dado_1.entity_type.abreviation,
                        'domain_id': '33004',
                        'pk': 1
                        }
                       ),
-            mock.call('lupa_dado',
+            mock.call('lupa_dado_entidade',
                       {'entity_type': dado_4.entity_type.abreviation,
                        'domain_id': '33010',
                        'pk': 4
                        }
                       ),
-            mock.call('lupa_dado',
+            mock.call('lupa_dado_entidade',
                       {'entity_type': dado_4.entity_type.abreviation,
                        'domain_id': '33011',
                        'pk': 4
                        }
                       ),
-            mock.call('lupa_dado',
+            mock.call('lupa_dado_entidade',
                       {'entity_type': dado_4.entity_type.abreviation,
                        'domain_id': '33012',
                        'pk': 4
                        }
                       ),
-            mock.call('lupa_dado',
+            mock.call('lupa_dado_entidade',
                       {'entity_type': dado_4.entity_type.abreviation,
                        'domain_id': '33013',
                        'pk': 4
                        }
                       ),
-            mock.call('lupa_dado',
+            mock.call('lupa_dado_entidade',
                       {'entity_type': dado_2.entity_type.abreviation,
                        'domain_id': '33010',
                        'pk': 2
                        }
                       ),
-            mock.call('lupa_dado',
+            mock.call('lupa_dado_entidade',
                       {'entity_type': dado_2.entity_type.abreviation,
                        'domain_id': '33011',
                        'pk': 2
                        }
                       ),
-            mock.call('lupa_dado',
+            mock.call('lupa_dado_entidade',
                       {'entity_type': dado_2.entity_type.abreviation,
                        'domain_id': '33012',
                        'pk': 2
                        }
                       ),
-            mock.call('lupa_dado',
+            mock.call('lupa_dado_entidade',
                       {'entity_type': dado_2.entity_type.abreviation,
                        'domain_id': '33013',
                        'pk': 2

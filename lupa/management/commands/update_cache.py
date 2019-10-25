@@ -14,7 +14,7 @@ class Command(BaseCommand):
         if obj_type == 'dado':
             queryset = DadoEntidade.cache.expiring()
             _repopulate_cache_data(
-                'lupa_dado',
+                'lupa_dado_entidade',
                 queryset,
                 DadoEntidadeSerializer
             )

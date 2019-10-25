@@ -249,7 +249,7 @@ class RetrieveExpiringCacheObjects(TestCase):
         self.assertEqual(days, expected_days)
 
     @freeze_time('2019-10-22 12:00:00')
-    def test_retrieve_expiring_cache_data(self):
+    def test_retrieve_expiring_cache_data_entidade(self):
         expired_data_obj = make(
             'lupa.DadoEntidade',
             cache_timeout=7,

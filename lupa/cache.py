@@ -92,7 +92,7 @@ def _repopulate_cache_data(key_prefix, queryset, serializer):
 def repopulate_cache(key_prefix, entities, queryset, serializer):
     for entity in entities:
         # Temporary workaround
-        if key_prefix == 'lupa_dado':
+        if key_prefix == 'lupa_dado_entidade':
             objs = queryset.filter(entity_type=entity)
         else:
             objs = queryset.filter(abreviation=entity.abreviation)
@@ -111,7 +111,7 @@ def repopulate_cache(key_prefix, entities, queryset, serializer):
                         'entity_type': entity.abreviation,
                         'domain_id': domain_id[0],
                 }
-                if key_prefix == 'lupa_dado':
+                if key_prefix == 'lupa_dado_entidade':
                     key_kwargs['pk'] = obj.pk
 
                 key = cache_key(

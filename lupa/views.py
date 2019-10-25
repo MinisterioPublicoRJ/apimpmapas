@@ -76,7 +76,10 @@ class EntidadeView(GenericAPIView, EntityDataView):
         return response
 
 
-@method_decorator(cache_page(600, key_prefix='lupa_dado'), name='dispatch')
+@method_decorator(
+    cache_page(600, key_prefix='lupa_dado_entidade'),
+    name='dispatch'
+)
 class DadoEntidadeView(RetrieveAPIView, EntityDataView):
     serializer_class = DadoEntidadeSerializer
     queryset = DadoEntidade.objects.all()
