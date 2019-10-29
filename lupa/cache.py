@@ -103,12 +103,13 @@ def _repopulate_cache_data_detail(key_prefix, queryset, serializer):
     repopulate_cache(key_prefix, entities, queryset, serializer)
 
 
-def _stderr(entity):
+def _stderr(entity, domain_id):
     msg = 'NOK - %s' % ' - '.join(
         [entity.database,
          entity.schema,
          entity.table,
-         entity.id_column
+         entity.id_column,
+         domain_id
          ]
     )
     STDERR.write(msg)
@@ -124,21 +125,22 @@ def repopulate_cache(key_prefix, entities, queryset, serializer):
         else:
             objs = queryset.filter(abreviation=entity.abreviation)
 
-        try:
-            domain_ids = execute_sample(
-                entity.database,
-                entity.schema,
-                entity.table,
-                [entity.id_column],
-                limit=False
-            )
-        except Exception:
-            _stderr(entity)
-            continue
+        domain_ids = execute_sample(
+            entity.database,
+            entity.schema,
+            entity.table,
+            [entity.id_column],
+            limit=False
+        )
 
         for obj in objs:
             for domain_id in domain_ids:
-                json_data = serializer(obj, domain_id=domain_id).data
+                try:
+                    json_data = serializer(obj, domain_id=domain_id).data
+                except Exception:
+                    _stderr(entity, domain_id[0])
+                    continue
+
                 key_kwargs = {
                         'entity_type': entity.abreviation,
                         'domain_id': domain_id[0],

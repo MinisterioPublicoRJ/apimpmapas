@@ -1,6 +1,7 @@
-import jwt
-
+from datetime import datetime as dt
 from unittest import mock
+
+import jwt
 
 import pytest
 
@@ -1201,3 +1202,38 @@ class RepopulateCache(TestCase):
         _execute_sample.assert_has_calls(execute_sample_calls)
         _cache_key.assert_has_calls(cache_key_calls)
         _django_cache.set.assert_has_calls(django_cache_calls)
+
+    @mock.patch('lupa.cache.cache_key')
+    @mock.patch('lupa.cache.STDERR')
+    @mock.patch('lupa.cache.execute_sample')
+    def test_update_cache_serializer_exception(
+            self, _execute_sample, _stderr, _cache_key):
+
+        serializer_mock = mock.MagicMock()
+        serializer_mock.side_effect = Exception()
+        _execute_sample.side_effect = (
+            [('33001',)],
+        )
+
+        entidade = make(
+            'lupa.Entidade',
+            last_cache_update=dt(2019, 10, 10)
+        )
+
+        queryset = Entidade.objects.all()
+        _repopulate_cache_entity(
+            key_prefix='lupa_entidade',
+            queryset=queryset,
+            serializer=serializer_mock
+        )
+        expected_msg = 'NOK - %s' % ' - '.join(
+            [entidade.database,
+             entidade.schema,
+             entidade.table,
+             entidade.id_column,
+             '33001'
+             ]
+        )
+
+        _stderr.write.assert_called_once_with(expected_msg)
+        _cache_key.assert_not_called()
