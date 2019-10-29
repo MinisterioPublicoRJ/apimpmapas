@@ -1,3 +1,4 @@
+import datetime as dt
 import sys
 
 import jwt
@@ -153,3 +154,5 @@ def repopulate_cache(key_prefix, entities, queryset, serializer):
                     key_kwargs
                 )
                 django_cache.set(key, json_data, timeout=obj.cache_timeout_sec)
+                obj.last_cache_update = dt.date.today()
+                obj.save()

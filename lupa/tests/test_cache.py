@@ -1,4 +1,5 @@
-from datetime import datetime as dt
+import datetime as dt
+
 from unittest import mock
 
 import jwt
@@ -7,6 +8,7 @@ import pytest
 
 from decouple import config
 from django.test import TestCase
+from freezegun import freeze_time
 from model_mommy.mommy import make
 from rest_framework.response import Response
 
@@ -563,6 +565,7 @@ class ModelCache(TestCase):
 
 @pytest.mark.django_db(transaction=True)
 class RepopulateCache(TestCase):
+    @freeze_time('2019-10-29')
     @mock.patch('lupa.serializers.execute')
     @mock.patch('lupa.cache.execute_sample')
     @mock.patch('lupa.cache.cache_key')
@@ -851,10 +854,17 @@ class RepopulateCache(TestCase):
                       timeout=dado_2.cache_timeout_sec
                       ),
         ]
+        updated_dado_entidade = DadoEntidade.objects.all()
+        expected_dt = dt.date.today()
 
         _execute_sample.assert_has_calls(execute_sample_calls)
         _cache_key.assert_has_calls(cache_key_calls)
         _django_cache.set.assert_has_calls(_django_cache_calls)
+        self.assertTrue(
+            all([d.last_cache_update == expected_dt
+                 for d in updated_dado_entidade]
+                )
+        )
 
     @mock.patch('lupa.serializers.execute')
     @mock.patch('lupa.cache.execute_sample')
@@ -1043,88 +1053,95 @@ class RepopulateCache(TestCase):
             mock.call('key 1', {'id': dado_3.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_3.data_type.name},
-                      timeout=dado_3.cache_timeout
+                      timeout=dado_3.cache_timeout_sec
                       ),
             mock.call('key 2', {'id': dado_3.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_3.data_type.name},
-                      timeout=dado_3.cache_timeout
+                      timeout=dado_3.cache_timeout_sec
                       ),
             mock.call('key 3', {'id': dado_3.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_3.data_type.name},
-                      timeout=dado_3.cache_timeout
+                      timeout=dado_3.cache_timeout_sec
                       ),
             mock.call('key 4', {'id': dado_3.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_3.data_type.name},
-                      timeout=dado_3.cache_timeout
+                      timeout=dado_3.cache_timeout_sec
                       ),
             mock.call('key 5', {'id': dado_1.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_1.data_type.name},
-                      timeout=dado_1.cache_timeout
+                      timeout=dado_1.cache_timeout_sec
                       ),
             mock.call('key 6', {'id': dado_1.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_1.data_type.name},
-                      timeout=dado_1.cache_timeout
+                      timeout=dado_1.cache_timeout_sec
                       ),
             mock.call('key 7', {'id': dado_1.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_1.data_type.name},
-                      timeout=dado_1.cache_timeout
+                      timeout=dado_1.cache_timeout_sec
                       ),
             mock.call('key 8', {'id': dado_1.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_1.data_type.name},
-                      timeout=dado_1.cache_timeout
+                      timeout=dado_1.cache_timeout_sec
                       ),
             mock.call('key 9', {'id': dado_4.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_4.data_type.name},
-                      timeout=dado_4.cache_timeout
+                      timeout=dado_4.cache_timeout_sec
                       ),
             mock.call('key 10', {'id': dado_4.pk, 'exibition_field': None,
                                  'external_data': {},
                                  'data_type': dado_4.data_type.name},
-                      timeout=dado_4.cache_timeout
+                      timeout=dado_4.cache_timeout_sec
                       ),
             mock.call('key 11', {'id': dado_4.pk, 'exibition_field': None,
                                  'external_data': {},
                                  'data_type': dado_4.data_type.name},
-                      timeout=dado_4.cache_timeout
+                      timeout=dado_4.cache_timeout_sec
                       ),
             mock.call('key 12', {'id': dado_4.pk, 'exibition_field': None,
                                  'external_data': {},
                                  'data_type': dado_4.data_type.name},
-                      timeout=dado_4.cache_timeout
+                      timeout=dado_4.cache_timeout_sec
                       ),
             mock.call('key 13', {'id': dado_2.pk, 'exibition_field': None,
                                  'external_data': {},
                                  'data_type': dado_2.data_type.name},
-                      timeout=dado_2.cache_timeout
+                      timeout=dado_2.cache_timeout_sec
                       ),
             mock.call('key 14', {'id': dado_2.pk, 'exibition_field': None,
                                  'external_data': {},
                                  'data_type': dado_2.data_type.name},
-                      timeout=dado_2.cache_timeout
+                      timeout=dado_2.cache_timeout_sec
                       ),
             mock.call('key 15', {'id': dado_2.pk, 'exibition_field': None,
                                  'external_data': {},
                                  'data_type': dado_2.data_type.name},
-                      timeout=dado_2.cache_timeout
+                      timeout=dado_2.cache_timeout_sec
                       ),
             mock.call('key 16', {'id': dado_2.pk, 'exibition_field': None,
                                  'external_data': {},
                                  'data_type': dado_2.data_type.name},
-                      timeout=dado_2.cache_timeout
+                      timeout=dado_2.cache_timeout_sec
                       ),
         ]
+        updated_dado_detalhe = DadoDetalhe.objects.all()
+        expected_dt = dt.date.today()
 
         _execute_sample.assert_has_calls(execute_sample_calls)
         _cache_key.assert_has_calls(cache_key_calls)
         _django_cache.set.assert_has_calls(_django_cache_calls)
+        self.assertTrue(
+            all([d.last_cache_update == expected_dt
+                 for d in updated_dado_detalhe]
+                )
+        )
 
     @mock.patch('lupa.serializers.execute', return_value=None)
     @mock.patch('lupa.cache.execute_sample')
@@ -1198,10 +1215,17 @@ class RepopulateCache(TestCase):
                        }
                       )
         ]
+        updated_entidade = Entidade.objects.all()
+        expected_dt = dt.date.today()
 
         _execute_sample.assert_has_calls(execute_sample_calls)
         _cache_key.assert_has_calls(cache_key_calls)
         _django_cache.set.assert_has_calls(django_cache_calls)
+        self.assertTrue(
+            all([d.last_cache_update == expected_dt
+                 for d in updated_entidade]
+                )
+        )
 
     @mock.patch('lupa.cache.cache_key')
     @mock.patch('lupa.cache.STDERR')
@@ -1217,7 +1241,7 @@ class RepopulateCache(TestCase):
 
         entidade = make(
             'lupa.Entidade',
-            last_cache_update=dt(2019, 10, 10)
+            last_cache_update=dt.date(2019, 10, 10)
         )
 
         queryset = Entidade.objects.all()
