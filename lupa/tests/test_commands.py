@@ -322,3 +322,28 @@ class UpdateCache(TestCase):
         self.assertEqual(args_prefix, key_prefix)
         self.assertCountEqual(expiring_entity, args_queryset)
         self.assertTrue(args_serializer is EntidadeSerializer)
+
+    @mock.patch('lupa.cache.cache_key')
+    @mock.patch('lupa.cache.STDERR')
+    @mock.patch('lupa.cache.execute_sample')
+    def test_update_cache_execute_sample_exception(
+            self, _execute_sample, _stderr, _cache_key):
+
+        _execute_sample.side_effect = Exception()
+
+        entidade = make(
+            'lupa.Entidade',
+            last_cache_update=dt(2019, 10, 10)
+        )
+
+        call_command('update_cache', 'entidade')
+        expected_msg = 'NOK - %s' % ' - '.join(
+            [entidade.database,
+             entidade.schema,
+             entidade.table,
+             entidade.id_column
+             ]
+        )
+
+        _stderr.write.assert_called_once_with(expected_msg)
+        _cache_key.assert_not_called()

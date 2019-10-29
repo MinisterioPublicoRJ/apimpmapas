@@ -1,12 +1,17 @@
+import sys
+
 import jwt
 
 from decouple import config
 from django.core.cache import cache as django_cache
+from django.core.management.base import OutputWrapper
 from django.shortcuts import get_object_or_404
 from jwt.exceptions import InvalidSignatureError, DecodeError
 from rest_framework.response import Response
 
 from lupa.db_connectors import execute_sample
+
+STDERR = OutputWrapper(sys.stderr)
 
 
 def _decode_jwt(token):
@@ -98,6 +103,17 @@ def _repopulate_cache_data_detail(key_prefix, queryset, serializer):
     repopulate_cache(key_prefix, entities, queryset, serializer)
 
 
+def _stderr(entity):
+    msg = 'NOK - %s' % ' - '.join(
+        [entity.database,
+         entity.schema,
+         entity.table,
+         entity.id_column
+         ]
+    )
+    STDERR.write(msg)
+
+
 def repopulate_cache(key_prefix, entities, queryset, serializer):
     for entity in entities:
         # Temporary workaround
@@ -108,13 +124,18 @@ def repopulate_cache(key_prefix, entities, queryset, serializer):
         else:
             objs = queryset.filter(abreviation=entity.abreviation)
 
-        domain_ids = execute_sample(
-            entity.database,
-            entity.schema,
-            entity.table,
-            [entity.id_column],
-            limit=False
-        )
+        try:
+            domain_ids = execute_sample(
+                entity.database,
+                entity.schema,
+                entity.table,
+                [entity.id_column],
+                limit=False
+            )
+        except Exception:
+            _stderr(entity)
+            continue
+
         for obj in objs:
             for domain_id in domain_ids:
                 json_data = serializer(obj, domain_id=domain_id).data
