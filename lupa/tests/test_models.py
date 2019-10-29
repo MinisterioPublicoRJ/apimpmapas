@@ -17,7 +17,6 @@ from lupa.models import (
     Entidade,
     DadoEntidade,
     DadoDetalhe,
-    CacheManager
 )
 
 
@@ -225,46 +224,17 @@ class TestEntityModel(TestCase):
 
 
 @pytest.mark.django_db(transaction=True)
-class ConvertCacheTimeout(TestCase):
-    def test_convert_entity_cache_timeout_to_seconds(self):
-        entity = make('lupa.Entidade', cache_timeout=7)
-        seconds = 604800
-
-        self.assertEqual(entity.cache_timeout, seconds)
-
-    def test_convert_data_entidade_cache_timeout_to_seconds(self):
-        entity = make('lupa.DadoEntidade', cache_timeout=10)
-        seconds = 864000
-
-        self.assertEqual(entity.cache_timeout, seconds)
-
-    def test_convert_data_detalhe_cache_timeout_to_seconds(self):
-        entity = make('lupa.DadoDetalhe', cache_timeout=10)
-        seconds = 864000
-
-        self.assertEqual(entity.cache_timeout, seconds)
-
-
-@pytest.mark.django_db(transaction=True)
 class RetrieveExpiringCacheObjects(TestCase):
-    def test_convert_seconds_to_days(self):
-        seconds = 604800
-        manager = CacheManager()
-        days = manager.to_days(seconds)
-        expected_days = 7
-
-        self.assertEqual(days, expected_days)
-
     @freeze_time('2019-10-22 12:00:00')
     def test_retrieve_expiring_cache_data_entidade(self):
         expired_data_obj = make(
             'lupa.DadoEntidade',
-            cache_timeout=7,
+            cache_timeout_days=7,
             last_cache_update=dt(2019, 10, 15, 12, 0, 0)
         )
         make(
             'lupa.DadoEntidade',
-            cache_timeout=7,
+            cache_timeout_days=7,
             last_cache_update=dt(2019, 10, 20, 12, 0, 0)
         )
 
@@ -278,12 +248,12 @@ class RetrieveExpiringCacheObjects(TestCase):
     def test_retrieve_expiring_cache_data_detalhe(self):
         expired_data_obj = make(
             'lupa.DadoDetalhe',
-            cache_timeout=7,
+            cache_timeout_days=7,
             last_cache_update=dt(2019, 10, 15, 12, 0, 0)
         )
         make(
             'lupa.DadoDetalhe',
-            cache_timeout=7,
+            cache_timeout_days=7,
             last_cache_update=dt(2019, 10, 20, 12, 0, 0)
         )
 
@@ -297,13 +267,13 @@ class RetrieveExpiringCacheObjects(TestCase):
     def test_retrieve_expiring_cache_entity(self):
         expired_entity_obj = make(
             'lupa.Entidade',
-            cache_timeout=7,
+            cache_timeout_days=7,
             last_cache_update=dt(2019, 10, 15, 12, 0, 0)
         )
         # This one is also expired. Ignore hours, just consider days
         make(
             'lupa.Entidade',
-            cache_timeout=7,
+            cache_timeout_days=7,
             last_cache_update=dt(2019, 10, 15, 14, 0, 0)
         )
 
@@ -316,7 +286,7 @@ class RetrieveExpiringCacheObjects(TestCase):
     def test_retrieve_expiring_object_with_null_last_update(self):
         make(
             'lupa.Entidade',
-            cache_timeout=7,
+            cache_timeout_days=7,
             last_cache_update=None
         )
 

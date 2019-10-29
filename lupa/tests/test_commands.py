@@ -256,12 +256,12 @@ class UpdateCache(TestCase):
         key_prefix = 'lupa_dado_entidade'
         make(
             'lupa.DadoEntidade',
-            cache_timeout=7,
+            cache_timeout_days=7,
             last_cache_update=dt(2019, 10, 15, 12, 0, 0),
         )
         make(
             'lupa.DadoEntidade',
-            cache_timeout=7,
+            cache_timeout_days=7,
             last_cache_update=dt(2019, 10, 14, 12, 0, 0),
         )
 
@@ -282,12 +282,12 @@ class UpdateCache(TestCase):
         key_prefix = 'lupa_dado_detalhe'
         make(
             'lupa.DadoDetalhe',
-            cache_timeout=7,
+            cache_timeout_days=7,
             last_cache_update=dt(2019, 10, 15, 12, 0, 0),
         )
         make(
             'lupa.DadoDetalhe',
-            cache_timeout=7,
+            cache_timeout_days=7,
             last_cache_update=dt(2019, 10, 14, 12, 0, 0),
         )
 

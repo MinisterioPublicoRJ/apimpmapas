@@ -41,14 +41,11 @@ ONLY_POSTGIS_SUPORTED = (
 
 
 class CacheManager(models.Manager):
-    def to_days(self, seconds):
-        return seconds / 60 / 60 / 24
-
     def expiring(self):
         objs = super().get_queryset()
         result_ids = []
         for obj in objs:
-            cache_days = self.to_days(obj.cache_timeout)
+            cache_days = obj.cache_timeout_days
             timedelta = dt.date.today() - dt.timedelta(days=cache_days)
             if obj.last_cache_update is None\
                     or obj.last_cache_update <= timedelta:
@@ -220,7 +217,8 @@ class Entidade(models.Model):
         verbose_name='guardar no cache?',
         default=True
     )
-    cache_timeout = models.BigIntegerField(
+    cache_timeout_sec = models.BigIntegerField(null=True)
+    cache_timeout_days = models.IntegerField(
         verbose_name='Tempo de persistência do cache (em dias)',
         default=7
     )
@@ -292,7 +290,7 @@ class Entidade(models.Model):
 
     def save(self, *args, **kwargs):
         seconds_scale = 24 * 60 * 60
-        self.cache_timeout = self.cache_timeout * seconds_scale
+        self.cache_timeout_sec = self.cache_timeout_days * seconds_scale
         super().save(*args, **kwargs)
 
 
@@ -382,7 +380,8 @@ class Dado(OrderedModel):
         default=True
     )
 
-    cache_timeout = models.BigIntegerField(
+    cache_timeout_sec = models.BigIntegerField(null=True)
+    cache_timeout_days = models.IntegerField(
         verbose_name='Tempo de persistência do cache (em dias)',
         default=7
     )
@@ -403,7 +402,7 @@ class Dado(OrderedModel):
 
     def save(self, *args, **kwargs):
         seconds_scale = 24 * 60 * 60
-        self.cache_timeout = self.cache_timeout * seconds_scale
+        self.cache_timeout_sec = self.cache_timeout_days * seconds_scale
         super().save(*args, **kwargs)
 
 

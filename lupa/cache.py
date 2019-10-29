@@ -152,4 +152,4 @@ def repopulate_cache(key_prefix, entities, queryset, serializer):
                     key_prefix,
                     key_kwargs
                 )
-                django_cache.set(key, json_data, timeout=obj.cache_timeout)
+                django_cache.set(key, json_data, timeout=obj.cache_timeout_sec)

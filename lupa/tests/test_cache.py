@@ -590,28 +590,28 @@ class RepopulateCache(TestCase):
             pk=1,
             entity_type=estado,
             order=2,
-            cache_timeout=10
+            cache_timeout_days=10
         )
         dado_2 = make(
             'lupa.DadoEntidade',
             pk=2,
             entity_type=municipio,
             order=7,
-            cache_timeout=20
+            cache_timeout_days=20
         )
         dado_3 = make(
             'lupa.DadoEntidade',
             pk=3,
             entity_type=estado,
             order=1,
-            cache_timeout=30
+            cache_timeout_days=30
         )
         dado_4 = make(
             'lupa.DadoEntidade',
             pk=4,
             entity_type=municipio,
             order=6,
-            cache_timeout=40
+            cache_timeout_days=40
         )
 
         queryset = DadoEntidade.objects.all()
@@ -743,112 +743,112 @@ class RepopulateCache(TestCase):
                                 'data_type': dado_3.data_type.name,
                                 'icon': None,
                                 'detalhe': []},
-                      timeout=dado_3.cache_timeout
+                      timeout=dado_3.cache_timeout_sec
                       ),
             mock.call('key 2', {'id': dado_3.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_3.data_type.name,
                                 'icon': None,
                                 'detalhe': []},
-                      timeout=dado_3.cache_timeout
+                      timeout=dado_3.cache_timeout_sec
                       ),
             mock.call('key 3', {'id': dado_3.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_3.data_type.name,
                                 'icon': None,
                                 'detalhe': []},
-                      timeout=dado_3.cache_timeout
+                      timeout=dado_3.cache_timeout_sec
                       ),
             mock.call('key 4', {'id': dado_3.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_3.data_type.name,
                                 'icon': None,
                                 'detalhe': []},
-                      timeout=dado_3.cache_timeout
+                      timeout=dado_3.cache_timeout_sec
                       ),
             mock.call('key 5', {'id': dado_1.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_1.data_type.name,
                                 'icon': None,
                                 'detalhe': []},
-                      timeout=dado_1.cache_timeout
+                      timeout=dado_1.cache_timeout_sec
                       ),
             mock.call('key 6', {'id': dado_1.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_1.data_type.name,
                                 'icon': None,
                                 'detalhe': []},
-                      timeout=dado_1.cache_timeout
+                      timeout=dado_1.cache_timeout_sec
                       ),
             mock.call('key 7', {'id': dado_1.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_1.data_type.name,
                                 'icon': None,
                                 'detalhe': []},
-                      timeout=dado_1.cache_timeout
+                      timeout=dado_1.cache_timeout_sec
                       ),
             mock.call('key 8', {'id': dado_1.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_1.data_type.name,
                                 'icon': None,
                                 'detalhe': []},
-                      timeout=dado_1.cache_timeout
+                      timeout=dado_1.cache_timeout_sec
                       ),
             mock.call('key 9', {'id': dado_4.pk, 'exibition_field': None,
                                 'external_data': {},
                                 'data_type': dado_4.data_type.name,
                                 'icon': None,
                                 'detalhe': []},
-                      timeout=dado_4.cache_timeout
+                      timeout=dado_4.cache_timeout_sec
                       ),
             mock.call('key 10', {'id': dado_4.pk, 'exibition_field': None,
                                  'external_data': {},
                                  'data_type': dado_4.data_type.name,
                                  'icon': None,
                                  'detalhe': []},
-                      timeout=dado_4.cache_timeout
+                      timeout=dado_4.cache_timeout_sec
                       ),
             mock.call('key 11', {'id': dado_4.pk, 'exibition_field': None,
                                  'external_data': {},
                                  'data_type': dado_4.data_type.name,
                                  'icon': None,
                                  'detalhe': []},
-                      timeout=dado_4.cache_timeout
+                      timeout=dado_4.cache_timeout_sec
                       ),
             mock.call('key 12', {'id': dado_4.pk, 'exibition_field': None,
                                  'external_data': {},
                                  'data_type': dado_4.data_type.name,
                                  'icon': None,
                                  'detalhe': []},
-                      timeout=dado_4.cache_timeout
+                      timeout=dado_4.cache_timeout_sec
                       ),
             mock.call('key 13', {'id': dado_2.pk, 'exibition_field': None,
                                  'external_data': {},
                                  'data_type': dado_2.data_type.name,
                                  'icon': None,
                                  'detalhe': []},
-                      timeout=dado_2.cache_timeout
+                      timeout=dado_2.cache_timeout_sec
                       ),
             mock.call('key 14', {'id': dado_2.pk, 'exibition_field': None,
                                  'external_data': {},
                                  'data_type': dado_2.data_type.name,
                                  'icon': None,
                                  'detalhe': []},
-                      timeout=dado_2.cache_timeout
+                      timeout=dado_2.cache_timeout_sec
                       ),
             mock.call('key 15', {'id': dado_2.pk, 'exibition_field': None,
                                  'external_data': {},
                                  'data_type': dado_2.data_type.name,
                                  'icon': None,
                                  'detalhe': []},
-                      timeout=dado_2.cache_timeout
+                      timeout=dado_2.cache_timeout_sec
                       ),
             mock.call('key 16', {'id': dado_2.pk, 'exibition_field': None,
                                  'external_data': {},
                                  'data_type': dado_2.data_type.name,
                                  'icon': None,
                                  'detalhe': []},
-                      timeout=dado_2.cache_timeout
+                      timeout=dado_2.cache_timeout_sec
                       ),
         ]
 
@@ -879,41 +879,41 @@ class RepopulateCache(TestCase):
             'lupa.DadoEntidade',
             pk=1,
             entity_type=estado,
-            cache_timeout=10
+            cache_timeout_days=10
         )
         dado_entidade_municipio = make(
             'lupa.DadoEntidade',
             pk=2,
             entity_type=municipio,
-            cache_timeout=10
+            cache_timeout_days=10
         )
         dado_1 = make(
             'lupa.DadoDetalhe',
             pk=1,
             dado_main=dado_entidade_estado,
             order=7,
-            cache_timeout=20
+            cache_timeout_days=20
         )
         dado_2 = make(
             'lupa.DadoDetalhe',
             pk=2,
             dado_main=dado_entidade_municipio,
             order=7,
-            cache_timeout=20
+            cache_timeout_days=20
         )
         dado_3 = make(
             'lupa.DadoDetalhe',
             pk=3,
             dado_main=dado_entidade_estado,
             order=1,
-            cache_timeout=30
+            cache_timeout_days=30
         )
         dado_4 = make(
             'lupa.DadoDetalhe',
             pk=4,
             dado_main=dado_entidade_municipio,
             order=6,
-            cache_timeout=40
+            cache_timeout_days=40
         )
 
         queryset = DadoDetalhe.objects.all()
@@ -1177,13 +1177,13 @@ class RepopulateCache(TestCase):
                                 'entity_type': estado.name,
                                 'exibition_field': None,
                                 'geojson': None, 'theme_list': []},
-                      timeout=estado.cache_timeout
+                      timeout=estado.cache_timeout_sec
                       ),
             mock.call('key 2', {'domain_id': ('33010', ),
                                 'entity_type': municipio.name,
                                 'exibition_field': None,
                                 'geojson': None, 'theme_list': []},
-                      timeout=municipio.cache_timeout
+                      timeout=municipio.cache_timeout_sec
                       ),
         ]
         cache_key_calls = [

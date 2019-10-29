@@ -148,7 +148,7 @@ class EntidadeAdmin(nested_admin.NestedModelAdmin):
                 'osm_value_attached',
                 'osm_default_level',
                 'is_cacheable',
-                'cache_timeout'
+                'cache_timeout_days'
             )
         })
     )
@@ -189,7 +189,7 @@ class DadoEntidadeAdmin(nested_admin.NestedModelAdmin, OrderedModelAdmin):
                 'schema',
                 'table',
                 'is_cacheable',
-                'cache_timeout'
+                'cache_timeout_days'
             )
         })
     )
