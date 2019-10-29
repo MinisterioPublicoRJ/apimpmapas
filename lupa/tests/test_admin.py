@@ -2,8 +2,11 @@ from django.contrib.admin.sites import AdminSite
 from model_mommy.mommy import make
 from unittest import TestCase, mock
 from lupa.admin import remove_data_from_cache, remove_entity_from_cache
-from lupa.models import DadoEntidade
+from lupa.models import DadoEntidade, DadoDetalhe
 from lupa.admin import DadoEntidadeAdmin
+from lupa.serializers import (EntidadeSerializer,
+                              DadoEntidadeSerializer,
+                              DadoDetalheSerializer)
 import pytest
 
 
@@ -87,8 +90,13 @@ class TestMoveDadoToPosition(TestCase):
 
 @pytest.mark.django_db(transaction=True)
 class ClearFromCache(TestCase):
+    @mock.patch('lupa.admin.asynch_repopulate_cache_data_detail')
+    @mock.patch('lupa.admin.asynch_repopulate_cache_data_entity')
     @mock.patch('lupa.admin.django_cache')
-    def test_clear_data_from_cache(self, _django_cache):
+    def test_clear_data_from_cache(self,
+                                   _django_cache, asynch_rep_data_entity,
+                                   asynch_rep_data_detail):
+
         rd_mock = mock.MagicMock()
         rd_mock.keys.side_effect = [
             ['key 1.1', 'key 1.2'],
@@ -131,9 +139,22 @@ class ClearFromCache(TestCase):
         _django_cache.get_master_client.assert_called_once_with()
         rd_mock.keys.assert_has_calls(rd_keys_calls)
         rd_mock.delete.assert_has_calls(rd_delete_calls)
+        asynch_rep_data_entity.delay.assert_called_once_with(
+            key_prefix,
+            queryset,
+            DadoEntidadeSerializer
+        )
 
+    @mock.patch('lupa.admin.asynch_repopulate_cache_data_detail')
+    @mock.patch('lupa.admin.asynch_repopulate_cache_data_entity')
     @mock.patch('lupa.admin.django_cache')
-    def test_clear_data_and_its_detail_from_cache(self, _django_cache):
+    def test_clear_data_and_its_detail_from_cache(
+        self,
+        _django_cache,
+        asynch_rep_cache_data_entity,
+        asynch_rep_cache_data_detail
+    ):
+
         rd_mock = mock.MagicMock()
         rd_mock.keys.side_effect = [
             ['key entidade 1.1', 'key entidade 1.2'],
@@ -250,13 +271,29 @@ class ClearFromCache(TestCase):
             mock.call('key detalhe 4.1'),
             mock.call('key detalhe 4.2'),
         ]
+        expected_queryset = list(DadoDetalhe.objects.filter(
+            dado_main__id__in=[d.id for d in queryset]
+        ).order_by('pk').values_list('id'))
 
         _django_cache.get_master_client.assert_called_once_with()
         rd_mock.keys.assert_has_calls(rd_keys_calls)
         rd_mock.delete.assert_has_calls(rd_delete_calls)
+        asynch_rep_cache_data_entity.delay.assert_called_once_with(
+            key_prefix_entidade,
+            queryset,
+            DadoEntidadeSerializer
+        )
+        call_args = asynch_rep_cache_data_detail.delay.call_args_list[0][0]
+        self.assertEqual(call_args[0], key_prefix_detalhe)
+        self.assertEqual(
+            list(call_args[1].values_list('id')),
+            expected_queryset
+        )
+        self.assertEqual(call_args[2], DadoDetalheSerializer)
 
+    @mock.patch('lupa.admin.asynch_repopulate_cache_entity')
     @mock.patch('lupa.admin.django_cache')
-    def test_clear_entity_from_cache(self, _django_cache):
+    def test_clear_entity_from_cache(self, _django_cache, asynch_rep_cache):
         rd_mock = mock.MagicMock()
         rd_mock.keys.side_effect = [
             ['key 1.1', 'key 1.2'],
@@ -299,3 +336,8 @@ class ClearFromCache(TestCase):
         _django_cache.get_master_client.assert_called_once_with()
         rd_mock.keys.assert_has_calls(rd_keys_calls)
         rd_mock.delete.assert_has_calls(rd_delete_calls)
+        asynch_rep_cache.delay.assert_called_once_with(
+            key_prefix,
+            queryset,
+            EntidadeSerializer
+        )

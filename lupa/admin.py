@@ -21,6 +21,15 @@ from .models import (
     ColunaDetalhe,
     ColunaMapa,
 )
+from lupa.serializers import (
+    EntidadeSerializer,
+    DadoEntidadeSerializer,
+    DadoDetalheSerializer)
+from lupa.tasks import (
+    asynch_repopulate_cache_entity,
+    asynch_repopulate_cache_data_entity,
+    asynch_repopulate_cache_data_detail
+)
 
 
 def _remove_from_cache(cache_client, key_prefix, model_args, queryset):
@@ -40,6 +49,12 @@ def remove_entity_from_cache(modeladmin, request, queryset):
     model_args = ['abreviation']
     _remove_from_cache(cache_client, key_prefix, model_args, queryset)
 
+    asynch_repopulate_cache_entity.delay(
+        key_prefix,
+        queryset,
+        EntidadeSerializer
+    )
+
 
 def remove_data_from_cache(modeladmin, request, queryset):
     cache_client = django_cache.get_master_client()
@@ -48,6 +63,10 @@ def remove_data_from_cache(modeladmin, request, queryset):
     entity_key_prefix = 'lupa_dado_entidade'
     model_args = ['entity_type.abreviation', 'pk']
     _remove_from_cache(cache_client, entity_key_prefix, model_args, queryset)
+
+    asynch_repopulate_cache_data_entity.delay(
+        entity_key_prefix, queryset, DadoEntidadeSerializer
+    )
 
     # Remove related DadoDetalhe from cache
     detail_queryset = DadoDetalhe.objects.filter(
@@ -60,6 +79,12 @@ def remove_data_from_cache(modeladmin, request, queryset):
         detail_key_prefix,
         detail_model_args,
         detail_queryset
+    )
+
+    asynch_repopulate_cache_data_detail.delay(
+        detail_key_prefix,
+        detail_queryset,
+        DadoDetalheSerializer
     )
 
 

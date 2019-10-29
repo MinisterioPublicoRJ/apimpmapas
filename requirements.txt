@@ -1,3 +1,4 @@
+celery
 cx_Oracle
 Django>=2.2
 django-colorfield
@@ -16,5 +17,6 @@ Markdown
 psycopg2-binary
 pyjwt
 python-decouple
+redis
 requests
 responses
