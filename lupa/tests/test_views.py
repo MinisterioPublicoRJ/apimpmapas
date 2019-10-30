@@ -930,3 +930,51 @@ class CacheView(TestCase):
              'detalhe': []},
             timeout=None
         )
+
+    @mock.patch('lupa.cache.django_cache')
+    @mock.patch('lupa.serializers.execute')
+    def test_cache_used_data_detail_view(self, _execute, _cache):
+        _execute.return_value = [(
+            '202',
+            7
+        )]
+
+        entidade = make(
+            'lupa.Entidade',
+            id=1,
+            abreviation='EST'
+        )
+        dado = make(
+            'lupa.DadoEntidade',
+            id=7,
+            entity_type=entidade,
+        )
+        data_type_obj = make(
+            'lupa.TipoDado',
+            name='texto_pequeno_destaque',
+            serialization='Singleton'
+        )
+        detalhe = make(
+            'lupa.DadoDetalhe',
+            id=23,
+            exibition_field='Abrigos para crianças e adolescentes',
+            dado_main=dado,
+            data_type=data_type_obj
+        )
+        make('lupa.ColunaDetalhe', info_type='id', name='identi', dado=detalhe)
+        make('lupa.ColunaDetalhe', info_type='dado', name='data', dado=detalhe)
+
+        url = reverse(
+            'lupa:detail_detalhes',
+            args=('EST', '33', 23)
+        )
+        self.client.get(url)
+
+        _cache.set.assert_called_once_with(
+            'lupa_dado_detalhe:EST:33:23',
+            {'id': 23,
+             'exibition_field': 'Abrigos para crianças e adolescentes',
+             'external_data': {'dado': '202', 'id': 7},
+             'data_type': 'texto_pequeno_destaque'},
+            timeout=None
+        )
