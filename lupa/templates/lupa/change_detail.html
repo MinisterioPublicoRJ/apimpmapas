@@ -1,0 +1,33 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+Você deseja colocar as caixinhas seleciondas: <br>
+<ul>
+  {% for item in caixinhas %}
+    <li>{{item.title}}</li>
+  {% endfor %}
+</ul>
+Da entidade {{entidade}} como detalhe de qual caixinha?
+
+<form action="" method="post">
+    {% csrf_token %}
+    {% for item in caixinhas %}
+      <input type="hidden" name="_selected_action" value="{{item.id}}" />
+    {% endfor %}
+    <select id="dado_base" name="dado_base">
+    {% for item in possiveis %}
+      <option value="{{item.id}}" {% if item == current_item %}selected="selected"{% endif %}>
+        {{item.title|capfirst}}
+      </option>
+    {% endfor %}
+    </select>
+    <br>
+    <br>
+
+    <input type="hidden" name="apply" value="yes" />
+    <input type="hidden" name="action" value="change_to_detail" />
+    <input type="submit" value="Transformar em Detalhe"/>
+</form>
+
+
+{% endblock %}
