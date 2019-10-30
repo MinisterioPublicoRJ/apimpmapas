@@ -866,7 +866,7 @@ class CacheView(TestCase):
             [('mock_name', )],
             None,
         ]
-        self.entidade = make(
+        make(
             'lupa.Entidade',
             id='33',
             name='Estado',
@@ -883,5 +883,50 @@ class CacheView(TestCase):
              'exibition_field': 'mock_name',
              'geojson': None,
              'theme_list': []},
+            timeout=None
+        )
+
+    @mock.patch('lupa.cache.django_cache')
+    @mock.patch('lupa.serializers.execute')
+    def test_cache_used_data_entity_view(self, _execute, _cache):
+        _execute.return_value = [(
+            'external_data',
+            'external_source',
+            1
+        )]
+        entidade = make(
+            'lupa.Entidade',
+            id=1,
+            abreviation='EST'
+        )
+        data_type_obj = make(
+            'lupa.TipoDado',
+            name='texto_pequeno_destaque',
+            serialization='Singleton'
+        )
+        dado = make(
+            'lupa.DadoEntidade',
+            id=7,
+            data_type=data_type_obj,
+            entity_type=entidade,
+            exibition_field='Abrigos para crianças e adolescentes'
+        )
+        make('lupa.ColunaDado', info_type='id', name='identi', dado=dado)
+        make('lupa.ColunaDado', info_type='fonte', name='fon', dado=dado)
+        make('lupa.ColunaDado', info_type='dado', name='data', dado=dado)
+        url = reverse('lupa:detail_dado', args=('EST', '33', 7))
+
+        self.client.get(url)
+
+        _cache.set.assert_called_once_with(
+            'lupa_dado_entidade:EST:33:7',
+            {'id': 7,
+             'exibition_field': 'Abrigos para crianças e adolescentes',
+             'external_data': {'dado': 'external_data',
+                               'fonte': 'external_source',
+                               'id': 1},
+             'data_type': 'texto_pequeno_destaque',
+             'icon': None,
+             'detalhe': []},
             timeout=None
         )

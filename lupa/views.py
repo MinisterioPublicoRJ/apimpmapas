@@ -81,14 +81,14 @@ class EntidadeView(GenericAPIView, EntityDataView):
         return response
 
 
-@method_decorator(
-    cache_page(600, key_prefix='lupa_dado_entidade'),
-    name='dispatch'
-)
 class DadoEntidadeView(RetrieveAPIView, EntityDataView):
     serializer_class = DadoEntidadeSerializer
     queryset = DadoEntidade.objects.all()
 
+    @custom_cache(
+        key_prefix='lupa_dado_entidade',
+        model_kwargs={'entity_type__abreviation': 'entity_type', 'pk': 'pk'}
+    )
     def get(self, request, *args, **kwargs):
         obj = get_object_or_404(
             self.queryset,
