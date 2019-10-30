@@ -1,8 +1,10 @@
 ## [Unreleased]
+## [1.2.2]
+### Added
+ - Sistema de transformação de caixinha em detalhe
 ## [1.2.0]
 ### Added
  - Adição de caixinha de detalhes
- - Sistema de transformação de caixinha em detalhe
 ### Changed
  - Revisão no layout do painel administrativo
 ## [1.1.9]
