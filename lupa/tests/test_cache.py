@@ -1190,13 +1190,13 @@ class RepopulateCache(TestCase):
 
         ]
         django_cache_calls = [
-            mock.call('key 1', {'domain_id': ('33001',),
+            mock.call('key 1', {'domain_id': '33001',
                                 'entity_type': estado.name,
                                 'exibition_field': None,
                                 'geojson': None, 'theme_list': []},
                       timeout=estado.cache_timeout_sec
                       ),
-            mock.call('key 2', {'domain_id': ('33010', ),
+            mock.call('key 2', {'domain_id': '33010',
                                 'entity_type': municipio.name,
                                 'exibition_field': None,
                                 'geojson': None, 'theme_list': []},

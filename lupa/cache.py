@@ -137,7 +137,7 @@ def repopulate_cache(key_prefix, entities, queryset, serializer):
         for obj in objs:
             for domain_id in domain_ids:
                 try:
-                    json_data = serializer(obj, domain_id=domain_id).data
+                    json_data = serializer(obj, domain_id=domain_id[0]).data
                 except Exception:
                     _stderr(entity, domain_id[0])
                     continue
