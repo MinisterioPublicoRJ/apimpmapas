@@ -13,6 +13,7 @@ from rest_framework.generics import (
 )
 from rest_framework.response import Response
 
+from lupa.cache import custom_cache
 from .models import Entidade, DadoDetalhe, DadoEntidade
 from .serializers import (
     EntidadeSerializer,
@@ -60,6 +61,10 @@ class EntidadeView(GenericAPIView, EntityDataView):
     serializer_class = EntidadeSerializer
     queryset = Entidade.objects.all()
 
+    @custom_cache(
+        key_prefix='lupa_entidade',
+        model_kwargs={'abreviation': 'entity_type'}
+    )
     def get(self, request, *args, **kwargs):
         obj = get_object_or_404(
             self.queryset,

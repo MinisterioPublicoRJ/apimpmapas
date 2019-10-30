@@ -856,3 +856,32 @@ class GeoSpatialQueryViewTest(TestCase, NoCacheTestCase):
 
         self.assertEqual(response.status_code, 404)
         _egsp.assert_called()
+
+
+class CacheView(TestCase):
+    @mock.patch('lupa.cache.django_cache')
+    @mock.patch('lupa.serializers.execute')
+    def test_cache_used_entity_view(self, _execute, _cache):
+        _execute.side_effect = [
+            [('mock_name', )],
+            None,
+        ]
+        self.entidade = make(
+            'lupa.Entidade',
+            id='33',
+            name='Estado',
+            abreviation='EST'
+        )
+        url = reverse('lupa:detail_entidade', args=('EST', '33',))
+
+        self.client.get(url)
+
+        _cache.set.assert_called_once_with(
+            'lupa_entidade:EST:33',
+            {'domain_id': '33',
+             'entity_type': 'Estado',
+             'exibition_field': 'mock_name',
+             'geojson': None,
+             'theme_list': []},
+            timeout=None
+        )
