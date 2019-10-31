@@ -449,6 +449,23 @@ class DadoEntidade(Dado):
     class Meta:
         verbose_name = 'dado'
 
+    def copy_to_detail(self, dado_base):
+        self.show_box = False
+        detalhe = DadoDetalhe(
+            title=self.title,
+            exibition_field=self.exibition_field,
+            database=self.database,
+            schema=self.schema,
+            table=self.table,
+            limit_fetch=self.limit_fetch,
+            data_type=self.data_type,
+            dado_main=dado_base
+        )
+        detalhe.save()
+        for coluna in self.column_list.all():
+            coluna.copy_to_detail(detalhe)
+        self.save()
+
 
 class DadoDetalhe(Dado):
     data_type = models.ForeignKey(
@@ -539,6 +556,14 @@ class ColunaDado(Coluna):
         related_name="column_list",
         verbose_name="dado"
     )
+
+    def copy_to_detail(self, detalhe):
+        coluna_detalhe = ColunaDetalhe(
+            name=self.name,
+            info_type=self.info_type,
+            dado=detalhe
+        )
+        coluna_detalhe.save()
 
 
 class ColunaDetalhe(Coluna):

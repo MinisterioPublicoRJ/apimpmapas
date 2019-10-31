@@ -293,3 +293,57 @@ class RetrieveExpiringCacheObjects(TestCase):
         expiring_entity = Entidade.cache.expiring()
 
         self.assertEqual(expiring_entity.count(), 1)
+
+
+@pytest.mark.django_db(transaction=True)
+class TestDataModel(TestCase):
+    def setUp(self):
+        self.dadoBase = make('lupa.DadoEntidade')
+        self.dadoDetalhar = make('lupa.DadoEntidade', show_box=True)
+        self.colunaDetalhar1 = make('lupa.ColunaDado', dado=self.dadoDetalhar)
+        self.colunaDetalhar2 = make('lupa.ColunaDado', dado=self.dadoDetalhar)
+
+    def test_main_work(self):
+        self.dadoDetalhar.copy_to_detail(self.dadoBase)
+        self.assertFalse(self.dadoDetalhar.show_box)
+
+        detalhes = self.dadoBase.data_details.all()
+        self.assertEqual(len(detalhes), 1)
+
+        detalhar = {
+            'title': self.dadoDetalhar.title,
+            'exibition_field': self.dadoDetalhar.exibition_field,
+            'database': self.dadoDetalhar.database,
+            'schema': self.dadoDetalhar.schema,
+            'table': self.dadoDetalhar.table,
+            'limit_fetch': self.dadoDetalhar.limit_fetch,
+            'data_type': self.dadoDetalhar.data_type
+        }
+
+        detalhe = detalhes.first()
+        detalhado = {
+            'title': detalhe.title,
+            'exibition_field': detalhe.exibition_field,
+            'database': detalhe.database,
+            'schema': detalhe.schema,
+            'table': detalhe.table,
+            'limit_fetch': detalhe.limit_fetch,
+            'data_type': detalhe.data_type
+        }
+
+        self.assertEqual(detalhe.dado_main, self.dadoBase)
+        self.assertEqual(detalhar, detalhado)
+
+        colunas_detalhar = []
+        for coluna in self.dadoDetalhar.column_list.all():
+            colunas_detalhar.append({
+                'name': coluna.name,
+                'info_type': coluna.info_type
+            })
+        colunas_detalhado = []
+        for coluna in self.dadoDetalhar.column_list.all():
+            colunas_detalhado.append({
+                'name': coluna.name,
+                'info_type': coluna.info_type
+            })
+        self.assertCountEqual(colunas_detalhar, colunas_detalhado)
