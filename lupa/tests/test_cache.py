@@ -18,7 +18,8 @@ from lupa.cache import (
     wildcard_cache_key,
     _repopulate_cache_data_entity,
     _repopulate_cache_data_detail,
-    _repopulate_cache_entity
+    _repopulate_cache_entity,
+    _remove_from_cache
 )
 from lupa.models import Entidade, DadoEntidade, DadoDetalhe
 from lupa.serializers import (EntidadeSerializer,
@@ -1261,3 +1262,36 @@ class RepopulateCache(TestCase):
 
         _stderr.write.assert_called_once_with(expected_msg)
         _cache_key.assert_not_called()
+
+
+class RemoveFromCache(TestCase):
+    @mock.patch('lupa.cache.wildcard_cache_key')
+    @mock.patch('lupa.cache.django_cache')
+    def test_remove_objs_from_cache(self, _django_cache, _wildcard):
+        cache_client_mock = mock.MagicMock()
+        cache_client_mock.keys.side_effect = [['KEY 1'], ['KEY 2']]
+        _django_cache.get_master_client.return_value = cache_client_mock
+        _wildcard.side_effect = ['key 1', 'key 2']
+        key_prefix = 'prefix'
+        entities = make('lupa.Entidade', _quantity=2)
+
+        _remove_from_cache(key_prefix, ['abreviation'], entities)
+
+        _django_cache.get_master_client.assert_called_once_with()
+        wildcard_calls = [
+            mock.call(key_prefix, [entities[0].abreviation]),
+            mock.call(key_prefix, [entities[1].abreviation])
+        ]
+        _wildcard.assert_has_calls(wildcard_calls)
+        self.assertEqual(
+            cache_client_mock.keys.call_args_list[0][0][0],
+            'key 1'
+        )
+        self.assertEqual(
+            cache_client_mock.keys.call_args_list[1][0][0],
+            'key 2'
+        )
+
+        cache_client_mock.delete.assert_has_calls(
+            [mock.call('KEY 1'), mock.call('KEY 2')]
+        )

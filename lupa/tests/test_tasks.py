@@ -3,7 +3,8 @@ from unittest import TestCase, mock
 from lupa.tasks import (
     asynch_repopulate_cache_entity,
     asynch_repopulate_cache_data_entity,
-    asynch_repopulate_cache_data_detail)
+    asynch_repopulate_cache_data_detail,
+    asynch_remove_from_cache)
 
 
 class Task(TestCase):
@@ -45,4 +46,20 @@ class Task(TestCase):
             'lupa_dado_detalhe',
             queryset_mock,
             None
+        )
+
+    @mock.patch('lupa.tasks._remove_from_cache')
+    def test_call_remove_from_cache(self, _remove):
+        queryset_mock = mock.MagicMock()
+        model_args = ['args']
+        asynch_remove_from_cache(
+            'key_prefix',
+            model_args,
+            queryset_mock
+        )
+
+        _remove.assert_called_once_with(
+            'key_prefix',
+            model_args,
+            queryset_mock,
         )
