@@ -231,7 +231,7 @@ class DadoEntidadeAdmin(nested_admin.NestedModelAdmin, OrderedModelAdmin):
 
     move_dado_to_position.short_description = "Mover para Posição..."
     change_to_detail.short_description = "Transformar em detalhe..."
-    actions = ['change_to_detail']
+    actions = ['change_to_detail', 'move_dado_to_position']
 
 
 admin.site.register(Grupo)
