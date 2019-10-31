@@ -1,14 +1,11 @@
-from operator import attrgetter
-
+from celery import chain
 from django.contrib import admin
-from django.core.cache import cache as django_cache
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django import forms
 import nested_admin
 from ordered_model.admin import OrderedModelAdmin
 
-from lupa.cache import wildcard_cache_key
 from .models import (
     DadoDetalhe,
     DadoEntidade,
@@ -28,45 +25,41 @@ from lupa.serializers import (
 from lupa.tasks import (
     asynch_repopulate_cache_entity,
     asynch_repopulate_cache_data_entity,
-    asynch_repopulate_cache_data_detail
+    asynch_repopulate_cache_data_detail,
+    asynch_remove_from_cache
 )
 
 
-def _remove_from_cache(cache_client, key_prefix, model_args, queryset):
-    for obj in queryset:
-        key_args = [
-            attrgetter(arg)(obj) for arg in model_args
-        ]
-        key = wildcard_cache_key(key_prefix, key_args)
-        cache_keys = cache_client.keys(key)
-        [cache_client.delete(cache_key) for cache_key in cache_keys]
-
-
 def remove_entity_from_cache(modeladmin, request, queryset):
-    cache_client = django_cache.get_master_client()
-
     key_prefix = 'lupa_entidade'
     model_args = ['abreviation']
-    _remove_from_cache(cache_client, key_prefix, model_args, queryset)
-
-    asynch_repopulate_cache_entity.delay(
+    proc1 = asynch_remove_from_cache.si(key_prefix, model_args, queryset)
+    proc2 = asynch_repopulate_cache_entity.si(
         key_prefix,
         queryset,
         EntidadeSerializer
     )
+    flow = chain(proc1, proc2)
+    flow.delay()
 
 
 def remove_data_from_cache(modeladmin, request, queryset):
-    cache_client = django_cache.get_master_client()
-
     entity_data_ids = [d.id for d in queryset]
     entity_key_prefix = 'lupa_dado_entidade'
     model_args = ['entity_type.abreviation', 'pk']
-    _remove_from_cache(cache_client, entity_key_prefix, model_args, queryset)
 
-    asynch_repopulate_cache_data_entity.delay(
+    proc1 = asynch_remove_from_cache.si(
+        entity_key_prefix,
+        model_args,
+        queryset
+    )
+
+    proc2 = asynch_repopulate_cache_data_entity.si(
         entity_key_prefix, queryset, DadoEntidadeSerializer
     )
+
+    flow = chain(proc1, proc2)
+    flow.delay()
 
     # Remove related DadoDetalhe from cache
     detail_queryset = DadoDetalhe.objects.filter(
@@ -74,18 +67,22 @@ def remove_data_from_cache(modeladmin, request, queryset):
     ).order_by('pk')
     detail_key_prefix = 'lupa_dado_detalhe'
     detail_model_args = ['dado_main.entity_type.abreviation', 'pk']
-    _remove_from_cache(
-        cache_client,
+
+    proc1 = asynch_remove_from_cache.si(
         detail_key_prefix,
         detail_model_args,
         detail_queryset
     )
 
-    asynch_repopulate_cache_data_detail.delay(
+    proc2 = asynch_repopulate_cache_data_detail.si(
         detail_key_prefix,
         detail_queryset,
-        DadoDetalheSerializer
+        DadoDetalheSerializer,
     )
+
+    flow = chain(proc1, proc2)
+
+    flow.delay()
 
 
 remove_data_from_cache.short_description = 'Remove do cache'

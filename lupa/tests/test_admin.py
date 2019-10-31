@@ -90,19 +90,19 @@ class TestMoveDadoToPosition(TestCase):
 
 @pytest.mark.django_db(transaction=True)
 class ClearFromCache(TestCase):
+    @mock.patch('lupa.admin.chain')
     @mock.patch('lupa.admin.asynch_repopulate_cache_data_detail')
     @mock.patch('lupa.admin.asynch_repopulate_cache_data_entity')
-    @mock.patch('lupa.admin.django_cache')
+    @mock.patch('lupa.admin.asynch_remove_from_cache')
     def test_clear_data_from_cache(self,
-                                   _django_cache, asynch_rep_data_entity,
-                                   asynch_rep_data_detail):
+                                   asynch_remove,
+                                   asynch_rep_data_entity,
+                                   asynch_rep_data_detail,
+                                   _chain):
 
-        rd_mock = mock.MagicMock()
-        rd_mock.keys.side_effect = [
-            ['key 1.1', 'key 1.2'],
-            ['key 2.1', 'key 2.2']
-        ]
-        _django_cache.get_master_client.return_value = rd_mock
+        flow_mock = mock.MagicMock()
+        _chain.return_value = flow_mock
+
         modeladmin = None
         request = None
 
@@ -117,54 +117,59 @@ class ClearFromCache(TestCase):
 
         remove_data_from_cache(modeladmin, request, queryset)
 
-        key_prefix = 'lupa_dado_entidade'
-        rd_keys_calls = [
-            mock.call(
-                '*%s:%s:*:%s'
-                % (key_prefix, dado_1.entity_type.abreviation, dado_1.pk)
-            ),
-            mock.call(
-                '*%s:%s:*:%s'
-                % (key_prefix, dado_2.entity_type.abreviation, dado_2.pk)
-            )
-        ]
+        entity_key_prefix = 'lupa_dado_entidade'
+        detail_key_prefix = 'lupa_dado_detalhe'
 
-        rd_delete_calls = [
-            mock.call('key 1.1'),
-            mock.call('key 1.2'),
-            mock.call('key 2.1'),
-            mock.call('key 2.2')
-        ]
-
-        _django_cache.get_master_client.assert_called_once_with()
-        rd_mock.keys.assert_has_calls(rd_keys_calls)
-        rd_mock.delete.assert_has_calls(rd_delete_calls)
-        asynch_rep_data_entity.delay.assert_called_once_with(
-            key_prefix,
+        self.assertEqual(
+            asynch_remove.si.call_args_list[0][0][0],
+            entity_key_prefix
+        )
+        self.assertEqual(
+            asynch_remove.si.call_args_list[0][0][1],
+            ['entity_type.abreviation', 'pk'],
+        )
+        self.assertEqual(
+            asynch_remove.si.call_args_list[0][0][2],
+            queryset
+        )
+        self.assertEqual(
+            asynch_remove.si.call_args_list[1][0][0],
+            detail_key_prefix
+        )
+        self.assertEqual(
+            asynch_remove.si.call_args_list[1][0][1],
+            ['dado_main.entity_type.abreviation', 'pk'],
+        )
+        self.assertEqual(
+            asynch_remove.si.call_args_list[0][0][1],
+            ['entity_type.abreviation', 'pk'],
+            []
+        )
+        asynch_rep_data_entity.si.assert_called_once_with(
+            entity_key_prefix,
             queryset,
             DadoEntidadeSerializer
         )
+        self.assertEqual(_chain.call_args_list[0][0][0], asynch_remove.si())
+        self.assertEqual(
+            _chain.call_args_list[0][0][1], asynch_rep_data_entity.si()
+        )
+        flow_mock.delay.assert_has_calls([mock.call(), mock.call()])
 
+    @mock.patch('lupa.admin.chain')
     @mock.patch('lupa.admin.asynch_repopulate_cache_data_detail')
     @mock.patch('lupa.admin.asynch_repopulate_cache_data_entity')
-    @mock.patch('lupa.admin.django_cache')
+    @mock.patch('lupa.admin.asynch_remove_from_cache')
     def test_clear_data_and_its_detail_from_cache(
         self,
-        _django_cache,
+        asynch_remove_data,
         asynch_rep_cache_data_entity,
-        asynch_rep_cache_data_detail
+        asynch_rep_cache_data_detail,
+        _chain
     ):
 
-        rd_mock = mock.MagicMock()
-        rd_mock.keys.side_effect = [
-            ['key entidade 1.1', 'key entidade 1.2'],
-            ['key entidade 2.1', 'key entidade 2.2'],
-            ['key detalhe 1.1', 'key detalhe 1.2'],
-            ['key detalhe 2.1', 'key detalhe 2.2'],
-            ['key detalhe 3.1', 'key detalhe 3.2'],
-            ['key detalhe 4.1', 'key detalhe 4.2'],
-        ]
-        _django_cache.get_master_client.return_value = rd_mock
+        flow_mock = mock.MagicMock()
+        _chain.return_value = flow_mock
         modeladmin = None
         request = None
 
@@ -178,19 +183,19 @@ class ClearFromCache(TestCase):
         dado_entidade_3 = make(
             'lupa.DadoEntidade',
         )
-        dado_detalhe_1_1 = make(
+        make(
             'lupa.DadoDetalhe',
             dado_main=dado_entidade_1
         )
-        dado_detalhe_1_2 = make(
+        make(
             'lupa.DadoDetalhe',
             dado_main=dado_entidade_1
         )
-        dado_detalhe_2_1 = make(
+        make(
             'lupa.DadoDetalhe',
             dado_main=dado_entidade_2
         )
-        dado_detalhe_2_2 = make(
+        make(
             'lupa.DadoDetalhe',
             dado_main=dado_entidade_2
         )
@@ -203,103 +208,62 @@ class ClearFromCache(TestCase):
         queryset = [dado_entidade_1, dado_entidade_2]
 
         remove_data_from_cache(modeladmin, request, queryset)
-
-        key_prefix_entidade = 'lupa_dado_entidade'
-        key_prefix_detalhe = 'lupa_dado_detalhe'
-        rd_keys_calls = [
-            mock.call(
-                '*%s:%s:*:%s'
-                % (
-                    key_prefix_entidade,
-                    dado_entidade_1.entity_type.abreviation,
-                    dado_entidade_1.pk
-                )
-            ),
-            mock.call(
-                '*%s:%s:*:%s'
-                % (
-                    key_prefix_entidade,
-                    dado_entidade_2.entity_type.abreviation,
-                    dado_entidade_2.pk
-                )
-            ),
-            mock.call(
-                '*%s:%s:*:%s'
-                % (
-                    key_prefix_detalhe,
-                    dado_detalhe_1_1.dado_main.entity_type.abreviation,
-                    dado_detalhe_1_1.pk
-                )
-            ),
-            mock.call(
-                '*%s:%s:*:%s'
-                % (
-                    key_prefix_detalhe,
-                    dado_detalhe_1_2.dado_main.entity_type.abreviation,
-                    dado_detalhe_1_2.pk
-                )
-            ),
-            mock.call(
-                '*%s:%s:*:%s'
-                % (
-                    key_prefix_detalhe,
-                    dado_detalhe_2_1.dado_main.entity_type.abreviation,
-                    dado_detalhe_2_1.pk
-                )
-            ),
-            mock.call(
-                '*%s:%s:*:%s'
-                % (
-                    key_prefix_detalhe,
-                    dado_detalhe_2_2.dado_main.entity_type.abreviation,
-                    dado_detalhe_2_2.pk
-                )
-            ),
-        ]
-
-        rd_delete_calls = [
-            mock.call('key entidade 1.1'),
-            mock.call('key entidade 1.2'),
-            mock.call('key entidade 2.1'),
-            mock.call('key entidade 2.2'),
-            mock.call('key detalhe 1.1'),
-            mock.call('key detalhe 1.2'),
-            mock.call('key detalhe 2.1'),
-            mock.call('key detalhe 2.2'),
-            mock.call('key detalhe 3.1'),
-            mock.call('key detalhe 3.2'),
-            mock.call('key detalhe 4.1'),
-            mock.call('key detalhe 4.2'),
-        ]
         expected_queryset = list(DadoDetalhe.objects.filter(
             dado_main__id__in=[d.id for d in queryset]
         ).order_by('pk').values_list('id'))
 
-        _django_cache.get_master_client.assert_called_once_with()
-        rd_mock.keys.assert_has_calls(rd_keys_calls)
-        rd_mock.delete.assert_has_calls(rd_delete_calls)
-        asynch_rep_cache_data_entity.delay.assert_called_once_with(
+        key_prefix_entidade = 'lupa_dado_entidade'
+        key_prefix_detalhe = 'lupa_dado_detalhe'
+
+        self.assertEqual(
+            asynch_rep_cache_data_entity.si.call_args_list[0][0][0],
+            key_prefix_entidade
+        )
+        self.assertEqual(
+            asynch_rep_cache_data_entity.si.call_args_list[0][0][1],
+            queryset
+        )
+        self.assertEqual(
+            asynch_rep_cache_data_entity.si.call_args_list[0][0][2],
+            DadoEntidadeSerializer
+        )
+        asynch_rep_cache_data_entity.si.assert_called_once_with(
             key_prefix_entidade,
             queryset,
             DadoEntidadeSerializer
         )
-        call_args = asynch_rep_cache_data_detail.delay.call_args_list[0][0]
+        call_args = asynch_rep_cache_data_detail.si.call_args_list[0][0]
         self.assertEqual(call_args[0], key_prefix_detalhe)
         self.assertEqual(
             list(call_args[1].values_list('id')),
             expected_queryset
         )
         self.assertEqual(call_args[2], DadoDetalheSerializer)
+        self.assertEqual(
+            _chain.call_args_list[0][0][0],
+            asynch_remove_data.si()
+        )
+        self.assertEqual(
+            _chain.call_args_list[0][0][1],
+            asynch_rep_cache_data_entity.si()
+        )
+        self.assertEqual(
+            _chain.call_args_list[1][0][0],
+            asynch_remove_data.si()
+        )
+        self.assertEqual(
+            _chain.call_args_list[1][0][1],
+            asynch_rep_cache_data_detail.si()
+        )
+        flow_mock.delay.assert_has_calls([mock.call(), mock.call()])
 
+    @mock.patch('lupa.admin.chain')
     @mock.patch('lupa.admin.asynch_repopulate_cache_entity')
-    @mock.patch('lupa.admin.django_cache')
-    def test_clear_entity_from_cache(self, _django_cache, asynch_rep_cache):
-        rd_mock = mock.MagicMock()
-        rd_mock.keys.side_effect = [
-            ['key 1.1', 'key 1.2'],
-            ['key 2.1', 'key 2.2']
-        ]
-        _django_cache.get_master_client.return_value = rd_mock
+    @mock.patch('lupa.admin.asynch_remove_from_cache')
+    def test_clear_entity_from_cache(self, asynch_remove, asynch_rep_cache,
+                                     _chain):
+        flow_mock = mock.MagicMock()
+        _chain.return_value = flow_mock
         modeladmin = None
         request = None
 
@@ -315,29 +279,19 @@ class ClearFromCache(TestCase):
         remove_entity_from_cache(modeladmin, request, queryset)
 
         key_prefix = 'lupa_entidade'
-        rd_keys_calls = [
-            mock.call(
-                '*%s:%s:*'
-                % (key_prefix, entidade_1.abreviation)
-            ),
-            mock.call(
-                '*%s:%s:*'
-                % (key_prefix, entidade_2.abreviation)
-            )
-        ]
 
-        rd_delete_calls = [
-            mock.call('key 1.1'),
-            mock.call('key 1.2'),
-            mock.call('key 2.1'),
-            mock.call('key 2.2')
-        ]
-
-        _django_cache.get_master_client.assert_called_once_with()
-        rd_mock.keys.assert_has_calls(rd_keys_calls)
-        rd_mock.delete.assert_has_calls(rd_delete_calls)
-        asynch_rep_cache.delay.assert_called_once_with(
+        asynch_remove.si.assert_called_once_with(
+            key_prefix,
+            ['abreviation'],
+            queryset,
+        )
+        asynch_rep_cache.si.assert_called_once_with(
             key_prefix,
             queryset,
             EntidadeSerializer
         )
+        _chain.assert_called_once_with(
+            asynch_remove.si(),
+            asynch_rep_cache.si()
+        )
+        flow_mock.delay.assert_called_once_with()

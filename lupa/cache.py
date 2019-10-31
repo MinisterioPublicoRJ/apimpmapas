@@ -1,3 +1,5 @@
+from operator import attrgetter
+
 import datetime as dt
 import sys
 
@@ -156,3 +158,15 @@ def repopulate_cache(key_prefix, entities, queryset, serializer):
                 django_cache.set(key, json_data, timeout=obj.cache_timeout_sec)
                 obj.last_cache_update = dt.date.today()
                 obj.save()
+
+
+def _remove_from_cache(key_prefix, model_args, queryset):
+    cache_client = django_cache.get_master_client()
+
+    for obj in queryset:
+        key_args = [
+            attrgetter(arg)(obj) for arg in model_args
+        ]
+        key = wildcard_cache_key(key_prefix, key_args)
+        cache_keys = cache_client.keys(key)
+        [cache_client.delete(cache_key) for cache_key in cache_keys]
