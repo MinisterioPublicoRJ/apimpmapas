@@ -6,7 +6,7 @@ django-cors-headers
 django-filter
 django-grappelli
 django-nested-admin
-django-ordered-model
+django-ordered-model==3.2.0
 django-redis-cache==2.1.0
 djangorestframework>=3.9
 dj-database-url
