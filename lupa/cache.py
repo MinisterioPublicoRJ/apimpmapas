@@ -16,6 +16,10 @@ from lupa.db_connectors import execute_sample
 
 STDERR = OutputWrapper(sys.stderr)
 
+ENTITY_KEY_PREFIX = 'lupa_entidade'
+DATA_ENTITY_KEY_PREFIX = 'lupa_dado_entidade'
+DATA_DETAIL_KEY_PREFIX = 'lupa_dado_detalhe'
+
 
 def _decode_jwt(token):
     try:
@@ -119,15 +123,12 @@ def _stderr(entity, domain_id):
 
 
 def repopulate_cache(key_prefix, entities, queryset, serializer):
+    query_args = {
+        ENTITY_KEY_PREFIX: 'abreviation',
+        DATA_ENTITY_KEY_PREFIX: 'entity_type__abreviation',
+        DATA_DETAIL_KEY_PREFIX: 'dado_main__entity_type__abreviation'
+    }
     for entity in entities:
-        # Temporary workaround
-        if key_prefix == 'lupa_dado_entidade':
-            objs = queryset.filter(entity_type=entity)
-        elif key_prefix == 'lupa_dado_detalhe':
-            objs = queryset.filter(dado_main__entity_type=entity)
-        else:
-            objs = queryset.filter(abreviation=entity.abreviation)
-
         domain_ids = execute_sample(
             entity.database,
             entity.schema,
@@ -136,6 +137,7 @@ def repopulate_cache(key_prefix, entities, queryset, serializer):
             limit=False
         )
 
+        objs = queryset.filter(**{query_args[key_prefix]: entity.abreviation})
         for obj in objs:
             for domain_id in domain_ids:
                 try:
@@ -148,7 +150,8 @@ def repopulate_cache(key_prefix, entities, queryset, serializer):
                         'entity_type': entity.abreviation,
                         'domain_id': domain_id[0],
                 }
-                if key_prefix in ('lupa_dado_entidade', 'lupa_dado_detalhe'):
+                if key_prefix in (DATA_ENTITY_KEY_PREFIX,
+                                  DATA_DETAIL_KEY_PREFIX):
                     key_kwargs['pk'] = obj.pk
 
                 key = cache_key(

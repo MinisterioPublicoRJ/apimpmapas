@@ -2,7 +2,11 @@ from django.core.management.base import BaseCommand
 
 from lupa.cache import (_repopulate_cache_data_entity,
                         _repopulate_cache_data_detail,
-                        _repopulate_cache_entity)
+                        _repopulate_cache_entity,
+                        ENTITY_KEY_PREFIX,
+                        DATA_ENTITY_KEY_PREFIX,
+                        DATA_DETAIL_KEY_PREFIX
+                        )
 from lupa.models import Entidade, DadoEntidade, DadoDetalhe
 from lupa.serializers import (EntidadeSerializer,
                               DadoEntidadeSerializer,
@@ -18,7 +22,7 @@ class Command(BaseCommand):
         if obj_type == 'dado_entidade':
             queryset = DadoEntidade.cache.expiring()
             _repopulate_cache_data_entity(
-                'lupa_dado_entidade',
+                DATA_ENTITY_KEY_PREFIX,
                 queryset,
                 DadoEntidadeSerializer
 
@@ -26,7 +30,7 @@ class Command(BaseCommand):
         elif obj_type == 'dado_detalhe':
             queryset = DadoDetalhe.cache.expiring()
             _repopulate_cache_data_detail(
-                'lupa_dado_detalhe',
+                DATA_DETAIL_KEY_PREFIX,
                 queryset,
                 DadoDetalheSerializer
 
@@ -35,7 +39,7 @@ class Command(BaseCommand):
         elif obj_type == 'entidade':
             queryset = Entidade.cache.expiring()
             _repopulate_cache_entity(
-                'lupa_entidade',
+                ENTITY_KEY_PREFIX,
                 queryset,
                 EntidadeSerializer
             )

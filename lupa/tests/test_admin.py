@@ -10,6 +10,11 @@ from lupa.serializers import (EntidadeSerializer,
 import pytest
 
 
+from lupa.cache import (
+    ENTITY_KEY_PREFIX,
+    DATA_ENTITY_KEY_PREFIX,
+    DATA_DETAIL_KEY_PREFIX
+)
 from lupa.tests.fixtures.admin import (
     entidade_name,
     dado_1_id,
@@ -134,8 +139,8 @@ class ClearFromCache(TestCase):
 
         remove_data_from_cache(modeladmin, request, queryset)
 
-        entity_key_prefix = 'lupa_dado_entidade'
-        detail_key_prefix = 'lupa_dado_detalhe'
+        entity_key_prefix = DATA_ENTITY_KEY_PREFIX
+        detail_key_prefix = DATA_DETAIL_KEY_PREFIX
 
         self.assertEqual(
             asynch_remove.si.call_args_list[0][0][0],
@@ -229,8 +234,8 @@ class ClearFromCache(TestCase):
             dado_main__id__in=[d.id for d in queryset]
         ).order_by('pk').values_list('id'))
 
-        key_prefix_entidade = 'lupa_dado_entidade'
-        key_prefix_detalhe = 'lupa_dado_detalhe'
+        key_prefix_entidade = DATA_ENTITY_KEY_PREFIX
+        key_prefix_detalhe = DATA_DETAIL_KEY_PREFIX
 
         self.assertEqual(
             asynch_rep_cache_data_entity.si.call_args_list[0][0][0],
@@ -295,7 +300,7 @@ class ClearFromCache(TestCase):
 
         remove_entity_from_cache(modeladmin, request, queryset)
 
-        key_prefix = 'lupa_entidade'
+        key_prefix = ENTITY_KEY_PREFIX
 
         asynch_remove.si.assert_called_once_with(
             key_prefix,
