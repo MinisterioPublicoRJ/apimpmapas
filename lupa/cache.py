@@ -123,15 +123,12 @@ def _stderr(entity, domain_id):
 
 
 def repopulate_cache(key_prefix, entities, queryset, serializer):
+    query_args = {
+        ENTITY_KEY_PREFIX: 'abreviation',
+        DATA_ENTITY_KEY_PREFIX: 'entity_type__abreviation',
+        DATA_DETAIL_KEY_PREFIX: 'dado_main__entity_type__abreviation'
+    }
     for entity in entities:
-        # Temporary workaround
-        if key_prefix == DATA_ENTITY_KEY_PREFIX:
-            objs = queryset.filter(entity_type=entity)
-        elif key_prefix == DATA_DETAIL_KEY_PREFIX:
-            objs = queryset.filter(dado_main__entity_type=entity)
-        else:
-            objs = queryset.filter(abreviation=entity.abreviation)
-
         domain_ids = execute_sample(
             entity.database,
             entity.schema,
@@ -140,6 +137,7 @@ def repopulate_cache(key_prefix, entities, queryset, serializer):
             limit=False
         )
 
+        objs = queryset.filter(**{query_args[key_prefix]: entity.abreviation})
         for obj in objs:
             for domain_id in domain_ids:
                 try:
