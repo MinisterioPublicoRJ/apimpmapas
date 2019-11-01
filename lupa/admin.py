@@ -90,8 +90,8 @@ def remove_data_from_cache(modeladmin, request, queryset):
     flow.delay()
 
 
-remove_data_from_cache.short_description = 'Remove do cache'
-remove_entity_from_cache.short_description = 'Remove do cache'
+remove_data_from_cache.short_description = 'Renovar o cache'
+remove_entity_from_cache.short_description = 'Renovar o cache'
 
 
 class ColunaDadoForm(forms.ModelForm):
