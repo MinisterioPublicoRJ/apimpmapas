@@ -16,6 +16,10 @@ from lupa.db_connectors import execute_sample
 
 STDERR = OutputWrapper(sys.stderr)
 
+ENTITY_KEY_PREFIX = 'lupa_entidade'
+DATA_ENTITY_KEY_PREFIX = 'lupa_dado_entidade'
+DATA_DETAIL_KEY_PREFIX = 'lupa_dado_detalhe'
+
 
 def _decode_jwt(token):
     try:
@@ -121,9 +125,9 @@ def _stderr(entity, domain_id):
 def repopulate_cache(key_prefix, entities, queryset, serializer):
     for entity in entities:
         # Temporary workaround
-        if key_prefix == 'lupa_dado_entidade':
+        if key_prefix == DATA_ENTITY_KEY_PREFIX:
             objs = queryset.filter(entity_type=entity)
-        elif key_prefix == 'lupa_dado_detalhe':
+        elif key_prefix == DATA_DETAIL_KEY_PREFIX:
             objs = queryset.filter(dado_main__entity_type=entity)
         else:
             objs = queryset.filter(abreviation=entity.abreviation)
@@ -148,7 +152,8 @@ def repopulate_cache(key_prefix, entities, queryset, serializer):
                         'entity_type': entity.abreviation,
                         'domain_id': domain_id[0],
                 }
-                if key_prefix in ('lupa_dado_entidade', 'lupa_dado_detalhe'):
+                if key_prefix in (DATA_ENTITY_KEY_PREFIX,
+                                  DATA_DETAIL_KEY_PREFIX):
                     key_kwargs['pk'] = obj.pk
 
                 key = cache_key(

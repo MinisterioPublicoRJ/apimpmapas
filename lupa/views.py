@@ -13,7 +13,12 @@ from rest_framework.generics import (
 )
 from rest_framework.response import Response
 
-from lupa.cache import custom_cache
+from lupa.cache import (
+    custom_cache,
+    ENTITY_KEY_PREFIX,
+    DATA_ENTITY_KEY_PREFIX,
+    DATA_DETAIL_KEY_PREFIX
+)
 from .models import Entidade, DadoDetalhe, DadoEntidade
 from .serializers import (
     EntidadeSerializer,
@@ -62,7 +67,7 @@ class EntidadeView(GenericAPIView, EntityDataView):
     queryset = Entidade.objects.all()
 
     @custom_cache(
-        key_prefix='lupa_entidade',
+        key_prefix=ENTITY_KEY_PREFIX,
         model_kwargs={'abreviation': 'entity_type'}
     )
     def get(self, request, *args, **kwargs):
@@ -86,7 +91,7 @@ class DadoEntidadeView(RetrieveAPIView, EntityDataView):
     queryset = DadoEntidade.objects.all()
 
     @custom_cache(
-        key_prefix='lupa_dado_entidade',
+        key_prefix=DATA_ENTITY_KEY_PREFIX,
         model_kwargs={'entity_type__abreviation': 'entity_type', 'pk': 'pk'}
     )
     def get(self, request, *args, **kwargs):
@@ -109,7 +114,7 @@ class DadoDetalheView(RetrieveAPIView, EntityDataView):
     queryset = DadoDetalhe.objects.all()
 
     @custom_cache(
-        key_prefix='lupa_dado_detalhe',
+        key_prefix=DATA_DETAIL_KEY_PREFIX,
         model_kwargs={
             'dado_main__entity_type__abreviation': 'entity_type',
             'pk': 'pk'

@@ -6,6 +6,11 @@ from django import forms
 import nested_admin
 from ordered_model.admin import OrderedModelAdmin
 
+from lupa.cache import (
+    ENTITY_KEY_PREFIX,
+    DATA_ENTITY_KEY_PREFIX,
+    DATA_DETAIL_KEY_PREFIX
+)
 from .models import (
     DadoDetalhe,
     DadoEntidade,
@@ -31,7 +36,7 @@ from lupa.tasks import (
 
 
 def remove_entity_from_cache(modeladmin, request, queryset):
-    key_prefix = 'lupa_entidade'
+    key_prefix = ENTITY_KEY_PREFIX
     model_args = ['abreviation']
     proc1 = asynch_remove_from_cache.si(key_prefix, model_args, queryset)
     proc2 = asynch_repopulate_cache_entity.si(
@@ -45,7 +50,7 @@ def remove_entity_from_cache(modeladmin, request, queryset):
 
 def remove_data_from_cache(modeladmin, request, queryset):
     entity_data_ids = [d.id for d in queryset]
-    entity_key_prefix = 'lupa_dado_entidade'
+    entity_key_prefix = DATA_ENTITY_KEY_PREFIX
     model_args = ['entity_type.abreviation', 'pk']
 
     proc1 = asynch_remove_from_cache.si(
@@ -65,7 +70,7 @@ def remove_data_from_cache(modeladmin, request, queryset):
     detail_queryset = DadoDetalhe.objects.filter(
         dado_main__id__in=entity_data_ids
     ).order_by('pk')
-    detail_key_prefix = 'lupa_dado_detalhe'
+    detail_key_prefix = DATA_DETAIL_KEY_PREFIX
     detail_model_args = ['dado_main.entity_type.abreviation', 'pk']
 
     proc1 = asynch_remove_from_cache.si(
