@@ -1,3 +1,4 @@
+from celery import chain
 from django.contrib import admin, messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -5,6 +6,11 @@ from django import forms
 import nested_admin
 from ordered_model.admin import OrderedModelAdmin
 
+from lupa.cache import (
+    ENTITY_KEY_PREFIX,
+    DATA_ENTITY_KEY_PREFIX,
+    DATA_DETAIL_KEY_PREFIX
+)
 from .models import (
     DadoDetalhe,
     DadoEntidade,
@@ -17,6 +23,75 @@ from .models import (
     ColunaDetalhe,
     ColunaMapa,
 )
+from lupa.serializers import (
+    EntidadeSerializer,
+    DadoEntidadeSerializer,
+    DadoDetalheSerializer)
+from lupa.tasks import (
+    asynch_repopulate_cache_entity,
+    asynch_repopulate_cache_data_entity,
+    asynch_repopulate_cache_data_detail,
+    asynch_remove_from_cache
+)
+
+
+def remove_entity_from_cache(modeladmin, request, queryset):
+    key_prefix = ENTITY_KEY_PREFIX
+    model_args = ['abreviation']
+    proc1 = asynch_remove_from_cache.si(key_prefix, model_args, queryset)
+    proc2 = asynch_repopulate_cache_entity.si(
+        key_prefix,
+        queryset,
+        EntidadeSerializer
+    )
+    flow = chain(proc1, proc2)
+    flow.delay()
+
+
+def remove_data_from_cache(modeladmin, request, queryset):
+    entity_data_ids = [d.id for d in queryset]
+    entity_key_prefix = DATA_ENTITY_KEY_PREFIX
+    model_args = ['entity_type.abreviation', 'pk']
+
+    proc1 = asynch_remove_from_cache.si(
+        entity_key_prefix,
+        model_args,
+        queryset
+    )
+
+    proc2 = asynch_repopulate_cache_data_entity.si(
+        entity_key_prefix, queryset, DadoEntidadeSerializer
+    )
+
+    flow = chain(proc1, proc2)
+    flow.delay()
+
+    # Remove related DadoDetalhe from cache
+    detail_queryset = DadoDetalhe.objects.filter(
+        dado_main__id__in=entity_data_ids
+    ).order_by('pk')
+    detail_key_prefix = DATA_DETAIL_KEY_PREFIX
+    detail_model_args = ['dado_main.entity_type.abreviation', 'pk']
+
+    proc1 = asynch_remove_from_cache.si(
+        detail_key_prefix,
+        detail_model_args,
+        detail_queryset
+    )
+
+    proc2 = asynch_repopulate_cache_data_detail.si(
+        detail_key_prefix,
+        detail_queryset,
+        DadoDetalheSerializer,
+    )
+
+    flow = chain(proc1, proc2)
+
+    flow.delay()
+
+
+remove_data_from_cache.short_description = 'Renovar o cache'
+remove_entity_from_cache.short_description = 'Renovar o cache'
 
 
 class ColunaDadoForm(forms.ModelForm):
@@ -98,12 +173,15 @@ class EntidadeAdmin(nested_admin.NestedModelAdmin):
                 'name_column',
                 'geojson_column',
                 'osm_value_attached',
-                'osm_default_level'
+                'osm_default_level',
+                'is_cacheable',
+                'cache_timeout_days'
             )
         })
     )
     filter_horizontal = ('roles_allowed', )
     inlines = [MapaAdminInline]
+    actions = [remove_entity_from_cache]
 
 
 @admin.register(DadoEntidade)
@@ -136,7 +214,9 @@ class DadoEntidadeAdmin(nested_admin.NestedModelAdmin, OrderedModelAdmin):
             'fields': (
                 'database',
                 'schema',
-                'table'
+                'table',
+                'is_cacheable',
+                'cache_timeout_days'
             )
         })
     )
@@ -231,7 +311,11 @@ class DadoEntidadeAdmin(nested_admin.NestedModelAdmin, OrderedModelAdmin):
 
     move_dado_to_position.short_description = "Mover para Posição..."
     change_to_detail.short_description = "Transformar em detalhe..."
-    actions = ['change_to_detail', 'move_dado_to_position']
+    actions = [
+        'change_to_detail',
+        remove_data_from_cache,
+        'move_dado_to_position'
+    ]
 
 
 admin.site.register(Grupo)

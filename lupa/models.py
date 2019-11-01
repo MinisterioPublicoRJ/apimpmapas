@@ -1,3 +1,5 @@
+import datetime as dt
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from colorfield.fields import ColorField
@@ -36,6 +38,20 @@ MANDATORY_GEOJSON_COLUMN = (
 ONLY_POSTGIS_SUPORTED = (
     'Apenas a engine PostgreSQL Opengeo suporta busca geolocalizada'
 )
+
+
+class CacheManager(models.Manager):
+    def expiring(self):
+        objs = super().get_queryset()
+        result_ids = []
+        for obj in objs:
+            cache_days = obj.cache_timeout_days
+            timedelta = dt.date.today() - dt.timedelta(days=cache_days)
+            if obj.last_cache_update is None\
+                    or obj.last_cache_update <= timedelta:
+                result_ids.append(obj.id)
+
+        return objs.filter(id__in=result_ids)
 
 
 class TipoDado(models.Model):
@@ -197,6 +213,19 @@ class Entidade(models.Model):
         default=False
     )
 
+    is_cacheable = models.BooleanField(
+        verbose_name='guardar no cache?',
+        default=True
+    )
+    cache_timeout_sec = models.BigIntegerField(null=True)
+    cache_timeout_days = models.IntegerField(
+        verbose_name='Tempo de persistência do cache (em dias)',
+        default=7
+    )
+    last_cache_update = models.DateField(null=True)
+    objects = models.Manager()
+    cache = CacheManager()
+
     def obter_dados(self):
         return self.data_list.order_by('order')
 
@@ -258,6 +287,11 @@ class Entidade(models.Model):
     def __str__(self):
         if self:
             return self.name
+
+    def save(self, *args, **kwargs):
+        seconds_scale = 24 * 60 * 60
+        self.cache_timeout_sec = self.cache_timeout_days * seconds_scale
+        super().save(*args, **kwargs)
 
 
 class Mapa(models.Model):
@@ -336,6 +370,25 @@ class Dado(OrderedModel):
         help_text='0 = sem limite'
     )
 
+    show_box = models.BooleanField(
+        verbose_name='Exibir dado',
+        default=True
+    )
+
+    is_cacheable = models.BooleanField(
+        verbose_name='guardar no cache?',
+        default=True
+    )
+
+    cache_timeout_sec = models.BigIntegerField(null=True)
+    cache_timeout_days = models.IntegerField(
+        verbose_name='Tempo de persistência do cache (em dias)',
+        default=7
+    )
+
+    last_cache_update = models.DateField(null=True)
+    cache = CacheManager()
+
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 
@@ -346,6 +399,11 @@ class Dado(OrderedModel):
     def __str__(self):
         if self:
             return self.title
+
+    def save(self, *args, **kwargs):
+        seconds_scale = 24 * 60 * 60
+        self.cache_timeout_sec = self.cache_timeout_days * seconds_scale
+        super().save(*args, **kwargs)
 
 
 class DadoEntidade(Dado):

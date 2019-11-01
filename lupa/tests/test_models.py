@@ -1,7 +1,11 @@
+from datetime import datetime as dt
 from unittest import TestCase
+
+from freezegun import freeze_time
 
 import pytest
 from django.core.exceptions import ValidationError
+from django.db.models.query import QuerySet
 from model_mommy.mommy import make
 from lupa.models import (
     MANDATORY_OSM_PARAMETERS,
@@ -9,7 +13,10 @@ from lupa.models import (
     SUBURB,
     ORACLE,
     POSTGRES,
-    ONLY_POSTGIS_SUPORTED
+    ONLY_POSTGIS_SUPORTED,
+    Entidade,
+    DadoEntidade,
+    DadoDetalhe,
 )
 
 
@@ -214,6 +221,78 @@ class TestEntityModel(TestCase):
         entity.osm_value_attached = SUBURB
         entity.database = POSTGRES
         entity.clean()
+
+
+@pytest.mark.django_db(transaction=True)
+class RetrieveExpiringCacheObjects(TestCase):
+    @freeze_time('2019-10-22 12:00:00')
+    def test_retrieve_expiring_cache_data_entidade(self):
+        expired_data_obj = make(
+            'lupa.DadoEntidade',
+            cache_timeout_days=7,
+            last_cache_update=dt(2019, 10, 15, 12, 0, 0)
+        )
+        make(
+            'lupa.DadoEntidade',
+            cache_timeout_days=7,
+            last_cache_update=dt(2019, 10, 20, 12, 0, 0)
+        )
+
+        expiring_data = DadoEntidade.cache.expiring()
+
+        self.assertEqual(len(expiring_data), 1)
+        self.assertIsInstance(expiring_data, QuerySet)
+        self.assertEqual(expiring_data[0], expired_data_obj)
+
+    @freeze_time('2019-10-22 12:00:00')
+    def test_retrieve_expiring_cache_data_detalhe(self):
+        expired_data_obj = make(
+            'lupa.DadoDetalhe',
+            cache_timeout_days=7,
+            last_cache_update=dt(2019, 10, 15, 12, 0, 0)
+        )
+        make(
+            'lupa.DadoDetalhe',
+            cache_timeout_days=7,
+            last_cache_update=dt(2019, 10, 20, 12, 0, 0)
+        )
+
+        expiring_data = DadoDetalhe.cache.expiring()
+
+        self.assertEqual(len(expiring_data), 1)
+        self.assertIsInstance(expiring_data, QuerySet)
+        self.assertEqual(expiring_data[0], expired_data_obj)
+
+    @freeze_time('2019-10-22 12:00:00')
+    def test_retrieve_expiring_cache_entity(self):
+        expired_entity_obj = make(
+            'lupa.Entidade',
+            cache_timeout_days=7,
+            last_cache_update=dt(2019, 10, 15, 12, 0, 0)
+        )
+        # This one is also expired. Ignore hours, just consider days
+        make(
+            'lupa.Entidade',
+            cache_timeout_days=7,
+            last_cache_update=dt(2019, 10, 15, 14, 0, 0)
+        )
+
+        expiring_entity = Entidade.cache.expiring()
+
+        self.assertEqual(len(expiring_entity), 2)
+        self.assertIsInstance(expiring_entity, QuerySet)
+        self.assertEqual(expiring_entity[0], expired_entity_obj)
+
+    def test_retrieve_expiring_object_with_null_last_update(self):
+        make(
+            'lupa.Entidade',
+            cache_timeout_days=7,
+            last_cache_update=None
+        )
+
+        expiring_entity = Entidade.cache.expiring()
+
+        self.assertEqual(expiring_entity.count(), 1)
 
 
 @pytest.mark.django_db(transaction=True)
