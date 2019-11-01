@@ -176,10 +176,6 @@ CACHES = {
                 'CACHE_DATABASE_NUMBER',
                 default=1
             ),
-            'PASSWORD': config(
-                'CACHE_PASSWORD',
-                default=''
-            )
         }
     }
 }
