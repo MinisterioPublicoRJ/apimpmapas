@@ -69,11 +69,16 @@ def custom_cache(key_prefix, model_kwargs=dict()):
                 **{k: kwargs[v] for k, v in model_kwargs.items()}
             )
 
+            # If DadoDetalhe check role in the related DadoEntidade
+            obj_role = obj
+            if not hasattr(obj, 'roles_allowed'):
+                obj_role = obj.dado_main
+
             token = request.GET.get('auth_token')
             permissions = _decode_jwt(token)
 
             key = cache_key(key_prefix, kwargs)
-            if key in django_cache and _has_role(obj, permissions):
+            if key in django_cache and _has_role(obj_role, permissions):
                 response_data = django_cache.get(key)
                 return Response(response_data)
 

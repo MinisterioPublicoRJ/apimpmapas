@@ -68,11 +68,16 @@ class Cache(TestCase):
 class DecoratorCache(TestCase):
     def setUp(self):
         self.role_allowed = 'role_allowed'
+        self.role_not_allowed = 'role_not_allowed'
         self.entity_abrv = 'EST'
         self.entity_type = 'Estado'
         self.entity_name = 'Rio de Janeiro'
         self.entity_id = '1'
 
+        self.grupo_not_allowed = make(
+            'lupa.Grupo',
+            role=self.role_not_allowed
+        )
         municipio = make('lupa.Entidade', abreviation='MUN')
         self.grupo_allowed = make(
             'lupa.Grupo',
@@ -88,19 +93,23 @@ class DecoratorCache(TestCase):
         seguranca = make('lupa.TemaDado', name='Segurança', color='#223478')
         saude = make('lupa.TemaDado', name='Saúde', color='#223578')
 
-        make(
+        dado_entidade_1 = make(
             'lupa.DadoEntidade',
             id=1,
             entity_type=estado,
             theme=seguranca,
-            order=2
+            roles_allowed=[self.grupo_allowed],
+            order=2,
+            pk=1
         )
-        make(
+        dado_entidade_2 = make(
             'lupa.DadoEntidade',
             id=2,
             entity_type=estado,
             theme=None,
-            order=5
+            order=5,
+            roles_allowed=[self.grupo_not_allowed],
+            pk=2
         )
         make(
             'lupa.DadoEntidade',
@@ -140,6 +149,18 @@ class DecoratorCache(TestCase):
             entity_type=estado,
             theme=None,
             order=4
+        )
+        make(
+            'lupa.DadoDetalhe',
+            id=1,
+            dado_main=dado_entidade_1,
+            pk=1
+        )
+        make(
+            'lupa.DadoDetalhe',
+            id=1,
+            dado_main=dado_entidade_2,
+            pk=2
         )
         self.expected_answer = {
             'domain_id': '33',
@@ -279,6 +300,170 @@ class DecoratorCache(TestCase):
         _django_cache.get.assert_not_called()
         _django_cache.set.assert_called_once_with(
             'prefix:EST:1', {'data': '12345'},
+            timeout=None
+        )
+        self.assertIsInstance(response, Response)
+        self.assertEqual(response.data, {'data': '12345'})
+
+    @mock.patch('lupa.cache.django_cache')
+    def test_retrieve_dado_entidade_from_cache_w_permission(
+            self, _django_cache):
+        _django_cache.__contains__.return_value = True
+        _django_cache.get.return_value = {'data': '12345'}
+        request_mock = mock.MagicMock()
+
+        payload = {
+            'uid': 'username',
+            'permissions': 'role_allowed'
+        }
+        secret = config('SECRET_KEY')
+        token = jwt.encode(payload, secret, algorithm="HS256")
+
+        request_mock.GET = {'auth_token': token}
+
+        class_mock = mock.MagicMock()
+        class_mock.queryset = DadoEntidade.objects.all()
+        kwargs = {'entity_type': 'EST', 'domain_id': '1', 'pk': 1}
+
+        def mock_view_get(self, request, *args, **kwargs):
+            return None
+
+        decorated_mock_view = custom_cache(
+            key_prefix='prefix',
+            model_kwargs={
+                'entity_type__abreviation': 'entity_type',
+                'pk': 'pk'})(
+            mock_view_get
+        )
+
+        response = decorated_mock_view(class_mock, request_mock, **kwargs)
+
+        _django_cache.get.assert_called_once_with(
+            'prefix:EST:1:1'
+        )
+        self.assertIsInstance(response, Response)
+        self.assertEqual(response.data, {'data': '12345'})
+
+    @mock.patch('lupa.cache.django_cache')
+    def test_donot_get_dado_entidade_cache_wo_permission(self, _django_cache):
+        _django_cache.__contains__.return_value = True
+        _django_cache.get.return_value = {'data': '12345'}
+        request_mock = mock.MagicMock()
+
+        payload = {
+            'uid': 'username',
+            'permissions': 'any_other_role'
+        }
+        secret = config('SECRET_KEY')
+        token = jwt.encode(payload, secret, algorithm="HS256")
+
+        request_mock.GET = {'auth_token': token}
+
+        class_mock = mock.MagicMock()
+        class_mock.queryset = DadoEntidade.objects.all()
+        kwargs = {'entity_type': 'EST', 'domain_id': '1', 'pk': 2}
+
+        def mock_view_get(self, request, *args, **kwargs):
+            response_mock = mock.MagicMock(spec=Response)
+            response_mock.data = {'data': '12345'}
+            response_mock.status_code = 200
+            return response_mock
+
+        decorated_mock_view = custom_cache(
+            key_prefix='prefix',
+            model_kwargs={
+                'entity_type__abreviation': 'entity_type',
+                'pk': 'pk'})(
+            mock_view_get
+        )
+
+        response = decorated_mock_view(class_mock, request_mock, **kwargs)
+
+        _django_cache.get.assert_not_called()
+        _django_cache.set.assert_called_once_with(
+            'prefix:EST:1:2', {'data': '12345'},
+            timeout=None
+        )
+        self.assertIsInstance(response, Response)
+        self.assertEqual(response.data, {'data': '12345'})
+
+    @mock.patch('lupa.cache.django_cache')
+    def test_retrieve_dado_detalhe_from_cache_w_permission(
+            self, _django_cache):
+        _django_cache.__contains__.return_value = True
+        _django_cache.get.return_value = {'data': '12345'}
+        request_mock = mock.MagicMock()
+
+        payload = {
+            'uid': 'username',
+            'permissions': 'role_allowed'
+        }
+        secret = config('SECRET_KEY')
+        token = jwt.encode(payload, secret, algorithm="HS256")
+
+        request_mock.GET = {'auth_token': token}
+
+        class_mock = mock.MagicMock()
+        class_mock.queryset = DadoDetalhe.objects.all()
+        kwargs = {'entity_type': 'EST', 'domain_id': '1', 'pk': 1}
+
+        def mock_view_get(self, request, *args, **kwargs):
+            return None
+
+        decorated_mock_view = custom_cache(
+            key_prefix='prefix',
+            model_kwargs={
+                'dado_main__entity_type__abreviation': 'entity_type',
+                'pk': 'pk'})(
+            mock_view_get
+        )
+
+        response = decorated_mock_view(class_mock, request_mock, **kwargs)
+
+        _django_cache.get.assert_called_once_with(
+            'prefix:EST:1:1'
+        )
+        self.assertIsInstance(response, Response)
+        self.assertEqual(response.data, {'data': '12345'})
+
+    @mock.patch('lupa.cache.django_cache')
+    def test_donot_get_dado_detalhe_cache_wo_permission(self, _django_cache):
+        _django_cache.__contains__.return_value = True
+        _django_cache.get.return_value = {'data': '12345'}
+        request_mock = mock.MagicMock()
+
+        payload = {
+            'uid': 'username',
+            'permissions': 'any_other_role'
+        }
+        secret = config('SECRET_KEY')
+        token = jwt.encode(payload, secret, algorithm="HS256")
+
+        request_mock.GET = {'auth_token': token}
+
+        class_mock = mock.MagicMock()
+        class_mock.queryset = DadoDetalhe.objects.all()
+        kwargs = {'entity_type': 'EST', 'domain_id': '1', 'pk': 2}
+
+        def mock_view_get(self, request, *args, **kwargs):
+            response_mock = mock.MagicMock(spec=Response)
+            response_mock.data = {'data': '12345'}
+            response_mock.status_code = 200
+            return response_mock
+
+        decorated_mock_view = custom_cache(
+            key_prefix='prefix',
+            model_kwargs={
+                'dado_main__entity_type__abreviation': 'entity_type',
+                'pk': 'pk'})(
+            mock_view_get
+        )
+
+        response = decorated_mock_view(class_mock, request_mock, **kwargs)
+
+        _django_cache.get.assert_not_called()
+        _django_cache.set.assert_called_once_with(
+            'prefix:EST:1:2', {'data': '12345'},
             timeout=None
         )
         self.assertIsInstance(response, Response)
