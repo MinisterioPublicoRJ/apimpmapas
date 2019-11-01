@@ -460,7 +460,7 @@ class TestChangeToDetail(TestCase):
             argument = call[0][0]
             # The argument is a DadoEntidade
             self.assertTrue(isinstance(argument, DadoEntidade))
-            self.assertEquals(argument.id, dado_base_id)
+            self.assertEqual(argument.id, dado_base_id)
 
     @mock.patch.object(DadoEntidadeAdmin, '_render_changer')
     @mock.patch.object(DadoEntidadeAdmin, '_valida_entidade_detailer')
