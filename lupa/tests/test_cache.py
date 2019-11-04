@@ -19,12 +19,10 @@ from lupa.cache import (
     _repopulate_cache_data_entity,
     _repopulate_cache_data_detail,
     _repopulate_cache_entity,
-    _remove_from_cache
+    _remove_from_cache,
+    repopulate_cache
 )
 from lupa.models import Entidade, DadoEntidade, DadoDetalhe
-from lupa.serializers import (EntidadeSerializer,
-                              DadoEntidadeSerializer,
-                              DadoDetalheSerializer)
 
 
 class Cache(TestCase):
@@ -807,7 +805,6 @@ class RepopulateCache(TestCase):
         _repopulate_cache_data_entity(
             key_prefix='lupa_dado_entidade',
             queryset=queryset,
-            serializer=DadoEntidadeSerializer
         )
 
         execute_sample_calls = [
@@ -1116,7 +1113,6 @@ class RepopulateCache(TestCase):
         _repopulate_cache_data_detail(
             key_prefix='lupa_dado_detalhe',
             queryset=queryset,
-            serializer=DadoDetalheSerializer
         )
 
         execute_sample_calls = [
@@ -1356,7 +1352,6 @@ class RepopulateCache(TestCase):
         _repopulate_cache_entity(
             key_prefix='lupa_entidade',
             queryset=queryset,
-            serializer=EntidadeSerializer
         )
         execute_sample_calls = [
             mock.call(
@@ -1421,6 +1416,7 @@ class RepopulateCache(TestCase):
 
         serializer_mock = mock.MagicMock()
         serializer_mock.side_effect = Exception()
+
         _execute_sample.side_effect = (
             [('33001',)],
         )
@@ -1431,9 +1427,11 @@ class RepopulateCache(TestCase):
         )
 
         queryset = Entidade.objects.all()
-        _repopulate_cache_entity(
+        entities = queryset.distinct('abreviation').order_by('abreviation')
+        repopulate_cache(
             key_prefix='lupa_entidade',
             queryset=queryset,
+            entities=entities,
             serializer=serializer_mock
         )
         expected_msg = 'NOK - %s' % ' - '.join(
