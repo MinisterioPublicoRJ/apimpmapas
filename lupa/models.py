@@ -6,7 +6,7 @@ from colorfield.fields import ColorField
 from ordered_model.models import OrderedModel
 
 from lupa.cache import ENTITY_KEY_PREFIX
-from lupa.tasks import asynch_remove_from_cache
+from lupa.tasks import asynch_remove_from_cache, asynch_repopulate_cache_entity
 
 POSTGRES = 'PG'
 ORACLE = 'ORA'
@@ -297,13 +297,24 @@ class Entidade(models.Model):
 
         cls = self.__class__
         try:
-            old = cls.objects.get(pk=self.pk)
+            queryset = cls.objects.filter(pk=self.pk)
+            old = queryset.get(pk=self.pk)
             new = self
-            # Check  if is_cacheable was updated
+
+            key_prefix = ENTITY_KEY_PREFIX
+            # Check if is_cacheable was updated
             if old.is_cacheable and not new.is_cacheable:
-                key_prefix = ENTITY_KEY_PREFIX
                 model_args = ['abreviation']
-                asynch_remove_from_cache.delay(key_prefix, model_args, [new])
+                asynch_remove_from_cache.delay(
+                    key_prefix,
+                    model_args,
+                    queryset
+                )
+            elif not old.is_cacheable and new.is_cacheable:
+                asynch_repopulate_cache_entity.delay(
+                    key_prefix,
+                    queryset,
+                )
         except ObjectDoesNotExist:
             pass
 

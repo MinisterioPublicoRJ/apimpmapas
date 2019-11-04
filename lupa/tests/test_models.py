@@ -361,8 +361,21 @@ class RenewCacheWhenIsCachebleIsChanged(TestCase):
         entidade.is_cacheable = False
         entidade.save()
 
-        _asynch_remove.delay.assert_called_once_with(
-            ENTITY_KEY_PREFIX,
-            ['abreviation'],
-            [entidade]
-        )
+        expected_queryset = Entidade.objects.filter(pk=entidade.pk)
+        asynch_call = _asynch_remove.delay.call_args_list[0][0]
+
+        self.assertEqual(asynch_call[0], ENTITY_KEY_PREFIX)
+        self.assertEqual(asynch_call[1], ['abreviation'])
+        self.assertEqual(asynch_call[2].first(), expected_queryset.first())
+
+    @mock.patch('lupa.models.asynch_repopulate_cache_entity')
+    def test_asynch_repopulate_entity_from_cache(self, _asynch_repopulate):
+        entidade = make('lupa.Entidade', is_cacheable=False)
+        entidade.is_cacheable = True
+        entidade.save()
+
+        expected_queryset = Entidade.objects.filter(pk=entidade.pk)
+        asynch_call = _asynch_repopulate.delay.call_args_list[0][0]
+
+        self.assertEqual(asynch_call[0], ENTITY_KEY_PREFIX)
+        self.assertEqual(asynch_call[1].first(), expected_queryset.first())
