@@ -1,9 +1,12 @@
 import datetime as dt
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import models
 from colorfield.fields import ColorField
 from ordered_model.models import OrderedModel
+
+from lupa.cache import ENTITY_KEY_PREFIX
+from lupa.tasks import asynch_remove_from_cache
 
 POSTGRES = 'PG'
 ORACLE = 'ORA'
@@ -291,6 +294,19 @@ class Entidade(models.Model):
     def save(self, *args, **kwargs):
         seconds_scale = 24 * 60 * 60
         self.cache_timeout_sec = self.cache_timeout_days * seconds_scale
+
+        cls = self.__class__
+        try:
+            old = cls.objects.get(pk=self.pk)
+            new = self
+            # Check  if is_cacheable was updated
+            if old.is_cacheable and not new.is_cacheable:
+                key_prefix = ENTITY_KEY_PREFIX
+                model_args = ['abreviation']
+                asynch_remove_from_cache.delay(key_prefix, model_args, [new])
+        except ObjectDoesNotExist:
+            pass
+
         super().save(*args, **kwargs)
 
 

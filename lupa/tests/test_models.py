@@ -1,5 +1,5 @@
 from datetime import datetime as dt
-from unittest import TestCase
+from unittest import TestCase, mock
 
 from freezegun import freeze_time
 
@@ -7,6 +7,8 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.db.models.query import QuerySet
 from model_mommy.mommy import make
+
+from lupa.cache import ENTITY_KEY_PREFIX
 from lupa.models import (
     MANDATORY_OSM_PARAMETERS,
     MANDATORY_GEOJSON_COLUMN,
@@ -347,3 +349,20 @@ class TestDataModel(TestCase):
                 'info_type': coluna.info_type
             })
         self.assertCountEqual(colunas_detalhar, colunas_detalhado)
+
+
+@pytest.mark.django_db(transaction=True)
+class RenewCacheWhenIsCachebleIsChanged(TestCase):
+    @mock.patch('lupa.models.asynch_remove_from_cache')
+    def test_asynch_remove_entity_from_cache(self, _asynch_remove):
+        """The the model field is_cacheable is set to False
+        start a async task to remove the given entity from cache"""
+        entidade = make('lupa.Entidade', is_cacheable=True)
+        entidade.is_cacheable = False
+        entidade.save()
+
+        _asynch_remove.delay.assert_called_once_with(
+            ENTITY_KEY_PREFIX,
+            ['abreviation'],
+            [entidade]
+        )
