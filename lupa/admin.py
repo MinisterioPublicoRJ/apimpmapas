@@ -23,10 +23,6 @@ from .models import (
     ColunaDetalhe,
     ColunaMapa,
 )
-from lupa.serializers import (
-    EntidadeSerializer,
-    DadoEntidadeSerializer,
-    DadoDetalheSerializer)
 from lupa.tasks import (
     asynch_repopulate_cache_entity,
     asynch_repopulate_cache_data_entity,
@@ -42,7 +38,6 @@ def remove_entity_from_cache(modeladmin, request, queryset):
     proc2 = asynch_repopulate_cache_entity.si(
         key_prefix,
         queryset,
-        EntidadeSerializer
     )
     flow = chain(proc1, proc2)
     flow.delay()
@@ -60,7 +55,8 @@ def remove_data_from_cache(modeladmin, request, queryset):
     )
 
     proc2 = asynch_repopulate_cache_data_entity.si(
-        entity_key_prefix, queryset, DadoEntidadeSerializer
+        entity_key_prefix,
+        queryset
     )
 
     flow = chain(proc1, proc2)
@@ -82,7 +78,6 @@ def remove_data_from_cache(modeladmin, request, queryset):
     proc2 = asynch_repopulate_cache_data_detail.si(
         detail_key_prefix,
         detail_queryset,
-        DadoDetalheSerializer,
     )
 
     flow = chain(proc1, proc2)

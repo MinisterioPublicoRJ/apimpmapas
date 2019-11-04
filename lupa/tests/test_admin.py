@@ -4,9 +4,6 @@ from unittest import TestCase, mock
 from lupa.admin import remove_data_from_cache, remove_entity_from_cache
 from lupa.models import DadoEntidade, DadoDetalhe
 from lupa.admin import DadoEntidadeAdmin
-from lupa.serializers import (EntidadeSerializer,
-                              DadoEntidadeSerializer,
-                              DadoDetalheSerializer)
 import pytest
 
 
@@ -170,7 +167,6 @@ class ClearFromCache(TestCase):
         asynch_rep_data_entity.si.assert_called_once_with(
             entity_key_prefix,
             queryset,
-            DadoEntidadeSerializer
         )
         self.assertEqual(_chain.call_args_list[0][0][0], asynch_remove.si())
         self.assertEqual(
@@ -245,14 +241,9 @@ class ClearFromCache(TestCase):
             asynch_rep_cache_data_entity.si.call_args_list[0][0][1],
             queryset
         )
-        self.assertEqual(
-            asynch_rep_cache_data_entity.si.call_args_list[0][0][2],
-            DadoEntidadeSerializer
-        )
         asynch_rep_cache_data_entity.si.assert_called_once_with(
             key_prefix_entidade,
             queryset,
-            DadoEntidadeSerializer
         )
         call_args = asynch_rep_cache_data_detail.si.call_args_list[0][0]
         self.assertEqual(call_args[0], key_prefix_detalhe)
@@ -260,7 +251,6 @@ class ClearFromCache(TestCase):
             list(call_args[1].values_list('id')),
             expected_queryset
         )
-        self.assertEqual(call_args[2], DadoDetalheSerializer)
         self.assertEqual(
             _chain.call_args_list[0][0][0],
             asynch_remove_data.si()
@@ -310,7 +300,6 @@ class ClearFromCache(TestCase):
         asynch_rep_cache.si.assert_called_once_with(
             key_prefix,
             queryset,
-            EntidadeSerializer
         )
         _chain.assert_called_once_with(
             asynch_remove.si(),
