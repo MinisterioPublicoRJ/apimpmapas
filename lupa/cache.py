@@ -168,6 +168,9 @@ def repopulate_cache(key_prefix, entities, queryset, serializer):
                 )
                 django_cache.set(key, json_data, timeout=obj.cache_timeout_sec)
                 obj.last_cache_update = dt.date.today()
+                # Set is_cacheable = True to avoid problems with the asynch
+                # calls performed the 'save' method from obj
+                obj.is_cacheable = True
                 obj.save()
 
 
