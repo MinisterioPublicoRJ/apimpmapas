@@ -41,6 +41,10 @@ def remove_entity_from_cache(modeladmin, request, queryset):
     )
     flow = chain(proc1, proc2)
     flow.delay()
+    messages.success(
+        request,
+        'Seu pedido de renovação de cache foi recebido e será processado'
+    )
 
 
 def remove_data_from_cache(modeladmin, request, queryset):
@@ -83,6 +87,11 @@ def remove_data_from_cache(modeladmin, request, queryset):
     flow = chain(proc1, proc2)
 
     flow.delay()
+
+    messages.success(
+        request,
+        'Seu pedido de renovação de cache foi recebido e será processado'
+    )
 
 
 remove_data_from_cache.short_description = 'Renovar o cache'

@@ -109,6 +109,7 @@ class TestMoveDadoToPosition(TestCase):
 
 @pytest.mark.django_db(transaction=True)
 class ClearFromCache(TestCase):
+    @mock.patch('lupa.admin.messages')
     @mock.patch('lupa.admin.chain')
     @mock.patch('lupa.admin.asynch_repopulate_cache_data_detail')
     @mock.patch('lupa.admin.asynch_repopulate_cache_data_entity')
@@ -117,7 +118,8 @@ class ClearFromCache(TestCase):
                                    asynch_remove,
                                    asynch_rep_data_entity,
                                    asynch_rep_data_detail,
-                                   _chain):
+                                   _chain,
+                                   _msgs):
 
         flow_mock = mock.MagicMock()
         _chain.return_value = flow_mock
@@ -173,7 +175,12 @@ class ClearFromCache(TestCase):
             _chain.call_args_list[0][0][1], asynch_rep_data_entity.si()
         )
         flow_mock.delay.assert_has_calls([mock.call(), mock.call()])
+        _msgs.success.assert_called_once_with(
+            request,
+            'Seu pedido de renovação de cache foi recebido e será processado'
+        )
 
+    @mock.patch('lupa.admin.messages')
     @mock.patch('lupa.admin.chain')
     @mock.patch('lupa.admin.asynch_repopulate_cache_data_detail')
     @mock.patch('lupa.admin.asynch_repopulate_cache_data_entity')
@@ -183,7 +190,8 @@ class ClearFromCache(TestCase):
         asynch_remove_data,
         asynch_rep_cache_data_entity,
         asynch_rep_cache_data_detail,
-        _chain
+        _chain,
+        _msgs
     ):
 
         flow_mock = mock.MagicMock()
@@ -268,12 +276,17 @@ class ClearFromCache(TestCase):
             asynch_rep_cache_data_detail.si()
         )
         flow_mock.delay.assert_has_calls([mock.call(), mock.call()])
+        _msgs.success.assert_called_once_with(
+            request,
+            'Seu pedido de renovação de cache foi recebido e será processado'
+        )
 
+    @mock.patch('lupa.admin.messages')
     @mock.patch('lupa.admin.chain')
     @mock.patch('lupa.admin.asynch_repopulate_cache_entity')
     @mock.patch('lupa.admin.asynch_remove_from_cache')
     def test_clear_entity_from_cache(self, asynch_remove, asynch_rep_cache,
-                                     _chain):
+                                     _chain, _msgs):
         flow_mock = mock.MagicMock()
         _chain.return_value = flow_mock
         modeladmin = None
@@ -306,6 +319,10 @@ class ClearFromCache(TestCase):
             asynch_rep_cache.si()
         )
         flow_mock.delay.assert_called_once_with()
+        _msgs.success.assert_called_once_with(
+            request,
+            'Seu pedido de renovação de cache foi recebido e será processado'
+        )
 
 
 @pytest.mark.django_db(transaction=True)
