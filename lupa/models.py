@@ -310,18 +310,17 @@ class Entidade(models.Model):
             old = queryset.get(pk=self.pk)
             new = self
 
-            key_prefix = ENTITY_KEY_PREFIX
             # Check if is_cacheable was updated
             if old.is_cacheable and not new.is_cacheable:
                 model_args = ['abreviation']
                 asynch_remove_from_cache.delay(
-                    key_prefix,
+                    ENTITY_KEY_PREFIX,
                     model_args,
                     queryset
                 )
             elif not old.is_cacheable and new.is_cacheable:
                 asynch_repopulate_cache_entity.delay(
-                    key_prefix,
+                    ENTITY_KEY_PREFIX,
                     queryset,
                 )
         except ObjectDoesNotExist:
