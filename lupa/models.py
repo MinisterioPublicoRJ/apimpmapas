@@ -42,7 +42,7 @@ ONLY_POSTGIS_SUPORTED = (
 
 class CacheManager(models.Manager):
     def expiring(self):
-        objs = super().get_queryset()
+        objs = super().get_queryset().filter(is_cacheable=True)
         result_ids = []
         for obj in objs:
             cache_days = obj.cache_timeout_days

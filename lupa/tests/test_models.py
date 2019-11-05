@@ -230,12 +230,14 @@ class RetrieveExpiringCacheObjects(TestCase):
         expired_data_obj = make(
             'lupa.DadoEntidade',
             cache_timeout_days=7,
-            last_cache_update=dt(2019, 10, 15, 12, 0, 0)
+            last_cache_update=dt(2019, 10, 15, 12, 0, 0),
+            is_cacheable=True
         )
         make(
             'lupa.DadoEntidade',
             cache_timeout_days=7,
-            last_cache_update=dt(2019, 10, 20, 12, 0, 0)
+            last_cache_update=dt(2019, 10, 20, 12, 0, 0),
+            is_cacheable=True
         )
 
         expiring_data = DadoEntidade.cache.expiring()
@@ -249,12 +251,14 @@ class RetrieveExpiringCacheObjects(TestCase):
         expired_data_obj = make(
             'lupa.DadoDetalhe',
             cache_timeout_days=7,
-            last_cache_update=dt(2019, 10, 15, 12, 0, 0)
+            last_cache_update=dt(2019, 10, 15, 12, 0, 0),
+            is_cacheable=True
         )
         make(
             'lupa.DadoDetalhe',
             cache_timeout_days=7,
-            last_cache_update=dt(2019, 10, 20, 12, 0, 0)
+            last_cache_update=dt(2019, 10, 20, 12, 0, 0),
+            is_cacheable=True
         )
 
         expiring_data = DadoDetalhe.cache.expiring()
@@ -268,13 +272,15 @@ class RetrieveExpiringCacheObjects(TestCase):
         expired_entity_obj = make(
             'lupa.Entidade',
             cache_timeout_days=7,
-            last_cache_update=dt(2019, 10, 15, 12, 0, 0)
+            last_cache_update=dt(2019, 10, 15, 12, 0, 0),
+            is_cacheable=True
         )
         # This one is also expired. Ignore hours, just consider days
         make(
             'lupa.Entidade',
             cache_timeout_days=7,
-            last_cache_update=dt(2019, 10, 15, 14, 0, 0)
+            last_cache_update=dt(2019, 10, 15, 14, 0, 0),
+            is_cacheable=True
         )
 
         expiring_entity = Entidade.cache.expiring()
@@ -287,12 +293,35 @@ class RetrieveExpiringCacheObjects(TestCase):
         make(
             'lupa.Entidade',
             cache_timeout_days=7,
-            last_cache_update=None
+            last_cache_update=None,
+            is_cacheable=True
         )
 
         expiring_entity = Entidade.cache.expiring()
 
         self.assertEqual(expiring_entity.count(), 1)
+
+    @freeze_time('2019-10-22 12:00:00')
+    def test_retrieve_expiring_and_is_cacheable(self):
+        make(
+            'lupa.Entidade',
+            cache_timeout_days=7,
+            last_cache_update=dt(2019, 10, 15, 12, 0, 0),
+            is_cacheable=False
+        )
+        # This one is also expired. Ignore hours, just consider days
+        expired_entity_obj = make(
+            'lupa.Entidade',
+            cache_timeout_days=7,
+            last_cache_update=dt(2019, 10, 15, 14, 0, 0),
+            is_cacheable=True
+        )
+
+        expiring_entity = Entidade.cache.expiring()
+
+        self.assertEqual(len(expiring_entity), 1)
+        self.assertIsInstance(expiring_entity, QuerySet)
+        self.assertEqual(expiring_entity[0], expired_entity_obj)
 
 
 @pytest.mark.django_db(transaction=True)
