@@ -8,7 +8,11 @@ from django.core.exceptions import ValidationError
 from django.db.models.query import QuerySet
 from model_mommy.mommy import make
 
-from lupa.cache import ENTITY_KEY_PREFIX
+from lupa.cache import (
+    ENTITY_KEY_PREFIX,
+    DATA_ENTITY_KEY_PREFIX,
+    DATA_DETAIL_KEY_PREFIX
+)
 from lupa.models import (
     MANDATORY_OSM_PARAMETERS,
     MANDATORY_GEOJSON_COLUMN,
@@ -353,10 +357,10 @@ class TestDataModel(TestCase):
 
 @pytest.mark.django_db(transaction=True)
 class RenewCacheWhenIsCachebleIsChanged(TestCase):
+    """The the model field is_cacheable is set to False
+    start a async task to remove the given entity from cache"""
     @mock.patch('lupa.models.asynch_remove_from_cache')
     def test_asynch_remove_entity_from_cache(self, _asynch_remove):
-        """The the model field is_cacheable is set to False
-        start a async task to remove the given entity from cache"""
         entidade = make('lupa.Entidade', is_cacheable=True)
         entidade.is_cacheable = False
         entidade.save()
@@ -381,3 +385,32 @@ class RenewCacheWhenIsCachebleIsChanged(TestCase):
         self.assertEqual(asynch_call[0], ENTITY_KEY_PREFIX)
         self.assertEqual(asynch_call[1].first(), expected_entidade)
         self.assertTrue(expected_entidade.is_cacheable)
+
+    @mock.patch('lupa.models.asynch_remove_from_cache')
+    def test_asynch_remove_data_from_cache(self, _asynch_remove):
+        dado_entidade = make('lupa.DadoEntidade', is_cacheable=True)
+        dado_detalhe = make('lupa.DadoDetalhe', dado_main=dado_entidade)
+        dado_entidade.is_cacheable = False
+        dado_entidade.save()
+
+        expected_dado_ent = DadoEntidade.objects.filter(
+            pk=dado_entidade.pk).first()
+        expected_dado_det = DadoDetalhe.objects.filter(
+            pk=dado_detalhe.pk).first()
+        asynch_call_ent = _asynch_remove.delay.call_args_list[0][0]
+        asynch_call_det = _asynch_remove.delay.call_args_list[1][0]
+
+        # DadoEntidade
+        self.assertEqual(asynch_call_ent[0], DATA_ENTITY_KEY_PREFIX)
+        self.assertEqual(asynch_call_ent[1], ['entity_type.abreviation', 'pk'])
+        self.assertEqual(asynch_call_ent[2].first(), expected_dado_ent)
+
+        # Dado Detalhe
+        self.assertEqual(asynch_call_det[0], DATA_DETAIL_KEY_PREFIX)
+        self.assertEqual(
+            asynch_call_det[1],
+            ['dado_main.entity_type.abreviation', 'pk']
+        )
+        self.assertEqual(asynch_call_det[2].first(), expected_dado_det)
+
+        self.assertFalse(expected_dado_ent.is_cacheable)

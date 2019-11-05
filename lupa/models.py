@@ -5,7 +5,11 @@ from django.db import models
 from colorfield.fields import ColorField
 from ordered_model.models import OrderedModel
 
-from lupa.cache import ENTITY_KEY_PREFIX
+from lupa.cache import (
+    ENTITY_KEY_PREFIX,
+    DATA_ENTITY_KEY_PREFIX,
+    DATA_DETAIL_KEY_PREFIX
+)
 from lupa.tasks import asynch_remove_from_cache, asynch_repopulate_cache_entity
 
 POSTGRES = 'PG'
@@ -492,6 +496,37 @@ class DadoEntidade(Dado):
         for coluna in self.column_list.all():
             coluna.copy_to_detail(detalhe)
         self.save()
+
+    def save(self, *args, **kwargs):
+        try:
+            cls = self.__class__
+            entity_queryset = cls.objects.filter(pk=self.pk)
+            old = entity_queryset.get(pk=self.pk)
+            new = self
+
+            entity_data_prefix = DATA_ENTITY_KEY_PREFIX
+            # Check if is_cacheable was updated
+            if old.is_cacheable and not new.is_cacheable:
+                entity_model_args = ['entity_type.abreviation', 'pk']
+                asynch_remove_from_cache.delay(
+                    entity_data_prefix,
+                    entity_model_args,
+                    entity_queryset
+                )
+                detail_queryset = DadoDetalhe.objects.filter(
+                    dado_main__id=new.id
+                )
+                detail_data_prefix = DATA_DETAIL_KEY_PREFIX
+                detail_model_args = ['dado_main.entity_type.abreviation', 'pk']
+                asynch_remove_from_cache.delay(
+                    detail_data_prefix,
+                    detail_model_args,
+                    detail_queryset
+                )
+        except ObjectDoesNotExist:
+            pass
+
+        super().save(*args, **kwargs)
 
 
 class DadoDetalhe(Dado):
