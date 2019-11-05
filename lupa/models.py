@@ -10,7 +10,12 @@ from lupa.cache import (
     DATA_ENTITY_KEY_PREFIX,
     DATA_DETAIL_KEY_PREFIX
 )
-from lupa.tasks import asynch_remove_from_cache, asynch_repopulate_cache_entity
+from lupa.tasks import (
+    asynch_remove_from_cache,
+    asynch_repopulate_cache_entity,
+    asynch_repopulate_cache_data_entity,
+    asynch_repopulate_cache_data_detail
+)
 
 POSTGRES = 'PG'
 ORACLE = 'ORA'
@@ -501,28 +506,36 @@ class DadoEntidade(Dado):
         try:
             cls = self.__class__
             entity_queryset = cls.objects.filter(pk=self.pk)
+            detail_queryset = DadoDetalhe.objects.filter(
+                dado_main__id=self.pk
+            )
             old = entity_queryset.get(pk=self.pk)
             new = self
 
-            entity_data_prefix = DATA_ENTITY_KEY_PREFIX
             # Check if is_cacheable was updated
             if old.is_cacheable and not new.is_cacheable:
                 entity_model_args = ['entity_type.abreviation', 'pk']
                 asynch_remove_from_cache.delay(
-                    entity_data_prefix,
+                    DATA_ENTITY_KEY_PREFIX,
                     entity_model_args,
                     entity_queryset
                 )
-                detail_queryset = DadoDetalhe.objects.filter(
-                    dado_main__id=new.id
-                )
-                detail_data_prefix = DATA_DETAIL_KEY_PREFIX
                 detail_model_args = ['dado_main.entity_type.abreviation', 'pk']
                 asynch_remove_from_cache.delay(
-                    detail_data_prefix,
+                    DATA_DETAIL_KEY_PREFIX,
                     detail_model_args,
                     detail_queryset
                 )
+            elif not old.is_cacheable and new.is_cacheable:
+                asynch_repopulate_cache_data_entity.delay(
+                    DATA_ENTITY_KEY_PREFIX,
+                    entity_queryset
+                )
+                asynch_repopulate_cache_data_detail.delay(
+                    DATA_DETAIL_KEY_PREFIX,
+                    detail_queryset
+                )
+
         except ObjectDoesNotExist:
             pass
 

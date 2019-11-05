@@ -374,7 +374,7 @@ class RenewCacheWhenIsCachebleIsChanged(TestCase):
         self.assertFalse(expected_entidade.is_cacheable)
 
     @mock.patch('lupa.models.asynch_repopulate_cache_entity')
-    def test_asynch_repopulate_entity_from_cache(self, _asynch_repopulate):
+    def test_asynch_repopulate_entity_to_cache(self, _asynch_repopulate):
         entidade = make('lupa.Entidade', is_cacheable=False)
         entidade.is_cacheable = True
         entidade.save()
@@ -414,3 +414,29 @@ class RenewCacheWhenIsCachebleIsChanged(TestCase):
         self.assertEqual(asynch_call_det[2].first(), expected_dado_det)
 
         self.assertFalse(expected_dado_ent.is_cacheable)
+
+    @mock.patch('lupa.models.asynch_repopulate_cache_data_detail')
+    @mock.patch('lupa.models.asynch_repopulate_cache_data_entity')
+    def test_asynch_repopulate_data_to_cache(self,
+                                             _asynch_rep_data_entity,
+                                             _asynch_rep_data_detail
+                                             ):
+        dado_entidade = make('lupa.DadoEntidade', is_cacheable=False)
+        dado_detalhe = make('lupa.DadoDetalhe', dado_main=dado_entidade)
+        dado_entidade.is_cacheable = True
+        dado_entidade.save()
+
+        expected_dado_ent = DadoEntidade.objects.filter(
+            pk=dado_entidade.pk).first()
+        expected_dado_det = DadoDetalhe.objects.filter(
+            pk=dado_detalhe.pk).first()
+        asynch_call_ent = _asynch_rep_data_entity.delay.call_args_list[0][0]
+        asynch_call_det = _asynch_rep_data_detail.delay.call_args_list[0][0]
+
+        self.assertEqual(asynch_call_ent[0], DATA_ENTITY_KEY_PREFIX)
+        self.assertEqual(asynch_call_ent[1].first(), expected_dado_ent)
+
+        self.assertEqual(asynch_call_det[0], DATA_DETAIL_KEY_PREFIX)
+        self.assertEqual(asynch_call_det[1].first(), expected_dado_det)
+
+        self.assertTrue(expected_dado_ent.is_cacheable)
