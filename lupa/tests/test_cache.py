@@ -76,6 +76,17 @@ class Cache(TestCase):
 
         self.assertEqual(wrapped_resp, expected_response)
 
+    def test_wrap_response_with_data_and_status_code_404(self):
+        response = {}
+
+        wrapped_resp = wrap_response(response)
+        expected_response = {
+            'data': response,
+            'status_code': 404
+        }
+
+        self.assertEqual(wrapped_resp, expected_response)
+
 
 class DecoratorCache(TestCase):
     def setUp(self):

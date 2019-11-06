@@ -22,7 +22,8 @@ DATA_DETAIL_KEY_PREFIX = 'lupa_dado_detalhe'
 
 
 def wrap_response(response):
-    return {'data': response, 'status_code': 200}
+    status = 200 if response else 404
+    return {'data': response, 'status_code': status}
 
 
 def _decode_jwt(token):
