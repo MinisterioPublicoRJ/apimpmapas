@@ -66,22 +66,24 @@ class Cache(TestCase):
         self.assertEqual(key, expected_key)
 
     def test_wrap_response_with_data_and_status_code_200(self):
-        response = {'some_response': 'response'}
+        key_check = 'check'
+        response_data = {'some_response': 'response', 'check': 'check_data'}
 
-        wrapped_resp = wrap_response(response)
+        wrapped_resp = wrap_response(response_data, key_check)
         expected_response = {
-            'data': response,
+            'data': response_data,
             'status_code': 200
         }
 
         self.assertEqual(wrapped_resp, expected_response)
 
     def test_wrap_response_with_data_and_status_code_404(self):
-        response = {}
+        key_check = 'check'
+        response_data = {'some_other_data': 'data'}
 
-        wrapped_resp = wrap_response(response)
+        wrapped_resp = wrap_response(response_data, key_check)
         expected_response = {
-            'data': response,
+            'data': response_data,
             'status_code': 404
         }
 
