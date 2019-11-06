@@ -21,6 +21,10 @@ DATA_ENTITY_KEY_PREFIX = 'lupa_dado_entidade'
 DATA_DETAIL_KEY_PREFIX = 'lupa_dado_detalhe'
 
 
+def wrap_response(response):
+    return {'data': response, 'status_code': 200}
+
+
 def _decode_jwt(token):
     try:
         payload = jwt.decode(

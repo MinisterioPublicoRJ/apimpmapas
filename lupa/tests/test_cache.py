@@ -19,7 +19,8 @@ from lupa.cache import (
     _repopulate_cache_data_entity,
     _repopulate_cache_data_detail,
     _repopulate_cache_entity,
-    _remove_from_cache
+    _remove_from_cache,
+    wrap_response
 )
 from lupa.models import Entidade, DadoEntidade, DadoDetalhe
 from lupa.serializers import (EntidadeSerializer,
@@ -63,6 +64,17 @@ class Cache(TestCase):
         expected_key = '*prefix:MUN:*:71'
 
         self.assertEqual(key, expected_key)
+
+    def test_wrap_response_with_data_and_status_code_200(self):
+        response = {'some_response': 'response'}
+
+        wrapped_resp = wrap_response(response)
+        expected_response = {
+            'data': response,
+            'status_code': 200
+        }
+
+        self.assertEqual(wrapped_resp, expected_response)
 
 
 class DecoratorCache(TestCase):
