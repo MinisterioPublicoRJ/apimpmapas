@@ -68,7 +68,8 @@ class EntidadeView(GenericAPIView, EntityDataView):
 
     @custom_cache(
         key_prefix=ENTITY_KEY_PREFIX,
-        model_kwargs={'abreviation': 'entity_type'}
+        model_kwargs={'abreviation': 'entity_type'},
+        key_check='exibition_field'
     )
     def get(self, request, *args, **kwargs):
         obj = get_object_or_404(
@@ -92,7 +93,8 @@ class DadoEntidadeView(RetrieveAPIView, EntityDataView):
 
     @custom_cache(
         key_prefix=DATA_ENTITY_KEY_PREFIX,
-        model_kwargs={'entity_type__abreviation': 'entity_type', 'pk': 'pk'}
+        model_kwargs={'entity_type__abreviation': 'entity_type', 'pk': 'pk'},
+        key_check='external_data'
     )
     def get(self, request, *args, **kwargs):
         obj = get_object_or_404(
@@ -118,7 +120,8 @@ class DadoDetalheView(RetrieveAPIView, EntityDataView):
         model_kwargs={
             'dado_main__entity_type__abreviation': 'entity_type',
             'pk': 'pk'
-        }
+        },
+        key_check='external_data'
     )
     def get(self, request, *args, **kwargs):
         obj = get_object_or_404(

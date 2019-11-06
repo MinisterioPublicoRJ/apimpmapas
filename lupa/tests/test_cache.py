@@ -243,14 +243,16 @@ class DecoratorCache(TestCase):
             return response_mock
 
         decorated_mock_view = custom_cache(
-            key_prefix='prefix', model_kwargs={'abreviation': 'entity_type'})(
+            key_prefix='prefix',
+            model_kwargs={'abreviation': 'entity_type'},
+            key_check='data')(
             mock_view_get
         )
 
         response = decorated_mock_view(class_mock, request_mock, **kwargs)
 
         _django_cache.set.assert_called_once_with(
-            'prefix:MUN:1', {'data': '12345'},
+            'prefix:MUN:1', {'data': {'data': '12345'}, 'status_code': 200},
             timeout=None
         )
         self.assertIsInstance(response, Response)
@@ -258,7 +260,9 @@ class DecoratorCache(TestCase):
     @mock.patch('lupa.cache.django_cache')
     def test_retrieve_data_from_cache_with_permission(self, _django_cache):
         _django_cache.__contains__.return_value = True
-        _django_cache.get.return_value = {'data': '12345'}
+        _django_cache.get.return_value = {
+            'data': {'data': '12345'}, 'status_code': 200
+        }
         request_mock = mock.MagicMock()
 
         payload = {
@@ -278,7 +282,8 @@ class DecoratorCache(TestCase):
             return None
 
         decorated_mock_view = custom_cache(
-            key_prefix='prefix', model_kwargs={'abreviation': 'entity_type'})(
+            key_prefix='prefix', model_kwargs={'abreviation': 'entity_type'},
+            key_check='check')(
             mock_view_get
         )
 
@@ -316,7 +321,9 @@ class DecoratorCache(TestCase):
             return response_mock
 
         decorated_mock_view = custom_cache(
-            key_prefix='prefix', model_kwargs={'abreviation': 'entity_type'})(
+            key_prefix='prefix',
+            model_kwargs={'abreviation': 'entity_type'},
+            key_check='data')(
             mock_view_get
         )
 
@@ -324,7 +331,7 @@ class DecoratorCache(TestCase):
 
         _django_cache.get.assert_not_called()
         _django_cache.set.assert_called_once_with(
-            'prefix:EST:1', {'data': '12345'},
+            'prefix:EST:1', {'data': {'data': '12345'}, 'status_code': 200},
             timeout=None
         )
         self.assertIsInstance(response, Response)
@@ -334,7 +341,9 @@ class DecoratorCache(TestCase):
     def test_retrieve_dado_entidade_from_cache_w_permission(
             self, _django_cache):
         _django_cache.__contains__.return_value = True
-        _django_cache.get.return_value = {'data': '12345'}
+        _django_cache.get.return_value = {
+            'data': {'data': '12345'}, 'status_code': 200
+        }
         request_mock = mock.MagicMock()
 
         payload = {
@@ -357,7 +366,8 @@ class DecoratorCache(TestCase):
             key_prefix='prefix',
             model_kwargs={
                 'entity_type__abreviation': 'entity_type',
-                'pk': 'pk'})(
+                'pk': 'pk'},
+            key_check='check')(
             mock_view_get
         )
 
@@ -398,7 +408,8 @@ class DecoratorCache(TestCase):
             key_prefix='prefix',
             model_kwargs={
                 'entity_type__abreviation': 'entity_type',
-                'pk': 'pk'})(
+                'pk': 'pk'},
+            key_check='data')(
             mock_view_get
         )
 
@@ -406,7 +417,7 @@ class DecoratorCache(TestCase):
 
         _django_cache.get.assert_not_called()
         _django_cache.set.assert_called_once_with(
-            'prefix:EST:1:2', {'data': '12345'},
+            'prefix:EST:1:2', {'data': {'data': '12345'}, 'status_code': 200},
             timeout=None
         )
         self.assertIsInstance(response, Response)
@@ -416,7 +427,9 @@ class DecoratorCache(TestCase):
     def test_retrieve_dado_detalhe_from_cache_w_permission(
             self, _django_cache):
         _django_cache.__contains__.return_value = True
-        _django_cache.get.return_value = {'data': '12345'}
+        _django_cache.get.return_value = {
+            'data': {'data': '12345'}, 'status_code': 200
+        }
         request_mock = mock.MagicMock()
 
         payload = {
@@ -439,7 +452,8 @@ class DecoratorCache(TestCase):
             key_prefix='prefix',
             model_kwargs={
                 'dado_main__entity_type__abreviation': 'entity_type',
-                'pk': 'pk'})(
+                'pk': 'pk'},
+            key_check='check')(
             mock_view_get
         )
 
@@ -454,7 +468,9 @@ class DecoratorCache(TestCase):
     @mock.patch('lupa.cache.django_cache')
     def test_donot_get_dado_detalhe_cache_wo_permission(self, _django_cache):
         _django_cache.__contains__.return_value = True
-        _django_cache.get.return_value = {'data': '12345'}
+        _django_cache.get.return_value = {
+            'data': {'data': '12345'}, 'status_code': 200
+        }
         request_mock = mock.MagicMock()
 
         payload = {
@@ -480,7 +496,8 @@ class DecoratorCache(TestCase):
             key_prefix='prefix',
             model_kwargs={
                 'dado_main__entity_type__abreviation': 'entity_type',
-                'pk': 'pk'})(
+                'pk': 'pk'},
+            key_check='data')(
             mock_view_get
         )
 
@@ -488,7 +505,7 @@ class DecoratorCache(TestCase):
 
         _django_cache.get.assert_not_called()
         _django_cache.set.assert_called_once_with(
-            'prefix:EST:1:2', {'data': '12345'},
+            'prefix:EST:1:2', {'data': {'data': '12345'}, 'status_code': 200},
             timeout=None
         )
         self.assertIsInstance(response, Response)
@@ -522,7 +539,8 @@ class DecoratorCache(TestCase):
             model_kwargs={
                 'entity_type__abreviation': 'entity_type',
                 'pk': 'pk'
-            }
+            },
+            key_check='key_check'
         )(mock_view_get)
 
         decorated_mock_view(class_mock, request_mock, **kwargs)
@@ -541,7 +559,9 @@ class DecoratorCache(TestCase):
         self.estado.save()
 
         _django_cache.__contains__.return_value = True
-        _django_cache.get.return_value = {'data': '12345'}
+        _django_cache.get.return_value = {
+            'data': {'data': '12345'}, 'status_code': 200
+        }
         request_mock = mock.MagicMock()
 
         payload = {
@@ -561,7 +581,8 @@ class DecoratorCache(TestCase):
             return None
 
         decorated_mock_view = custom_cache(
-            key_prefix='prefix', model_kwargs={'abreviation': 'entity_type'})(
+            key_prefix='prefix', model_kwargs={'abreviation': 'entity_type'},
+            key_check='check')(
             mock_view_get
         )
 
@@ -736,7 +757,9 @@ class ModelCache(TestCase):
             return response_mock
 
         decorated_mock_view = custom_cache(
-            key_prefix='prefix', model_kwargs={'abreviation': 'entity_type'})(
+            key_prefix='prefix',
+            model_kwargs={'abreviation': 'entity_type'},
+            key_check='check')(
             mock_view_get
         )
 
@@ -761,14 +784,15 @@ class ModelCache(TestCase):
             return response_mock
 
         decorated_mock_view = custom_cache(
-            key_prefix='prefix', model_kwargs={'abreviation': 'entity_type'})(
+            key_prefix='prefix',
+            model_kwargs={'abreviation': 'entity_type'}, key_check='data')(
             mock_view_get
         )
 
         response = decorated_mock_view(class_mock, request_mock, **kwargs)
 
         _django_cache.set.assert_called_once_with(
-            'prefix:EST:1', {'data': '12345'},
+            'prefix:EST:1', {'data': {'data': '12345'}, 'status_code': 200},
             timeout=None
         )
         self.assertIsInstance(response, Response)
@@ -788,6 +812,10 @@ class RepopulateCache(TestCase):
             _execute_sample,
             _execute):
 
+        _execute.return_value = [(
+            '202',
+            7
+        )]
         _execute_sample.side_effect = (
             [('33001',), ('33002',), ('33003',), ('33004',)],
             [('33010',), ('33011',), ('33012',), ('33013',)],
@@ -827,6 +855,10 @@ class RepopulateCache(TestCase):
             order=6,
             cache_timeout_days=40
         )
+        make('lupa.ColunaDado', info_type='id', name='identi', dado=dado_1)
+        make('lupa.ColunaDado', info_type='id', name='identi', dado=dado_2)
+        make('lupa.ColunaDado', info_type='id', name='identi', dado=dado_3)
+        make('lupa.ColunaDado', info_type='id', name='identi', dado=dado_4)
 
         queryset = DadoEntidade.objects.all()
         _repopulate_cache_data_entity(
@@ -952,116 +984,148 @@ class RepopulateCache(TestCase):
                       ),
         ]
         _django_cache_calls = [
-            mock.call('key 1', {'id': dado_3.pk, 'exibition_field': None,
-                                'external_data': {},
-                                'data_type': dado_3.data_type.name,
-                                'icon': None,
-                                'detalhe': []},
+            mock.call('key 1', {'data': {'id': dado_3.pk,
+                                         'exibition_field': None,
+                                         'external_data': {'id': '202'},
+                                         'data_type': dado_3.data_type.name,
+                                         'icon': None,
+                                         'detalhe': []},
+                                'status_code': 200},
                       timeout=dado_3.cache_timeout_sec
                       ),
-            mock.call('key 2', {'id': dado_3.pk, 'exibition_field': None,
-                                'external_data': {},
-                                'data_type': dado_3.data_type.name,
-                                'icon': None,
-                                'detalhe': []},
+            mock.call('key 2', {'data': {'id': dado_3.pk,
+                                         'exibition_field': None,
+                                         'external_data': {'id': '202'},
+                                         'data_type': dado_3.data_type.name,
+                                         'icon': None,
+                                         'detalhe': []},
+                                'status_code': 200},
                       timeout=dado_3.cache_timeout_sec
                       ),
-            mock.call('key 3', {'id': dado_3.pk, 'exibition_field': None,
-                                'external_data': {},
-                                'data_type': dado_3.data_type.name,
-                                'icon': None,
-                                'detalhe': []},
+            mock.call('key 3', {'data': {'id': dado_3.pk,
+                                         'exibition_field': None,
+                                         'external_data': {'id': '202'},
+                                         'data_type': dado_3.data_type.name,
+                                         'icon': None,
+                                         'detalhe': []},
+                                'status_code': 200},
                       timeout=dado_3.cache_timeout_sec
                       ),
-            mock.call('key 4', {'id': dado_3.pk, 'exibition_field': None,
-                                'external_data': {},
-                                'data_type': dado_3.data_type.name,
-                                'icon': None,
-                                'detalhe': []},
+            mock.call('key 4', {'data': {'id': dado_3.pk,
+                                         'exibition_field': None,
+                                         'external_data': {'id': '202'},
+                                         'data_type': dado_3.data_type.name,
+                                         'icon': None,
+                                         'detalhe': []},
+                                'status_code': 200},
                       timeout=dado_3.cache_timeout_sec
                       ),
-            mock.call('key 5', {'id': dado_1.pk, 'exibition_field': None,
-                                'external_data': {},
-                                'data_type': dado_1.data_type.name,
-                                'icon': None,
-                                'detalhe': []},
+            mock.call('key 5', {'data': {'id': dado_1.pk,
+                                         'exibition_field': None,
+                                         'external_data': {'id': '202'},
+                                         'data_type': dado_1.data_type.name,
+                                         'icon': None,
+                                         'detalhe': []},
+                                'status_code': 200},
                       timeout=dado_1.cache_timeout_sec
                       ),
-            mock.call('key 6', {'id': dado_1.pk, 'exibition_field': None,
-                                'external_data': {},
-                                'data_type': dado_1.data_type.name,
-                                'icon': None,
-                                'detalhe': []},
+            mock.call('key 6', {'data': {'id': dado_1.pk,
+                                         'exibition_field': None,
+                                         'external_data': {'id': '202'},
+                                         'data_type': dado_1.data_type.name,
+                                         'icon': None,
+                                         'detalhe': []},
+                                'status_code': 200},
                       timeout=dado_1.cache_timeout_sec
                       ),
-            mock.call('key 7', {'id': dado_1.pk, 'exibition_field': None,
-                                'external_data': {},
-                                'data_type': dado_1.data_type.name,
-                                'icon': None,
-                                'detalhe': []},
+            mock.call('key 7', {'data': {'id': dado_1.pk,
+                                         'exibition_field': None,
+                                         'external_data': {'id': '202'},
+                                         'data_type': dado_1.data_type.name,
+                                         'icon': None,
+                                         'detalhe': []},
+                                'status_code': 200},
                       timeout=dado_1.cache_timeout_sec
                       ),
-            mock.call('key 8', {'id': dado_1.pk, 'exibition_field': None,
-                                'external_data': {},
-                                'data_type': dado_1.data_type.name,
-                                'icon': None,
-                                'detalhe': []},
+            mock.call('key 8', {'data': {'id': dado_1.pk,
+                                         'exibition_field': None,
+                                         'external_data': {'id': '202'},
+                                         'data_type': dado_1.data_type.name,
+                                         'icon': None,
+                                         'detalhe': []},
+                                'status_code': 200},
                       timeout=dado_1.cache_timeout_sec
                       ),
-            mock.call('key 9', {'id': dado_4.pk, 'exibition_field': None,
-                                'external_data': {},
-                                'data_type': dado_4.data_type.name,
-                                'icon': None,
-                                'detalhe': []},
+            mock.call('key 9', {'data': {'id': dado_4.pk,
+                                         'exibition_field': None,
+                                         'external_data': {'id': '202'},
+                                         'data_type': dado_4.data_type.name,
+                                         'icon': None,
+                                         'detalhe': []},
+                                'status_code': 200},
                       timeout=dado_4.cache_timeout_sec
                       ),
-            mock.call('key 10', {'id': dado_4.pk, 'exibition_field': None,
-                                 'external_data': {},
-                                 'data_type': dado_4.data_type.name,
-                                 'icon': None,
-                                 'detalhe': []},
+            mock.call('key 10', {'data': {'id': dado_4.pk,
+                                          'exibition_field': None,
+                                          'external_data': {'id': '202'},
+                                          'data_type': dado_4.data_type.name,
+                                          'icon': None,
+                                          'detalhe': []},
+                                 'status_code': 200},
                       timeout=dado_4.cache_timeout_sec
                       ),
-            mock.call('key 11', {'id': dado_4.pk, 'exibition_field': None,
-                                 'external_data': {},
-                                 'data_type': dado_4.data_type.name,
-                                 'icon': None,
-                                 'detalhe': []},
+            mock.call('key 11', {'data': {'id': dado_4.pk,
+                                          'exibition_field': None,
+                                          'external_data': {'id': '202'},
+                                          'data_type': dado_4.data_type.name,
+                                          'icon': None,
+                                          'detalhe': []},
+                                 'status_code': 200},
                       timeout=dado_4.cache_timeout_sec
                       ),
-            mock.call('key 12', {'id': dado_4.pk, 'exibition_field': None,
-                                 'external_data': {},
-                                 'data_type': dado_4.data_type.name,
-                                 'icon': None,
-                                 'detalhe': []},
+            mock.call('key 12', {'data': {'id': dado_4.pk,
+                                          'exibition_field': None,
+                                          'external_data': {'id': '202'},
+                                          'data_type': dado_4.data_type.name,
+                                          'icon': None,
+                                          'detalhe': []},
+                                 'status_code': 200},
                       timeout=dado_4.cache_timeout_sec
                       ),
-            mock.call('key 13', {'id': dado_2.pk, 'exibition_field': None,
-                                 'external_data': {},
-                                 'data_type': dado_2.data_type.name,
-                                 'icon': None,
-                                 'detalhe': []},
+            mock.call('key 13', {'data': {'id': dado_2.pk,
+                                          'exibition_field': None,
+                                          'external_data': {'id': '202'},
+                                          'data_type': dado_2.data_type.name,
+                                          'icon': None,
+                                          'detalhe': []},
+                                 'status_code': 200},
                       timeout=dado_2.cache_timeout_sec
                       ),
-            mock.call('key 14', {'id': dado_2.pk, 'exibition_field': None,
-                                 'external_data': {},
-                                 'data_type': dado_2.data_type.name,
-                                 'icon': None,
-                                 'detalhe': []},
+            mock.call('key 14', {'data': {'id': dado_2.pk,
+                                          'exibition_field': None,
+                                          'external_data': {'id': '202'},
+                                          'data_type': dado_2.data_type.name,
+                                          'icon': None,
+                                          'detalhe': []},
+                                 'status_code': 200},
                       timeout=dado_2.cache_timeout_sec
                       ),
-            mock.call('key 15', {'id': dado_2.pk, 'exibition_field': None,
-                                 'external_data': {},
-                                 'data_type': dado_2.data_type.name,
-                                 'icon': None,
-                                 'detalhe': []},
+            mock.call('key 15', {'data': {'id': dado_2.pk,
+                                          'exibition_field': None,
+                                          'external_data': {'id': '202'},
+                                          'data_type': dado_2.data_type.name,
+                                          'icon': None,
+                                          'detalhe': []},
+                                 'status_code': 200},
                       timeout=dado_2.cache_timeout_sec
                       ),
-            mock.call('key 16', {'id': dado_2.pk, 'exibition_field': None,
-                                 'external_data': {},
-                                 'data_type': dado_2.data_type.name,
-                                 'icon': None,
-                                 'detalhe': []},
+            mock.call('key 16', {'data': {'id': dado_2.pk,
+                                          'exibition_field': None,
+                                          'external_data': {'id': '202'},
+                                          'data_type': dado_2.data_type.name,
+                                          'icon': None,
+                                          'detalhe': []},
+                                 'status_code': 200},
                       timeout=dado_2.cache_timeout_sec
                       ),
         ]
@@ -1088,6 +1152,10 @@ class RepopulateCache(TestCase):
             _execute_sample,
             _execute):
 
+        _execute.return_value = [(
+            '202',
+            7
+        )]
         _execute_sample.side_effect = (
             [('33001',), ('33002',), ('33003',), ('33004',)],
             [('33010',), ('33011',), ('33012',), ('33013',)],
@@ -1100,20 +1168,20 @@ class RepopulateCache(TestCase):
             'lupa.DadoEntidade',
             pk=1,
             entity_type=estado,
-            cache_timeout_days=10
+            cache_timeout_days=10,
         )
         dado_entidade_municipio = make(
             'lupa.DadoEntidade',
             pk=2,
             entity_type=municipio,
-            cache_timeout_days=10
+            cache_timeout_days=10,
         )
         dado_1 = make(
             'lupa.DadoDetalhe',
             pk=1,
             dado_main=dado_entidade_estado,
             order=7,
-            cache_timeout_days=20
+            cache_timeout_days=20,
         )
         dado_2 = make(
             'lupa.DadoDetalhe',
@@ -1136,6 +1204,10 @@ class RepopulateCache(TestCase):
             order=6,
             cache_timeout_days=40
         )
+        make('lupa.ColunaDetalhe', info_type='id', name='identi', dado=dado_1)
+        make('lupa.ColunaDetalhe', info_type='id', name='identi', dado=dado_2)
+        make('lupa.ColunaDetalhe', info_type='id', name='identi', dado=dado_3)
+        make('lupa.ColunaDetalhe', info_type='id', name='identi', dado=dado_4)
 
         queryset = DadoDetalhe.objects.all()
         _repopulate_cache_data_detail(
@@ -1261,84 +1333,116 @@ class RepopulateCache(TestCase):
                       ),
         ]
         _django_cache_calls = [
-            mock.call('key 1', {'id': dado_3.pk, 'exibition_field': None,
-                                'external_data': {},
-                                'data_type': dado_3.data_type.name},
+            mock.call('key 1', {'data': {'id': dado_3.pk,
+                                         'exibition_field': None,
+                                         'external_data': {'id': '202'},
+                                         'data_type': dado_3.data_type.name},
+                                'status_code': 200},
                       timeout=dado_3.cache_timeout_sec
                       ),
-            mock.call('key 2', {'id': dado_3.pk, 'exibition_field': None,
-                                'external_data': {},
-                                'data_type': dado_3.data_type.name},
+            mock.call('key 2', {'data': {'id': dado_3.pk,
+                                         'exibition_field': None,
+                                         'external_data': {'id': '202'},
+                                         'data_type': dado_3.data_type.name},
+                                'status_code': 200},
                       timeout=dado_3.cache_timeout_sec
                       ),
-            mock.call('key 3', {'id': dado_3.pk, 'exibition_field': None,
-                                'external_data': {},
-                                'data_type': dado_3.data_type.name},
+            mock.call('key 3', {'data': {'id': dado_3.pk,
+                                         'exibition_field': None,
+                                         'external_data': {'id': '202'},
+                                         'data_type': dado_3.data_type.name},
+                                'status_code': 200},
                       timeout=dado_3.cache_timeout_sec
                       ),
-            mock.call('key 4', {'id': dado_3.pk, 'exibition_field': None,
-                                'external_data': {},
-                                'data_type': dado_3.data_type.name},
+            mock.call('key 4', {'data': {'id': dado_3.pk,
+                                         'exibition_field': None,
+                                         'external_data': {'id': '202'},
+                                         'data_type': dado_3.data_type.name},
+                                'status_code': 200},
                       timeout=dado_3.cache_timeout_sec
                       ),
-            mock.call('key 5', {'id': dado_1.pk, 'exibition_field': None,
-                                'external_data': {},
-                                'data_type': dado_1.data_type.name},
+            mock.call('key 5', {'data': {'id': dado_1.pk,
+                                         'exibition_field': None,
+                                         'external_data': {'id': '202'},
+                                         'data_type': dado_1.data_type.name},
+                                'status_code': 200},
                       timeout=dado_1.cache_timeout_sec
                       ),
-            mock.call('key 6', {'id': dado_1.pk, 'exibition_field': None,
-                                'external_data': {},
-                                'data_type': dado_1.data_type.name},
+            mock.call('key 6', {'data': {'id': dado_1.pk,
+                                         'exibition_field': None,
+                                         'external_data': {'id': '202'},
+                                         'data_type': dado_1.data_type.name},
+                                'status_code': 200},
                       timeout=dado_1.cache_timeout_sec
                       ),
-            mock.call('key 7', {'id': dado_1.pk, 'exibition_field': None,
-                                'external_data': {},
-                                'data_type': dado_1.data_type.name},
+            mock.call('key 7', {'data': {'id': dado_1.pk,
+                                         'exibition_field': None,
+                                         'external_data': {'id': '202'},
+                                         'data_type': dado_1.data_type.name},
+                                'status_code': 200},
                       timeout=dado_1.cache_timeout_sec
                       ),
-            mock.call('key 8', {'id': dado_1.pk, 'exibition_field': None,
-                                'external_data': {},
-                                'data_type': dado_1.data_type.name},
+            mock.call('key 8', {'data': {'id': dado_1.pk,
+                                         'exibition_field': None,
+                                         'external_data': {'id': '202'},
+                                         'data_type': dado_1.data_type.name},
+                                'status_code': 200},
                       timeout=dado_1.cache_timeout_sec
                       ),
-            mock.call('key 9', {'id': dado_4.pk, 'exibition_field': None,
-                                'external_data': {},
-                                'data_type': dado_4.data_type.name},
+            mock.call('key 9', {'data': {'id': dado_4.pk,
+                                         'exibition_field': None,
+                                         'external_data': {'id': '202'},
+                                         'data_type': dado_4.data_type.name},
+                                'status_code': 200},
                       timeout=dado_4.cache_timeout_sec
                       ),
-            mock.call('key 10', {'id': dado_4.pk, 'exibition_field': None,
-                                 'external_data': {},
-                                 'data_type': dado_4.data_type.name},
+            mock.call('key 10', {'data': {'id': dado_4.pk,
+                                          'exibition_field': None,
+                                          'external_data': {'id': '202'},
+                                          'data_type': dado_4.data_type.name},
+                                 'status_code': 200},
                       timeout=dado_4.cache_timeout_sec
                       ),
-            mock.call('key 11', {'id': dado_4.pk, 'exibition_field': None,
-                                 'external_data': {},
-                                 'data_type': dado_4.data_type.name},
+            mock.call('key 11', {'data': {'id': dado_4.pk,
+                                          'exibition_field': None,
+                                          'external_data': {'id': '202'},
+                                          'data_type': dado_4.data_type.name},
+                                 'status_code': 200},
                       timeout=dado_4.cache_timeout_sec
                       ),
-            mock.call('key 12', {'id': dado_4.pk, 'exibition_field': None,
-                                 'external_data': {},
-                                 'data_type': dado_4.data_type.name},
+            mock.call('key 12', {'data': {'id': dado_4.pk,
+                                          'exibition_field': None,
+                                          'external_data': {'id': '202'},
+                                          'data_type': dado_4.data_type.name},
+                                 'status_code': 200},
                       timeout=dado_4.cache_timeout_sec
                       ),
-            mock.call('key 13', {'id': dado_2.pk, 'exibition_field': None,
-                                 'external_data': {},
-                                 'data_type': dado_2.data_type.name},
+            mock.call('key 13', {'data': {'id': dado_2.pk,
+                                          'exibition_field': None,
+                                          'external_data': {'id': '202'},
+                                          'data_type': dado_2.data_type.name},
+                                 'status_code': 200},
                       timeout=dado_2.cache_timeout_sec
                       ),
-            mock.call('key 14', {'id': dado_2.pk, 'exibition_field': None,
-                                 'external_data': {},
-                                 'data_type': dado_2.data_type.name},
+            mock.call('key 14', {'data': {'id': dado_2.pk,
+                                          'exibition_field': None,
+                                          'external_data': {'id': '202'},
+                                          'data_type': dado_2.data_type.name},
+                                 'status_code': 200},
                       timeout=dado_2.cache_timeout_sec
                       ),
-            mock.call('key 15', {'id': dado_2.pk, 'exibition_field': None,
-                                 'external_data': {},
-                                 'data_type': dado_2.data_type.name},
+            mock.call('key 15', {'data': {'id': dado_2.pk,
+                                          'exibition_field': None,
+                                          'external_data': {'id': '202'},
+                                          'data_type': dado_2.data_type.name},
+                                 'status_code': 200},
                       timeout=dado_2.cache_timeout_sec
                       ),
-            mock.call('key 16', {'id': dado_2.pk, 'exibition_field': None,
-                                 'external_data': {},
-                                 'data_type': dado_2.data_type.name},
+            mock.call('key 16', {'data': {'id': dado_2.pk,
+                                          'exibition_field': None,
+                                          'external_data': {'id': '202'},
+                                          'data_type': dado_2.data_type.name},
+                      'status_code': 200},
                       timeout=dado_2.cache_timeout_sec
                       ),
         ]
@@ -1354,7 +1458,7 @@ class RepopulateCache(TestCase):
                 )
         )
 
-    @mock.patch('lupa.serializers.execute', return_value=None)
+    @mock.patch('lupa.serializers.execute')
     @mock.patch('lupa.cache.execute_sample')
     @mock.patch('lupa.cache.cache_key')
     @mock.patch('lupa.cache.django_cache')
@@ -1365,6 +1469,10 @@ class RepopulateCache(TestCase):
             _execute_sample,
             _execute):
 
+        _execute.side_effect = [
+            [(1, )],
+            [(2, )],
+        ]
         municipio = make('lupa.Entidade', abreviation='MUN')
         estado = make(
             'lupa.Entidade',
@@ -1401,16 +1509,18 @@ class RepopulateCache(TestCase):
 
         ]
         django_cache_calls = [
-            mock.call('key 1', {'domain_id': '33001',
-                                'entity_type': estado.name,
-                                'exibition_field': None,
-                                'geojson': None, 'theme_list': []},
+            mock.call('key 1', {'data': {'domain_id': '33001',
+                                         'entity_type': estado.name,
+                                         'exibition_field': 1,
+                                         'geojson': None, 'theme_list': []},
+                                'status_code':  200},
                       timeout=estado.cache_timeout_sec
                       ),
-            mock.call('key 2', {'domain_id': '33010',
-                                'entity_type': municipio.name,
-                                'exibition_field': None,
-                                'geojson': None, 'theme_list': []},
+            mock.call('key 2', {'data': {'domain_id': '33010',
+                                         'entity_type': municipio.name,
+                                         'exibition_field': 2,
+                                         'geojson': None, 'theme_list': []},
+                                'status_code': 200},
                       timeout=municipio.cache_timeout_sec
                       ),
         ]
