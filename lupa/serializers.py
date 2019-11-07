@@ -166,7 +166,7 @@ class EntidadeSerializer(serializers.ModelSerializer):
                     obj.map_info.table,
                     columns,
                     id_column,
-                    self.base_data['domain_id']
+                    str(self.base_data['domain_id'])
                 )
             except QueryError:
                 return None
