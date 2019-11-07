@@ -610,7 +610,8 @@ class DecoratorCache(TestCase):
             return response_mock
 
         decorated_mock_view = custom_cache(
-            key_prefix='prefix', model_kwargs={'abreviation': 'entity_type'})(
+            key_prefix='prefix',
+            model_kwargs={'abreviation': 'entity_type'}, key_check='data')(
             mock_view_get
         )
 
