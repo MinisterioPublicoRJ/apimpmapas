@@ -30,8 +30,10 @@ DATA_DETAIL_MODEL_KWARGS = {
 
 
 def wrap_response(response_data, key_check):
-    status = 200 if response_data.get(key_check) else 404
-    return {'data': response_data, 'status_code': status}
+    status, data = (200, response_data) if response_data.get(key_check)\
+        else (404, {"detail": "Não encontrado."})
+
+    return {'data': data, 'status_code': status}
 
 
 def _decode_jwt(token):

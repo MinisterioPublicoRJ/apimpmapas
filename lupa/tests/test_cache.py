@@ -86,7 +86,7 @@ class Cache(TestCase):
 
         wrapped_resp = wrap_response(response_data, key_check)
         expected_response = {
-            'data': response_data,
+            'data': {"detail": "Não encontrado."},
             'status_code': 404
         }
 
