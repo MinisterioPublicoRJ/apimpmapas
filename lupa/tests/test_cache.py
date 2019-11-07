@@ -506,7 +506,8 @@ class DecoratorCache(TestCase):
         )
 
     @mock.patch('lupa.cache.django_cache')
-    def test_retrive_data_from_cache_wo_no_role(self, _django_cache):
+    @mock.patch('lupa.models.asynch_remove_from_cache')
+    def test_retrive_data_from_cache_wo_no_role(self, _arfc, _django_cache):
         """Return data from cache if user has no role and data has no
         group restrictions i.e no roles_allowed"""
 
@@ -545,6 +546,7 @@ class DecoratorCache(TestCase):
         )
         self.assertIsInstance(response, Response)
         self.assertEqual(response.data, {'data': '12345'})
+        _arfc.delay.assert_not_called()
 
     @mock.patch('lupa.cache.django_cache')
     def test_only_insert_response_200_in_cache(self, _django_cache):
@@ -572,13 +574,13 @@ class DecoratorCache(TestCase):
         self.assertIsInstance(response, Response)
 
 
+@pytest.mark.django_db(transaction=True)
 class ModelCache(TestCase):
     def setUp(self):
         self.role_allowed = 'role_allowed'
         self.entity_abrv = 'EST'
         self.entity_type = 'Estado'
         self.entity_name = 'Rio de Janeiro'
-        self.entity_id = '1'
 
         municipio = make('lupa.Entidade', abreviation='MUN')
         self.grupo_allowed = make(
@@ -587,7 +589,6 @@ class ModelCache(TestCase):
         )
         estado = make(
             'lupa.Entidade',
-            id=self.entity_id,
             roles_allowed=[self.grupo_allowed],
             name=self.entity_type,
             abreviation=self.entity_abrv
@@ -690,7 +691,8 @@ class ModelCache(TestCase):
         self.estado = estado
 
     @mock.patch('lupa.cache.django_cache')
-    def test_only_cache_cacheable_objects(self, _django_cache):
+    @mock.patch('lupa.models.asynch_remove_from_cache')
+    def test_only_cache_cacheable_objects(self, _arfc, _django_cache):
         request_mock = mock.MagicMock()
         request_mock.GET = {'auth_token': 'abc1234'}
         class_mock = mock.MagicMock()
@@ -717,6 +719,7 @@ class ModelCache(TestCase):
 
         _django_cache.set.assert_not_called()
         self.assertIsInstance(response, Response)
+        _arfc.delay.assert_called_once()
 
     @mock.patch('lupa.cache.django_cache')
     def test_cache_cacheable_object(self, _django_cache):
