@@ -20,6 +20,14 @@ ENTITY_KEY_PREFIX = 'lupa_entidade'
 DATA_ENTITY_KEY_PREFIX = 'lupa_dado_entidade'
 DATA_DETAIL_KEY_PREFIX = 'lupa_dado_detalhe'
 
+ENTITY_MODEL_KWARGS = {'abreviation': 'entity_type'}
+DATA_ENTITY_MODEL_KWARGS = {
+    'entity_type__abreviation': 'entity_type', 'pk': 'pk'
+}
+DATA_DETAIL_MODEL_KWARGS = {
+    'dado_main__entity_type__abreviation': 'entity_type', 'pk': 'pk'
+}
+
 
 def wrap_response(response_data, key_check):
     status = 200 if response_data.get(key_check) else 404

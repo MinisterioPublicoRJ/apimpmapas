@@ -20,7 +20,10 @@ from lupa.cache import (
     _repopulate_cache_data_detail,
     _repopulate_cache_entity,
     _remove_from_cache,
-    wrap_response
+    wrap_response,
+    ENTITY_MODEL_KWARGS,
+    DATA_ENTITY_MODEL_KWARGS,
+    DATA_DETAIL_MODEL_KWARGS
 )
 from lupa.models import Entidade, DadoEntidade, DadoDetalhe
 from lupa.serializers import (EntidadeSerializer,
@@ -244,7 +247,7 @@ class DecoratorCache(TestCase):
 
         decorated_mock_view = custom_cache(
             key_prefix='prefix',
-            model_kwargs={'abreviation': 'entity_type'},
+            model_kwargs=ENTITY_MODEL_KWARGS,
             key_check='data')(
             mock_view_get
         )
@@ -282,7 +285,7 @@ class DecoratorCache(TestCase):
             return None
 
         decorated_mock_view = custom_cache(
-            key_prefix='prefix', model_kwargs={'abreviation': 'entity_type'},
+            key_prefix='prefix', model_kwargs=ENTITY_MODEL_KWARGS,
             key_check='check')(
             mock_view_get
         )
@@ -322,7 +325,7 @@ class DecoratorCache(TestCase):
 
         decorated_mock_view = custom_cache(
             key_prefix='prefix',
-            model_kwargs={'abreviation': 'entity_type'},
+            model_kwargs=ENTITY_MODEL_KWARGS,
             key_check='data')(
             mock_view_get
         )
@@ -364,9 +367,7 @@ class DecoratorCache(TestCase):
 
         decorated_mock_view = custom_cache(
             key_prefix='prefix',
-            model_kwargs={
-                'entity_type__abreviation': 'entity_type',
-                'pk': 'pk'},
+            model_kwargs=DATA_ENTITY_MODEL_KWARGS,
             key_check='check')(
             mock_view_get
         )
@@ -406,9 +407,7 @@ class DecoratorCache(TestCase):
 
         decorated_mock_view = custom_cache(
             key_prefix='prefix',
-            model_kwargs={
-                'entity_type__abreviation': 'entity_type',
-                'pk': 'pk'},
+            model_kwargs=DATA_ENTITY_MODEL_KWARGS,
             key_check='data')(
             mock_view_get
         )
@@ -450,9 +449,7 @@ class DecoratorCache(TestCase):
 
         decorated_mock_view = custom_cache(
             key_prefix='prefix',
-            model_kwargs={
-                'dado_main__entity_type__abreviation': 'entity_type',
-                'pk': 'pk'},
+            model_kwargs=DATA_DETAIL_MODEL_KWARGS,
             key_check='check')(
             mock_view_get
         )
@@ -494,9 +491,7 @@ class DecoratorCache(TestCase):
 
         decorated_mock_view = custom_cache(
             key_prefix='prefix',
-            model_kwargs={
-                'dado_main__entity_type__abreviation': 'entity_type',
-                'pk': 'pk'},
+            model_kwargs=DATA_DETAIL_MODEL_KWARGS,
             key_check='data')(
             mock_view_get
         )
@@ -536,10 +531,7 @@ class DecoratorCache(TestCase):
 
         decorated_mock_view = custom_cache(
             key_prefix='prefix',
-            model_kwargs={
-                'entity_type__abreviation': 'entity_type',
-                'pk': 'pk'
-            },
+            model_kwargs=DATA_ENTITY_MODEL_KWARGS,
             key_check='key_check'
         )(mock_view_get)
 
@@ -581,7 +573,7 @@ class DecoratorCache(TestCase):
             return None
 
         decorated_mock_view = custom_cache(
-            key_prefix='prefix', model_kwargs={'abreviation': 'entity_type'},
+            key_prefix='prefix', model_kwargs=ENTITY_MODEL_KWARGS,
             key_check='check')(
             mock_view_get
         )
@@ -611,7 +603,7 @@ class DecoratorCache(TestCase):
 
         decorated_mock_view = custom_cache(
             key_prefix='prefix',
-            model_kwargs={'abreviation': 'entity_type'}, key_check='data')(
+            model_kwargs=ENTITY_MODEL_KWARGS, key_check='data')(
             mock_view_get
         )
 
@@ -759,7 +751,7 @@ class ModelCache(TestCase):
 
         decorated_mock_view = custom_cache(
             key_prefix='prefix',
-            model_kwargs={'abreviation': 'entity_type'},
+            model_kwargs=ENTITY_MODEL_KWARGS,
             key_check='check')(
             mock_view_get
         )
@@ -786,7 +778,7 @@ class ModelCache(TestCase):
 
         decorated_mock_view = custom_cache(
             key_prefix='prefix',
-            model_kwargs={'abreviation': 'entity_type'}, key_check='data')(
+            model_kwargs=ENTITY_MODEL_KWARGS, key_check='data')(
             mock_view_get
         )
 

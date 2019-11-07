@@ -17,7 +17,10 @@ from lupa.cache import (
     custom_cache,
     ENTITY_KEY_PREFIX,
     DATA_ENTITY_KEY_PREFIX,
-    DATA_DETAIL_KEY_PREFIX
+    DATA_DETAIL_KEY_PREFIX,
+    ENTITY_MODEL_KWARGS,
+    DATA_ENTITY_MODEL_KWARGS,
+    DATA_DETAIL_MODEL_KWARGS
 )
 from .models import Entidade, DadoDetalhe, DadoEntidade
 from .serializers import (
@@ -68,7 +71,7 @@ class EntidadeView(GenericAPIView, EntityDataView):
 
     @custom_cache(
         key_prefix=ENTITY_KEY_PREFIX,
-        model_kwargs={'abreviation': 'entity_type'},
+        model_kwargs=ENTITY_MODEL_KWARGS,
         key_check='exibition_field'
     )
     def get(self, request, *args, **kwargs):
@@ -93,7 +96,7 @@ class DadoEntidadeView(RetrieveAPIView, EntityDataView):
 
     @custom_cache(
         key_prefix=DATA_ENTITY_KEY_PREFIX,
-        model_kwargs={'entity_type__abreviation': 'entity_type', 'pk': 'pk'},
+        model_kwargs=DATA_ENTITY_MODEL_KWARGS,
         key_check='external_data'
     )
     def get(self, request, *args, **kwargs):
@@ -117,10 +120,7 @@ class DadoDetalheView(RetrieveAPIView, EntityDataView):
 
     @custom_cache(
         key_prefix=DATA_DETAIL_KEY_PREFIX,
-        model_kwargs={
-            'dado_main__entity_type__abreviation': 'entity_type',
-            'pk': 'pk'
-        },
+        model_kwargs=DATA_DETAIL_MODEL_KWARGS,
         key_check='external_data'
     )
     def get(self, request, *args, **kwargs):
