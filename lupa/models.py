@@ -222,7 +222,11 @@ class Entidade(models.Model):
         verbose_name='Tempo de persistência do cache (em dias)',
         default=7
     )
-    last_cache_update = models.DateField(null=True)
+    last_cache_update = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name='Data da última atualização do cache'
+    )
     objects = models.Manager()
     cache = CacheManager()
 
@@ -386,7 +390,11 @@ class Dado(OrderedModel):
         default=7
     )
 
-    last_cache_update = models.DateField(null=True)
+    last_cache_update = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name='Data da última atualização do cache'
+    )
     cache = CacheManager()
 
     created_at = models.DateTimeField(auto_now_add=True)
