@@ -45,6 +45,9 @@ class Command(BaseCommand):
         columns = parsecolumns(columns)
         try:
             self.process_execution(dado, columns)
+            if hasattr(dado, 'data_details'):
+                for detalhe in dado.data_details.all().order_by('id'):
+                    self.process_data(detalhe)
         except Exception as error:
             self.printnok(
                 'NOK - %s' %

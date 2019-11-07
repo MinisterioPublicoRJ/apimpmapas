@@ -9,18 +9,18 @@ from mprj_api.celeryconfig import app
 
 
 @app.task
-def asynch_repopulate_cache_entity(key_prefix, queryset, serializer):
-    _repopulate_cache_entity(key_prefix, queryset, serializer)
+def asynch_repopulate_cache_entity(key_prefix, queryset):
+    _repopulate_cache_entity(key_prefix, queryset)
 
 
 @app.task
-def asynch_repopulate_cache_data_entity(key_prefix, queryset, serializer):
-    _repopulate_cache_data_entity(key_prefix, queryset, serializer)
+def asynch_repopulate_cache_data_entity(key_prefix, queryset):
+    _repopulate_cache_data_entity(key_prefix, queryset)
 
 
 @app.task
-def asynch_repopulate_cache_data_detail(key_prefix, queryset, serializer):
-    _repopulate_cache_data_detail(key_prefix, queryset, serializer)
+def asynch_repopulate_cache_data_detail(key_prefix, queryset):
+    _repopulate_cache_data_detail(key_prefix, queryset)
 
 
 @app.task

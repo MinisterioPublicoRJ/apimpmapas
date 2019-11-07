@@ -1,9 +1,21 @@
 import datetime as dt
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import models
 from colorfield.fields import ColorField
 from ordered_model.models import OrderedModel
+
+from lupa.cache import (
+    ENTITY_KEY_PREFIX,
+    DATA_ENTITY_KEY_PREFIX,
+    DATA_DETAIL_KEY_PREFIX
+)
+from lupa.tasks import (
+    asynch_remove_from_cache,
+    asynch_repopulate_cache_entity,
+    asynch_repopulate_cache_data_entity,
+    asynch_repopulate_cache_data_detail
+)
 
 POSTGRES = 'PG'
 ORACLE = 'ORA'
@@ -42,7 +54,7 @@ ONLY_POSTGIS_SUPORTED = (
 
 class CacheManager(models.Manager):
     def expiring(self):
-        objs = super().get_queryset()
+        objs = super().get_queryset().filter(is_cacheable=True)
         result_ids = []
         for obj in objs:
             cache_days = obj.cache_timeout_days
@@ -295,6 +307,29 @@ class Entidade(models.Model):
     def save(self, *args, **kwargs):
         seconds_scale = 24 * 60 * 60
         self.cache_timeout_sec = self.cache_timeout_days * seconds_scale
+
+        cls = self.__class__
+        try:
+            queryset = cls.objects.filter(pk=self.pk)
+            old = queryset.get(pk=self.pk)
+            new = self
+
+            # Check if is_cacheable was updated
+            if old.is_cacheable and not new.is_cacheable:
+                model_args = ['abreviation']
+                asynch_remove_from_cache.delay(
+                    ENTITY_KEY_PREFIX,
+                    model_args,
+                    queryset
+                )
+            elif not old.is_cacheable and new.is_cacheable:
+                asynch_repopulate_cache_entity.delay(
+                    ENTITY_KEY_PREFIX,
+                    queryset,
+                )
+        except ObjectDoesNotExist:
+            pass
+
         super().save(*args, **kwargs)
 
 
@@ -473,6 +508,45 @@ class DadoEntidade(Dado):
         for coluna in self.column_list.all():
             coluna.copy_to_detail(detalhe)
         self.save()
+
+    def save(self, *args, **kwargs):
+        try:
+            cls = self.__class__
+            entity_queryset = cls.objects.filter(pk=self.pk)
+            detail_queryset = DadoDetalhe.objects.filter(
+                dado_main__id=self.pk
+            )
+            old = entity_queryset.get(pk=self.pk)
+            new = self
+
+            # Check if is_cacheable was updated
+            if old.is_cacheable and not new.is_cacheable:
+                entity_model_args = ['entity_type.abreviation', 'pk']
+                asynch_remove_from_cache.delay(
+                    DATA_ENTITY_KEY_PREFIX,
+                    entity_model_args,
+                    entity_queryset
+                )
+                detail_model_args = ['dado_main.entity_type.abreviation', 'pk']
+                asynch_remove_from_cache.delay(
+                    DATA_DETAIL_KEY_PREFIX,
+                    detail_model_args,
+                    detail_queryset
+                )
+            elif not old.is_cacheable and new.is_cacheable:
+                asynch_repopulate_cache_data_entity.delay(
+                    DATA_ENTITY_KEY_PREFIX,
+                    entity_queryset
+                )
+                asynch_repopulate_cache_data_detail.delay(
+                    DATA_DETAIL_KEY_PREFIX,
+                    detail_queryset
+                )
+
+        except ObjectDoesNotExist:
+            pass
+
+        super().save(*args, **kwargs)
 
 
 class DadoDetalhe(Dado):

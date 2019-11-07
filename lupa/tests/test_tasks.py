@@ -17,25 +17,22 @@ class Task(TestCase):
     def test_call_repopulate_cache_entity(self, _rep_cache):
         asynch_repopulate_cache_entity(
             key_prefix=ENTITY_KEY_PREFIX,
-            queryset=None,
-            serializer=None
+            queryset=None
         )
 
-        _rep_cache.assert_called_once_with(ENTITY_KEY_PREFIX, None, None)
+        _rep_cache.assert_called_once_with(ENTITY_KEY_PREFIX, None)
 
     @mock.patch('lupa.tasks._repopulate_cache_data_entity')
     def test_call_repopulate_cache_data_entity(self, _rep_cache):
         queryset_mock = mock.MagicMock()
         asynch_repopulate_cache_data_entity(
             key_prefix=DATA_ENTITY_KEY_PREFIX,
-            queryset=queryset_mock,
-            serializer=None
+            queryset=queryset_mock
         )
 
         _rep_cache.assert_called_once_with(
             DATA_ENTITY_KEY_PREFIX,
             queryset_mock,
-            None
         )
 
     @mock.patch('lupa.tasks._repopulate_cache_data_detail')
@@ -43,14 +40,12 @@ class Task(TestCase):
         queryset_mock = mock.MagicMock()
         asynch_repopulate_cache_data_detail(
             key_prefix=DATA_DETAIL_KEY_PREFIX,
-            queryset=queryset_mock,
-            serializer=None
+            queryset=queryset_mock
         )
 
         _rep_cache.assert_called_once_with(
             DATA_DETAIL_KEY_PREFIX,
             queryset_mock,
-            None
         )
 
     @mock.patch('lupa.tasks._remove_from_cache')

@@ -137,6 +137,68 @@ class TestCheckConsistency(TestCase):
 
     @mock.patch.object(Command, 'printnok')
     @mock.patch.object(Command, 'printstatus')
+    @mock.patch(
+        'lupa.management.commands.checkconsistency.execute_sample',
+        return_value=[1, 2, 3]
+    )
+    def test_process_data_detail(self, _excs, _ptst, _ptnok):
+        dado = make(
+            'lupa.DadoEntidade',
+        )
+        make(
+            'lupa.DadoDetalhe',
+            dado_main=dado
+        )
+        make(
+            'lupa.DadoDetalhe',
+            dado_main=dado
+        )
+
+        dets = dado.data_details.all().order_by('id').all()
+
+        command = Command()
+        command.process_data(dado)
+
+        self.assertEqual(
+            len(_excs.call_args_list),
+            3
+        )
+        self.assertEqual(
+            len(_ptst.call_args_list),
+            3
+        )
+        self.assertEqual(
+            len(_ptnok.call_args_list),
+            0
+        )
+
+        calls = [
+            call(
+                dado.database,
+                dado.schema,
+                dado.table,
+                []
+            )
+        ]
+
+        calls.extend(
+            [
+                call(
+                    det.database,
+                    det.schema,
+                    det.table,
+                    []
+                ) for det in dets
+            ]
+        )
+
+        self.assertEqual(
+            _excs.call_args_list,
+            calls
+        )
+
+    @mock.patch.object(Command, 'printnok')
+    @mock.patch.object(Command, 'printstatus')
     def test_process_data_error(self, _ptst, _ptnok):
         mdado = make(
             'lupa.DadoEntidade',
