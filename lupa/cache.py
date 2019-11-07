@@ -93,26 +93,29 @@ def custom_cache(key_prefix, model_kwargs=dict()):
     return _custom_cache
 
 
-def _repopulate_cache_entity(key_prefix, queryset, serializer):
+def _repopulate_cache_entity(key_prefix, queryset):
+    from lupa.serializers import EntidadeSerializer
     entities = queryset.distinct('abreviation').order_by('abreviation')
-    repopulate_cache(key_prefix, entities, queryset, serializer)
+    repopulate_cache(key_prefix, entities, queryset, EntidadeSerializer)
 
 
-def _repopulate_cache_data_entity(key_prefix, queryset, serializer):
+def _repopulate_cache_data_entity(key_prefix, queryset):
+    from lupa.serializers import DadoEntidadeSerializer
     entities = queryset.distinct('entity_type__abreviation').order_by(
         'entity_type__abreviation'
     )
     entities = [e.entity_type for e in entities]
-    repopulate_cache(key_prefix, entities, queryset, serializer)
+    repopulate_cache(key_prefix, entities, queryset, DadoEntidadeSerializer)
 
 
-def _repopulate_cache_data_detail(key_prefix, queryset, serializer):
+def _repopulate_cache_data_detail(key_prefix, queryset):
+    from lupa.serializers import DadoDetalheSerializer
     entities = queryset.distinct(
         'dado_main__entity_type__abreviation').order_by(
             'dado_main__entity_type__abreviation'
     )
     entities = [e.dado_main.entity_type for e in entities]
-    repopulate_cache(key_prefix, entities, queryset, serializer)
+    repopulate_cache(key_prefix, entities, queryset, DadoDetalheSerializer)
 
 
 def _stderr(entity, domain_id):
@@ -165,6 +168,9 @@ def repopulate_cache(key_prefix, entities, queryset, serializer):
                 )
                 django_cache.set(key, json_data, timeout=obj.cache_timeout_sec)
                 obj.last_cache_update = dt.date.today()
+                # Set is_cacheable = True to avoid problems with the asynch
+                # calls performed the 'save' method from obj
+                obj.is_cacheable = True
                 obj.save()
 
 

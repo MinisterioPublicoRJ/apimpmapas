@@ -19,12 +19,10 @@ from lupa.cache import (
     _repopulate_cache_data_entity,
     _repopulate_cache_data_detail,
     _repopulate_cache_entity,
-    _remove_from_cache
+    _remove_from_cache,
+    repopulate_cache
 )
 from lupa.models import Entidade, DadoEntidade, DadoDetalhe
-from lupa.serializers import (EntidadeSerializer,
-                              DadoEntidadeSerializer,
-                              DadoDetalheSerializer)
 
 
 class Cache(TestCase):
@@ -508,7 +506,8 @@ class DecoratorCache(TestCase):
         )
 
     @mock.patch('lupa.cache.django_cache')
-    def test_retrive_data_from_cache_wo_no_role(self, _django_cache):
+    @mock.patch('lupa.models.asynch_remove_from_cache')
+    def test_retrive_data_from_cache_wo_no_role(self, _arfc, _django_cache):
         """Return data from cache if user has no role and data has no
         group restrictions i.e no roles_allowed"""
 
@@ -547,6 +546,7 @@ class DecoratorCache(TestCase):
         )
         self.assertIsInstance(response, Response)
         self.assertEqual(response.data, {'data': '12345'})
+        _arfc.delay.assert_not_called()
 
     @mock.patch('lupa.cache.django_cache')
     def test_only_insert_response_200_in_cache(self, _django_cache):
@@ -574,13 +574,13 @@ class DecoratorCache(TestCase):
         self.assertIsInstance(response, Response)
 
 
+@pytest.mark.django_db(transaction=True)
 class ModelCache(TestCase):
     def setUp(self):
         self.role_allowed = 'role_allowed'
         self.entity_abrv = 'EST'
         self.entity_type = 'Estado'
         self.entity_name = 'Rio de Janeiro'
-        self.entity_id = '1'
 
         municipio = make('lupa.Entidade', abreviation='MUN')
         self.grupo_allowed = make(
@@ -589,7 +589,6 @@ class ModelCache(TestCase):
         )
         estado = make(
             'lupa.Entidade',
-            id=self.entity_id,
             roles_allowed=[self.grupo_allowed],
             name=self.entity_type,
             abreviation=self.entity_abrv
@@ -692,7 +691,8 @@ class ModelCache(TestCase):
         self.estado = estado
 
     @mock.patch('lupa.cache.django_cache')
-    def test_only_cache_cacheable_objects(self, _django_cache):
+    @mock.patch('lupa.models.asynch_remove_from_cache')
+    def test_only_cache_cacheable_objects(self, _arfc, _django_cache):
         request_mock = mock.MagicMock()
         request_mock.GET = {'auth_token': 'abc1234'}
         class_mock = mock.MagicMock()
@@ -719,6 +719,7 @@ class ModelCache(TestCase):
 
         _django_cache.set.assert_not_called()
         self.assertIsInstance(response, Response)
+        _arfc.delay.assert_called_once()
 
     @mock.patch('lupa.cache.django_cache')
     def test_cache_cacheable_object(self, _django_cache):
@@ -807,7 +808,6 @@ class RepopulateCache(TestCase):
         _repopulate_cache_data_entity(
             key_prefix='lupa_dado_entidade',
             queryset=queryset,
-            serializer=DadoEntidadeSerializer
         )
 
         execute_sample_calls = [
@@ -1116,7 +1116,6 @@ class RepopulateCache(TestCase):
         _repopulate_cache_data_detail(
             key_prefix='lupa_dado_detalhe',
             queryset=queryset,
-            serializer=DadoDetalheSerializer
         )
 
         execute_sample_calls = [
@@ -1356,7 +1355,6 @@ class RepopulateCache(TestCase):
         _repopulate_cache_entity(
             key_prefix='lupa_entidade',
             queryset=queryset,
-            serializer=EntidadeSerializer
         )
         execute_sample_calls = [
             mock.call(
@@ -1421,6 +1419,7 @@ class RepopulateCache(TestCase):
 
         serializer_mock = mock.MagicMock()
         serializer_mock.side_effect = Exception()
+
         _execute_sample.side_effect = (
             [('33001',)],
         )
@@ -1431,9 +1430,11 @@ class RepopulateCache(TestCase):
         )
 
         queryset = Entidade.objects.all()
-        _repopulate_cache_entity(
+        entities = queryset.distinct('abreviation').order_by('abreviation')
+        repopulate_cache(
             key_prefix='lupa_entidade',
             queryset=queryset,
+            entities=entities,
             serializer=serializer_mock
         )
         expected_msg = 'NOK - %s' % ' - '.join(
