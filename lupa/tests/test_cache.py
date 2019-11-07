@@ -1563,7 +1563,8 @@ class RepopulateCache(TestCase):
             key_prefix='lupa_entidade',
             queryset=queryset,
             entities=entities,
-            serializer=serializer_mock
+            serializer=serializer_mock,
+            key_check='teste'
         )
         expected_msg = 'NOK - %s' % ' - '.join(
             [entidade.database,

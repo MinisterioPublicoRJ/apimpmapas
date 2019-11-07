@@ -116,7 +116,13 @@ def _repopulate_cache_entity(key_prefix, queryset):
     from lupa.serializers import EntidadeSerializer
     entities = queryset.distinct('abreviation').order_by('abreviation')
     key_check = 'exibition_field'
-    repopulate_cache(key_prefix, entities, queryset, EntidadeSerializer, key_check)
+    repopulate_cache(
+        key_prefix,
+        entities,
+        queryset,
+        EntidadeSerializer,
+        key_check
+    )
 
 
 def _repopulate_cache_data_entity(key_prefix, queryset):
@@ -126,7 +132,13 @@ def _repopulate_cache_data_entity(key_prefix, queryset):
     )
     key_check = 'external_data'
     entities = [e.entity_type for e in entities]
-    repopulate_cache(key_prefix, entities, queryset, DadoEntidadeSerializer, key_check)
+    repopulate_cache(
+        key_prefix,
+        entities,
+        queryset,
+        DadoEntidadeSerializer,
+        key_check
+    )
 
 
 def _repopulate_cache_data_detail(key_prefix, queryset):
@@ -137,7 +149,13 @@ def _repopulate_cache_data_detail(key_prefix, queryset):
     )
     key_check = 'external_data'
     entities = [e.dado_main.entity_type for e in entities]
-    repopulate_cache(key_prefix, entities, queryset, DadoDetalheSerializer, key_check)
+    repopulate_cache(
+        key_prefix,
+        entities,
+        queryset,
+        DadoDetalheSerializer,
+        key_check
+    )
 
 
 def _stderr(entity, domain_id):
