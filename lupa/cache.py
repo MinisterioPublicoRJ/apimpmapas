@@ -20,6 +20,21 @@ ENTITY_KEY_PREFIX = 'lupa_entidade'
 DATA_ENTITY_KEY_PREFIX = 'lupa_dado_entidade'
 DATA_DETAIL_KEY_PREFIX = 'lupa_dado_detalhe'
 
+ENTITY_MODEL_KWARGS = {'abreviation': 'entity_type'}
+DATA_ENTITY_MODEL_KWARGS = {
+    'entity_type__abreviation': 'entity_type', 'pk': 'pk'
+}
+DATA_DETAIL_MODEL_KWARGS = {
+    'dado_main__entity_type__abreviation': 'entity_type', 'pk': 'pk'
+}
+
+
+def wrap_response(response_data, key_check):
+    status, data = (200, response_data) if response_data.get(key_check)\
+        else (404, {"detail": "Não encontrado."})
+
+    return {'data': data, 'status_code': status}
+
 
 def _decode_jwt(token):
     try:
@@ -59,7 +74,7 @@ def wildcard_cache_key(key_prefix, keys):
     return '*%s:%s' % (key_prefix, kwargs_key)
 
 
-def custom_cache(key_prefix, model_kwargs=dict()):
+def custom_cache(key_prefix, model_kwargs, key_check):
     def _custom_cache(func):
         def inner(*args, **kwargs):
             instance = args[0]
@@ -79,12 +94,16 @@ def custom_cache(key_prefix, model_kwargs=dict()):
 
             key = cache_key(key_prefix, kwargs)
             if key in django_cache and _has_role(obj_role, permissions):
-                response_data = django_cache.get(key)
-                return Response(response_data)
+                cache_response = django_cache.get(key)
+                return Response(
+                    cache_response['data'],
+                    status=cache_response['status_code']
+                )
 
             response = func(*args, **kwargs)
             if response.status_code == 200 and obj.is_cacheable:
-                django_cache.set(key, response.data, timeout=None)
+                wrapped_response = wrap_response(response.data, key_check)
+                django_cache.set(key, wrapped_response, timeout=None)
 
             return response
 
@@ -96,7 +115,14 @@ def custom_cache(key_prefix, model_kwargs=dict()):
 def _repopulate_cache_entity(key_prefix, queryset):
     from lupa.serializers import EntidadeSerializer
     entities = queryset.distinct('abreviation').order_by('abreviation')
-    repopulate_cache(key_prefix, entities, queryset, EntidadeSerializer)
+    key_check = 'exibition_field'
+    repopulate_cache(
+        key_prefix,
+        entities,
+        queryset,
+        EntidadeSerializer,
+        key_check
+    )
 
 
 def _repopulate_cache_data_entity(key_prefix, queryset):
@@ -104,8 +130,15 @@ def _repopulate_cache_data_entity(key_prefix, queryset):
     entities = queryset.distinct('entity_type__abreviation').order_by(
         'entity_type__abreviation'
     )
+    key_check = 'external_data'
     entities = [e.entity_type for e in entities]
-    repopulate_cache(key_prefix, entities, queryset, DadoEntidadeSerializer)
+    repopulate_cache(
+        key_prefix,
+        entities,
+        queryset,
+        DadoEntidadeSerializer,
+        key_check
+    )
 
 
 def _repopulate_cache_data_detail(key_prefix, queryset):
@@ -114,8 +147,15 @@ def _repopulate_cache_data_detail(key_prefix, queryset):
         'dado_main__entity_type__abreviation').order_by(
             'dado_main__entity_type__abreviation'
     )
+    key_check = 'external_data'
     entities = [e.dado_main.entity_type for e in entities]
-    repopulate_cache(key_prefix, entities, queryset, DadoDetalheSerializer)
+    repopulate_cache(
+        key_prefix,
+        entities,
+        queryset,
+        DadoDetalheSerializer,
+        key_check
+    )
 
 
 def _stderr(entity, domain_id):
@@ -130,7 +170,7 @@ def _stderr(entity, domain_id):
     STDERR.write(msg)
 
 
-def repopulate_cache(key_prefix, entities, queryset, serializer):
+def repopulate_cache(key_prefix, entities, queryset, serializer, key_check):
     query_args = {
         ENTITY_KEY_PREFIX: 'abreviation',
         DATA_ENTITY_KEY_PREFIX: 'entity_type__abreviation',
@@ -149,7 +189,7 @@ def repopulate_cache(key_prefix, entities, queryset, serializer):
         for obj in objs:
             for domain_id in domain_ids:
                 try:
-                    json_data = serializer(obj, domain_id=domain_id[0]).data
+                    cache_data = serializer(obj, domain_id=domain_id[0]).data
                 except Exception:
                     _stderr(entity, domain_id[0])
                     continue
@@ -166,7 +206,12 @@ def repopulate_cache(key_prefix, entities, queryset, serializer):
                     key_prefix,
                     key_kwargs
                 )
-                django_cache.set(key, json_data, timeout=obj.cache_timeout_sec)
+                wrapped_response = wrap_response(cache_data, key_check)
+                django_cache.set(
+                    key,
+                    wrapped_response,
+                    timeout=obj.cache_timeout_sec
+                )
                 obj.last_cache_update = dt.date.today()
                 # Set is_cacheable = True to avoid problems with the asynch
                 # calls performed the 'save' method from obj
