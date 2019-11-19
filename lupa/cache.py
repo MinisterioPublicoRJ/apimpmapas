@@ -41,7 +41,7 @@ def _has_role(obj, permissions):
     return True
 
 
-def cache_key(key_prefix, kwargs):
+def cache_key(key_prefix, **kwargs):
     kwargs_key = ':'.join(
         str(val) for val in kwargs.values()
     )
@@ -91,6 +91,18 @@ def custom_cache(key_prefix, model_kwargs=dict()):
         return inner
 
     return _custom_cache
+
+
+def get_cache(obj, key_prefix, **kwargs):
+    key = cache_key(key_prefix, **kwargs)
+    if key in django_cache:
+        response_data = django_cache.get(key)
+        return Response(response_data)
+
+
+def save_cache(data, key_prefix, **kwargs):
+    key = cache_key(key_prefix, **kwargs)
+    django_cache.set(key, data, timeout=None)
 
 
 def _repopulate_cache_entity(key_prefix, queryset):

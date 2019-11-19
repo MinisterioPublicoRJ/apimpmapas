@@ -163,7 +163,7 @@ class DadoDetalheAdminInline(nested_admin.NestedStackedInline):
 
 @admin.register(Entidade)
 class EntidadeAdmin(nested_admin.NestedModelAdmin):
-    list_display = ('name', 'abreviation')
+    list_display = ('name', 'abreviation', 'get_roles')
     fieldsets = (
         (None, {
             'fields': ('name', 'abreviation', 'roles_allowed')
@@ -187,6 +187,9 @@ class EntidadeAdmin(nested_admin.NestedModelAdmin):
     inlines = [MapaAdminInline]
     actions = [remove_entity_from_cache]
 
+    def get_roles(self, obj):
+        return "\n".join([p.name for p in obj.roles_allowed.all()])
+
 
 @admin.register(DadoEntidade)
 class DadoEntidadeAdmin(nested_admin.NestedModelAdmin, OrderedModelAdmin):
@@ -194,6 +197,7 @@ class DadoEntidadeAdmin(nested_admin.NestedModelAdmin, OrderedModelAdmin):
         'title',
         'entity_type',
         'theme',
+        'get_roles',
         'show_box',
         'order',
         'move_up_down_links',
@@ -320,6 +324,9 @@ class DadoEntidadeAdmin(nested_admin.NestedModelAdmin, OrderedModelAdmin):
         remove_data_from_cache,
         'move_dado_to_position'
     ]
+
+    def get_roles(self, obj):
+        return "\n".join([p.name for p in obj.roles_allowed.all()])
 
 
 admin.site.register(Grupo)

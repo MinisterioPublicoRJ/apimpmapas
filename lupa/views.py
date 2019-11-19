@@ -15,6 +15,8 @@ from rest_framework.response import Response
 
 from lupa.cache import (
     custom_cache,
+    get_cache,
+    save_cache,
     ENTITY_KEY_PREFIX,
     DATA_ENTITY_KEY_PREFIX,
     DATA_DETAIL_KEY_PREFIX
@@ -28,6 +30,19 @@ from .serializers import (
 )
 from .osmapi import query as osmquery
 from .db_connectors import execute_geospatial
+
+
+def get_permissions(request):
+    token = request.GET.get('auth_token')
+    try:
+        payload = jwt.decode(
+            token,
+            config('SECRET_KEY'),
+            algorithms=["HS256"]
+        )
+    except (InvalidSignatureError, DecodeError):
+        return []
+    return payload['permissions']
 
 
 class EntityDataView:
@@ -64,75 +79,84 @@ class EntityDataView:
 
 class EntidadeView(GenericAPIView, EntityDataView):
     serializer_class = EntidadeSerializer
-    queryset = Entidade.objects.all()
 
-    @custom_cache(
-        key_prefix=ENTITY_KEY_PREFIX,
-        model_kwargs={'abreviation': 'entity_type'}
-    )
     def get(self, request, *args, **kwargs):
+        permissions = get_permissions(request)
+
         obj = get_object_or_404(
-            self.queryset,
+            Entidade.objects.get_authorized(permissions),
             abreviation=self.kwargs['entity_type']
         )
 
-        response = self.process_request(
-            request,
-            obj,
-            EntidadeSerializer,
-            'exibition_field'
+        cache = get_cache(obj, ENTITY_KEY_PREFIX, **kwargs)
+        if cache:
+            return cache
 
-        )
-        return response
+        data = EntidadeSerializer(obj, domain_id=self.kwargs['domain_id']).data
+        if not data['exibition_field']:
+            raise Http404
+
+        if obj.is_cacheable:
+            save_cache(data, ENTITY_KEY_PREFIX, **kwargs)
+
+        return Response(data)
 
 
 class DadoEntidadeView(RetrieveAPIView, EntityDataView):
     serializer_class = DadoEntidadeSerializer
-    queryset = DadoEntidade.objects.all()
 
-    @custom_cache(
-        key_prefix=DATA_ENTITY_KEY_PREFIX,
-        model_kwargs={'entity_type__abreviation': 'entity_type', 'pk': 'pk'}
-    )
     def get(self, request, *args, **kwargs):
+        permissions = get_permissions(request)
+
         obj = get_object_or_404(
-            self.queryset,
+            DadoEntidade.objects.get_authorized(permissions),
             entity_type__abreviation=self.kwargs['entity_type'],
             pk=self.kwargs['pk']
         )
 
-        return self.process_request(
-            request,
+        import ipdb; ipdb.set_trace()
+
+        cache = get_cache(obj, DATA_ENTITY_KEY_PREFIX, **kwargs)
+        if cache:
+            return cache
+
+        data = DadoEntidadeSerializer(
             obj,
-            DadoEntidadeSerializer,
-            'external_data'
-        )
+            domain_id=self.kwargs['domain_id']
+        ).data
+        if not data['external_data']:
+            raise Http404
+
+        if obj.is_cacheable:
+            save_cache(data, DATA_ENTITY_KEY_PREFIX, **kwargs)
+
+        return Response(data)
 
 
 class DadoDetalheView(RetrieveAPIView, EntityDataView):
     serializer_class = DadoDetalheSerializer
-    queryset = DadoDetalhe.objects.all()
 
-    @custom_cache(
-        key_prefix=DATA_DETAIL_KEY_PREFIX,
-        model_kwargs={
-            'dado_main__entity_type__abreviation': 'entity_type',
-            'pk': 'pk'
-        }
-    )
     def get(self, request, *args, **kwargs):
+        permissions = get_permissions(request)
+
         obj = get_object_or_404(
-            self.queryset,
+            DadoDetalhe.objects.get_authorized(permissions),
             dado_main__entity_type__abreviation=self.kwargs['entity_type'],
             pk=self.kwargs['pk']
         )
 
-        return self.process_request(
-            request,
-            obj,
-            DadoDetalheSerializer,
-            'external_data'
-        )
+        data = DadoDetalheSerializer(obj, domain_id=self.kwargs['domain_id']).data
+        if not data['external_data']:
+            raise Http404
+
+        cache = get_cache(obj, DATA_DETAIL_KEY_PREFIX, **kwargs)
+        if cache:
+            return cache
+
+        if obj.is_cacheable:
+            save_cache(data, DATA_DETAIL_KEY_PREFIX, **kwargs)
+
+        return Response(data)
 
 
 @method_decorator(cache_page(600, key_prefix='lupa_osm'), name='dispatch')

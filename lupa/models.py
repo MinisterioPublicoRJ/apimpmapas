@@ -10,6 +10,7 @@ from lupa.cache import (
     DATA_ENTITY_KEY_PREFIX,
     DATA_DETAIL_KEY_PREFIX
 )
+from lupa.managers import RoleManager, DadoDetalheManager
 from lupa.tasks import (
     asynch_remove_from_cache,
     asynch_repopulate_cache_entity,
@@ -251,7 +252,7 @@ class Entidade(models.Model):
         default=7
     )
     last_cache_update = models.DateField(null=True)
-    objects = models.Manager()
+    objects = RoleManager()
     cache = CacheManager()
 
     def obter_dados(self):
@@ -496,6 +497,7 @@ class DadoEntidade(Dado):
 
     # CONFIG FIELDS
     order_with_respect_to = 'entity_type'
+    objects = RoleManager()
 
     class Meta:
         verbose_name = 'dado'
@@ -574,6 +576,7 @@ class DadoDetalhe(Dado):
 
     # CONFIG FIELDS
     order_with_respect_to = 'dado_main'
+    objects = DadoDetalheManager()
 
 
 class Coluna(models.Model):
