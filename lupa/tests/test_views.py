@@ -878,11 +878,12 @@ class CacheView(TestCase):
 
         _cache.set.assert_called_once_with(
             'lupa_entidade:EST:33',
-            {'domain_id': '33',
-             'entity_type': 'Estado',
-             'exibition_field': 'mock_name',
-             'geojson': None,
-             'theme_list': []},
+            {'data': {'domain_id': '33',
+                      'entity_type': 'Estado',
+                      'exibition_field': 'mock_name',
+                      'geojson': None,
+                      'theme_list': []},
+             'status_code': 200},
             timeout=None
         )
 
@@ -920,14 +921,16 @@ class CacheView(TestCase):
 
         _cache.set.assert_called_once_with(
             'lupa_dado_entidade:EST:33:7',
-            {'id': 7,
-             'exibition_field': 'Abrigos para crianças e adolescentes',
-             'external_data': {'dado': 'external_data',
-                               'fonte': 'external_source',
-                               'id': 1},
-             'data_type': 'texto_pequeno_destaque',
-             'icon': None,
-             'detalhe': []},
+            {'data': {
+                'id': 7,
+                'exibition_field': 'Abrigos para crianças e adolescentes',
+                'external_data': {'dado': 'external_data',
+                                  'fonte': 'external_source',
+                                  'id': 1},
+                'data_type': 'texto_pequeno_destaque',
+                'icon': None,
+                'detalhe': []},
+             'status_code': 200},
             timeout=None
         )
 
@@ -972,9 +975,11 @@ class CacheView(TestCase):
 
         _cache.set.assert_called_once_with(
             'lupa_dado_detalhe:EST:33:23',
-            {'id': 23,
-             'exibition_field': 'Abrigos para crianças e adolescentes',
-             'external_data': {'dado': '202', 'id': 7},
-             'data_type': 'texto_pequeno_destaque'},
+            {'data': {
+                'id': 23,
+                'exibition_field': 'Abrigos para crianças e adolescentes',
+                'external_data': {'dado': '202', 'id': 7},
+                'data_type': 'texto_pequeno_destaque'},
+             'status_code': 200},
             timeout=None
         )

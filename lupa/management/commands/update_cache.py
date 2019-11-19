@@ -23,23 +23,18 @@ class Command(BaseCommand):
             queryset = DadoEntidade.cache.expiring()
             _repopulate_cache_data_entity(
                 DATA_ENTITY_KEY_PREFIX,
-                queryset,
-                DadoEntidadeSerializer
-
+                queryset
             )
         elif obj_type == 'dado_detalhe':
             queryset = DadoDetalhe.cache.expiring()
             _repopulate_cache_data_detail(
                 DATA_DETAIL_KEY_PREFIX,
-                queryset,
-                DadoDetalheSerializer
-
+                queryset
             )
 
         elif obj_type == 'entidade':
             queryset = Entidade.cache.expiring()
             _repopulate_cache_entity(
                 ENTITY_KEY_PREFIX,
-                queryset,
-                EntidadeSerializer
+                queryset
             )

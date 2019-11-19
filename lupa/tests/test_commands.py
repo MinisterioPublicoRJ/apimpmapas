@@ -330,12 +330,11 @@ class UpdateCache(TestCase):
         call_command('update_cache', 'dado_entidade')
 
         expiring_data = DadoEntidade.cache.expiring()
-        args_prefix, args_queryset, args_serializer\
+        args_prefix, args_queryset\
             = _repopulate_cache_entity.call_args_list[0][0]
 
         self.assertEqual(args_prefix, key_prefix)
         self.assertCountEqual(expiring_data, args_queryset)
-        self.assertTrue(args_serializer is DadoEntidadeSerializer)
 
     @mock.patch(
         'lupa.management.commands.update_cache._repopulate_cache_data_detail'
@@ -356,12 +355,11 @@ class UpdateCache(TestCase):
         call_command('update_cache', 'dado_detalhe')
 
         expiring_data = DadoDetalhe.cache.expiring()
-        args_prefix, args_queryset, args_serializer\
+        args_prefix, args_queryset\
             = _repopulate_cache_detail.call_args_list[0][0]
 
         self.assertEqual(args_prefix, key_prefix)
         self.assertCountEqual(expiring_data, args_queryset)
-        self.assertTrue(args_serializer is DadoDetalheSerializer)
 
     @mock.patch(
         'lupa.management.commands.update_cache._repopulate_cache_entity'
@@ -378,9 +376,8 @@ class UpdateCache(TestCase):
         call_command('update_cache', 'entidade')
 
         expiring_entity = Entidade.cache.expiring()
-        args_prefix, args_queryset, args_serializer\
+        args_prefix, args_queryset\
             = _repopulate_cache_entity.call_args_list[0][0]
 
         self.assertEqual(args_prefix, key_prefix)
         self.assertCountEqual(expiring_entity, args_queryset)
-        self.assertTrue(args_serializer is EntidadeSerializer)

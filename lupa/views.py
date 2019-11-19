@@ -19,7 +19,10 @@ from lupa.cache import (
     save_cache,
     ENTITY_KEY_PREFIX,
     DATA_ENTITY_KEY_PREFIX,
-    DATA_DETAIL_KEY_PREFIX
+    DATA_DETAIL_KEY_PREFIX,
+    ENTITY_MODEL_KWARGS,
+    DATA_ENTITY_MODEL_KWARGS,
+    DATA_DETAIL_MODEL_KWARGS
 )
 from .models import Entidade, DadoDetalhe, DadoEntidade
 from .serializers import (
@@ -135,7 +138,7 @@ class DadoEntidadeView(RetrieveAPIView, EntityDataView):
 
 class DadoDetalheView(RetrieveAPIView, EntityDataView):
     serializer_class = DadoDetalheSerializer
-
+    
     def get(self, request, *args, **kwargs):
         permissions = get_permissions(request)
 
