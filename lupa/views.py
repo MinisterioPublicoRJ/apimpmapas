@@ -14,15 +14,14 @@ from rest_framework.generics import (
 from rest_framework.response import Response
 
 from lupa.cache import (
-    custom_cache,
     get_cache,
     save_cache,
     ENTITY_KEY_PREFIX,
+    ENTITY_KEY_CHECK,
     DATA_ENTITY_KEY_PREFIX,
+    DATA_ENTITY_KEY_CHECK,
     DATA_DETAIL_KEY_PREFIX,
-    ENTITY_MODEL_KWARGS,
-    DATA_ENTITY_MODEL_KWARGS,
-    DATA_DETAIL_MODEL_KWARGS
+    DATA_DETAIL_KEY_CHECK
 )
 from .models import Entidade, DadoDetalhe, DadoEntidade
 from .serializers import (
@@ -100,7 +99,7 @@ class EntidadeView(GenericAPIView, EntityDataView):
             raise Http404
 
         if obj.is_cacheable:
-            save_cache(data, ENTITY_KEY_PREFIX, **kwargs)
+            save_cache(data, ENTITY_KEY_PREFIX, ENTITY_KEY_CHECK, **kwargs)
 
         return Response(data)
 
@@ -117,8 +116,6 @@ class DadoEntidadeView(RetrieveAPIView, EntityDataView):
             pk=self.kwargs['pk']
         )
 
-        import ipdb; ipdb.set_trace()
-
         cache = get_cache(obj, DATA_ENTITY_KEY_PREFIX, **kwargs)
         if cache:
             return cache
@@ -131,14 +128,19 @@ class DadoEntidadeView(RetrieveAPIView, EntityDataView):
             raise Http404
 
         if obj.is_cacheable:
-            save_cache(data, DATA_ENTITY_KEY_PREFIX, **kwargs)
+            save_cache(
+                data,
+                DATA_ENTITY_KEY_PREFIX,
+                DATA_ENTITY_KEY_CHECK,
+                **kwargs
+            )
 
         return Response(data)
 
 
 class DadoDetalheView(RetrieveAPIView, EntityDataView):
     serializer_class = DadoDetalheSerializer
-    
+
     def get(self, request, *args, **kwargs):
         permissions = get_permissions(request)
 
@@ -148,7 +150,10 @@ class DadoDetalheView(RetrieveAPIView, EntityDataView):
             pk=self.kwargs['pk']
         )
 
-        data = DadoDetalheSerializer(obj, domain_id=self.kwargs['domain_id']).data
+        data = DadoDetalheSerializer(
+            obj,
+            domain_id=self.kwargs['domain_id']
+        ).data
         if not data['external_data']:
             raise Http404
 
@@ -157,7 +162,12 @@ class DadoDetalheView(RetrieveAPIView, EntityDataView):
             return cache
 
         if obj.is_cacheable:
-            save_cache(data, DATA_DETAIL_KEY_PREFIX, **kwargs)
+            save_cache(
+                data,
+                DATA_DETAIL_KEY_PREFIX,
+                DATA_DETAIL_KEY_CHECK,
+                **kwargs
+            )
 
         return Response(data)
 

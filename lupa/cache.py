@@ -20,6 +20,9 @@ ENTITY_KEY_PREFIX = 'lupa_entidade'
 DATA_ENTITY_KEY_PREFIX = 'lupa_dado_entidade'
 DATA_DETAIL_KEY_PREFIX = 'lupa_dado_detalhe'
 
+ENTITY_KEY_CHECK = 'exibition_field'
+DATA_ENTITY_KEY_CHECK = DATA_DETAIL_KEY_CHECK = 'external_data'
+
 ENTITY_MODEL_KWARGS = {'abreviation': 'entity_type'}
 DATA_ENTITY_MODEL_KWARGS = {
     'entity_type__abreviation': 'entity_type', 'pk': 'pk'
@@ -115,13 +118,17 @@ def custom_cache(key_prefix, model_kwargs, key_check):
 def get_cache(obj, key_prefix, **kwargs):
     key = cache_key(key_prefix, **kwargs)
     if key in django_cache:
-        response_data = django_cache.get(key)
-        return Response(response_data)
+        cache_response = django_cache.get(key)
+        return Response(
+            cache_response['data'],
+            status=cache_response['status_code']
+        )
 
 
-def save_cache(data, key_prefix, **kwargs):
+def save_cache(data, key_prefix, key_check, **kwargs):
     key = cache_key(key_prefix, **kwargs)
-    django_cache.set(key, data, timeout=None)
+    wrapped_response = wrap_response(data, key_check)
+    django_cache.set(key, wrapped_response, timeout=None)
 
 
 def _repopulate_cache_entity(key_prefix, queryset):
