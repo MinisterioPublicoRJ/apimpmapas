@@ -7,7 +7,7 @@ def _get_authorized_roles(permissions):
     from .models import Grupo
 
     if permissions:
-        return Grupo.objects.filter(role__in=[permissions])
+        return Grupo.objects.filter(role__in=permissions)
 
     return Grupo.objects.filter(role=config('GUEST_ROLE'))
 

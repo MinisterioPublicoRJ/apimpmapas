@@ -22,7 +22,7 @@ class ManagerTest(TestCase):
             roles_allowed=[grupo_fail]
         )
 
-        queryset = DadoEntidade.objects.get_authorized(permissao)
+        queryset = DadoEntidade.objects.get_authorized([permissao])
 
-        self.assertEquals(len(queryset), 1)
-        self.assertEquals(queryset[0].id, dado_ok.id)
+        self.assertEqual(len(queryset), 1)
+        self.assertEqual(queryset[0].id, dado_ok.id)

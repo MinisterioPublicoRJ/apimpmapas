@@ -221,7 +221,7 @@ class AuthEntidadeViewTest(NoCacheTestCase, TestCase):
             args=(self.entity_abrv, self.entity_id)
         )
         resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 404)
 
     def test_entidade_permission_failed(self):
         payload = {'permissions': [self.role_forbidden]}
@@ -232,7 +232,7 @@ class AuthEntidadeViewTest(NoCacheTestCase, TestCase):
             args=(self.entity_abrv, self.entity_id)
         )
         resp = self.client.get(url, {'auth_token': token})
-        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 404)
 
 
 class ListDadosViewTest(TestCase, NoCacheTestCase):
@@ -556,7 +556,7 @@ class AuthDadosViewTest(NoCacheTestCase, TestCase):
             args=(self.entity_abrv, self.entity_id, self.data_id)
         )
         resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 404)
 
     def test_dado_permission_failed(self):
         payload = {'permissions': [self.role_forbidden]}
@@ -567,7 +567,7 @@ class AuthDadosViewTest(NoCacheTestCase, TestCase):
             args=(self.entity_abrv, self.entity_id, self.data_id)
         )
         resp = self.client.get(url, {'auth_token': token})
-        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 404)
 
 
 class DetalhesViewTest(TestCase, NoCacheTestCase):
