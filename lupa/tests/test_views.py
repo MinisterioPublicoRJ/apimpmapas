@@ -12,10 +12,12 @@ import responses
 from rest_framework.response import Response
 
 from lupa import osmapi
-from lupa.cache import ENTITY_KEY_PREFIX
+from lupa.cache import (
+    ENTITY_KEY_PREFIX,
+    ENTITY_KEY_CHECK
+)
 from lupa.exceptions import QueryError
 from .fixtures.osmapi import default_response
-
 
 
 class NoCacheTestCase:
@@ -858,7 +860,6 @@ class CacheView(TestCase):
         expected_response = {'id': 1, 'abreviation': 'EST'}
 
         _get_cache.return_value = Response(expected_response)
-        _execute.return_value
         kwargs = {
             'entity_type': 'EST',
             'domain_id': '33'
@@ -872,3 +873,41 @@ class CacheView(TestCase):
         call_args = _get_cache.call_args_list[0][0]
         self.assertEqual(call_args,  (obj, ENTITY_KEY_PREFIX, kwargs))
         self.assertEqual(resp_json, expected_response)
+
+    @mock.patch('lupa.serializers.execute')
+    @mock.patch('lupa.views.save_cache')
+    def test_save_cache_entidade(self, _save_cache, _execute):
+        domain_id = '33'
+        entity_type = 'EST'
+        entity_name = 'Rio de Janeiro'
+        entity_title = 'Estado'
+
+        make(
+            'lupa.Entidade',
+            abreviation=entity_type,
+            name=entity_title,
+            is_cacheable=True
+        )
+        data = {
+            'domain_id': domain_id,
+            'entity_type': entity_title,
+            'exibition_field': entity_name,
+            'geojson': None,
+            'theme_list': []
+        }
+
+        _execute.return_value = [(entity_name, 'mock')]
+        kwargs = {
+            'entity_type': entity_type,
+            'domain_id': domain_id
+        }
+
+        url = reverse('lupa:detail_entidade', args=(entity_type, domain_id,))
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
+        call_args = _save_cache.call_args_list[0][0]
+        self.assertEqual(
+            call_args,
+            (data, ENTITY_KEY_PREFIX, ENTITY_KEY_CHECK, kwargs)
+        )
