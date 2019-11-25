@@ -59,9 +59,9 @@ def _has_role(obj, permissions):
     return True
 
 
-def cache_key(key_prefix, **kwargs):
+def cache_key(key_prefix, args_dict):
     kwargs_key = ':'.join(
-        str(val) for val in kwargs.values()
+        str(val) for val in args_dict.values()
     )
 
     return '%s:%s' % (key_prefix, kwargs_key)
@@ -77,46 +77,8 @@ def wildcard_cache_key(key_prefix, keys):
     return '*%s:%s' % (key_prefix, kwargs_key)
 
 
-def custom_cache(key_prefix, model_kwargs, key_check):
-    def _custom_cache(func):
-        def inner(*args, **kwargs):
-            instance = args[0]
-            request = args[1]
-            obj = get_object_or_404(
-                instance.queryset,
-                **{k: kwargs[v] for k, v in model_kwargs.items()}
-            )
-
-            # If DadoDetalhe check role in the related DadoEntidade
-            obj_role = obj
-            if not hasattr(obj, 'roles_allowed'):
-                obj_role = obj.dado_main
-
-            token = request.GET.get('auth_token')
-            permissions = _decode_jwt(token)
-
-            key = cache_key(key_prefix, kwargs)
-            if key in django_cache and _has_role(obj_role, permissions):
-                cache_response = django_cache.get(key)
-                return Response(
-                    cache_response['data'],
-                    status=cache_response['status_code']
-                )
-
-            response = func(*args, **kwargs)
-            if response.status_code == 200 and obj.is_cacheable:
-                wrapped_response = wrap_response(response.data, key_check)
-                django_cache.set(key, wrapped_response, timeout=None)
-
-            return response
-
-        return inner
-
-    return _custom_cache
-
-
-def get_cache(obj, key_prefix, **kwargs):
-    key = cache_key(key_prefix, **kwargs)
+def get_cache(obj, key_prefix, request_args):
+    key = cache_key(key_prefix, request_args)
     if key in django_cache:
         cache_response = django_cache.get(key)
         return Response(
@@ -125,8 +87,8 @@ def get_cache(obj, key_prefix, **kwargs):
         )
 
 
-def save_cache(data, key_prefix, key_check, **kwargs):
-    key = cache_key(key_prefix, **kwargs)
+def save_cache(data, key_prefix, key_check, request_args):
+    key = cache_key(key_prefix, request_args)
     wrapped_response = wrap_response(data, key_check)
     django_cache.set(key, wrapped_response, timeout=None)
 

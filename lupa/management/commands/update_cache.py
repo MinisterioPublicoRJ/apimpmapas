@@ -8,9 +8,6 @@ from lupa.cache import (_repopulate_cache_data_entity,
                         DATA_DETAIL_KEY_PREFIX
                         )
 from lupa.models import Entidade, DadoEntidade, DadoDetalhe
-from lupa.serializers import (EntidadeSerializer,
-                              DadoEntidadeSerializer,
-                              DadoDetalheSerializer)
 
 
 class Command(BaseCommand):

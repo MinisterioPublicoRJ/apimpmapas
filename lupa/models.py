@@ -251,6 +251,11 @@ class Entidade(models.Model):
         verbose_name='Tempo de persistência do cache (em dias)',
         default=7
     )
+    last_cache_update = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name='Data da última atualização do cache'
+    )
     objects = RoleManager()
     cache = CacheManager()
 

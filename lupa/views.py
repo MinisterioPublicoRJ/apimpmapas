@@ -47,39 +47,7 @@ def get_permissions(request):
     return payload['permissions']
 
 
-class EntityDataView:
-    def process_request(self, request, obj, serializer, key_check):
-        if isinstance(obj, (Entidade, DadoEntidade)):
-            roles = obj.roles_allowed.all().values_list('role', flat=True)
-        elif isinstance(obj, DadoDetalhe):
-            roles = obj.dado_main.roles_allowed.all().values_list(
-                'role',
-                flat=True
-            )
-        else:
-            return Response({}, status=401)
-        if roles:
-            token = request.GET.get('auth_token')
-            try:
-                payload = jwt.decode(
-                    token,
-                    config('SECRET_KEY'),
-                    algorithms=["HS256"]
-                )
-            except (InvalidSignatureError, DecodeError):
-                return Response({}, status=403)
-            permissions = payload['permissions']
-            allowed = [role for role in roles if role in permissions]
-            if not allowed:
-                return Response({}, status=403)
-
-        data = serializer(obj, domain_id=self.kwargs['domain_id']).data
-        if not data[key_check]:
-            raise Http404
-        return Response(data)
-
-
-class EntidadeView(GenericAPIView, EntityDataView):
+class EntidadeView(GenericAPIView):
     serializer_class = EntidadeSerializer
 
     def get(self, request, *args, **kwargs):
@@ -90,7 +58,7 @@ class EntidadeView(GenericAPIView, EntityDataView):
             abreviation=self.kwargs['entity_type']
         )
 
-        cache = get_cache(obj, ENTITY_KEY_PREFIX, **kwargs)
+        cache = get_cache(obj, ENTITY_KEY_PREFIX, kwargs)
         if cache:
             return cache
 
@@ -99,12 +67,12 @@ class EntidadeView(GenericAPIView, EntityDataView):
             raise Http404
 
         if obj.is_cacheable:
-            save_cache(data, ENTITY_KEY_PREFIX, ENTITY_KEY_CHECK, **kwargs)
+            save_cache(data, ENTITY_KEY_PREFIX, ENTITY_KEY_CHECK, kwargs)
 
         return Response(data)
 
 
-class DadoEntidadeView(RetrieveAPIView, EntityDataView):
+class DadoEntidadeView(RetrieveAPIView):
     serializer_class = DadoEntidadeSerializer
 
     def get(self, request, *args, **kwargs):
@@ -116,7 +84,7 @@ class DadoEntidadeView(RetrieveAPIView, EntityDataView):
             pk=self.kwargs['pk']
         )
 
-        cache = get_cache(obj, DATA_ENTITY_KEY_PREFIX, **kwargs)
+        cache = get_cache(obj, DATA_ENTITY_KEY_PREFIX, kwargs)
         if cache:
             return cache
 
@@ -132,13 +100,13 @@ class DadoEntidadeView(RetrieveAPIView, EntityDataView):
                 data,
                 DATA_ENTITY_KEY_PREFIX,
                 DATA_ENTITY_KEY_CHECK,
-                **kwargs
+                kwargs
             )
 
         return Response(data)
 
 
-class DadoDetalheView(RetrieveAPIView, EntityDataView):
+class DadoDetalheView(RetrieveAPIView):
     serializer_class = DadoDetalheSerializer
 
     def get(self, request, *args, **kwargs):
@@ -157,7 +125,7 @@ class DadoDetalheView(RetrieveAPIView, EntityDataView):
         if not data['external_data']:
             raise Http404
 
-        cache = get_cache(obj, DATA_DETAIL_KEY_PREFIX, **kwargs)
+        cache = get_cache(obj, DATA_DETAIL_KEY_PREFIX, kwargs)
         if cache:
             return cache
 
@@ -166,7 +134,7 @@ class DadoDetalheView(RetrieveAPIView, EntityDataView):
                 data,
                 DATA_DETAIL_KEY_PREFIX,
                 DATA_DETAIL_KEY_CHECK,
-                **kwargs
+                kwargs
             )
 
         return Response(data)

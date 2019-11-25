@@ -1,6 +1,7 @@
 from decouple import config
 from django.db import models
 from django.db.models import Q
+from ordered_model.models import OrderedModelManager
 
 
 def _get_authorized_roles(permissions):
@@ -12,7 +13,7 @@ def _get_authorized_roles(permissions):
     return Grupo.objects.filter(role=config('GUEST_ROLE'))
 
 
-class RoleManager(models.Manager):
+class RoleManager(OrderedModelManager):
     def get_authorized(self, permissions):
         roles = _get_authorized_roles(permissions)
 
@@ -22,7 +23,7 @@ class RoleManager(models.Manager):
         )
 
 
-class DadoDetalheManager(models.Manager):
+class DadoDetalheManager(OrderedModelManager):
     def get_authorized(self, permissions):
         roles = _get_authorized_roles(permissions)
 
