@@ -86,15 +86,16 @@ class Cache(TestCase):
         self.assertEqual(wrapped_resp, expected_response)
 
     @mock.patch('lupa.cache.cache_key')
-    @mock.patch.object(django_cache, 'get')
-    def test_get_cache(self, _get, _cache_key):
+    @mock.patch('lupa.cache.django_cache')
+    def test_get_cache(self, _django_cache, _cache_key):
         key_data = 'key'
         cache_data = 'cache_data'
         request_args = {'arg': 'arg_data'}
         prefix = 'prefix'
         expected_response = Response(cache_data, status=200)
 
-        _get.return_value = {
+        _django_cache.__contains__.return_value = True
+        _django_cache.get.return_value = {
             'data': cache_data,
             'status_code': 200
         }
@@ -102,9 +103,9 @@ class Cache(TestCase):
 
         cache = get_cache(prefix, request_args)
 
-        _get.assert_called_once_with(key_data)
-        self.assertEqual(cache, expected_response)
-
+        _django_cache.get.assert_called_once_with(key_data)
+        self.assertEqual(200, expected_response.status_code)
+        self.assertEqual(cache.data, expected_response.data)
 
 @pytest.mark.django_db(transaction=True)
 class ModelCache(TestCase):
@@ -221,6 +222,7 @@ class ModelCache(TestCase):
             ]
         }
         self.estado = estado
+
 
 @pytest.mark.django_db(transaction=True)
 class RepopulateCache(TestCase):
