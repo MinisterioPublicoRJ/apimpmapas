@@ -1,10 +1,7 @@
 import datetime as dt
-
 from unittest import mock
 
 import pytest
-
-from django.core.cache import cache as django_cache
 from django.test import TestCase
 from freezegun import freeze_time
 from model_mommy.mommy import make
@@ -19,7 +16,8 @@ from lupa.cache import (
     _remove_from_cache,
     wrap_response,
     repopulate_cache,
-    get_cache
+    get_cache,
+    _has_role
 )
 from lupa.models import Entidade, DadoEntidade, DadoDetalhe
 
@@ -106,6 +104,29 @@ class Cache(TestCase):
         _django_cache.get.assert_called_once_with(key_data)
         self.assertEqual(200, expected_response.status_code)
         self.assertEqual(cache.data, expected_response.data)
+
+    def test_check_has_roles(self):
+        grupo = make('lupa.Grupo', role='ROLE_OK')
+        obj = make('lupa.Entidade', roles_allowed=[grupo])
+        permissions = ['ROLE_OK']
+        has_roles = _has_role(obj, permissions)
+
+        self.assertTrue(has_roles)
+
+    def test_check_hasnt_roles(self):
+        grupo = make('lupa.Grupo', role='ROLE_OK')
+        obj = make('lupa.Entidade', roles_allowed=[grupo])
+        permissions = ['ROLE_NOT_OK']
+        has_roles = _has_role(obj, permissions)
+
+        self.assertFalse(has_roles)
+
+    def test_check_has_default(self):
+        obj = make('lupa.Entidade')
+        permissions = []
+        has_roles = _has_role(obj, permissions)
+        self.assertTrue(has_roles)
+
 
 @pytest.mark.django_db(transaction=True)
 class ModelCache(TestCase):

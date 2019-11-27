@@ -1,11 +1,7 @@
-import jwt
-
-from decouple import config
 from django.http import Http404
 from django.shortcuts import get_object_or_404
-from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
-from jwt.exceptions import InvalidSignatureError, DecodeError
+from django.views.decorators.cache import cache_page
 from rest_framework.generics import (
     GenericAPIView,
     RetrieveAPIView,
@@ -13,7 +9,7 @@ from rest_framework.generics import (
 )
 from rest_framework.response import Response
 
-from lupa.cache import (
+from .cache import (
     get_cache,
     save_cache,
     ENTITY_KEY_PREFIX,
@@ -23,28 +19,16 @@ from lupa.cache import (
     DATA_DETAIL_KEY_PREFIX,
     DATA_DETAIL_KEY_CHECK
 )
+from .db_connectors import execute_geospatial
+from .jwt_manager import get_permissions
 from .models import Entidade, DadoDetalhe, DadoEntidade
+from .osmapi import query as osmquery
 from .serializers import (
     EntidadeSerializer,
     DadoDetalheSerializer,
     DadoEntidadeSerializer,
     EntidadeIdSerializer
 )
-from .osmapi import query as osmquery
-from .db_connectors import execute_geospatial
-
-
-def get_permissions(request):
-    token = request.GET.get('auth_token')
-    try:
-        payload = jwt.decode(
-            token,
-            config('SECRET_KEY'),
-            algorithms=["HS256"]
-        )
-    except (InvalidSignatureError, DecodeError):
-        return []
-    return payload['permissions']
 
 
 class EntidadeView(GenericAPIView):

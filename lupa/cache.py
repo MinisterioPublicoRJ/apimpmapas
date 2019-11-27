@@ -1,15 +1,9 @@
-from operator import attrgetter
-
 import datetime as dt
 import sys
+from operator import attrgetter
 
-import jwt
-
-from decouple import config
 from django.core.cache import cache as django_cache
 from django.core.management.base import OutputWrapper
-from django.shortcuts import get_object_or_404
-from jwt.exceptions import InvalidSignatureError, DecodeError
 from rest_framework.response import Response
 
 from lupa.db_connectors import execute_sample
@@ -37,18 +31,6 @@ def wrap_response(response_data, key_check):
         else (404, {"detail": "Não encontrado."})
 
     return {'data': data, 'status_code': status}
-
-
-def _decode_jwt(token):
-    try:
-        payload = jwt.decode(
-            token,
-            config('SECRET_KEY'),
-            algorithms=["HS256"]
-        )
-        return payload.get('permissions', [])
-    except (InvalidSignatureError, DecodeError):
-        return []
 
 
 def _has_role(obj, permissions):
