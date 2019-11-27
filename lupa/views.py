@@ -58,7 +58,9 @@ class EntidadeView(GenericAPIView):
             abreviation=self.kwargs['entity_type']
         )
 
-        cache = get_cache(obj, ENTITY_KEY_PREFIX, kwargs)
+        # O cache é visto somente aqui, para garantir que
+        # não bypasse as permissões
+        cache = get_cache(ENTITY_KEY_PREFIX, kwargs)
         if cache:
             return cache
 
@@ -84,7 +86,9 @@ class DadoEntidadeView(RetrieveAPIView):
             pk=self.kwargs['pk']
         )
 
-        cache = get_cache(obj, DATA_ENTITY_KEY_PREFIX, kwargs)
+        # O cache é visto somente aqui, para garantir que
+        # não bypasse as permissões
+        cache = get_cache(DATA_ENTITY_KEY_PREFIX, kwargs)
         if cache:
             return cache
 
@@ -118,16 +122,18 @@ class DadoDetalheView(RetrieveAPIView):
             pk=self.kwargs['pk']
         )
 
+        # O cache é visto somente aqui, para garantir que
+        # não bypasse as permissões
+        cache = get_cache(DATA_DETAIL_KEY_PREFIX, kwargs)
+        if cache:
+            return cache
+
         data = DadoDetalheSerializer(
             obj,
             domain_id=self.kwargs['domain_id']
         ).data
         if not data['external_data']:
             raise Http404
-
-        cache = get_cache(obj, DATA_DETAIL_KEY_PREFIX, kwargs)
-        if cache:
-            return cache
 
         if obj.is_cacheable:
             save_cache(

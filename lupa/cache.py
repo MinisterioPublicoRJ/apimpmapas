@@ -77,7 +77,7 @@ def wildcard_cache_key(key_prefix, keys):
     return '*%s:%s' % (key_prefix, kwargs_key)
 
 
-def get_cache(obj, key_prefix, request_args):
+def get_cache(key_prefix, request_args):
     key = cache_key(key_prefix, request_args)
     if key in django_cache:
         cache_response = django_cache.get(key)

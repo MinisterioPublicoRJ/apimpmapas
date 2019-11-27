@@ -4,9 +4,11 @@ from unittest import mock
 
 import pytest
 
+from django.core.cache import cache as django_cache
 from django.test import TestCase
 from freezegun import freeze_time
 from model_mommy.mommy import make
+from rest_framework.response import Response
 
 from lupa.cache import (
     cache_key,
@@ -17,6 +19,7 @@ from lupa.cache import (
     _remove_from_cache,
     wrap_response,
     repopulate_cache,
+    get_cache
 )
 from lupa.models import Entidade, DadoEntidade, DadoDetalhe
 
@@ -81,6 +84,26 @@ class Cache(TestCase):
         }
 
         self.assertEqual(wrapped_resp, expected_response)
+
+    @mock.patch('lupa.cache.cache_key')
+    @mock.patch.object(django_cache, 'get')
+    def test_get_cache(self, _get, _cache_key):
+        key_data = 'key'
+        cache_data = 'cache_data'
+        request_args = {'arg': 'arg_data'}
+        prefix = 'prefix'
+        expected_response = Response(cache_data, status=200)
+
+        _get.return_value = {
+            'data': cache_data,
+            'status_code': 200
+        }
+        _cache_key.return_value = key_data
+
+        cache = get_cache(prefix, request_args)
+
+        _get.assert_called_once_with(key_data)
+        self.assertEqual(cache, expected_response)
 
 
 @pytest.mark.django_db(transaction=True)
