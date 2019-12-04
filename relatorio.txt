@@ -1,0 +1,606 @@
+Error on query: permission denied for relation lp_estado_bancada_assembleia
+
+Verificando Dado(caixinhas) para entidade Estado
+Dado: Frota id=468 - OK
+Dado: QUANTIDADE DE FAMÍLIAS INSERIDAS PELO CRAS (PAIF/2018) id=475 - OK
+Dado: Mortalidade Estado id=479 - OK
+Dado: Nascidos Estado id=478 - OK
+Dado: Escolas id=488 - OK
+Dado: ESCOLA PRISIONAL OU SOCIOEDUCATIVO id=70 - OK
+Dado: ESCOLAS PÚBLICAS ENSINO INTEGRAL id=71 - OK
+Dado: QUANTIDADE DE FAMÍLIAS ACOMPANHADAS PELO CREAS (PAEFI/2018) id=473 - OK
+Dado: Grafico Funcionarios Direta Estado id=277 - OK
+Dado: MATRÍCULAS id=484 - OK
+Dado: MATRÍCULAS CRECHE id=15 - OK
+Dado: MATRÍCULAS PRÉ ESCOLA id=16 - OK
+Dado: MATRÍCULAS FUNDAMENTAL INICIAL id=17 - OK
+Dado: MATRÍCULAS FUNDAMENTAL FINAL id=18 - OK
+Dado: MATRÍCULAS ENSINO MÉDIO id=19 - OK
+Dado: MATRÍCULAS EJA FUNDAMENTAL INICIAL id=20 - OK
+Dado: MATRÍCULAS EJA FUNDAMENTAL FINAL id=21 - OK
+Dado: MATRÍCULAS EJA ENSINO MÉDIO id=22 - OK
+Dado: Outras matrículas id=23 - OK
+Dado: MATRICULADOS POR RAÇA id=25 - OK
+Dado: MATRICULADOS POR SEXO id=26 - OK
+Dado: PERCENTUAL DEFASAGEM SÉRIE-IDADE POR RAÇA (%) id=52 - OK
+Dado: Bancada Assembleia id=331 - NOK - PG - lupa - lp_estado_bancada_assembleia
+Dado: MATRÍCULAS CRECHE id=144 - OK
+Dado: QUANTIDADE DE DOSES BCG (até jul/2019) id=429 - OK
+Dado: População Estimada id=80 - OK
+Dado: Evolução da População Estimada id=1 - OK
+Dado: Densidade Populacional id=3 - OK
+Dado: Despesas saude id=375 - OK
+Dado: QUANTIDADE DE DENTISTAS (até jul/2019) id=440 - OK
+Dado: Evolução despesas saude estado id=451 - OK
+Dado: PERCENTUAL DEFASAGEM SÉRIE-IDADE POR RAÇA (%) id=251 - OK
+Dado: Eleitores Aptos por Idade id=371 - OK
+Dado: Meta 2A id=230 - OK
+Dado: Meta 2B id=231 - OK
+Dado: QUANTIDADE DE FAMÍLIAS ACOMPANHADAS PELO CRAS (PAIF/2018) id=474 - OK
+Dado: MATRICULADOS POR RAÇA id=96 - OK
+Dado: QUANTIDADE DE AGENTES DE SAÚDE (até jul/2019) id=443 - OK
+Dado: Meta 6B id=255 - OK
+Dado: COMPARECIMENTO 2018_2 id=458 - OK
+Dado: TOTAL DE INTERNAÇÕES (R$) (até jul/2019) id=426 - OK
+Dado: POPULAÇÃO TOTAL ATENDIDA COM ESGOTAMENTO SANITÁRIO id=326 - OK
+Dado: POPULAÇÃO TOTAL ATENDIDA COM ABASTECIMENTO DE ÁGUA id=328 - OK
+Dado: PM morto em serviço id=341 - OK
+Dado: Bombeiros id=14 - OK
+Dado: Latrocinio id=336 - OK
+Dado: MATRÍCULAS EJA ENSINO MÉDIO id=224 - OK
+Dado: Eleitores Aptos por Sexo id=372 - OK
+Dado: ABSTENÇÕES 2018_1 id=455 - OK
+Dado: Eleitores Aptos id=9 - OK
+Dado: Eleitores Aptos por Escolaridade id=64 - OK
+Dado: Eleitores Aptos por Idade id=65 - OK
+Dado: Eleitores Aptos por Sexo id=66 - OK
+Dado: ESCOLA COM DEPENDÊNCIA PARA PORTADORES DE NECESSIDADES ESPECIAIS id=139 - OK
+Dado: Roubo a transeunte id=345 - OK
+Dado: TOTAL DE SERVIÇOS PROFISSIONAIS (R$) (até jul/2019) id=428 - OK
+Dado: QTD DE OUTROS PROFISSIONAIS DE ENS SUP EM UNIDADES DE SAÚDE (até jul/2019) id=442 - OK
+Dado: QUANTIDADE DE ENFERMEIROS (até jul/2019) id=438 - OK
+Dado: MATRÍCULAS FUNDAMENTAL INICIAL id=146 - OK
+Dado: COMPARECIMENTO 2018_1 id=456 - OK
+Dado: ABSTENÇÕES 2018_2 id=457 - OK
+Dado: Número de Emprego Formal id=446 - OK
+Dado: MATRÍCULAS PRÉ ESCOLA id=145 - OK
+Dado: Lesão Corporal Dolosa id=337 - OK
+Dado: Pessoas Desaparecidas id=346 - OK
+Dado: Tentativa de homicídio id=347 - OK
+Dado: Homicídio Doloso id=333 - OK
+Dado: Estelionato id=349 - OK
+Dado: DEFASAGEM SÉRIE-IDADE ENSINO MÉDIO id=150 - OK
+Dado: Registro de ocorrência id=338 - OK
+Dado: MATRICULADOS POR SEXO id=151 - OK
+Dado: QTD DE VACINAS APLICADAS CONTRA FEBRE AMARELA (até jul/2019) id=430 - OK
+Dado: Lesao corporal seguida de morte id=335 - OK
+Dado: Eleitores Aptos por Escolaridade id=370 - OK
+Dado: Pessoal Ocupado id=17 - OK
+Dado: Grafico Funcionarios Indireta Estado id=278 - OK
+Dado: Densidade Populacional id=7 - OK
+Dado: Estupro id=344 - OK
+Dado: VOLUME DE ESGOTO COLETADO id=325 - OK
+Dado: Lesao corporal culposa id=348 - OK
+Dado: Meta 1A - Pré Escola id=228 - OK
+Dado: MATRÍCULAS ENSINO MÉDIO id=148 - OK
+Dado: Liquidado id=306 - OK
+Dado: MATRÍCULAS EJA FUNDAMENTAL INICIAL id=222 - OK
+Dado: Outras matrículas id=249 - OK
+Dado: VOLUME DE ÁGUA CONSUMIDO id=327 - OK
+Dado: Funcionarios Direta Estado id=270 - OK
+Dado: Grafico Funcionarios Direta Estado id=79 - OK
+Dado: Consumidor - Ranking de Reclamações id=73 - OK
+Dado: Funcionarios Indireta Estado id=271 - OK
+Dado: Grafico Funcionarios Indireta Estado id=80 - OK
+Dado: Evolução da População Estimada id=5 - OK
+Dado: MATRICULADOS PORTADORES DE NECESSIDADES ESPECIAIS id=143 - OK
+Dado: Governador id=77 - OK
+Dado: QUANTIDADE DE OUTROS PROFISSIONAIS (até jul/2019) id=445 - OK
+Dado: Deputados Estaduais id=330 - OK
+Dado: QUANTIDADE DE ASSISTENTES DE SAÚDE (até jul/2019) id=444 - OK
+Dado: Apreensão de Drogas id=334 - OK
+Dado: DEFASAGEM SÉRIE-IDADE ENSINO FUNDAMENTAL id=149 - OK
+Dado: Meta 3A id=235 - OK
+Dado: Lista Municipios id=82 - OK
+Dado: Custos MPRJ id=78 - OK
+Dado: Unidades Asistencia Social id=1 - OK
+Dado: Conselho Tutelar - Total id=57 - OK
+Dado: roubo de carga id=340 - OK
+Dado: Delegacias de Polícia id=16 - OK
+Dado: ESCOLA PRISIONAL OU SOCIOEDUCATIVO id=3 - OK
+Dado: Meta 1B - Creche id=221 - OK
+Dado: MATRÍCULAS FUNDAMENTAL FINAL id=147 - OK
+Dado: MATRÍCULAS EJA FUNDAMENTAL FINAL id=223 - OK
+Dado: ESCOLAS PÚBLICAS ENSINO INTEGRAL id=141 - OK
+Dado: IDEB – ENSINO PÚBLICO ENSINO MÉDIO id=154 - OK
+Dado: IDEB – ENSINO PÚBLICO FUNDAMENTAL INICIAL id=152 - OK
+Dado: CRAAI id=8 - OK
+Dado: IDEB – ENSINO PÚBLICO FUNDAMENTAL FINAL id=153 - OK
+Dado: Homicídio culposo id=342 - OK
+Dado: Morte por intervenção de agente do Estado id=343 - OK
+Dado: QUANTIDADE DE TÉCNICOS DE ENFERMAGEM (até jul/2019) id=439 - OK
+Dado: QUANTIDADE DE MÉDICOS (até jul/2019) id=436 - OK
+Dado: QTD DE VACINAS APLICADAS CONTRA A POLIOMIELITE (até jul/2019) id=434 - OK
+Dado: QUANTIDADE DE VACINAS APLICADAS CONTRA HEPATITE B (até jul/2019) id=433 - OK
+Dado: QUANTIDADE DE VACINAS APLICADAS CONTRA HEPATITE A (até jul/2019) id=432 - OK
+Dado: Área id=6 - OK
+Dado: TOTAL DE SERVIÇOS HOSPITALARES (R$) (até jul/2019) id=427 - OK
+--------\n
+Error on query: syntax error at or near "Escolar"
+LINE 1: ...co_municipio as id, qtde_escolas as dado, ''Censo Escolar IN...
+                                                             ^
+
+Error on query: relation "lupa.abrigos_criancas_adolescentes" does not exist
+LINE 1: ...des as dado, fonte as source, cod_ibge as id FROM lupa.abrig...
+                                                             ^
+
+Error on query: relation "lupa.qtd_escolas_publicas_ativas" does not exist
+LINE 1: ...qtd as dado, fonte as source, cod_ibge as id FROM lupa.qtd_e...
+                                                             ^
+
+Error on query: relation "lupa.seguranca_samu" does not exist
+LINE 1: ...ades as dado, fonte as source, cod_mun as id FROM lupa.segur...
+                                                             ^
+
+Error on query: syntax error at or near "Escolar"
+LINE 1: ...a prisional e socioeducativo' as details, ''Censo Escolar IN...
+                                                             ^
+
+Verificando Dado(caixinhas) para entidade Município
+Dado: Frota id=403 - OK
+Dado: Lista Escolas id=86 - OK
+Dado: Matrículas id=483 - OK
+Dado: Quantidade de Matrícula Creche id=4 - OK
+Dado: Quantidade  de Matrícula Pré Escola id=5 - OK
+Dado: Matrícula Fundamental Inicial id=6 - OK
+Dado: Matricula Fundamental Final id=7 - OK
+Dado: Matrícula Ensino Médio id=8 - OK
+Dado: MATRÍCULA EJA FUNDAMENTAL INICIAL id=9 - OK
+Dado: MATRÍCULA EJA FUNDAMENTAL FINAL id=10 - OK
+Dado: MATRÍCULA EJA ENSINO MÉDIO id=11 - OK
+Dado: Outras matrículas id=12 - OK
+Dado: Matriculados por Raça id=13 - OK
+Dado: Matriculados por Sexo id=14 - OK
+Dado: PERCENTUAL DEFASAGEM SÉRIE-IDADE POR RAÇA (%) id=50 - OK
+Dado: Matriculados por Raça id=98 - OK
+Dado: PERCENTUAL DE COBERTURA DA ESTRATÉGIA DA SAÚDE DA FAMÍLIA (julho / 2019) id=213 - OK
+Dado: COMPARECIMENTO 2018_1 id=465 - OK
+Dado: ÍNDICE DE ATENDIMENTO TOTAL DE ÁGUA id=320 - NOK - PG - lupa - lp_municipio_snis_in055_ae
+Dado: Predios MPRJ id=161 - OK
+Dado: Despesas Assistência Município id=447 - OK
+Dado: CAPACIDADE DE FAMÍLIAS REFERENCIADAS - CRAS id=481 - OK
+Dado: QUANTIDADE DE CREAS ATIVOS id=482 - OK
+Dado: PERCENTUAL DE COBERTURA DA VACINAÇÃO BCG id=234 - OK
+Dado: Matriculados Portadores de Necessidades Especiais id=126 - OK
+Dado: QUANTIDADE DE MIGRANTES IDENTIFICADOS PELO CENTRO POP (2019) id=387 - OK
+Dado: Latrocínio id=288 - OK
+Dado: Estelionato id=296 - OK
+Dado: Homicídio Culposo id=301 - OK
+Dado: ÍNDICE DE CONSUMO DE ÁGUA id=323 - NOK - PG - lupa - lp_municipio_snis_in052_ae
+Dado: VOLUME DE ÁGUA FLUORETADA id=314 - OK
+Dado: COMPARECIMENTO 2018_2 id=467 - OK
+Dado: ABSTENÇÕES 2018_1 id=464 - OK
+Dado: Lista Delegacias id=332 - OK
+Dado: Escolas id=489 - OK
+Dado: Escola Prisional ou Socioeducativo id=73 - NOK - PG - lupa - lp_municipio_escola_prisional
+Dado: Escola Pública com Ensino Integral id=74 - OK
+Dado: Funcionarios Indireta id=237 - OK
+Dado: Grafico Funcionarios Indireta id=83 - OK
+Dado: Defasagem série-idade Ensino Fundamental id=157 - OK
+Dado: PERCENTUAL DE COBERTURA DA VACINAÇÃO CONTRA HEPATITE A id=239 - OK
+Dado: Meta 3A id=169 - OK
+Dado: QUANTIDADE DE CRAS ATIVOS id=480 - OK
+Dado: Despesas Segurança Município id=450 - OK
+Dado: DOSES HEPATITE A (julho/2019) id=199 - OK
+Dado: Despesas saude municipio id=382 - OK
+Dado: DOSES BCG (julho/2019) id=197 - OK
+Dado: Eleitores Aptos id=37 - OK
+Dado: Eleitores Aptos por Escolaridade id=67 - OK
+Dado: Eleitores aptos por idade id=68 - OK
+Dado: Eleitores Aptos por Sexo id=69 - OK
+Dado: Presidente da Câmara Municipal id=274 - OK
+Dado: Número de empregos formais id=424 - OK
+Dado: Lista_Distritos id=203 - OK
+Dado: Abrigos de infância e adolescência id=2 - NOK - PG - lupa - abrigos_criancas_adolescentes
+Dado: VOLUME DE ÁGUA FATURADO id=312 - OK
+Dado: VOLUME DE ÁGUA CONSUMIDO id=311 - OK
+Dado: MATRÍCULA EJA FUNDAMENTAL INICIAL id=218 - OK
+Dado: TÉCNICOS DE ENFERMAGEM id=184 - OK
+Dado: QUANTIDADE DE FAMÍLIAS ACOMPANHADAS PELO CREAS (PAEFI) id=324 - OK
+Dado: Meta 2a id=166 - OK
+Dado: Meta 2B id=167 - OK
+Dado: QUANTIDADE DE FAMÍLIAS EM SITUAÇÃO DE POBREZA (mês referência junho) id=268 - OK
+Dado: Meta 6B id=254 - OK
+Dado: Dados Município id=476 - OK
+Dado: CUSTO TOTAL MENSAL DE SERVIÇOS HOSPITALARES (R$) (2019) id=259 - OK
+Dado: Eleitores aptos por idade id=359 - OK
+Dado: Matrícula Fundamental Inicial id=112 - OK
+Dado: MATRÍCULA EJA FUNDAMENTAL FINAL id=219 - OK
+Dado: SERVIÇOS DE SANEAMENTO id=309 - OK
+Dado: Plano Municipal de Educação id=120 - OK
+Dado: Pessoal Ocupado id=45 - OK
+Dado: PRESTADORES DE SERVIÇOS DE SANEAMENTO id=308 - OK
+Dado: Pessoas Desaparecidas id=294 - OK
+Dado: Liquidado id=305 - OK
+Dado: escolas públicas ativas id=4 - NOK - PG - lupa - qtd_escolas_publicas_ativas
+Dado: roubo de carga id=302 - OK
+Dado: PERCENTUAL DE COBERTURA DA ESTRATÉGIA DA SAÚDE DA FAMÍLIA (2018) id=210 - OK
+Dado: ABSTENÇÕES 2018_2 id=466 - OK
+Dado: Escola com Dependência PNE id=103 - OK
+Dado: Prefeito id=76 - OK
+Dado: Área id=35 - OK
+Dado: Eleitores Aptos por Escolaridade id=355 - OK
+Dado: Matricula Fundamental Final id=114 - OK
+Dado: AGENTES DE SAÚDE id=186 - OK
+Dado: Lista Locais de Votação id=380 - OK
+Dado: Meta 1B - Creche id=108 - OK
+Dado: IDEB - Ensino Público AI id=142 - OK
+Dado: IDEB - Ensino AF id=155 - OK
+Dado: Apreensão de Drogas id=285 - OK
+Dado: Tentativa de homicídio id=295 - OK
+Dado: PROPORÇÃO DE PESSOAS POR SEXO EM SITUAÇÃO DE RUA (abril / 2019) id=383 - OK
+Dado: Lesão Corporal Seguida de Morte id=287 - OK
+Dado: PERCENTUAL DE COBERTURA DA ATENÇÃO BÁSICA (julho / 2019) id=214 - OK
+Dado: OUTROS PROFISSIONAIS id=189 - OK
+Dado: População Estimada id=81 - OK
+Dado: Evolução da População Estimada id=81 - OK
+Dado: Densidade Populacional id=84 - OK
+Dado: PERCENTUAL DEFASAGEM SÉRIE-IDADE POR RAÇA (%) id=244 - OK
+Dado: Eleitores Aptos por Sexo id=363 - OK
+Dado: PERCENTUAL DE COBERTURA DA ATENÇÃO BÁSICA (2018) id=211 - OK
+Dado: PROPORÇÃO DE PESSOAS POR SEXO ABORDADAS PELO CENTRO POP (abril / 2019) id=385 - OK
+Dado: Estupro id=300 - OK
+Dado: MÉDICOS id=182 - OK
+Dado: DENTISTAS id=185 - OK
+Dado: Densidade Populacional id=36 - OK
+Dado: Funcionarios Direta id=236 - OK
+Dado: Grafico Funcionarios Direta id=82 - OK
+Dado: IDEB - Ensino Público Médio id=156 - OK
+Dado: QUANTIDADE DE LIGAÇÕES DE ESGOTO id=316 - OK
+Dado: PM morto em serviço id=292 - OK
+Dado: QUANTIDADE DE USUÁRIOS DE CRACK OU OUTRAS DROGAS ILÍCITAS IDENTIFICADOS (2019) id=386 - OK
+Dado: SAMU id=43 - NOK - PG - lupa - seguranca_samu
+Dado: DOSES POLIOMIELITE (2018) id=204 - OK
+Dado: Meta 1A - Pré Escola id=165 - OK
+Dado: MUN_CRAAI id=83 - OK
+Dado: PIB per Capita id=79 - OK
+Dado: Vereadores eleitos id=273 - OK
+Dado: QUANTIDADE TOTAL DE FAMÍLIAS ACOMPANHADAS PELO CRAS (PAIF) id=275 - OK
+Dado: VOLUME DE ESGOTOS FATURADO id=319 - OK
+Dado: Homicídio Doloso id=284 - OK
+Dado: Registro de ocorrência id=289 - OK
+Dado: Mortalidade Infantil e Materna id=339 - OK
+Dado: DOSES BCG (2018) id=233 - OK
+Dado: DOSES POLIOMIELITE (julho/2019) id=202 - OK
+Dado: QUANTIDADE DE INTERNAÇÕES HOSPITALARES POR MÊS (2019) id=253 - OK
+Dado: PERCENTUAL DE COBERTURA DA VACINAÇÃO CONTRA FEBRE AMARELA id=238 - OK
+Dado: QUANTIDADE TOTAL DE FAMÍLIAS INCLUSAS PELO CRAS (PAIF) id=276 - OK
+Dado: QUANTIDADE DE FAMÍLIAS EM SITUAÇÃO DE EXTREMA POBREZA (mês referência junho) id=269 - OK
+Dado: Matriculados por Sexo id=99 - OK
+Dado: VOLUME DE ESGOTOS TRATADO id=318 - OK
+Dado: VOLUME DE ESGOTO COLETADO id=317 - OK
+Dado: POPULAÇÃO TOTAL ATENDIDA COM ESGOTAMENTO SANITÁRIO id=315 - OK
+Dado: Homicídio por intervenção id=291 - OK
+Dado: Lesão corporal dolosa id=297 - OK
+Dado: QUANTIDADE DE PESSOAS COM DOENÇA OU TRANSTORNOS MENTAIS IDENTIFICADAS (2019) id=388 - OK
+Dado: QUANTIDADE DE FAMÍLIAS ACOMPANHADAS PELO CREAS (PAEFI) id=281 - OK
+Dado: PERCENTUAL DE COBERTURA VACINAÇÃO CONTRA POLIOMIELITE id=241 - OK
+Dado: PARTOS REALIZADOS EM UNIDADES DE SAÚDE id=215 - OK
+Dado: DOSES HEPATITE A (2018) id=193 - OK
+Dado: CUSTO TOTAL MENSAL DE INTERNAÇÕES POR MUNICÍPIOS (R$) (2019) id=258 - OK
+Dado: Despesas Saneamento Municipio id=448 - OK
+Dado: Evolução da População Estimada id=34 - OK
+Dado: Grafico Funcionarios Direta id=245 - OK
+Dado: PARTOS REALIZADOS EM DOMICÍLIO id=216 - OK
+Dado: DOSES FEBRE AMARELA (julho/2019) id=198 - OK
+Dado: Grafico Funcionarios Indireta id=247 - OK
+Dado: QUANTIDADE DE FAMÍLIAS COM RENDA PER CAPITA ATÉ MEIO SALÁRIO (mês referência junho) id=267 - OK
+Dado: QUANTIDADE DE FAMÍLIAS CADASTRADAS NO CAD ÚNICO (mês referência junho) id=272 - OK
+Dado: QUANTIDADE DE LIGAÇÕES DE ÁGUA id=310 - OK
+Dado: Bombeiros id=42 - OK
+Dado: POPULAÇÃO TOTAL ATENDIDA COM ABASTECIMENTO DE ÁGUA id=307 - OK
+Dado: PERCENTUAL DE COBERTURA DA VACINAÇÃO CONTRA HEPATITE B id=240 - OK
+Dado: ENFERMEIROS id=183 - OK
+Dado: Outras matrículas id=246 - OK
+Dado: Quantidade de Matrícula Creche id=104 - OK
+Dado: Lista Bairros id=97 - OK
+Dado: Escola Prisional ou Socioeducativo id=101 - NOK - PG - lupa - lp_municipio_escola_prisional
+Dado: Escola Pública com Ensino Integral id=127 - OK
+Dado: DOSES HEPATITE B (2018) id=194 - OK
+Dado: DOSES HEPATITE B (julho/2019) id=200 - Error on query: permission denied for relation lp_municipio_bancada_camara
+
+OK
+Dado: Defasagem série-idade  Ensino médio id=158 - OK
+Dado: ASSISTENTES id=187 - OK
+Dado: Conselho Tutelar - Total id=55 - OK
+Dado: OUTROS PROFISSIONAIS DE SAÚDE (NÍVEL SUPERIOR) id=188 - OK
+Dado: DOSES FEBRE AMARELA (2018) id=192 - OK
+Dado: Conselho Tutelar - Conformidade id=50 - OK
+Dado: Quantidade  de Matrícula Pré Escola id=110 - OK
+Dado: Matrícula Ensino Médio id=117 - OK
+Dado: MATRÍCULA EJA ENSINO MÉDIO id=220 - OK
+Dado: ÍNDICE DE ESGOTO TRATADO REFERIDO À ÁGUA CONSUMIDA id=321 - NOK - PG - lupa - lp_municipio_snis_in046_ae
+Dado: VOLUME DE ÁGUA TRATADA POR SIMPLES DESINFECÇÃO id=313 - OK
+Dado: Roubo a transeunte id=299 - OK
+Dado: Lesão Corporal Culposa id=303 - OK
+Dado: Delegacias de Polícia id=44 - OK
+Dado: Lista Delegacias id=85 - OK
+Dado: Despesa educação municipio id=437 - OK
+Dado: Bancada Camara id=279 - NOK - PG - lupa - lp_municipio_bancada_camara
+--------\n
+Error on query: relation "lupa.lp_craai_abrigos_criancas_adolescentes" does not exist
+LINE 1: SELECT quantidade as dado, cod_craai as id FROM lupa.lp_craa...
+                                                        ^
+
+Error on query: relation "lupa.lp_craai_bombeiros" does not exist
+LINE 1: SELECT quantidade as dado, cod_craai as id FROM lupa.lp_craa...
+                                                        ^
+
+Error on query: relation "lupa.lp_craai_samu" does not exist
+LINE 1: SELECT quantidade as dado, cod_craai as id FROM lupa.lp_craa...
+                                                        ^
+
+Error on query: relation "lupa.lp_craai_eleitoral" does not exist
+LINE 1: ...nk_externo, fonte as source, cod_craai as id FROM lupa.lp_cr...
+                                                             ^
+
+Error on query: relation "lupa.lp_craai_seguranca_policia" does not exist
+LINE 1: SELECT cod_craai as id, quantidade as dado FROM lupa.lp_craa...
+                                                        ^
+
+Error on query: relation "lupa.lp_craai_qtd_escolas_publicas_ativas" does not exist
+LINE 1: SELECT quantidade as dado, cod_craai as id FROM lupa.lp_craa...
+                                                        ^
+
+Verificando Dado(caixinhas) para entidade CRAAI
+Dado: COMPARECIMENTO 2018_2 id=463 - OK
+Dado: MATRÍCULAS id=486 - OK
+Dado: MATRÍCULAS CRECHE id=53 - OK
+Dado: MATRÍCULAS PRÉ ESCOLA id=54 - OK
+Dado: MATRÍCULAS FUNDAMENTAL INICIAL id=55 - OK
+Dado: MATRÍCULAS FUNDAMENTAL FINAL id=56 - OK
+Dado: QUANTIDADE DE MATRÍCULAS ENSINO MÉDIO id=57 - OK
+Dado: MATRÍCULA EDUCAÇÃO JOVEM E ADULTO FUNDAMENTAL INICIAL id=58 - OK
+Dado: MATRÍCULA EDUCAÇÃO JOVEM E ADULTO FUNDAMENTAL FINAL id=59 - OK
+Dado: MATRÍCULA EJA ENSINO MÉDIO id=60 - OK
+Dado: Outras Matrículas id=61 - OK
+Dado: MATRICULADOS POR RAÇA id=62 - OK
+Dado: MATRICULADOS POR SEXO id=63 - OK
+Dado: ABSTENÇÕES 2018_1 id=460 - OK
+Dado: COMPARECIMENTO 2018_1 id=461 - OK
+Dado: Eleitores Aptos id=379 - OK
+Dado: Escolas id=490 - OK
+Dado: ESCOLAS PRISIONAL OU SOCIOEDUCATIVO id=76 - OK
+Dado: ESCOLAS PÚBLICAS ENSINO INTEGRAL id=77 - OK
+Dado: ABSTENÇÕES 2018_2 id=462 - OK
+Dado: QUANTIDADE DE VACINAS APLICADAS CONTRA FEBRE AMARELA (2018) id=393 - OK
+Dado: QUANTIDADE DE FAMÍLIAS ACOMPANHADAS PELO CRAS EM 2018 (PAIF) id=286 - OK
+Dado: MATRÍCULAS FUNDAMENTAL INICIAL id=118 - OK
+Dado: MATRÍCULA EJA ENSINO MÉDIO id=227 - OK
+Dado: ESCOLAS PÚBLICAS ENSINO INTEGRAL id=106 - OK
+Dado: QUANTIDADE DE DOSES BCG (2018) id=392 - OK
+Dado: Abrigos de Infância e Adolescência id=19 - NOK - PG - lupa - lp_craai_abrigos_criancas_adolescentes
+Dado: QUANTIDADE DE MÉDICOS POR CRAAI id=260 - OK
+Dado: MATRICULADOS POR RAÇA id=128 - OK
+Dado: Frota id=459 - OK
+Dado: Bombeiros id=28 - NOK - PG - lupa - lp_craai_bombeiros
+Dado: Conselho Tutelar - Conformidade id=53 - OK
+Dado: QUANTIDADE DE VACINAS APLICADAS CONTRA HEPATITE A (2018) id=394 - OK
+Dado: MATRÍCULAS PRÉ ESCOLA id=115 - OK
+Dado: QUANTIDADE DE ENFERMEIROS POR CRAAI id=261 - OK
+Dado: MATRÍCULAS FUNDAMENTAL FINAL id=121 - OK
+Dado: QUANTIDADE DE MATRÍCULAS ENSINO MÉDIO id=122 - OK
+Dado: Número de Empregos Formais id=441 - OK
+Dado: SAMU id=29 - NOK - PG - lupa - lp_craai_samu
+Dado: MATRICULADOS PORTADORES DE NECESSIDADES ESPECIAIS id=107 - OK
+Dado: QUANTIDADE DE PESSOAS COM DOENÇA OU TRANSTORNOS MENTAIS IDENTIFICADAS (até abril / 2019) id=410 - OK
+Dado: PROPORÇÃO DE PESSOAS POR SEXO EM SITUAÇÃO DE RUA (abril / 2019) id=405 - OK
+Dado: Eleitores Aptos id=22 - NOK - PG - lupa - lp_craai_eleitoral
+Dado: ESCOLAS COM DEPENDÊNCIA PARA PORTADORES DE NECESSIDADES ESPECIAIS id=105 - OK
+Dado: Delegacias de Polícia id=30 - NOK - PG - lupa - lp_craai_seguranca_policia
+Dado: Despesas Liquidadas id=329 - OK
+Dado: QUANTIDADE DE DENTISTAS POR CRAAI id=263 - OK
+Dado: QUANTIDADE DE VACINAS APLICADAS CONTRA HEPATITE B (2018) id=396 - OK
+Dado: QUANTIDADE DE FAMÍLIAS ACOMPANHADAS PELO CREAS EM 2018 (PAEFI) id=298 - OK
+Dado: QUANTIDADE DE FAMÍLIAS INCLUSAS PELO CRAS EM 2018 (PAIF) id=290 - OK
+Dado: Escolas Públicas Ativas id=20 - NOK - PG - lupa - lp_craai_qtd_escolas_publicas_ativas
+Dado: MATRÍCULAS CRECHE id=113 - OK
+Dado: MATRÍCULA EDUCAÇÃO JOVEM E ADULTO FUNDAMENTAL INICIAL id=225 - OK
+Dado: MATRICULADOS POR SEXO id=131 - OK
+Dado: Conselho Tutelar - Total id=54 - OK
+Dado: QUANTIDADE DE OUTROS PROFISSIONAIS DE ENSINO SUPERIOR EM UNIDADES DE SAÚDE POR CRAAI id=264 - OK
+Dado: Eleitores Aptos por Idade id=376 - OK
+Dado: QUANTIDADE DE VACINAS APLICADAS CONTRA POLIOMIELITE (2018) id=397 - OK
+Dado: QUANTIDADE DE DOSES BCG (até jul/2019) id=398 - OK
+Dado: QUANTIDADE DE AGENTES DE SAÚDE POR CRAAI id=265 - OK
+Dado: Eleitores aptos por sexo id=377 - OK
+Dado: QUANTIDADE DE INTERNAÇÕES HOSPITALARES (até jul/2019) id=418 - OK
+Dado: QUANTIDADE DE USUÁRIOS DE CRACK OU OUTRAS DROGAS ILÍCITAS IDENTIFICADOS (até abr / 2019) id=407 - OK
+Dado: População Estimada id=18 - OK
+Dado: QUANTIDADE DE VACINAS APLICADAS CONTRA FEBRE AMARELA (até jul/2019) id=399 - OK
+Dado: Eleitores aptos por Escolaridade id=378 - OK
+Dado: Área id=21 - OK
+Dado: CUSTO TOTAL DE INTERNAÇÕES (R$) (até jul/2019) id=419 - OK
+Dado: CRAAI_MUN id=84 - OK
+Dado: Densidade Populacional id=23 - OK
+Dado: DEFASAGEM SÉRIE-IDADE ENSINO FUNDAMENTAL id=123 - OK
+Dado: QUANTIDADE DE TÉCNICOS DE ENFERMAGEM POR CRAAI id=262 - OK
+Dado: CUSTO TOTAL DE SERVIÇOS HOSPITALARES (R$) (até jul/2019) id=420 - OK
+Dado: QUANTIDADE DE VACINAS APLICADAS CONTRA HEPATITE A (até jul/2019) id=400 - OK
+Dado: ESCOLAS PRISIONAL OU SOCIOEDUCATIVO id=102 - OK
+Dado: CUSTO TOTAL DE SERVIÇOS PROFISSIONAIS (R$) (até jul/2019) id=421 - OK
+Dado: QUANTIDADE DE VACINAS APLICADAS CONTRA HEPATITE B (até jul/2019) id=401 - OK
+Dado: QUANTIDADE DE VACINAS APLICADAS CONTRA POLIOMIELITE (até jul/2019) id=402 - OK
+Dado: PROPORÇÃO DE PESSOAS POR SEXO ABORDADAS PELOS CENTROS POP (abril / 2019) id=404 - OK
+Dado: DEFASAGEM SÉRIE-IDADE ENSINO MÉDIO id=125 - OK
+Dado: Pessoal Ocupado id=31 - OK
+Dado: QUANTIDADE DE MIGRANTES IDENTIFICADOS PELO CENTRO POP (até abril 2019) id=409 - OK
+Dado: MATRÍCULA EDUCAÇÃO JOVEM E ADULTO FUNDAMENTAL FINAL id=226 - OK
+Dado: Outras Matrículas id=250 - OK
+Dado: Promotorias id=46 - OK
+Dado: Procuradorias id=47 - OK
+Dado: Outros Órgãos id=49 - OK
+Dado: Financeiro - Exercício Atual id=32 - OK
+--------\n
+Verificando Dado(caixinhas) para entidade Sedes MPRJ
+Dado: Custos por Órgão id=63 - OK
+Dado: Custos por Tipo id=64 - OK
+Dado: Outros órgãos id=61 - OK
+Dado: Promotorias presentes id=59 - OK
+Dado: Procuradorias presentes id=62 - OK
+Dado: Documentos id=256 - OK
+--------\n
+Verificando Dado(caixinhas) para entidade Promotoria
+Dado: Saldo do Acervo id=52 - OK
+Dado: Órgãos Auxiliares id=60 - OK
+Dado: Financeiro - Exercício Atual id=51 - OK
+Dado: Acervo atual id=74 - OK
+Dado: Servidores id=56 - OK
+Dado: Titular id=48 - OK
+--------\n
+Error on query: AnalysisException: Could not resolve table reference: 'lua.lp_servidores'
+
+Verificando Dado(caixinhas) para entidade Procuradoria
+Dado: Financeiro - Exercício Atual id=69 - OK
+Dado: Órgãos Auxiliares id=72 - OK
+Dado: Titular id=68 - OK
+Dado: Servidores id=71 - NOK - BDA - lua - lp_servidores
+Dado: Acervo atual id=75 - OK
+--------\n
+Verificando Dado(caixinhas) para entidade Órgão
+Dado: Financeiro - Exercício Atual id=66 - OK
+Dado: Órgãos Auxiliares id=67 - OK
+Dado: Servidores id=65 - OK
+--------\n
+Verificando Dado(caixinhas) para entidade ESCOLAS
+Dado: IDEB Ensino Médio id=138 - OK
+Dado: Fundamental Inicial id=132 - OK
+Dado: Defasagem Fundamental Escola id=87 - OK
+Dado: Matriculas id=485 - OK
+Dado: Creche id=27 - OK
+Dado: Pré Escola id=28 - OK
+Dado: Fundamental Inicial id=29 - OK
+Dado: Fundamental Final id=30 - OK
+Dado: Ensino Médio id=31 - OK
+Dado: Educação Jovens e Adultos - Fundamental Inicial id=32 - OK
+Dado: Educação Jovens e Adultos - Fundamental Final id=33 - OK
+Dado: educação jovens e adultos ensino médio id=34 - OK
+Dado: Outras Matrículas id=35 - OK
+Dado: MATRICULADOS POR RAÇA id=37 - OK
+Dado: Matriculados por Sexo id=38 - OK
+Dado: IDEB ESCOLA AI id=90 - OK
+Dado: Matriculados por Sexo id=160 - OK
+Dado: Dependência id=116 - OK
+Dado: Bairro Escola id=91 - OK
+Dado: Prisional e SocioEducativo id=119 - OK
+Dado: Defasagem Medio Escola id=88 - OK
+Dado: Pré Escola id=129 - OK
+Dado: Educação Jovens e Adultos - Fundamental Inicial id=205 - OK
+Dado: Outras Matrículas id=243 - OK
+Dado: IDEB ESCOLA AF id=89 - OK
+Dado: Localização id=111 - OK
+Dado: MATRICULADOS POR RAÇA id=95 - OK
+Dado: Escola Integral id=92 - OK
+Dado: matriculados portadores de necessidades especiais id=140 - OK
+Dado: Fundamental Final id=133 - OK
+Dado: Creche id=124 - OK
+Dado: Ensino Médio id=136 - OK
+Dado: Educação Jovens e Adultos - Fundamental Final id=206 - OK
+Dado: educação jovens e adultos ensino médio id=207 - OK
+Dado: dependência para PNE? id=159 - OK
+Dado: Taxas de Rendimento - Ensino Fundamental id=431 - OK
+Dado: Taxas de Rendimento - Ensino Médio id=435 - OK
+--------\n
+Verificando Dado(caixinhas) para entidade Bairro
+Dado: Predios MPRJ id=212 - OK
+Dado: Eleitores Aptos por Sexo id=423 - OK
+Dado: MATRICULADOS POR RAÇA id=178 - OK
+Dado: Outras Matrículas id=257 - OK
+Dado: MATRICULADOS PORTADORES DE NECESSIDADES ESPECIAIS id=176 - OK
+Dado: ABSTENÇÕES 2018_1 id=469 - OK
+Dado: MATRÍCULAS EJA FUNDAMENTAL FINAL id=209 - OK
+Dado: MATRÍCULAS ENSINO MÉDIO id=174 - OK
+Dado: MATRÍCULAS EJA FUNDAMENTAL INICIAL id=208 - OK
+Dado: MATRÍCULAS id=487 - OK
+Dado: MATRÍCULAS CRECHES id=39 - OK
+Dado: MATRÍCULAS PRÉ ESCOLA id=40 - OK
+Dado: MATRÍCULAS FUNDAMENTAL INICIAL id=41 - OK
+Dado: MATRICULAS FUNDAMENTAL FINAL id=42 - OK
+Dado: MATRÍCULAS ENSINO MÉDIO id=43 - OK
+Dado: MATRÍCULAS EJA FUNDAMENTAL INICIAL id=44 - OK
+Dado: MATRÍCULAS EJA FUNDAMENTAL FINAL id=45 - OK
+Dado: MATRÍCULAS EJA ENSINO MÉDIO id=46 - OK
+Dado: Outras Matrículas id=47 - OK
+Dado: MATRICULADOS POR RAÇA id=48 - OK
+Dado: MATRICULADOS POR SEXO id=49 - OK
+Dado: ESCOLA PRISIONAL OU SOCIOEDUCATIVO id=163 - OK
+Dado: ESCOLA PÚBLICA ENSINO INTEGRAL id=175 - OK
+Dado: Eleitores Aptos por idade id=406 - OK
+Dado: COMPARECIMENTO 2018_1 id=470 - OK
+Dado: ESCOLAS POR ESFERA ADMINISTRATIVA id=180 - OK
+Dado: MATRICULADOS POR SEXO id=179 - OK
+Dado: MATRÍCULAS FUNDAMENTAL INICIAL id=172 - OK
+Dado: MATRICULAS FUNDAMENTAL FINAL id=173 - OK
+Dado: MATRÍCULAS PRÉ ESCOLA id=170 - OK
+Dado: MATRÍCULAS CRECHES id=168 - OK
+Dado: LOCALIZAÇÃO id=162 - OK
+Dado: DEPENDÊNCIA PARA PESSOAS COM NECESSIDADES ESPECIAIS id=177 - OK
+Dado: Lista Escolas Bairro id=374 - OK
+Dado: MATRÍCULAS EJA ENSINO MÉDIO id=217 - OK
+Dado: Eleitores Aptos por Escolaridade id=422 - OK
+Dado: ABSTENÇÕES 2018_2 id=471 - OK
+Dado: COMPARECIMENTO 2018_2 id=472 - OK
+--------\n
+Verificando Dado(caixinhas) para entidade Delegacia
+Dado: Homicídio Doloso id=350 - OK
+Dado: Homicídio culposo id=366 - OK
+Dado: Apreensão de drogas id=351 - OK
+Dado: Tentativa de homicídio id=360 - OK
+Dado: Roubo de carga id=367 - OK
+Dado: Lesao corporal seguida de morte id=352 - OK
+Dado: Lesão corporal culposa id=368 - OK
+Dado: Latrocinio id=353 - OK
+Dado: Estelionato id=361 - OK
+Dado: Delegacia id=369 - OK
+Dado: Registro de ocorrência id=354 - OK
+Dado: Lesao corporal dolosa id=362 - OK
+Dado: PM morte em serviço id=356 - OK
+Dado: Roubo a transeunte id=364 - OK
+Dado: Morte por intervenção de agente do Estado id=357 - OK
+Dado: Estupro id=365 - OK
+Dado: Pessoas Desaparecidas id=358 - OK
+--------\n
+Traceback (most recent call last):
+  File "./manage.py", line 21, in <module>
+    main()
+  File "./manage.py", line 17, in main
+    execute_from_command_line(sys.argv)
+  File "/Users/felipeferreira/.virtualenvs/apimpmapas/lib/python3.7/site-packages/django/core/management/__init__.py", line 381, in execute_from_command_line
+    utility.execute()
+  File "/Users/felipeferreira/.virtualenvs/apimpmapas/lib/python3.7/site-packages/django/core/management/__init__.py", line 375, in execute
+    self.fetch_command(subcommand).run_from_argv(self.argv)
+  File "/Users/felipeferreira/.virtualenvs/apimpmapas/lib/python3.7/site-packages/django/core/management/base.py", line 323, in run_from_argv
+    self.execute(*args, **cmd_options)
+  File "/Users/felipeferreira/.virtualenvs/apimpmapas/lib/python3.7/site-packages/django/core/management/base.py", line 364, in execute
+    output = self.handle(*args, **options)
+  File "/Users/felipeferreira/Projetos/apimpmapas/lupa/management/commands/checkconsistency.py", line 67, in handle
+    entidade = Entidade.objects.get(id=entity_id)
+  File "/Users/felipeferreira/.virtualenvs/apimpmapas/lib/python3.7/site-packages/django/db/models/manager.py", line 82, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/felipeferreira/.virtualenvs/apimpmapas/lib/python3.7/site-packages/django/db/models/query.py", line 408, in get
+    self.model._meta.object_name
+lupa.models.DoesNotExist: Entidade matching query does not exist.
+--------\n
+Verificando Dado(caixinhas) para entidade Locais de Votação
+Dado: COMPARECIMENTO 2016_1 id=411 - OK
+Dado: ABSTENÇÕES 2016_2 id=412 - OK
+Dado: Eleitores Aptos por Sexo id=384 - OK
+Dado: COMPARECIMENTO 2016_2 id=413 - OK
+Dado: Eleitores Aptos por Escolaridade id=381 - OK
+Dado: ABSTENÇÕES 2018_1 id=414 - OK
+Dado: ABSTENÇÕES 2016_1 id=408 - OK
+Dado: COMPARECIMENTO 2018_1 id=415 - OK
+Dado: Eleitores aptos por idade id=395 - OK
+Dado: ABSTENÇÕES 2018_2 id=416 - OK
+Dado: COMPARECIMENTO 2018_2 id=417 - OK
+--------\n

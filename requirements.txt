@@ -15,6 +15,7 @@ git+https://github.com/MinisterioPublicoRJ/login-sca
 gunicorn==19.9.0
 impyla
 Markdown
+newrelic==5.4.0.132
 psycopg2-binary
 pyjwt
 python-decouple
