@@ -1,3 +1,4 @@
+from decouple import config
 from django.core.cache import cache
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,7 +11,11 @@ from desaparecidos.tasks import async_calculate_rank
 class DesaparecidosView(APIView):
     def post(self, request, *args, **kwargs):
         id_sinalid = kwargs.pop('id_sinalid')
-        cursor = client()
+        cursor = client(
+            config('DESAPARECIDOS_DB_USER'),
+            config('DESAPARECIDOS_DB_PWD'),
+            config('DESAPARECIDOS_DB_HOST')
+        )
         person = search_target_person(cursor, id_sinalid)
         if person is None:
             data, status\
