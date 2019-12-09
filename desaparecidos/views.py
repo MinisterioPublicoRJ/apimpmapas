@@ -9,7 +9,7 @@ from desaparecidos.tasks import async_calculate_rank
 
 
 class DesaparecidosView(APIView):
-    def post(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         id_sinalid = kwargs.pop('id_sinalid')
         cursor = client(
             config('DESAPARECIDOS_DB_USER'),
@@ -26,6 +26,6 @@ class DesaparecidosView(APIView):
         if data is None:
             async_calculate_rank.delay(id_sinalid, person)
             cache.set(id_sinalid, {'status': 'processing'})
-            data, status = {'status': 'Seu pedido será processado'}, 200
+            data, status = {'status': 'Seu pedido será processado'}, 201
 
         return Response(data, status=status)

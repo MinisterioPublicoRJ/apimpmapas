@@ -2,6 +2,7 @@ from unittest import mock
 
 import pandas
 
+from decouple import config
 from django.shortcuts import reverse
 from django.test import TestCase
 
@@ -22,7 +23,7 @@ class TestDesaparecidos(TestCase):
             kwargs={'id_sinalid': id_sinalid}
         )
 
-        resp = self.client.post(url)
+        resp = self.client.get(url)
         expected_resp = {'status': 'Seu pedido será processado'}
 
         _cache.get.assert_called_once_with(id_sinalid)
@@ -34,7 +35,7 @@ class TestDesaparecidos(TestCase):
             id_sinalid,
             {'status': 'processing'}
         )
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 201)
         self.assertEqual(resp.data, expected_resp)
 
     @mock.patch('desaparecidos.views.search_target_person')
@@ -51,7 +52,7 @@ class TestDesaparecidos(TestCase):
             kwargs={'id_sinalid': id_sinalid}
         )
 
-        resp = self.client.post(url)
+        resp = self.client.get(url)
 
         _cache.get.assert_called_once_with(id_sinalid)
         _async_calculate_rank.delay.assert_not_called()
@@ -72,7 +73,7 @@ class TestDesaparecidos(TestCase):
             kwargs={'id_sinalid': id_sinalid}
         )
 
-        resp = self.client.post(url)
+        resp = self.client.get(url)
 
         _cache.get.assert_called_once_with(id_sinalid)
         _async_calculate_rank.delay.assert_not_called()
@@ -96,9 +97,13 @@ class TestDesaparecidos(TestCase):
             kwargs={'id_sinalid': id_sinalid}
         )
 
-        resp = self.client.post(url)
+        resp = self.client.get(url)
 
-        _client.assert_called_once_with()
+        _client.assert_called_once_with(
+            config('DESAPARECIDOS_DB_USER'),
+            config('DESAPARECIDOS_DB_PWD'),
+            config('DESAPARECIDOS_DB_HOST')
+        )
         _search.assert_called_once_with(cursor_mock, id_sinalid)
         _cache.get.assert_not_called()
         _async_calculate_rank.delay.assert_not_called()
