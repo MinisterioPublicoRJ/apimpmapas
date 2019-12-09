@@ -17,5 +17,10 @@ def async_calculate_rank(id_sinalid, target_person):
     score_df = calculate_scores(target_person, persons)
     final_score_df = final_score(score_df)
 
-    cache_data = {'status': 'ready', 'data': final_score_df.iloc[:100]}
+    data_len = config('DESAPARECIDOS_DATA_LEN', cast=int)
+    data = final_score_df.head(data_len)
+    cache_data = {
+        'status': 'ready',
+        'data': data.to_dict()
+    }
     cache.set(id_sinalid, cache_data)
