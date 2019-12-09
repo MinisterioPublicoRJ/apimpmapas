@@ -10,7 +10,8 @@ class DesaparecidosView(APIView):
         id_sinalid = kwargs.pop('id_sinalid')
         data = cache.get(id_sinalid)
         if data is None:
-            async_calculate_rank(id_sinalid)
+            async_calculate_rank.delay(id_sinalid)
+            cache.set(id_sinalid, {'status': 'processing'})
             data = {'status': 'Seu pedido será processado'}
 
         return Response(data)
