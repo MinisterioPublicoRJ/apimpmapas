@@ -16,7 +16,9 @@ class TestDesaparecidos(TestCase):
         )
 
         resp = self.client.post(url)
+        expected_resp = {'status': 'Seu pedido será processado'}
 
         _cache.get.assert_called_once_with(id_sinalid)
         _async_calculate_rank.assert_called_once_with(id_sinalid)
         self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, expected_resp)
