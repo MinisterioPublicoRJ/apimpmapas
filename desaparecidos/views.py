@@ -19,7 +19,7 @@ class DesaparecidosView(APIView):
             data, status = cache.get(id_sinalid), 200
 
         if data is None:
-            async_calculate_rank.delay(id_sinalid)
+            async_calculate_rank.delay(id_sinalid, person)
             cache.set(id_sinalid, {'status': 'processing'})
             data, status = {'status': 'Seu pedido será processado'}, 200
 

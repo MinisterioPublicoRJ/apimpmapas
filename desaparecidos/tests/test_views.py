@@ -1,5 +1,7 @@
 from unittest import mock
 
+import pandas
+
 from django.shortcuts import reverse
 from django.test import TestCase
 
@@ -11,6 +13,8 @@ class TestDesaparecidos(TestCase):
     @mock.patch('desaparecidos.views.async_calculate_rank')
     def test_search_id_sinalid(self, _async_calculate_rank, _cache, _client,
                                _search):
+        target_person = pandas.Series([1, 2, 3], index=['a', 'b', 'c'])
+        _search.return_value = target_person
         _cache.get.return_value = None
         id_sinalid = '12345'
         url = reverse(
@@ -22,7 +26,10 @@ class TestDesaparecidos(TestCase):
         expected_resp = {'status': 'Seu pedido será processado'}
 
         _cache.get.assert_called_once_with(id_sinalid)
-        _async_calculate_rank.delay.assert_called_once_with(id_sinalid)
+        _async_calculate_rank.delay.assert_called_once_with(
+            id_sinalid,
+            target_person
+        )
         _cache.set.assert_called_once_with(
             id_sinalid,
             {'status': 'processing'}
