@@ -25,3 +25,14 @@ class TestUtils(TestCase):
             'key 2': list(range(110, 120))
         }
         self.assertEqual(page_data, expected_data)
+
+    def test_paginate_data_page_size(self):
+        data = {'key 1': list(range(100)), 'key 2': list(range(100, 200))}
+
+        page_data = paginate(data, page=3, page_size=20)
+
+        expected_data = {
+            'key 1': list(range(40, 60)),
+            'key 2': list(range(140, 160))
+        }
+        self.assertEqual(page_data, expected_data)
