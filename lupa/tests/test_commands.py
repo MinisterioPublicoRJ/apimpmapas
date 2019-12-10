@@ -10,9 +10,6 @@ from lupa.management.commands.checkconsistency import (
     parsecolumns
 )
 from lupa.models import ColunaDado, Entidade, DadoEntidade, DadoDetalhe
-from lupa.serializers import (EntidadeSerializer,
-                              DadoEntidadeSerializer,
-                              DadoDetalheSerializer)
 
 
 class TestCheckConsistency(TestCase):
