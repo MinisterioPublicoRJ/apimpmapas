@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from busca_desaparecidos.dao import client, search_target_person
 
 from desaparecidos.tasks import async_calculate_rank
-from desaparecidos.utils import paginate
+from desaparecidos.utils import paginate, previous_next_page
 
 
 def _client():
@@ -17,14 +17,37 @@ def _client():
     )
 
 
-def _paginate(data, page):
-    try:
-        page = int(page)
-    except ValueError:
-        page = 1
+def page_to_int(func):
+    def inner(*args, **kwargs):
+        try:
+            page = int(kwargs.pop('page'))
+        except ValueError:
+            page = 1
 
+        return func(page=page, *args, **kwargs)
+
+    return inner
+
+
+@page_to_int
+def _paginate(data, page):
     page_size = config('DESAPARECIDOS_PAGE_SIZE', cast=int)
     return paginate(data, page=page, page_size=page_size)
+
+
+@page_to_int
+def _links(request, page):
+    base_url = '{scheme}://{host}{path}'.format(
+        scheme=request.scheme,
+        host=request.META.get('HTTP_HOST', 'localhost.com'),
+        path=request.path
+    )
+    return previous_next_page(
+        base_url,
+        page=page,
+        data_len=config('DESAPARECIDOS_DATA_LEN', cast=int),
+        page_size=config('DESAPARECIDOS_PAGE_SIZE', cast=int),
+    )
 
 
 class DesaparecidosView(APIView):
@@ -46,6 +69,7 @@ class DesaparecidosView(APIView):
 
         if data['status'] == 'ready':
             page = request.GET.get('page', 1)
-            data['data'] = _paginate(data['data'], page)
+            data['data'] = _paginate(data['data'], page=page)
+            data['_links'] = _links(request, page=page)
 
         return Response(data, status=status)

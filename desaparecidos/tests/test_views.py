@@ -137,5 +137,16 @@ class TestDesaparecidos(TestCase):
             page=1,
             page_size=config('DESAPARECIDOS_PAGE_SIZE', cast=int)
         )
+        expected_resp_data = {
+            'status': 'ready',
+            'data': [1, 2],
+            '_links': {
+                'first': 'http://localhost.com/desaparecidos/12345?page=1',
+                'last': 'http://localhost.com/desaparecidos/12345?page=10',
+                'next': 'http://localhost.com/desaparecidos/12345?page=2',
+                'prev': None,
+                'self': 'http://localhost.com/desaparecidos/12345?page=1',
+            }
+        }
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.data, {'status': 'ready', 'data': [1, 2]})
+        self.assertEqual(resp.data, expected_resp_data)
