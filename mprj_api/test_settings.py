@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.gis',
 
     'rest_framework',
     'nested_admin',
@@ -53,6 +52,7 @@ INSTALLED_APPS = [
     'lupa',
     'login',
     'mprj_plus',
+    'desaparecidos',
 ]
 
 MIDDLEWARE = [
