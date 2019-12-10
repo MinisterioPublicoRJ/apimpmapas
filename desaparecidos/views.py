@@ -9,6 +9,15 @@ from desaparecidos.tasks import async_calculate_rank
 from desaparecidos.utils import paginate
 
 
+def _paginate(data, page):
+    try:
+        page = int(page)
+    except ValueError:
+        page = 1
+
+    return paginate(data, page=page)
+
+
 class DesaparecidosView(APIView):
     def get(self, request, *args, **kwargs):
         id_sinalid = kwargs.pop('id_sinalid')
@@ -28,8 +37,8 @@ class DesaparecidosView(APIView):
             cache.set(id_sinalid, {'status': 'processing'})
             data, status = {'status': 'Seu pedido será processado'}, 201
         else:
-            page = int(request.GET.get('page', '1'))
+            page = int(request.GET.get('page', 1))
             if data['status'] == 'ready':
-                data['data'] = paginate(data['data'], page=page)
+                data['data'] = _paginate(data['data'], page)
 
         return Response(data, status=status)
