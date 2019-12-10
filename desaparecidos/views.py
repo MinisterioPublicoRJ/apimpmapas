@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from busca_desaparecidos.dao import client, search_target_person
 
 from desaparecidos.tasks import async_calculate_rank
+from desaparecidos.utils import paginate
 
 
 class DesaparecidosView(APIView):
@@ -22,10 +23,13 @@ class DesaparecidosView(APIView):
                 = {'status': 'Identificador Sinalid não encontrado'}, 404
         else:
             data, status = cache.get(id_sinalid), 200
-
         if data is None:
             async_calculate_rank.delay(id_sinalid, person)
             cache.set(id_sinalid, {'status': 'processing'})
             data, status = {'status': 'Seu pedido será processado'}, 201
+        else:
+            page = int(request.GET.get('page', '1'))
+            if data['status'] == 'ready':
+                data['data'] = paginate(data['data'], page=page)
 
         return Response(data, status=status)
