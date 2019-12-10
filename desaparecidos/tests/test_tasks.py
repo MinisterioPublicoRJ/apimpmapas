@@ -19,7 +19,7 @@ class Task(TestCase):
                             _final_score, _cache):
         target_person = pandas.Series([1, 2, 3], index=['a', 'b', 'c'])
         data_mock = mock.MagicMock()
-        data_mock = [{'a': 1, 'b': 2}, {'a': 3, 'b': 4}]
+        data_mock.to_dict.return_value = [{'a': 1, 'b': 2}, {'a': 3, 'b': 4}]
         final_score_df = mock.MagicMock()
         final_score_df.head.return_value = data_mock
         _final_score.return_value = final_score_df
@@ -36,8 +36,9 @@ class Task(TestCase):
         _all_persons.assert_called_once_with('cursor')
         _calculate_score.assert_called_once_with(target_person, 'persons')
         _final_score.assert_called_once_with('score_df')
-        DESAPARECIDOS_DATA_LEN = config('DESAPARECIDOS_DATA_LEN', cast=int)
-        final_score_df.head.assert_called_once_with(DESAPARECIDOS_DATA_LEN)
+        len_data = config('DESAPARECIDOS_DATA_LEN', cast=int)
+        final_score_df.head.assert_called_once_with(len_data)
+        data_mock.to_dict.assert_called_once_with()
         _cache.set.assert_called_once_with(
             id_sinalid,
             {'status': 'ready', 'data': [{'a': 1, 'b': 2}, {'a': 3, 'b': 4}]}

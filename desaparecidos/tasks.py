@@ -21,6 +21,6 @@ def async_calculate_rank(id_sinalid, target_person):
     data = final_score_df.head(data_len)
     cache_data = {
         'status': 'ready',
-        'data': data
+        'data': data.to_dict()
     }
     cache.set(id_sinalid, cache_data)
