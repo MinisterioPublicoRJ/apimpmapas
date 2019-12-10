@@ -23,7 +23,8 @@ def _paginate(data, page):
     except ValueError:
         page = 1
 
-    return paginate(data, page=page)
+    page_size = config('DESAPARECIDOS_PAGE_SIZE', cast=int)
+    return paginate(data, page=page, page_size=page_size)
 
 
 class DesaparecidosView(APIView):

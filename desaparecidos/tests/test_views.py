@@ -132,6 +132,10 @@ class TestDesaparecidos(TestCase):
 
         _cache.get.assert_called_once_with(id_sinalid)
         _async_calculate_rank.delay.assert_not_called()
-        _paginate.assert_called_once_with([1, 2, 3, 4], page=1)
+        _paginate.assert_called_once_with(
+            [1, 2, 3, 4],
+            page=1,
+            page_size=config('DESAPARECIDOS_PAGE_SIZE', cast=int)
+        )
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, {'status': 'ready', 'data': [1, 2]})
