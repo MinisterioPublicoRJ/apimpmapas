@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from desaparecidos.utils import paginate
+from desaparecidos.utils import paginate, previous_next_page
 
 
 class TestUtils(TestCase):
@@ -45,3 +45,25 @@ class TestUtils(TestCase):
             'key 2': dict(zip(range(20), range(140, 160)))
         }
         self.assertEqual(page_data, expected_data)
+
+    def test_next_page_url(self):
+        base_url = 'http://base.com'
+        page = 1
+        data_len = 100
+        page_size = 10
+
+        page_url = previous_next_page(
+            base_url,
+            page,
+            data_len,
+            page_size
+        )
+        expected = {
+            'self': 'http://base.com?page=1',
+            'first': 'http://base.com?page=1',
+            'prev': None,
+            'next': 'http://base.com?page=2',
+            'last': 'http://base.com?page=10'
+        }
+
+        self.assertEqual(page_url, expected)
