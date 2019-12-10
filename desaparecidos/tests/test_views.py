@@ -150,3 +150,43 @@ class TestDesaparecidos(TestCase):
         }
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, expected_resp_data)
+
+    @mock.patch('desaparecidos.views.paginate')
+    @mock.patch('desaparecidos.views.search_target_person')
+    @mock.patch('desaparecidos.views.client')
+    @mock.patch('desaparecidos.views.cache')
+    @mock.patch('desaparecidos.views.async_calculate_rank')
+    def test_search_paginate_default_invalid_page(self, _async_calculate_rank,
+                                                  _cache, _client, _search,
+                                                  _paginate):
+        cache_resp = {'status': 'ready', 'data': [1, 2, 3, 4]}
+        _paginate.return_value = [1, 2]
+        _cache.get.return_value = cache_resp
+        id_sinalid = '12345'
+        url = reverse(
+            'desaparecidos:busca',
+            kwargs={'id_sinalid': id_sinalid}
+        )
+
+        resp = self.client.get(url + '?page=invalid')
+
+        _cache.get.assert_called_once_with(id_sinalid)
+        _async_calculate_rank.delay.assert_not_called()
+        _paginate.assert_called_once_with(
+            [1, 2, 3, 4],
+            page=1,
+            page_size=config('DESAPARECIDOS_PAGE_SIZE', cast=int)
+        )
+        expected_resp_data = {
+            'status': 'ready',
+            'data': [1, 2],
+            '_links': {
+                'first': 'http://localhost.com/desaparecidos/12345?page=1',
+                'last': 'http://localhost.com/desaparecidos/12345?page=10',
+                'next': 'http://localhost.com/desaparecidos/12345?page=2',
+                'prev': None,
+                'self': 'http://localhost.com/desaparecidos/12345?page=1',
+            }
+        }
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, expected_resp_data)
