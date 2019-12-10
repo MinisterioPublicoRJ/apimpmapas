@@ -38,7 +38,7 @@ class Task(TestCase):
         _final_score.assert_called_once_with('score_df')
         len_data = config('DESAPARECIDOS_DATA_LEN', cast=int)
         final_score_df.head.assert_called_once_with(len_data)
-        data_mock.to_dict.assert_called_once_with()
+        data_mock.to_dict.assert_called_once_with(orient='records')
         _cache.set.assert_called_once_with(
             id_sinalid,
             {'status': 'ready', 'data': [{'a': 1, 'b': 2}, {'a': 3, 'b': 4}]}
