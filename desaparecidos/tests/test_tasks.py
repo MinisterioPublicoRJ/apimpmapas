@@ -18,14 +18,22 @@ class Task(TestCase):
     def test_calculate_rank(self, _client, _all_persons, _calculate_score,
                             _final_score, _cache):
         target_person = pandas.Series([1, 2, 3], index=['a', 'b', 'c'])
+
+        # data frame mocks
         data_mock = mock.MagicMock()
-        data_mock.to_dict.return_value = [{'a': 1, 'b': 2}, {'a': 3, 'b': 4}]
+        data_replace_mock = mock.MagicMock()
+        data_replace_mock.to_dict.return_value = [
+            {'a': 1, 'b': 2}, {'a': 3, 'b': 4}
+        ]
+        data_mock.replace.return_value = data_replace_mock
         final_score_df = mock.MagicMock()
         final_score_df.head.return_value = data_mock
         _final_score.return_value = final_score_df
-        _client.return_value = 'cursor'
-        id_sinalid = '12345'
 
+        # cursor mock
+        _client.return_value = 'cursor'
+
+        id_sinalid = '12345'
         async_calculate_rank(id_sinalid, target_person)
 
         _client.assert_called_once_with(

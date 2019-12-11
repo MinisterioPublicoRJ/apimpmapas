@@ -1,3 +1,5 @@
+import pandas
+
 from busca_desaparecidos.dao import client, all_persons
 from busca_desaparecidos.rank import calculate_scores, final_score
 from decouple import config
@@ -19,8 +21,11 @@ def async_calculate_rank(id_sinalid, target_person):
 
     data_len = config('DESAPARECIDOS_DATA_LEN', cast=int)
     data = final_score_df.head(data_len)
+    data = data.replace({pandas.np.nan: None})
+
     cache_data = {
         'status': 'ready',
-        'data': data.to_dict(orient='records')
+        'data': data.to_dict(orient='records'),
+        'target_data': target_person.to_dict()
     }
     cache.set(id_sinalid, cache_data)
