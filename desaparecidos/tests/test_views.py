@@ -66,7 +66,11 @@ class TestDesaparecidos(TestCase):
     @mock.patch('desaparecidos.views.async_calculate_rank')
     def test_search_ready(self, _async_calculate_rank, _cache, _client,
                           _search, _paginate):
-        cache_resp = {'status': 'ready', 'data': [1, 2, 3, 4]}
+        cache_resp = {
+            'status': 'ready',
+            'data': [1, 2, 3, 4],
+            'target_data': [6, 7, 8, 9]
+        }
         _paginate.return_value = [1, 2, 3, 4]
         _cache.get.return_value = cache_resp
         id_sinalid = '12345'
