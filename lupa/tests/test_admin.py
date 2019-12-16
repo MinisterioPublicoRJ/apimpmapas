@@ -2,8 +2,8 @@ from django.contrib.admin.sites import AdminSite
 from model_mommy.mommy import make
 from unittest import TestCase, mock
 from lupa.admin import remove_data_from_cache, remove_entity_from_cache
-from lupa.models import DadoEntidade, DadoDetalhe
-from lupa.admin import DadoEntidadeAdmin
+from lupa.models import DadoEntidade, DadoDetalhe, Entidade
+from lupa.admin import DadoEntidadeAdmin, EntidadeAdmin
 import pytest
 
 
@@ -509,3 +509,39 @@ class TestChangeToDetail(TestCase):
         )
 
         _executor.assert_called_once_with(request, queryset)
+
+
+@pytest.mark.django_db(transaction=True)
+class TestRoleExhibition(TestCase):
+    def setUp(self):
+        self.adminsite = AdminSite()
+        self.grupo_1_name = 'GRUPO_1'
+        self.grupo_2_name = 'GRUPO_2'
+        self.grupo_1 = make('lupa.Grupo', name=self.grupo_1_name)
+        self.grupo_2 = make('lupa.Grupo', name=self.grupo_2_name)
+        self.entidade = make(
+            'lupa.Entidade',
+            roles_allowed=[self.grupo_1, self.grupo_2]
+        )
+        self.dado = make(
+            'lupa.DadoEntidade',
+            roles_allowed=[self.grupo_1, self.grupo_2]
+        )
+
+    def test_roles_entidade(self):
+        self.entidadeadmin = EntidadeAdmin(
+            Entidade,
+            self.adminsite
+        )
+        roles = self.entidadeadmin.get_roles(self.entidade)
+
+        self.assertEqual(roles, f'{self.grupo_1_name}\n{self.grupo_2_name}')
+
+    def test_roles_dado(self):
+        self.dadoadmin = DadoEntidadeAdmin(
+            DadoEntidade,
+            self.adminsite
+        )
+        roles = self.dadoadmin.get_roles(self.dado)
+
+        self.assertEqual(roles, f'{self.grupo_1_name}\n{self.grupo_2_name}')

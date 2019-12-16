@@ -10,6 +10,7 @@ from lupa.cache import (
     DATA_ENTITY_KEY_PREFIX,
     DATA_DETAIL_KEY_PREFIX
 )
+from lupa.managers import RoleManager, DadoDetalheManager
 from lupa.tasks import (
     asynch_remove_from_cache,
     asynch_repopulate_cache_entity,
@@ -49,6 +50,22 @@ MANDATORY_GEOJSON_COLUMN = (
 )
 ONLY_POSTGIS_SUPORTED = (
     'Apenas a engine PostgreSQL Opengeo suporta busca geolocalizada'
+)
+ROLES_TOOLTIP = (
+    'Deixar em branco para todos<br>'
+    'Usar "Usuários autorizados" para qualquer usuário logado<br>'
+    'Usar "Convidados" para qualquer usuário NÃO logado<br>'
+)
+COLUMN_TOOLTIP = (
+    '<pre>'
+    'Toda caixinha e mapa precisa de uma coluna de id\n'
+    'Toda caixinha precisa de uma coluna de dados\n'
+    'Todo mapa precisa de uma coluna de geojson, '
+    'contendo a string json de um mapa\n'
+    'Caixinhas de gráficos precisam de uma coluna do tipo label\n'
+    'Colunas de imagem precisam referenciar um campo do tipo "BLOB"\n'
+    'Colunas de tipo e id de entidade vinculada precisam existir aos pares'
+    '</pre>'
 )
 
 
@@ -175,7 +192,7 @@ class Entidade(models.Model):
         related_name="entity_allowed",
         verbose_name="grupos com acesso",
         blank=True,
-        help_text='Deixar em branco para todos',
+        help_text=ROLES_TOOLTIP,
     )
 
     database = models.CharField(
@@ -239,7 +256,7 @@ class Entidade(models.Model):
         blank=True,
         verbose_name='Data da última atualização do cache'
     )
-    objects = models.Manager()
+    objects = RoleManager()
     cache = CacheManager()
 
     def obter_dados(self):
@@ -478,7 +495,7 @@ class DadoEntidade(Dado):
         related_name="data_allowed",
         verbose_name="grupos com acesso",
         blank=True,
-        help_text='Deixar em branco para todos',
+        help_text=ROLES_TOOLTIP,
     )
 
     show_box = models.BooleanField(
@@ -488,6 +505,7 @@ class DadoEntidade(Dado):
 
     # CONFIG FIELDS
     order_with_respect_to = 'entity_type'
+    objects = RoleManager()
 
     class Meta:
         verbose_name = 'dado'
@@ -566,16 +584,12 @@ class DadoDetalhe(Dado):
 
     # CONFIG FIELDS
     order_with_respect_to = 'dado_main'
+    objects = DadoDetalheManager()
 
 
 class Coluna(models.Model):
     # CLASS FIELDS
-    help_info_type = '''<pre>Toda caixinha e mapa precisa de uma coluna de id
-Toda caixinha precisa de uma coluna de dados
-Todo mapa precisa de uma coluna de geojson, contendo a string json de um mapa
-Caixinhas de gráficos precisam de uma coluna do tipo label
-Colunas de imagem precisam referenciar um campo do tipo "BLOB"
-Colunas de tipo e id de entidade vinculada precisam existir aos pares</pre>'''
+    help_info_type = COLUMN_TOOLTIP
 
     # CHOICES
     ID_COLUMN = 'id'

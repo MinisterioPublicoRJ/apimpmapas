@@ -1,10 +1,11 @@
 from datetime import datetime as dt
+from unittest import mock
+from unittest.mock import call, MagicMock
 
 from django.core.management import call_command
 from django.test import TestCase
 from model_mommy.mommy import make
-from unittest import mock
-from unittest.mock import call, MagicMock
+
 from lupa.management.commands.checkconsistency import (
     Command,
     parsecolumns

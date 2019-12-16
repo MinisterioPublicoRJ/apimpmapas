@@ -9,11 +9,19 @@ import jwt
 import pytest
 from model_mommy.mommy import make
 import responses
+from rest_framework.response import Response
 
 from lupa import osmapi
+from lupa.cache import (
+    ENTITY_KEY_PREFIX,
+    ENTITY_KEY_CHECK,
+    DATA_ENTITY_KEY_PREFIX,
+    DATA_ENTITY_KEY_CHECK,
+    DATA_DETAIL_KEY_PREFIX,
+    DATA_DETAIL_KEY_CHECK
+)
 from lupa.exceptions import QueryError
 from .fixtures.osmapi import default_response
-from lupa.views import EntityDataView
 
 
 class NoCacheTestCase:
@@ -156,16 +164,146 @@ class EntidadeViewTest(NoCacheTestCase, TestCase):
 
         self.assertEqual(resp.status_code, 404)
 
-    def test_entidade_nao_autorizavel(self):
-        view = EntityDataView()
-        response = view.process_request(
-            request=None,
-            obj=None,
-            serializer=None,
-            key_check=None
+    @mock.patch('lupa.views.get_cache')
+    @mock.patch('lupa.views.get_object_or_404')
+    def test_get_cache_entidade(self, _get_object_or_404, _get_cache):
+        expected_response = {'id': 1, 'abreviation': 'EST'}
+
+        _get_object_or_404.return_value = 'mock'
+        _get_cache.return_value = Response(expected_response)
+        kwargs = {'entity_type': 'EST', 'domain_id': '33'}
+
+        url = reverse('lupa:detail_entidade', args=('EST', '33'))
+        resp = self.client.get(url)
+        resp_json = resp.json()
+
+        self.assertEqual(resp.status_code, 200)
+        call_args = _get_cache.call_args_list[0][0]
+        self.assertEqual(
+            call_args,
+            (ENTITY_KEY_PREFIX, kwargs)
+        )
+        self.assertEqual(resp_json, expected_response)
+
+    @mock.patch('lupa.views.save_cache')
+    @mock.patch('lupa.serializers.execute')
+    def test_save_cache_entidade(self, _execute, _save_cache):
+        expected_answer = {
+            'domain_id': '33',
+            'entity_type': 'Estado',
+            'exibition_field': 'Rio de Janeiro',
+            'geojson': None,
+            'theme_list': [
+                {
+                    'tema': None,
+                    'cor': None,
+                    'data_list': [
+                        {'id': 4}
+                    ]
+                },
+                {
+                    'tema': 'Segurança',
+                    'cor': '#223478',
+                    'data_list': [
+                        {'id': 1},
+                        {'id': 7}
+                    ]
+                },
+                {
+                    'tema': None,
+                    'cor': None,
+                    'data_list': [
+                        {'id': 8},
+                        {'id': 2}
+                    ]
+                },
+                {
+                    'tema': 'Saúde',
+                    'cor': '#223578',
+                    'data_list': [
+                        {'id': 5}
+                    ]
+                }
+            ]
+        }
+
+        _execute.return_value = [('Rio de Janeiro', 'mock_geo')]
+
+        estado = make('lupa.Entidade', name='Estado', abreviation='EST')
+        municipio = make('lupa.Entidade', abreviation='MUN')
+
+        seguranca = make('lupa.TemaDado', name='Segurança', color='#223478')
+        saude = make('lupa.TemaDado', name='Saúde', color='#223578')
+
+        make(
+            'lupa.DadoEntidade',
+            id=1,
+            entity_type=estado,
+            theme=seguranca,
+            order=2
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=2,
+            entity_type=estado,
+            theme=None,
+            order=5
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=3,
+            entity_type=municipio,
+            order=7
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=4,
+            entity_type=estado,
+            theme=None,
+            order=1
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=5,
+            entity_type=estado,
+            theme=saude,
+            order=8
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=6,
+            entity_type=municipio,
+            order=6
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=7,
+            entity_type=estado,
+            theme=seguranca,
+            order=3
+        )
+        make(
+            'lupa.DadoEntidade',
+            id=8,
+            entity_type=estado,
+            theme=None,
+            order=4
         )
 
-        self.assertEqual(response.status_code, 401)
+        url = reverse('lupa:detail_entidade', args=('EST', '33',))
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
+        call_args = _save_cache.call_args_list[0][0]
+        self.assertEqual(
+            call_args,
+            (
+                expected_answer,
+                ENTITY_KEY_PREFIX,
+                ENTITY_KEY_CHECK,
+                {'entity_type': 'EST', 'domain_id': '33'}
+            )
+        )
 
 
 class AuthEntidadeViewTest(NoCacheTestCase, TestCase):
@@ -221,7 +359,7 @@ class AuthEntidadeViewTest(NoCacheTestCase, TestCase):
             args=(self.entity_abrv, self.entity_id)
         )
         resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 404)
 
     def test_entidade_permission_failed(self):
         payload = {'permissions': [self.role_forbidden]}
@@ -232,7 +370,7 @@ class AuthEntidadeViewTest(NoCacheTestCase, TestCase):
             args=(self.entity_abrv, self.entity_id)
         )
         resp = self.client.get(url, {'auth_token': token})
-        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 404)
 
 
 class ListDadosViewTest(TestCase, NoCacheTestCase):
@@ -479,6 +617,112 @@ class DetailDadosViewTest(TestCase, NoCacheTestCase):
 
         self.assertEqual(resp.status_code, 404)
 
+    @mock.patch('lupa.views.get_cache')
+    @mock.patch('lupa.views.get_object_or_404')
+    def test_dado_get_cache(self, _get_object_or_404, _get_cache):
+        expected_response = {
+            'id': self.data_id,
+            'external_data': {
+                'dado': self.external_data,
+                'fonte': self.external_source,
+                'id': self.data_id
+            },
+            'exibition_field': self.exibition_field,
+            'data_type': self.data_type,
+            'icon': settings.MEDIA_URL + self.icon_file,
+            'detalhe': [
+                {'id': self.detail_data_2_id},
+                {'id': self.detail_data_1_id},
+                {'id': self.detail_data_3_id},
+            ]
+        }
+
+        _get_object_or_404.return_value = 'mock'
+        _get_cache.return_value = Response(expected_response)
+        kwargs = {
+            'entity_type': self.entity_abrv,
+            'domain_id': self.domain_id,
+            'pk': self.data_id
+        }
+
+        url = reverse(
+            'lupa:detail_dado',
+            args=(self.entity_abrv, self.domain_id, self.data_id)
+        )
+        resp = self.client.get(url)
+        resp_json = resp.json()
+
+        self.assertEqual(resp.status_code, 200)
+        call_args = _get_cache.call_args_list[0][0]
+        self.assertEqual(
+            call_args,
+            (DATA_ENTITY_KEY_PREFIX, kwargs)
+        )
+        self.assertEqual(resp_json, expected_response)
+
+    @mock.patch('lupa.views.save_cache')
+    @mock.patch('lupa.serializers.execute')
+    def test_dado_save_cache(self, _execute, _save_cache):
+        expected_response = {
+            'id': self.data_id,
+            'exibition_field': self.exibition_field,
+            'external_data': {
+                'dado': self.external_data,
+                'fonte': self.external_source,
+                'id': self.data_id
+            },
+            'data_type': self.data_type,
+            'icon': None,
+            'detalhe': []
+        }
+
+        _execute.return_value = [(
+            self.external_data,
+            self.external_source,
+            self.data_id
+        )]
+
+        kwargs = {
+            'entity_type': self.entity_abrv,
+            'domain_id': self.domain_id,
+            'pk': self.data_id
+        }
+
+        entidade = make(
+            'lupa.Entidade',
+            id=self.entity_id,
+            abreviation=self.entity_abrv,
+        )
+        dado = make(
+            'lupa.DadoEntidade',
+            id=self.data_id,
+            data_type=self.data_type_obj,
+            entity_type=entidade,
+            exibition_field=self.exibition_field,
+            is_cacheable=True
+        )
+        make('lupa.ColunaDado', info_type='id', name='identi', dado=dado)
+        make('lupa.ColunaDado', info_type='fonte', name='fon', dado=dado)
+        make('lupa.ColunaDado', info_type='dado', name='data', dado=dado)
+
+        url = reverse(
+            'lupa:detail_dado',
+            args=(self.entity_abrv, self.domain_id, self.data_id)
+        )
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
+        call_args = _save_cache.call_args_list[0][0]
+        self.assertEqual(
+            call_args,
+            (
+                expected_response,
+                DATA_ENTITY_KEY_PREFIX,
+                DATA_ENTITY_KEY_CHECK,
+                kwargs
+            )
+        )
+
 
 class AuthDadosViewTest(NoCacheTestCase, TestCase):
 
@@ -556,7 +800,7 @@ class AuthDadosViewTest(NoCacheTestCase, TestCase):
             args=(self.entity_abrv, self.entity_id, self.data_id)
         )
         resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 404)
 
     def test_dado_permission_failed(self):
         payload = {'permissions': [self.role_forbidden]}
@@ -567,7 +811,7 @@ class AuthDadosViewTest(NoCacheTestCase, TestCase):
             args=(self.entity_abrv, self.entity_id, self.data_id)
         )
         resp = self.client.get(url, {'auth_token': token})
-        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 404)
 
 
 class DetalhesViewTest(TestCase, NoCacheTestCase):
@@ -690,6 +934,105 @@ class DetalhesViewTest(TestCase, NoCacheTestCase):
         )
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)
+
+    @mock.patch('lupa.views.get_cache')
+    @mock.patch('lupa.views.get_object_or_404')
+    def test_detalhe_get_cache(self, _get_object_or_404, _get_cache):
+        expected_response = {
+            'id': self.detail_id,
+            'external_data': {
+                'dado': self.external_data,
+                'id': self.data_id
+            },
+            'exibition_field': self.exibition_field,
+            'data_type': self.data_type,
+        }
+
+        _get_object_or_404.return_value = 'mock'
+        _get_cache.return_value = Response(expected_response)
+        kwargs = {
+            'entity_type': self.entity_abrv,
+            'domain_id': self.domain_id,
+            'pk': self.detail_id
+        }
+
+        url = reverse(
+            'lupa:detail_detalhes',
+            args=(self.entity_abrv, self.domain_id, self.detail_id)
+        )
+        resp = self.client.get(url)
+        resp_json = resp.json()
+
+        self.assertEqual(resp.status_code, 200)
+        call_args = _get_cache.call_args_list[0][0]
+        self.assertEqual(
+            call_args,
+            (DATA_DETAIL_KEY_PREFIX, kwargs)
+        )
+        self.assertEqual(resp_json, expected_response)
+
+    @mock.patch('lupa.views.save_cache')
+    @mock.patch('lupa.serializers.execute')
+    def test_detalhe_save_cache(self, _execute, _save_cache):
+        expected_response = {
+            'id': self.detail_id,
+            'external_data': {
+                'dado': self.external_data,
+                'id': self.data_id
+            },
+            'exibition_field': self.exibition_field,
+            'data_type': self.data_type,
+        }
+
+        _execute.return_value = [(
+            self.external_data,
+            self.data_id
+        )]
+
+        kwargs = {
+            'entity_type': self.entity_abrv,
+            'domain_id': self.domain_id,
+            'pk': self.detail_id
+        }
+
+        entidade = make(
+            'lupa.Entidade',
+            id=self.entity_id,
+            abreviation=self.entity_abrv,
+        )
+        dado = make(
+            'lupa.DadoEntidade',
+            id=self.data_id,
+            entity_type=entidade,
+        )
+        detalhe = make(
+            'lupa.DadoDetalhe',
+            id=self.detail_id,
+            exibition_field=self.exibition_field,
+            dado_main=dado,
+            data_type=self.data_type_obj,
+            is_cacheable=True
+        )
+        make('lupa.ColunaDetalhe', info_type='id', name='identi', dado=detalhe)
+        make('lupa.ColunaDetalhe', info_type='dado', name='data', dado=detalhe)
+
+        url = reverse(
+            'lupa:detail_detalhes',
+            args=(self.entity_abrv, self.domain_id, self.detail_id)
+        )
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
+        call_args = _save_cache.call_args_list[0][0]
+        self.assertEqual(
+            call_args,
+            (
+                expected_response,
+                DATA_DETAIL_KEY_PREFIX,
+                DATA_DETAIL_KEY_CHECK,
+                kwargs
+            )
+        )
 
 
 class OsmQueryViewTest(TestCase):
@@ -856,130 +1199,3 @@ class GeoSpatialQueryViewTest(TestCase, NoCacheTestCase):
 
         self.assertEqual(response.status_code, 404)
         _egsp.assert_called()
-
-
-class CacheView(TestCase):
-    @mock.patch('lupa.cache.django_cache')
-    @mock.patch('lupa.serializers.execute')
-    def test_cache_used_entity_view(self, _execute, _cache):
-        _execute.side_effect = [
-            [('mock_name', )],
-            None,
-        ]
-        make(
-            'lupa.Entidade',
-            id='33',
-            name='Estado',
-            abreviation='EST'
-        )
-        url = reverse('lupa:detail_entidade', args=('EST', '33',))
-
-        self.client.get(url)
-
-        _cache.set.assert_called_once_with(
-            'lupa_entidade:EST:33',
-            {'data': {'domain_id': '33',
-                      'entity_type': 'Estado',
-                      'exibition_field': 'mock_name',
-                      'geojson': None,
-                      'theme_list': []},
-             'status_code': 200},
-            timeout=None
-        )
-
-    @mock.patch('lupa.cache.django_cache')
-    @mock.patch('lupa.serializers.execute')
-    def test_cache_used_data_entity_view(self, _execute, _cache):
-        _execute.return_value = [(
-            'external_data',
-            'external_source',
-            1
-        )]
-        entidade = make(
-            'lupa.Entidade',
-            id=1,
-            abreviation='EST'
-        )
-        data_type_obj = make(
-            'lupa.TipoDado',
-            name='texto_pequeno_destaque',
-            serialization='Singleton'
-        )
-        dado = make(
-            'lupa.DadoEntidade',
-            id=7,
-            data_type=data_type_obj,
-            entity_type=entidade,
-            exibition_field='Abrigos para crianças e adolescentes'
-        )
-        make('lupa.ColunaDado', info_type='id', name='identi', dado=dado)
-        make('lupa.ColunaDado', info_type='fonte', name='fon', dado=dado)
-        make('lupa.ColunaDado', info_type='dado', name='data', dado=dado)
-        url = reverse('lupa:detail_dado', args=('EST', '33', 7))
-
-        self.client.get(url)
-
-        _cache.set.assert_called_once_with(
-            'lupa_dado_entidade:EST:33:7',
-            {'data': {
-                'id': 7,
-                'exibition_field': 'Abrigos para crianças e adolescentes',
-                'external_data': {'dado': 'external_data',
-                                  'fonte': 'external_source',
-                                  'id': 1},
-                'data_type': 'texto_pequeno_destaque',
-                'icon': None,
-                'detalhe': []},
-             'status_code': 200},
-            timeout=None
-        )
-
-    @mock.patch('lupa.cache.django_cache')
-    @mock.patch('lupa.serializers.execute')
-    def test_cache_used_data_detail_view(self, _execute, _cache):
-        _execute.return_value = [(
-            '202',
-            7
-        )]
-
-        entidade = make(
-            'lupa.Entidade',
-            id=1,
-            abreviation='EST'
-        )
-        dado = make(
-            'lupa.DadoEntidade',
-            id=7,
-            entity_type=entidade,
-        )
-        data_type_obj = make(
-            'lupa.TipoDado',
-            name='texto_pequeno_destaque',
-            serialization='Singleton'
-        )
-        detalhe = make(
-            'lupa.DadoDetalhe',
-            id=23,
-            exibition_field='Abrigos para crianças e adolescentes',
-            dado_main=dado,
-            data_type=data_type_obj
-        )
-        make('lupa.ColunaDetalhe', info_type='id', name='identi', dado=detalhe)
-        make('lupa.ColunaDetalhe', info_type='dado', name='data', dado=detalhe)
-
-        url = reverse(
-            'lupa:detail_detalhes',
-            args=('EST', '33', 23)
-        )
-        self.client.get(url)
-
-        _cache.set.assert_called_once_with(
-            'lupa_dado_detalhe:EST:33:23',
-            {'data': {
-                'id': 23,
-                'exibition_field': 'Abrigos para crianças e adolescentes',
-                'external_data': {'dado': '202', 'id': 7},
-                'data_type': 'texto_pequeno_destaque'},
-             'status_code': 200},
-            timeout=None
-        )

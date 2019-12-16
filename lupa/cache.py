@@ -1,15 +1,9 @@
-from operator import attrgetter
-
 import datetime as dt
 import sys
+from operator import attrgetter
 
-import jwt
-
-from decouple import config
 from django.core.cache import cache as django_cache
 from django.core.management.base import OutputWrapper
-from django.shortcuts import get_object_or_404
-from jwt.exceptions import InvalidSignatureError, DecodeError
 from rest_framework.response import Response
 
 from lupa.db_connectors import execute_sample
@@ -19,6 +13,9 @@ STDERR = OutputWrapper(sys.stderr)
 ENTITY_KEY_PREFIX = 'lupa_entidade'
 DATA_ENTITY_KEY_PREFIX = 'lupa_dado_entidade'
 DATA_DETAIL_KEY_PREFIX = 'lupa_dado_detalhe'
+
+ENTITY_KEY_CHECK = 'exibition_field'
+DATA_ENTITY_KEY_CHECK = DATA_DETAIL_KEY_CHECK = 'external_data'
 
 ENTITY_MODEL_KWARGS = {'abreviation': 'entity_type'}
 DATA_ENTITY_MODEL_KWARGS = {
@@ -36,18 +33,6 @@ def wrap_response(response_data, key_check):
     return {'data': data, 'status_code': status}
 
 
-def _decode_jwt(token):
-    try:
-        payload = jwt.decode(
-            token,
-            config('SECRET_KEY'),
-            algorithms=["HS256"]
-        )
-        return payload.get('permissions', [])
-    except (InvalidSignatureError, DecodeError):
-        return []
-
-
 def _has_role(obj, permissions):
     roles = obj.roles_allowed.all().values_list('role', flat=True)
     if roles:
@@ -56,9 +41,9 @@ def _has_role(obj, permissions):
     return True
 
 
-def cache_key(key_prefix, kwargs):
+def cache_key(key_prefix, args_dict):
     kwargs_key = ':'.join(
-        str(val) for val in kwargs.values()
+        str(val) for val in args_dict.values()
     )
 
     return '%s:%s' % (key_prefix, kwargs_key)
@@ -74,42 +59,20 @@ def wildcard_cache_key(key_prefix, keys):
     return '*%s:%s' % (key_prefix, kwargs_key)
 
 
-def custom_cache(key_prefix, model_kwargs, key_check):
-    def _custom_cache(func):
-        def inner(*args, **kwargs):
-            instance = args[0]
-            request = args[1]
-            obj = get_object_or_404(
-                instance.queryset,
-                **{k: kwargs[v] for k, v in model_kwargs.items()}
-            )
+def get_cache(key_prefix, request_args):
+    key = cache_key(key_prefix, request_args)
+    if key in django_cache:
+        cache_response = django_cache.get(key)
+        return Response(
+            cache_response['data'],
+            status=cache_response['status_code']
+        )
 
-            # If DadoDetalhe check role in the related DadoEntidade
-            obj_role = obj
-            if not hasattr(obj, 'roles_allowed'):
-                obj_role = obj.dado_main
 
-            token = request.GET.get('auth_token')
-            permissions = _decode_jwt(token)
-
-            key = cache_key(key_prefix, kwargs)
-            if key in django_cache and _has_role(obj_role, permissions):
-                cache_response = django_cache.get(key)
-                return Response(
-                    cache_response['data'],
-                    status=cache_response['status_code']
-                )
-
-            response = func(*args, **kwargs)
-            if response.status_code == 200 and obj.is_cacheable:
-                wrapped_response = wrap_response(response.data, key_check)
-                django_cache.set(key, wrapped_response, timeout=None)
-
-            return response
-
-        return inner
-
-    return _custom_cache
+def save_cache(data, key_prefix, key_check, request_args):
+    key = cache_key(key_prefix, request_args)
+    wrapped_response = wrap_response(data, key_check)
+    django_cache.set(key, wrapped_response, timeout=None)
 
 
 def _repopulate_cache_entity(key_prefix, queryset):
