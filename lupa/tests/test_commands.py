@@ -1,18 +1,16 @@
 from datetime import datetime as dt
+from unittest import mock
+from unittest.mock import call, MagicMock
 
 from django.core.management import call_command
 from django.test import TestCase
 from model_mommy.mommy import make
-from unittest import mock
-from unittest.mock import call, MagicMock
+
 from lupa.management.commands.checkconsistency import (
     Command,
     parsecolumns
 )
 from lupa.models import ColunaDado, Entidade, DadoEntidade, DadoDetalhe
-from lupa.serializers import (EntidadeSerializer,
-                              DadoEntidadeSerializer,
-                              DadoDetalheSerializer)
 
 
 class TestCheckConsistency(TestCase):
@@ -133,6 +131,68 @@ class TestCheckConsistency(TestCase):
             self.dadosimples.schema,
             self.dadosimples.table,
             self.columns
+        )
+
+    @mock.patch.object(Command, 'printnok')
+    @mock.patch.object(Command, 'printstatus')
+    @mock.patch(
+        'lupa.management.commands.checkconsistency.execute_sample',
+        return_value=[1, 2, 3]
+    )
+    def test_process_data_detail(self, _excs, _ptst, _ptnok):
+        dado = make(
+            'lupa.DadoEntidade',
+        )
+        make(
+            'lupa.DadoDetalhe',
+            dado_main=dado
+        )
+        make(
+            'lupa.DadoDetalhe',
+            dado_main=dado
+        )
+
+        dets = dado.data_details.all().order_by('id').all()
+
+        command = Command()
+        command.process_data(dado)
+
+        self.assertEqual(
+            len(_excs.call_args_list),
+            3
+        )
+        self.assertEqual(
+            len(_ptst.call_args_list),
+            3
+        )
+        self.assertEqual(
+            len(_ptnok.call_args_list),
+            0
+        )
+
+        calls = [
+            call(
+                dado.database,
+                dado.schema,
+                dado.table,
+                []
+            )
+        ]
+
+        calls.extend(
+            [
+                call(
+                    det.database,
+                    det.schema,
+                    det.table,
+                    []
+                ) for det in dets
+            ]
+        )
+
+        self.assertEqual(
+            _excs.call_args_list,
+            calls
         )
 
     @mock.patch.object(Command, 'printnok')
@@ -268,12 +328,11 @@ class UpdateCache(TestCase):
         call_command('update_cache', 'dado_entidade')
 
         expiring_data = DadoEntidade.cache.expiring()
-        args_prefix, args_queryset, args_serializer\
+        args_prefix, args_queryset\
             = _repopulate_cache_entity.call_args_list[0][0]
 
         self.assertEqual(args_prefix, key_prefix)
         self.assertCountEqual(expiring_data, args_queryset)
-        self.assertTrue(args_serializer is DadoEntidadeSerializer)
 
     @mock.patch(
         'lupa.management.commands.update_cache._repopulate_cache_data_detail'
@@ -294,12 +353,11 @@ class UpdateCache(TestCase):
         call_command('update_cache', 'dado_detalhe')
 
         expiring_data = DadoDetalhe.cache.expiring()
-        args_prefix, args_queryset, args_serializer\
+        args_prefix, args_queryset\
             = _repopulate_cache_detail.call_args_list[0][0]
 
         self.assertEqual(args_prefix, key_prefix)
         self.assertCountEqual(expiring_data, args_queryset)
-        self.assertTrue(args_serializer is DadoDetalheSerializer)
 
     @mock.patch(
         'lupa.management.commands.update_cache._repopulate_cache_entity'
@@ -316,9 +374,8 @@ class UpdateCache(TestCase):
         call_command('update_cache', 'entidade')
 
         expiring_entity = Entidade.cache.expiring()
-        args_prefix, args_queryset, args_serializer\
+        args_prefix, args_queryset\
             = _repopulate_cache_entity.call_args_list[0][0]
 
         self.assertEqual(args_prefix, key_prefix)
         self.assertCountEqual(expiring_entity, args_queryset)
-        self.assertTrue(args_serializer is EntidadeSerializer)

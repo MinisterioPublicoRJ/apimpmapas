@@ -2,11 +2,8 @@ from django.contrib.admin.sites import AdminSite
 from model_mommy.mommy import make
 from unittest import TestCase, mock
 from lupa.admin import remove_data_from_cache, remove_entity_from_cache
-from lupa.models import DadoEntidade, DadoDetalhe
-from lupa.admin import DadoEntidadeAdmin
-from lupa.serializers import (EntidadeSerializer,
-                              DadoEntidadeSerializer,
-                              DadoDetalheSerializer)
+from lupa.models import DadoEntidade, DadoDetalhe, Entidade
+from lupa.admin import DadoEntidadeAdmin, EntidadeAdmin
 import pytest
 
 
@@ -112,6 +109,7 @@ class TestMoveDadoToPosition(TestCase):
 
 @pytest.mark.django_db(transaction=True)
 class ClearFromCache(TestCase):
+    @mock.patch('lupa.admin.messages')
     @mock.patch('lupa.admin.chain')
     @mock.patch('lupa.admin.asynch_repopulate_cache_data_detail')
     @mock.patch('lupa.admin.asynch_repopulate_cache_data_entity')
@@ -120,7 +118,8 @@ class ClearFromCache(TestCase):
                                    asynch_remove,
                                    asynch_rep_data_entity,
                                    asynch_rep_data_detail,
-                                   _chain):
+                                   _chain,
+                                   _msgs):
 
         flow_mock = mock.MagicMock()
         _chain.return_value = flow_mock
@@ -170,14 +169,18 @@ class ClearFromCache(TestCase):
         asynch_rep_data_entity.si.assert_called_once_with(
             entity_key_prefix,
             queryset,
-            DadoEntidadeSerializer
         )
         self.assertEqual(_chain.call_args_list[0][0][0], asynch_remove.si())
         self.assertEqual(
             _chain.call_args_list[0][0][1], asynch_rep_data_entity.si()
         )
         flow_mock.delay.assert_has_calls([mock.call(), mock.call()])
+        _msgs.success.assert_called_once_with(
+            request,
+            'Seu pedido de renovação de cache foi recebido e será processado'
+        )
 
+    @mock.patch('lupa.admin.messages')
     @mock.patch('lupa.admin.chain')
     @mock.patch('lupa.admin.asynch_repopulate_cache_data_detail')
     @mock.patch('lupa.admin.asynch_repopulate_cache_data_entity')
@@ -187,7 +190,8 @@ class ClearFromCache(TestCase):
         asynch_remove_data,
         asynch_rep_cache_data_entity,
         asynch_rep_cache_data_detail,
-        _chain
+        _chain,
+        _msgs
     ):
 
         flow_mock = mock.MagicMock()
@@ -245,14 +249,9 @@ class ClearFromCache(TestCase):
             asynch_rep_cache_data_entity.si.call_args_list[0][0][1],
             queryset
         )
-        self.assertEqual(
-            asynch_rep_cache_data_entity.si.call_args_list[0][0][2],
-            DadoEntidadeSerializer
-        )
         asynch_rep_cache_data_entity.si.assert_called_once_with(
             key_prefix_entidade,
             queryset,
-            DadoEntidadeSerializer
         )
         call_args = asynch_rep_cache_data_detail.si.call_args_list[0][0]
         self.assertEqual(call_args[0], key_prefix_detalhe)
@@ -260,7 +259,6 @@ class ClearFromCache(TestCase):
             list(call_args[1].values_list('id')),
             expected_queryset
         )
-        self.assertEqual(call_args[2], DadoDetalheSerializer)
         self.assertEqual(
             _chain.call_args_list[0][0][0],
             asynch_remove_data.si()
@@ -278,12 +276,17 @@ class ClearFromCache(TestCase):
             asynch_rep_cache_data_detail.si()
         )
         flow_mock.delay.assert_has_calls([mock.call(), mock.call()])
+        _msgs.success.assert_called_once_with(
+            request,
+            'Seu pedido de renovação de cache foi recebido e será processado'
+        )
 
+    @mock.patch('lupa.admin.messages')
     @mock.patch('lupa.admin.chain')
     @mock.patch('lupa.admin.asynch_repopulate_cache_entity')
     @mock.patch('lupa.admin.asynch_remove_from_cache')
     def test_clear_entity_from_cache(self, asynch_remove, asynch_rep_cache,
-                                     _chain):
+                                     _chain, _msgs):
         flow_mock = mock.MagicMock()
         _chain.return_value = flow_mock
         modeladmin = None
@@ -310,13 +313,16 @@ class ClearFromCache(TestCase):
         asynch_rep_cache.si.assert_called_once_with(
             key_prefix,
             queryset,
-            EntidadeSerializer
         )
         _chain.assert_called_once_with(
             asynch_remove.si(),
             asynch_rep_cache.si()
         )
         flow_mock.delay.assert_called_once_with()
+        _msgs.success.assert_called_once_with(
+            request,
+            'Seu pedido de renovação de cache foi recebido e será processado'
+        )
 
 
 @pytest.mark.django_db(transaction=True)
@@ -503,3 +509,39 @@ class TestChangeToDetail(TestCase):
         )
 
         _executor.assert_called_once_with(request, queryset)
+
+
+@pytest.mark.django_db(transaction=True)
+class TestRoleExhibition(TestCase):
+    def setUp(self):
+        self.adminsite = AdminSite()
+        self.grupo_1_name = 'GRUPO_1'
+        self.grupo_2_name = 'GRUPO_2'
+        self.grupo_1 = make('lupa.Grupo', name=self.grupo_1_name)
+        self.grupo_2 = make('lupa.Grupo', name=self.grupo_2_name)
+        self.entidade = make(
+            'lupa.Entidade',
+            roles_allowed=[self.grupo_1, self.grupo_2]
+        )
+        self.dado = make(
+            'lupa.DadoEntidade',
+            roles_allowed=[self.grupo_1, self.grupo_2]
+        )
+
+    def test_roles_entidade(self):
+        self.entidadeadmin = EntidadeAdmin(
+            Entidade,
+            self.adminsite
+        )
+        roles = self.entidadeadmin.get_roles(self.entidade)
+
+        self.assertEqual(roles, f'{self.grupo_1_name}\n{self.grupo_2_name}')
+
+    def test_roles_dado(self):
+        self.dadoadmin = DadoEntidadeAdmin(
+            DadoEntidade,
+            self.adminsite
+        )
+        roles = self.dadoadmin.get_roles(self.dado)
+
+        self.assertEqual(roles, f'{self.grupo_1_name}\n{self.grupo_2_name}')

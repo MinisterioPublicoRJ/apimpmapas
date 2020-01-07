@@ -1,9 +1,22 @@
 import datetime as dt
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import models
 from colorfield.fields import ColorField
 from ordered_model.models import OrderedModel
+
+from lupa.cache import (
+    ENTITY_KEY_PREFIX,
+    DATA_ENTITY_KEY_PREFIX,
+    DATA_DETAIL_KEY_PREFIX
+)
+from lupa.managers import RoleManager, DadoDetalheManager
+from lupa.tasks import (
+    asynch_remove_from_cache,
+    asynch_repopulate_cache_entity,
+    asynch_repopulate_cache_data_entity,
+    asynch_repopulate_cache_data_detail
+)
 
 POSTGRES = 'PG'
 ORACLE = 'ORA'
@@ -38,11 +51,27 @@ MANDATORY_GEOJSON_COLUMN = (
 ONLY_POSTGIS_SUPORTED = (
     'Apenas a engine PostgreSQL Opengeo suporta busca geolocalizada'
 )
+ROLES_TOOLTIP = (
+    'Deixar em branco para todos<br>'
+    'Usar "Usuários autorizados" para qualquer usuário logado<br>'
+    'Usar "Convidados" para qualquer usuário NÃO logado<br>'
+)
+COLUMN_TOOLTIP = (
+    '<pre>'
+    'Toda caixinha e mapa precisa de uma coluna de id\n'
+    'Toda caixinha precisa de uma coluna de dados\n'
+    'Todo mapa precisa de uma coluna de geojson, '
+    'contendo a string json de um mapa\n'
+    'Caixinhas de gráficos precisam de uma coluna do tipo label\n'
+    'Colunas de imagem precisam referenciar um campo do tipo "BLOB"\n'
+    'Colunas de tipo e id de entidade vinculada precisam existir aos pares'
+    '</pre>'
+)
 
 
 class CacheManager(models.Manager):
     def expiring(self):
-        objs = super().get_queryset()
+        objs = super().get_queryset().filter(is_cacheable=True)
         result_ids = []
         for obj in objs:
             cache_days = obj.cache_timeout_days
@@ -163,7 +192,7 @@ class Entidade(models.Model):
         related_name="entity_allowed",
         verbose_name="grupos com acesso",
         blank=True,
-        help_text='Deixar em branco para todos',
+        help_text=ROLES_TOOLTIP,
     )
 
     database = models.CharField(
@@ -222,8 +251,12 @@ class Entidade(models.Model):
         verbose_name='Tempo de persistência do cache (em dias)',
         default=7
     )
-    last_cache_update = models.DateField(null=True)
-    objects = models.Manager()
+    last_cache_update = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name='Data da última atualização do cache'
+    )
+    objects = RoleManager()
     cache = CacheManager()
 
     def obter_dados(self):
@@ -291,6 +324,29 @@ class Entidade(models.Model):
     def save(self, *args, **kwargs):
         seconds_scale = 24 * 60 * 60
         self.cache_timeout_sec = self.cache_timeout_days * seconds_scale
+
+        cls = self.__class__
+        try:
+            queryset = cls.objects.filter(pk=self.pk)
+            old = queryset.get(pk=self.pk)
+            new = self
+
+            # Check if is_cacheable was updated
+            if old.is_cacheable and not new.is_cacheable:
+                model_args = ['abreviation']
+                asynch_remove_from_cache.delay(
+                    ENTITY_KEY_PREFIX,
+                    model_args,
+                    queryset
+                )
+            elif not old.is_cacheable and new.is_cacheable:
+                asynch_repopulate_cache_entity.delay(
+                    ENTITY_KEY_PREFIX,
+                    queryset,
+                )
+        except ObjectDoesNotExist:
+            pass
+
         super().save(*args, **kwargs)
 
 
@@ -386,7 +442,11 @@ class Dado(OrderedModel):
         default=7
     )
 
-    last_cache_update = models.DateField(null=True)
+    last_cache_update = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name='Data da última atualização do cache'
+    )
     cache = CacheManager()
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -435,7 +495,7 @@ class DadoEntidade(Dado):
         related_name="data_allowed",
         verbose_name="grupos com acesso",
         blank=True,
-        help_text='Deixar em branco para todos',
+        help_text=ROLES_TOOLTIP,
     )
 
     show_box = models.BooleanField(
@@ -445,6 +505,7 @@ class DadoEntidade(Dado):
 
     # CONFIG FIELDS
     order_with_respect_to = 'entity_type'
+    objects = RoleManager()
 
     class Meta:
         verbose_name = 'dado'
@@ -466,6 +527,45 @@ class DadoEntidade(Dado):
             coluna.copy_to_detail(detalhe)
         self.save()
 
+    def save(self, *args, **kwargs):
+        try:
+            cls = self.__class__
+            entity_queryset = cls.objects.filter(pk=self.pk)
+            detail_queryset = DadoDetalhe.objects.filter(
+                dado_main__id=self.pk
+            )
+            old = entity_queryset.get(pk=self.pk)
+            new = self
+
+            # Check if is_cacheable was updated
+            if old.is_cacheable and not new.is_cacheable:
+                entity_model_args = ['entity_type.abreviation', 'pk']
+                asynch_remove_from_cache.delay(
+                    DATA_ENTITY_KEY_PREFIX,
+                    entity_model_args,
+                    entity_queryset
+                )
+                detail_model_args = ['dado_main.entity_type.abreviation', 'pk']
+                asynch_remove_from_cache.delay(
+                    DATA_DETAIL_KEY_PREFIX,
+                    detail_model_args,
+                    detail_queryset
+                )
+            elif not old.is_cacheable and new.is_cacheable:
+                asynch_repopulate_cache_data_entity.delay(
+                    DATA_ENTITY_KEY_PREFIX,
+                    entity_queryset
+                )
+                asynch_repopulate_cache_data_detail.delay(
+                    DATA_DETAIL_KEY_PREFIX,
+                    detail_queryset
+                )
+
+        except ObjectDoesNotExist:
+            pass
+
+        super().save(*args, **kwargs)
+
 
 class DadoDetalhe(Dado):
     data_type = models.ForeignKey(
@@ -484,16 +584,12 @@ class DadoDetalhe(Dado):
 
     # CONFIG FIELDS
     order_with_respect_to = 'dado_main'
+    objects = DadoDetalheManager()
 
 
 class Coluna(models.Model):
     # CLASS FIELDS
-    help_info_type = '''<pre>Toda caixinha e mapa precisa de uma coluna de id
-Toda caixinha precisa de uma coluna de dados
-Todo mapa precisa de uma coluna de geojson, contendo a string json de um mapa
-Caixinhas de gráficos precisam de uma coluna do tipo label
-Colunas de imagem precisam referenciar um campo do tipo "BLOB"
-Colunas de tipo e id de entidade vinculada precisam existir aos pares</pre>'''
+    help_info_type = COLUMN_TOOLTIP
 
     # CHOICES
     ID_COLUMN = 'id'

@@ -11,10 +11,12 @@ django-redis-cache==2.1.0
 djangorestframework>=3.9
 dj-database-url
 freezegun==0.3.12
+git+https://github.com/MinisterioPublicoRJ/busca_desaparecidos
 git+https://github.com/MinisterioPublicoRJ/login-sca
 gunicorn==19.9.0
 impyla
 Markdown
+newrelic==5.4.0.132
 psycopg2-binary
 pyjwt
 python-decouple

@@ -1,4 +1,17 @@
 ## [Unreleased]
+## [1.2.6]
+### Changed
+ - Melhorias no sistema de acesso ao cache
+ - Adição de sistema para acesso diferenciado por guest user
+## [1.2.5]
+### Changed
+ - BUGFIX - Revisão nos testes do cache
+## [1.2.4]
+### Changed
+ - Adição de status html ao cache
+## [1.2.3]
+### Changed
+ - BUGFIX - Correção em problemas do cache
 ## [1.2.2]
 ### Added
  - Sistema de transformação de caixinha em detalhe
