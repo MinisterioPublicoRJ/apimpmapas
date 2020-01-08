@@ -1,4 +1,4 @@
-from sys import stdout
+from sys import stdout, stderr
 
 from django.core.management.base import OutputWrapper
 
@@ -9,5 +9,15 @@ class LogSuccess:
 
     def print(self, msg):
         color_prefix = '\033[92m'
+        color_suffix = '\033[0m'
+        self._output.write(f'{color_prefix}{msg}{color_suffix}')
+
+
+class LogError:
+    def __init__(self):
+        self._output = OutputWrapper(stderr)
+
+    def print(self, msg):
+        color_prefix = '\033[91m'
         color_suffix = '\033[0m'
         self._output.write(f'{color_prefix}{msg}{color_suffix}')
