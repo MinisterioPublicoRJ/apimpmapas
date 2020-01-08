@@ -23,3 +23,15 @@ class LogError(BaseLog):
     def __init__(self):
         super().__init__(stderr)
         self._color_prefix = '\033[91m'
+
+
+class Log:
+    def __init__(self):
+        self._error = LogError()
+        self._sucess = LogSuccess()
+
+    def printok(self, msg):
+        self._sucess.print(msg)
+
+    def printerr(self, msg):
+        self._error.print(msg)

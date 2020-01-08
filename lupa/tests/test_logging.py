@@ -1,9 +1,9 @@
 from unittest import TestCase, mock
 
-from lupa.logging import LogSuccess, LogError
+from lupa.logging import LogSuccess, LogError, Log
 
 
-class Log(TestCase):
+class Logging(TestCase):
     @mock.patch('lupa.logging.stdout')
     @mock.patch('lupa.logging.OutputWrapper')
     def test_success_message(self, _output_wrapper, _stdout):
@@ -25,3 +25,19 @@ class Log(TestCase):
 
         _output_wrapper.assert_called_once_with(_stderr)
         _wrapper_mock.write.assert_called_once_with('\x1b[91mmessage\x1b[0m')
+
+    @mock.patch('lupa.logging.LogSuccess')
+    @mock.patch('lupa.logging.LogError')
+    def test_log_class(self, _LogError, _LogSuccess):
+        _log_error = mock.MagicMock()
+        _log_success = mock.MagicMock()
+        _LogError.return_value = _log_error
+        _LogSuccess.return_value = _log_success
+
+        log = Log()
+
+        log.printok('message ok')
+        log.printerr('message err')
+
+        _log_error.print.assert_called()
+        _log_success.print.assert_called()
