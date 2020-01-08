@@ -3,21 +3,23 @@ from sys import stdout, stderr
 from django.core.management.base import OutputWrapper
 
 
-class LogSuccess:
-    def __init__(self):
-        self._output = OutputWrapper(stdout)
+class BaseLog:
+    def __init__(self, output):
+        self._output = OutputWrapper(output)
+        self._color_prefix = ''
+        self._color_suffix = '\033[0m'
 
     def print(self, msg):
-        color_prefix = '\033[92m'
-        color_suffix = '\033[0m'
-        self._output.write(f'{color_prefix}{msg}{color_suffix}')
+        self._output.write(f'{self._color_prefix}{msg}{self._color_suffix}')
 
 
-class LogError:
+class LogSuccess(BaseLog):
     def __init__(self):
-        self._output = OutputWrapper(stderr)
+        super().__init__(stdout)
+        self._color_prefix = '\033[92m'
 
-    def print(self, msg):
-        color_prefix = '\033[91m'
-        color_suffix = '\033[0m'
-        self._output.write(f'{color_prefix}{msg}{color_suffix}')
+
+class LogError(BaseLog):
+    def __init__(self):
+        super().__init__(stderr)
+        self._color_prefix = '\033[91m'
