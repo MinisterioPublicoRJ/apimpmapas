@@ -9,8 +9,11 @@ class BaseLog:
         self._color_prefix = ''
         self._color_suffix = '\033[0m'
 
-    def print(self, msg):
-        self._output.write(f'{self._color_prefix}{msg}{self._color_suffix}')
+    def print(self, msg, ending):
+        self._output.write(
+            f'{self._color_prefix}{msg}{self._color_suffix}',
+            ending=ending
+        )
 
 
 class LogInfo(BaseLog):
@@ -36,11 +39,11 @@ class Log:
         self._error = LogError()
         self._sucess = LogSuccess()
 
-    def print(self, msg):
-        self._info.print(msg)
+    def print(self, msg, ending='\n'):
+        self._info.print(msg, ending=ending)
 
-    def printok(self, msg):
-        self._sucess.print(msg)
+    def printok(self, msg, ending='\n'):
+        self._sucess.print(msg, ending=ending)
 
-    def printerr(self, msg):
-        self._error.print(msg)
+    def printerr(self, msg, ending='\n'):
+        self._error.print(msg, ending=ending)

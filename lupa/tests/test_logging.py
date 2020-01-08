@@ -10,10 +10,13 @@ class Logging(TestCase):
         _wrapper_mock = mock.MagicMock()
         _output_wrapper.return_value = _wrapper_mock
         log = LogSuccess()
-        log.print('message')
+        log.print('message', ending='')
 
         _output_wrapper.assert_called_once_with(_stdout)
-        _wrapper_mock.write.assert_called_once_with('\x1b[92mmessage\x1b[0m')
+        _wrapper_mock.write.assert_called_once_with(
+            '\x1b[92mmessage\x1b[0m',
+            ending=''
+        )
 
     @mock.patch('lupa.logging.stderr')
     @mock.patch('lupa.logging.OutputWrapper')
@@ -21,10 +24,13 @@ class Logging(TestCase):
         _wrapper_mock = mock.MagicMock()
         _output_wrapper.return_value = _wrapper_mock
         log = LogError()
-        log.print('message')
+        log.print('message', ending='')
 
         _output_wrapper.assert_called_once_with(_stderr)
-        _wrapper_mock.write.assert_called_once_with('\x1b[91mmessage\x1b[0m')
+        _wrapper_mock.write.assert_called_once_with(
+            '\x1b[91mmessage\x1b[0m',
+            ending=''
+        )
 
     @mock.patch('lupa.logging.stdout')
     @mock.patch('lupa.logging.OutputWrapper')
@@ -32,10 +38,13 @@ class Logging(TestCase):
         _wrapper_mock = mock.MagicMock()
         _output_wrapper.return_value = _wrapper_mock
         log = LogInfo()
-        log.print('message')
+        log.print('message', ending='')
 
         _output_wrapper.assert_called_once_with(_stdout)
-        _wrapper_mock.write.assert_called_once_with('message\x1b[0m')
+        _wrapper_mock.write.assert_called_once_with(
+            'message\x1b[0m',
+            ending=''
+        )
 
     @mock.patch('lupa.logging.LogSuccess')
     @mock.patch('lupa.logging.LogError')
