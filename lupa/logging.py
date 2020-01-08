@@ -13,6 +13,11 @@ class BaseLog:
         self._output.write(f'{self._color_prefix}{msg}{self._color_suffix}')
 
 
+class LogInfo(BaseLog):
+    def __init__(self):
+        super().__init__(stdout)
+
+
 class LogSuccess(BaseLog):
     def __init__(self):
         super().__init__(stdout)
@@ -27,8 +32,12 @@ class LogError(BaseLog):
 
 class Log:
     def __init__(self):
+        self._info = LogInfo()
         self._error = LogError()
         self._sucess = LogSuccess()
+
+    def print(self, msg):
+        self._info.print(msg)
 
     def printok(self, msg):
         self._sucess.print(msg)
