@@ -35,3 +35,9 @@ class Command(BaseCommand):
                 ENTITY_KEY_PREFIX,
                 queryset
             )
+
+        else:
+            raise ValueError(
+                'Opção %s inválida.'
+                ' Escolha entre "dado_entidade", "dado_detalhe" e "entidade"'
+            )

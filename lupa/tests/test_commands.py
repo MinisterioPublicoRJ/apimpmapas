@@ -379,3 +379,7 @@ class UpdateCache(TestCase):
 
         self.assertEqual(args_prefix, key_prefix)
         self.assertCountEqual(expiring_entity, args_queryset)
+
+    def test_update_cache_object_doesnt_exist(self):
+        with self.assertRaises(ValueError):
+            call_command('update_cache', 'doesn_exist')
