@@ -1,6 +1,6 @@
 from datetime import datetime as dt
 from unittest import mock
-from unittest.mock import call, MagicMock
+from unittest.mock import call, patch
 
 from django.core.management import call_command
 from django.test import TestCase
@@ -23,32 +23,17 @@ class TestCheckConsistency(TestCase):
         self.dadosimples = dadosimples
         self.columns = ['a', 'b']
 
-    def test_simpleprint(self):
+    @patch('lupa.management.commands.checkconsistency.Log')
+    def test_simpleprint(self, _Log):
+        log_mock = _Log.return_value
         command = Command()
-        command.stdout.write = MagicMock()
         command.printok("OKMSG", "OKEND")
         command.printnok("NOKMSG", None, "NOKEND")
         command.printstatus("STATUSMSG", "STATUSEND")
 
-        expected = [
-            call(
-                command.style.SUCCESS("OKMSG"),
-                ending="OKEND"
-            ),
-            call(
-                command.style.ERROR("NOKMSG"),
-                ending="NOKEND"
-            ),
-            call(
-                "STATUSMSG",
-                ending="STATUSEND"
-            ),
-        ]
-
-        self.assertEqual(
-            command.stdout.write.call_args_list,
-            expected
-        )
+        log_mock.printok.assert_called_once_with('OKMSG', ending='OKEND')
+        log_mock.printerr.assert_called_once_with('NOKMSG', ending='NOKEND')
+        log_mock.print.assert_called_once_with('STATUSMSG', ending='STATUSEND')
 
     def test_parse_columns(self):
         builder = [
@@ -379,3 +364,7 @@ class UpdateCache(TestCase):
 
         self.assertEqual(args_prefix, key_prefix)
         self.assertCountEqual(expiring_entity, args_queryset)
+
+    def test_update_cache_object_doesnt_exist(self):
+        with self.assertRaises(ValueError):
+            call_command('update_cache', 'doesn_exist')
