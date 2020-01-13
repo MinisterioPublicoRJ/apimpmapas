@@ -7,6 +7,7 @@ from django.core.management.base import OutputWrapper
 from rest_framework.response import Response
 
 from lupa.db_connectors import execute_sample
+from lupa.logging import Log
 
 STDERR = OutputWrapper(sys.stderr)
 
@@ -121,19 +122,19 @@ def _repopulate_cache_data_detail(key_prefix, queryset):
     )
 
 
-def _stderr(entity, domain_id):
-    msg = 'NOK - %s' % ' - '.join(
+def message(entity, domain_id):
+    return '%s' % ' - '.join(
         [entity.database,
          entity.schema,
          entity.table,
          entity.id_column,
-         domain_id
+         str(domain_id[0])
          ]
-    )
-    STDERR.write(msg)
+        )
 
 
 def repopulate_cache(key_prefix, entities, queryset, serializer, key_check):
+    log = Log()
     query_args = {
         ENTITY_KEY_PREFIX: 'abreviation',
         DATA_ENTITY_KEY_PREFIX: 'entity_type__abreviation',
@@ -151,10 +152,11 @@ def repopulate_cache(key_prefix, entities, queryset, serializer, key_check):
         objs = queryset.filter(**{query_args[key_prefix]: entity.abreviation})
         for obj in objs:
             for domain_id in domain_ids:
+                log.print(message(entity, domain_id), ending=' ')
                 try:
                     cache_data = serializer(obj, domain_id=domain_id[0]).data
                 except Exception:
-                    _stderr(entity, domain_id[0])
+                    log.printerr('FAIL')
                     continue
 
                 key_kwargs = {
@@ -180,6 +182,7 @@ def repopulate_cache(key_prefix, entities, queryset, serializer, key_check):
                 # calls performed the 'save' method from obj
                 obj.is_cacheable = True
                 obj.save()
+                log.printok('OK')
 
 
 def _remove_from_cache(key_prefix, model_args, queryset):

@@ -247,6 +247,7 @@ class ModelCache(TestCase):
 
 @pytest.mark.django_db(transaction=True)
 class RepopulateCache(TestCase):
+    @mock.patch('lupa.cache.Log')
     @freeze_time('2019-10-29')
     @mock.patch('lupa.serializers.execute')
     @mock.patch('lupa.cache.execute_sample')
@@ -257,7 +258,8 @@ class RepopulateCache(TestCase):
             _django_cache,
             _cache_key,
             _execute_sample,
-            _execute):
+            _execute,
+            _log):
 
         _execute.return_value = [(
             '202',
@@ -587,6 +589,7 @@ class RepopulateCache(TestCase):
                 )
         )
 
+    @mock.patch('lupa.cache.Log')
     @mock.patch('lupa.serializers.execute')
     @mock.patch('lupa.cache.execute_sample')
     @mock.patch('lupa.cache.cache_key')
@@ -596,7 +599,8 @@ class RepopulateCache(TestCase):
             _django_cache,
             _cache_key,
             _execute_sample,
-            _execute):
+            _execute,
+            _log):
 
         _execute.return_value = [(
             '202',
@@ -903,6 +907,7 @@ class RepopulateCache(TestCase):
                 )
         )
 
+    @mock.patch('lupa.cache.Log')
     @mock.patch('lupa.serializers.execute')
     @mock.patch('lupa.cache.execute_sample')
     @mock.patch('lupa.cache.cache_key')
@@ -912,7 +917,8 @@ class RepopulateCache(TestCase):
             _django_cache,
             _cache_key,
             _execute_sample,
-            _execute):
+            _execute,
+            _log):
 
         _execute.side_effect = [
             [(1, )],
@@ -992,11 +998,13 @@ class RepopulateCache(TestCase):
                 )
         )
 
+    @mock.patch('lupa.cache.Log')
     @mock.patch('lupa.cache.cache_key')
-    @mock.patch('lupa.cache.STDERR')
     @mock.patch('lupa.cache.execute_sample')
     def test_update_cache_serializer_exception(
-            self, _execute_sample, _stderr, _cache_key):
+            self, _execute_sample, _cache_key, _log):
+        mock_log = mock.MagicMock()
+        _log.return_value = mock_log
 
         serializer_mock = mock.MagicMock()
         serializer_mock.side_effect = Exception()
@@ -1005,7 +1013,7 @@ class RepopulateCache(TestCase):
             [('33001',)],
         )
 
-        entidade = make(
+        make(
             'lupa.Entidade',
             last_cache_update=dt.date(2019, 10, 10)
         )
@@ -1019,16 +1027,8 @@ class RepopulateCache(TestCase):
             serializer=serializer_mock,
             key_check='teste'
         )
-        expected_msg = 'NOK - %s' % ' - '.join(
-            [entidade.database,
-             entidade.schema,
-             entidade.table,
-             entidade.id_column,
-             '33001'
-             ]
-        )
 
-        _stderr.write.assert_called_once_with(expected_msg)
+        mock_log.printerr.assert_called_once_with('FAIL')
         _cache_key.assert_not_called()
 
 
