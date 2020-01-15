@@ -31,13 +31,15 @@ def execute_sample(
     db_name,
     schema,
     table,
-    columns
+    columns,
+    limit=True
 ):
     query = generate_query_sample(
         db_name,
         schema,
         table,
-        columns
+        columns,
+        limit=limit
     )
     return conns(db_name)(query, [])
 
@@ -85,7 +87,7 @@ def execute_geospatial(
     return conns(db_name)(query, [])
 
 
-def generate_query_sample(db_name, schema, table, columns):
+def generate_query_sample(db_name, schema, table, columns, limit=True):
     query = "SELECT {columns} FROM {schema}.{table}"\
         .format(
             columns=', '.join(columns),
@@ -93,10 +95,11 @@ def generate_query_sample(db_name, schema, table, columns):
             table=table
         )
 
-    if db_name in ('PG', 'BDA'):
-        query += ' limit 10'
-    else:
-        query += ' WHERE rownum < 10'
+    if limit:
+        if db_name in ('PG', 'BDA'):
+            query += ' limit 10'
+        else:
+            query += ' WHERE rownum < 10'
     return query
 
 

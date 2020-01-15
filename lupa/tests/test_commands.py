@@ -1,13 +1,16 @@
+from datetime import datetime as dt
+from unittest import mock
+from unittest.mock import call, patch
+
 from django.core.management import call_command
 from django.test import TestCase
 from model_mommy.mommy import make
-from unittest import mock
-from unittest.mock import call, MagicMock
+
 from lupa.management.commands.checkconsistency import (
     Command,
     parsecolumns
 )
-from lupa.models import ColunaDado
+from lupa.models import ColunaDado, Entidade, DadoEntidade, DadoDetalhe
 
 
 class TestCheckConsistency(TestCase):
@@ -20,32 +23,17 @@ class TestCheckConsistency(TestCase):
         self.dadosimples = dadosimples
         self.columns = ['a', 'b']
 
-    def test_simpleprint(self):
+    @patch('lupa.management.commands.checkconsistency.Log')
+    def test_simpleprint(self, _Log):
+        log_mock = _Log.return_value
         command = Command()
-        command.stdout.write = MagicMock()
         command.printok("OKMSG", "OKEND")
         command.printnok("NOKMSG", None, "NOKEND")
         command.printstatus("STATUSMSG", "STATUSEND")
 
-        expected = [
-            call(
-                command.style.SUCCESS("OKMSG"),
-                ending="OKEND"
-            ),
-            call(
-                command.style.ERROR("NOKMSG"),
-                ending="NOKEND"
-            ),
-            call(
-                "STATUSMSG",
-                ending="STATUSEND"
-            ),
-        ]
-
-        self.assertEqual(
-            command.stdout.write.call_args_list,
-            expected
-        )
+        log_mock.printok.assert_called_once_with('OKMSG', ending='OKEND')
+        log_mock.printerr.assert_called_once_with('NOKMSG', ending='NOKEND')
+        log_mock.print.assert_called_once_with('STATUSMSG', ending='STATUSEND')
 
     def test_parse_columns(self):
         builder = [
@@ -128,6 +116,68 @@ class TestCheckConsistency(TestCase):
             self.dadosimples.schema,
             self.dadosimples.table,
             self.columns
+        )
+
+    @mock.patch.object(Command, 'printnok')
+    @mock.patch.object(Command, 'printstatus')
+    @mock.patch(
+        'lupa.management.commands.checkconsistency.execute_sample',
+        return_value=[1, 2, 3]
+    )
+    def test_process_data_detail(self, _excs, _ptst, _ptnok):
+        dado = make(
+            'lupa.DadoEntidade',
+        )
+        make(
+            'lupa.DadoDetalhe',
+            dado_main=dado
+        )
+        make(
+            'lupa.DadoDetalhe',
+            dado_main=dado
+        )
+
+        dets = dado.data_details.all().order_by('id').all()
+
+        command = Command()
+        command.process_data(dado)
+
+        self.assertEqual(
+            len(_excs.call_args_list),
+            3
+        )
+        self.assertEqual(
+            len(_ptst.call_args_list),
+            3
+        )
+        self.assertEqual(
+            len(_ptnok.call_args_list),
+            0
+        )
+
+        calls = [
+            call(
+                dado.database,
+                dado.schema,
+                dado.table,
+                []
+            )
+        ]
+
+        calls.extend(
+            [
+                call(
+                    det.database,
+                    det.schema,
+                    det.table,
+                    []
+                ) for det in dets
+            ]
+        )
+
+        self.assertEqual(
+            _excs.call_args_list,
+            calls
         )
 
     @mock.patch.object(Command, 'printnok')
@@ -241,3 +291,80 @@ class TestCheckConsistency(TestCase):
         _prtst.assert_called_once_with(
             "Verificando Dado(caixinhas) para entidade Entidade Teste"
         )
+
+
+class UpdateCache(TestCase):
+    @mock.patch(
+        'lupa.management.commands.update_cache._repopulate_cache_data_entity'
+    )
+    def test_update_data_entidade_cache(self, _repopulate_cache_entity):
+        key_prefix = 'lupa_dado_entidade'
+        make(
+            'lupa.DadoEntidade',
+            cache_timeout_days=7,
+            last_cache_update=dt(2019, 10, 15, 12, 0, 0),
+        )
+        make(
+            'lupa.DadoEntidade',
+            cache_timeout_days=7,
+            last_cache_update=dt(2019, 10, 14, 12, 0, 0),
+        )
+
+        call_command('update_cache', 'dado_entidade')
+
+        expiring_data = DadoEntidade.cache.expiring()
+        args_prefix, args_queryset\
+            = _repopulate_cache_entity.call_args_list[0][0]
+
+        self.assertEqual(args_prefix, key_prefix)
+        self.assertCountEqual(expiring_data, args_queryset)
+
+    @mock.patch(
+        'lupa.management.commands.update_cache._repopulate_cache_data_detail'
+    )
+    def test_update_data_detalhe_cache(self, _repopulate_cache_detail):
+        key_prefix = 'lupa_dado_detalhe'
+        make(
+            'lupa.DadoDetalhe',
+            cache_timeout_days=7,
+            last_cache_update=dt(2019, 10, 15, 12, 0, 0),
+        )
+        make(
+            'lupa.DadoDetalhe',
+            cache_timeout_days=7,
+            last_cache_update=dt(2019, 10, 14, 12, 0, 0),
+        )
+
+        call_command('update_cache', 'dado_detalhe')
+
+        expiring_data = DadoDetalhe.cache.expiring()
+        args_prefix, args_queryset\
+            = _repopulate_cache_detail.call_args_list[0][0]
+
+        self.assertEqual(args_prefix, key_prefix)
+        self.assertCountEqual(expiring_data, args_queryset)
+
+    @mock.patch(
+        'lupa.management.commands.update_cache._repopulate_cache_entity'
+    )
+    def test_update_entity_cache(self, _repopulate_cache_entity):
+        key_prefix = 'lupa_entidade'
+
+        make(
+            'lupa.Entidade',
+            _quantity=2,
+            last_cache_update=dt(2019, 10, 10)
+        )
+
+        call_command('update_cache', 'entidade')
+
+        expiring_entity = Entidade.cache.expiring()
+        args_prefix, args_queryset\
+            = _repopulate_cache_entity.call_args_list[0][0]
+
+        self.assertEqual(args_prefix, key_prefix)
+        self.assertCountEqual(expiring_entity, args_queryset)
+
+    def test_update_cache_object_doesnt_exist(self):
+        with self.assertRaises(ValueError):
+            call_command('update_cache', 'doesn_exist')

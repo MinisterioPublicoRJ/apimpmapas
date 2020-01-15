@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from lupa.models import DadoEntidade, Entidade
 from lupa.db_connectors import execute_sample
+from lupa.logging import Log
 
 
 def parsecolumns(columns):
@@ -13,14 +14,18 @@ def parsecolumns(columns):
 class Command(BaseCommand):
     help = 'Verifica a integridade mínima das views usadas pelo Lupa'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._log = Log()
+
     def printok(self, message, end='\n'):
-        self.stdout.write(self.style.SUCCESS(message), ending=end)
+        self._log.printok(message, ending=end)
 
     def printnok(self, message, exception=None, end="\n"):
-        self.stdout.write(self.style.ERROR(message), ending=end)
+        self._log.printerr(message, ending=end)
 
     def printstatus(self, message, end="\n"):
-        self.stdout.write(message, ending=end)
+        self._log.print(message, ending=end)
 
     def add_arguments(self, parser):
         parser.add_argument('entity_id', type=int)
@@ -45,6 +50,9 @@ class Command(BaseCommand):
         columns = parsecolumns(columns)
         try:
             self.process_execution(dado, columns)
+            if hasattr(dado, 'data_details'):
+                for detalhe in dado.data_details.all().order_by('id'):
+                    self.process_data(detalhe)
         except Exception as error:
             self.printnok(
                 'NOK - %s' %

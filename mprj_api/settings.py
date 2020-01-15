@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.gis',
 
     'rest_framework',
     'ordered_model',
@@ -53,6 +52,7 @@ INSTALLED_APPS = [
     'login',
     'mprj_plus',
     'nested_admin',
+    'desaparecidos',
 ]
 
 MIDDLEWARE = [
@@ -176,10 +176,6 @@ CACHES = {
                 'CACHE_DATABASE_NUMBER',
                 default=1
             ),
-            'PASSWORD': config(
-                'CACHE_PASSWORD',
-                default=''
-            )
         }
     }
 }
