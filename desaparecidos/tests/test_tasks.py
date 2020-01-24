@@ -2,8 +2,7 @@ from unittest import TestCase, mock
 
 import pandas
 
-from decouple import config
-
+from desaparecidos import settings as desaparecidos_settings
 from desaparecidos.tasks import async_calculate_rank
 
 
@@ -37,11 +36,11 @@ class Task(TestCase):
         async_calculate_rank(id_sinalid, target_person)
 
         _client.assert_called_once_with(
-            config('DESAPARECIDOS_DB_USER'),
-            config('DESAPARECIDOS_DB_PWD'),
-            config('DESAPARECIDOS_DB_HOST')
+            desaparecidos_settings.DESAPARECIDOS_DB_USER,
+            desaparecidos_settings.DESAPARECIDOS_DB_PWD,
+            desaparecidos_settings.DESAPARECIDOS_DB_HOST
         )
-        len_data = config('DESAPARECIDOS_DATA_LEN', cast=int)
+        len_data = desaparecidos_settings.DESAPARECIDOS_DATA_LEN
 
         # asserts
         _all_persons.assert_called_once_with('cursor')
@@ -56,5 +55,6 @@ class Task(TestCase):
                 'status': 'ready',
                 'data': [{'a': 1, 'b': 2}, {'a': 3, 'b': 4}],
                 'target_data': {'a': 1, 'b': 2, 'c': 3}
-            }
+            },
+            timeout=desaparecidos_settings.DESAPARECIDOS_CACHE_TIMEOUT
         )
