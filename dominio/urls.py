@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import AcervoView  # , AlertasListView
+from .views import AcervoView, AcervoVariationView  # , AlertasListView
 
 app_name = 'dominio'
 
@@ -15,4 +15,9 @@ urlpatterns = [
         AcervoView.as_view(),
         name='acervo'
     ),
+    path(
+        'acervo_variation/<str:orgao_id>/<str:tipo_acervo>/<str:dt_inicio>/<str:dt_fim>',
+        AcervoVariationView.as_view(),
+        name='acervo_variation'
+    )
 ]
