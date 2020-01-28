@@ -84,7 +84,8 @@ class AcervoVariationView(RetrieveAPIView):
                     ) tb_data_inicio
                 ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
                 AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
-                WHERE tb_data_fim.`data` = to_timestamp('{dt_fim}', 'yyyy-MM-dd')
+                WHERE tb_data_fim.`data` = to_timestamp(
+                    '{dt_fim}', 'yyyy-MM-dd')
                 AND tb_data_fim.cod_orgao = {orgao_id}
                 AND tb_data_fim.tipo_acervo = {tipo_acervo};
                 """
@@ -149,7 +150,8 @@ class AcervoVariationTopNView(ListAPIView):
                     ) tb_data_inicio
                 ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
                 AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
-                WHERE tb_data_fim.`data` = to_timestamp('{dt_fim}', 'yyyy-MM-dd')
+                WHERE tb_data_fim.`data` = to_timestamp(
+                    '{dt_fim}', 'yyyy-MM-dd')
                 AND tb_data_fim.tipo_acervo = {tipo_acervo}
                 ORDER BY variacao DESC
                 LIMIT {n};
