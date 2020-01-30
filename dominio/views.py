@@ -24,10 +24,10 @@ class AcervoView(RetrieveAPIView):
         try:
             db_result = execute(
                 "SELECT acervo "
-                "FROM exadata_aux.vw_acervo_historico_diario "
+                "FROM exadata_aux.tb_acervo "
                 "WHERE cod_orgao = {orgao_id} "
                 "AND tipo_acervo = {tipo_acervo} "
-                "AND `data` = to_timestamp('{data}', 'yyyy-MM-dd')"
+                "AND dt_inclusao = to_timestamp('{data}', 'yyyy-MM-dd')"
                 .format(
                     orgao_id=orgao_id,
                     tipo_acervo=tipo_acervo,
@@ -72,19 +72,19 @@ class AcervoVariationView(RetrieveAPIView):
                     tb_data_fim.acervo as acervo_fim,
                     tb_data_inicio.acervo_inicio,
                     (acervo - acervo_inicio)/acervo_inicio as variacao
-                FROM exadata_aux.vw_acervo_historico_diario tb_data_fim
+                FROM exadata_aux.tb_acervo tb_data_fim
                 INNER JOIN (
                     SELECT
                         acervo as acervo_inicio,
-                        `data` as data_inicio,
+                        dt_inclusao as data_inicio,
                         cod_orgao,
                         tipo_acervo
-                    FROM exadata_aux.vw_acervo_historico_diario
-                    WHERE `data` = to_timestamp('{dt_inicio}', 'yyyy-MM-dd')
+                    FROM exadata_aux.tb_acervo
+                    WHERE dt_inclusao = to_timestamp('{dt_inicio}', 'yyyy-MM-dd')
                     ) tb_data_inicio
                 ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
                 AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
-                WHERE tb_data_fim.`data` = to_timestamp(
+                WHERE tb_data_fim.dt_inclusao = to_timestamp(
                     '{dt_fim}', 'yyyy-MM-dd')
                 AND tb_data_fim.cod_orgao = {orgao_id}
                 AND tb_data_fim.tipo_acervo = {tipo_acervo};
@@ -138,19 +138,19 @@ class AcervoVariationTopNView(ListAPIView):
                     tb_data_inicio.acervo_inicio,
                     (acervo - acervo_inicio)/acervo_inicio as variacao,
                     tb_data_fim.cod_orgao as cod_orgao
-                FROM exadata_aux.vw_acervo_historico_diario tb_data_fim
+                FROM exadata_aux.tb_acervo tb_data_fim
                 INNER JOIN (
                     SELECT
                         acervo as acervo_inicio,
-                        `data` as data_inicio,
+                        dt_inclusao as data_inicio,
                         cod_orgao,
                         tipo_acervo
-                    FROM exadata_aux.vw_acervo_historico_diario
-                    WHERE `data` = to_timestamp('{dt_inicio}', 'yyyy-MM-dd')
+                    FROM exadata_aux.tb_acervo
+                    WHERE dt_inclusao = to_timestamp('{dt_inicio}', 'yyyy-MM-dd')
                     ) tb_data_inicio
                 ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
                 AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
-                WHERE tb_data_fim.`data` = to_timestamp(
+                WHERE tb_data_fim.dt_inclusao = to_timestamp(
                     '{dt_fim}', 'yyyy-MM-dd')
                 AND tb_data_fim.tipo_acervo = {tipo_acervo}
                 ORDER BY variacao DESC
