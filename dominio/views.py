@@ -57,7 +57,6 @@ class AcervoView(RetrieveAPIView):
             raise Http404
 
         acervo = {'acervo_qtd': acervo_qtd}
-        print(acervo)
         data = AcervoSerializer(acervo).data
         return Response(data)
 
