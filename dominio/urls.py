@@ -3,7 +3,8 @@ from django.urls import path
 from .views import (
     AcervoView,
     AcervoVariationView,
-    AcervoVariationTopNView  # , AlertasListView
+    AcervoVariationTopNView,
+    OutliersView  # , AlertasListView
 )
 
 app_name = 'dominio'
@@ -30,5 +31,11 @@ urlpatterns = [
         '<str:tipo_acervo>/<str:dt_inicio>/<str:dt_fim>/<str:n>',
         AcervoVariationTopNView.as_view(),
         name='acervo_variation_topn'
+    ),
+    path(
+        'outliers/'
+        '<str:orgao_id>/<str:tipo_acervo>/<str:dt_calculo>',
+        OutliersView.as_view(),
+        name='outliers'
     )
 ]

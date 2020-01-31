@@ -6,7 +6,8 @@ from .db_connectors import execute
 from .serializers import (
     AcervoSerializer,
     AcervoVariationSerializer,
-    AcervoVariationTopNSerializer  # , AlertaSerializer
+    AcervoVariationTopNSerializer,
+    OutliersSerializer  # , AlertaSerializer
 )
 from lupa.exceptions import QueryError
 
@@ -191,4 +192,65 @@ class AcervoVariationTopNView(ListAPIView):
             {fieldname: value for fieldname, value in zip(fields, row)}
             for row in data]
         data = AcervoVariationTopNSerializer(data_obj, many=True).data
+        return Response(data)
+
+
+class OutliersView(RetrieveAPIView):
+
+    def get_outliers(self, orgao_id, tipo_acervo, dt_calculo):
+
+        try:
+            db_result = execute(
+                """
+                SELECT B.pacote_atribuicao,
+                B.minimo,
+                B.maximo,
+                B.media,
+                B.primeiro_quartil,
+                B.mediana,
+                B.terceiro_quartil,
+                B.iqr,
+                B.lout,
+                B.hout
+                FROM exadata_aux.tb_acervo A
+                INNER JOIN exadata_aux.tb_distribuicao B
+                ON A.pacote_atribuicao = B.pacote_atribuicao
+                AND A.dt_inclusao = B.dt_inclusao
+                WHERE A.cod_orgao = {orgao_id}
+                AND A.tipo_acervo = {tipo_acervo}
+                AND B.dt_inclusao = to_timestamp('{dt_calculo}', 'yyyy-MM-dd')
+                """
+                .format(
+                    orgao_id=orgao_id,
+                    tipo_acervo=tipo_acervo,
+                    dt_calculo=dt_calculo
+                )
+            )
+        except QueryError:
+            return None
+
+        if db_result and db_result[0]:
+            return db_result[0]
+
+        return None
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(self.kwargs['orgao_id'])
+        tipo_acervo = int(self.kwargs['tipo_acervo'])
+        dt_calculo = str(self.kwargs['dt_calculo'])
+
+        data = self.get_outliers(
+            orgao_id=orgao_id,
+            tipo_acervo=tipo_acervo,
+            dt_calculo=dt_calculo
+        )
+
+        if not data:
+            raise Http404
+
+        fields = ['pacote_atribuicao', 'minimo', 'maximo',
+                  'media', 'primeiro_quartil', 'mediana', 'terceiro_quartil',
+                  'iqr', 'lout', 'hout']
+        data_obj = {fieldname: value for fieldname, value in zip(fields, data)}
+        data = OutliersSerializer(data_obj).data
         return Response(data)
