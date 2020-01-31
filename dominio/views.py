@@ -80,7 +80,8 @@ class AcervoVariationView(RetrieveAPIView):
                         cod_orgao,
                         tipo_acervo
                     FROM exadata_aux.tb_acervo
-                    WHERE dt_inclusao = to_timestamp('{dt_inicio}', 'yyyy-MM-dd')
+                    WHERE dt_inclusao = to_timestamp(
+                        '{dt_inicio}', 'yyyy-MM-dd')
                     ) tb_data_inicio
                 ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
                 AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
@@ -146,7 +147,8 @@ class AcervoVariationTopNView(ListAPIView):
                         cod_orgao,
                         tipo_acervo
                     FROM exadata_aux.tb_acervo
-                    WHERE dt_inclusao = to_timestamp('{dt_inicio}', 'yyyy-MM-dd')
+                    WHERE dt_inclusao = to_timestamp(
+                        '{dt_inicio}', 'yyyy-MM-dd')
                     ) tb_data_inicio
                 ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
                 AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
