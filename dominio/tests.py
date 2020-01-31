@@ -17,6 +17,15 @@ class AcervoViewTest(TestCase):
 
         expected_response = {'acervo_qtd': 10}
 
+        expected_query = (
+                "SELECT acervo "
+                "FROM exadata_aux.tb_acervo "
+                "WHERE cod_orgao = 0 "
+                "AND tipo_acervo = 1 "
+                "AND dt_inclusao = to_timestamp('2', 'yyyy-MM-dd')")
+
+        _execute.assert_called_once_with(expected_query)
+
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected_response)
 
@@ -47,6 +56,31 @@ class AcervoVariationViewTest(TestCase):
             'acervo_inicio': 100,
             'variacao': 0.0
         }
+
+        expected_query = """
+                SELECT
+                    tb_data_fim.acervo as acervo_fim,
+                    tb_data_inicio.acervo_inicio,
+                    (acervo - acervo_inicio)/acervo_inicio as variacao
+                FROM exadata_aux.tb_acervo tb_data_fim
+                INNER JOIN (
+                    SELECT
+                        acervo as acervo_inicio,
+                        dt_inclusao as data_inicio,
+                        cod_orgao,
+                        tipo_acervo
+                    FROM exadata_aux.tb_acervo
+                    WHERE dt_inclusao = to_timestamp('2', 'yyyy-MM-dd')
+                    ) tb_data_inicio
+                ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
+                AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
+                WHERE tb_data_fim.dt_inclusao = to_timestamp(
+                    '3', 'yyyy-MM-dd')
+                AND tb_data_fim.cod_orgao = 0
+                AND tb_data_fim.tipo_acervo = 1;
+                """
+
+        _execute.assert_called_once_with(expected_query)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected_response)
@@ -97,6 +131,33 @@ class AcervoVariationTopNViewTest(TestCase):
                 'cod_orgao': 3
             }
         ]
+
+        expected_query = """
+                SELECT
+                    tb_data_fim.acervo as acervo_fim,
+                    tb_data_inicio.acervo_inicio,
+                    (acervo - acervo_inicio)/acervo_inicio as variacao,
+                    tb_data_fim.cod_orgao as cod_orgao
+                FROM exadata_aux.tb_acervo tb_data_fim
+                INNER JOIN (
+                    SELECT
+                        acervo as acervo_inicio,
+                        dt_inclusao as data_inicio,
+                        cod_orgao,
+                        tipo_acervo
+                    FROM exadata_aux.tb_acervo
+                    WHERE dt_inclusao = to_timestamp('1', 'yyyy-MM-dd')
+                    ) tb_data_inicio
+                ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
+                AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
+                WHERE tb_data_fim.dt_inclusao = to_timestamp(
+                    '2', 'yyyy-MM-dd')
+                AND tb_data_fim.tipo_acervo = 0
+                ORDER BY variacao DESC
+                LIMIT 3;
+                """
+
+        _execute.assert_called_once_with(expected_query)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected_response)
