@@ -182,14 +182,14 @@ class OutliersViewTest(TestCase):
     @mock.patch('dominio.views.execute')
     def test_outliers_result(self, _execute):
         _execute.return_value = [
-            ('TC de Tal Coisa', '100', '1000', '500', '300', '450', '700',
+            ('20', '100', '1000', '500', '300', '450', '700',
              '400', '50', '950')]
         response = self.client.get(reverse(
             'dominio:outliers',
-            args=('0', '1', '2')))
+            args=('0', '1')))
 
         expected_response = {
-            'pacote_atribuicao': 'TC de Tal Coisa',
+            'cod_atribuicao': 20,
             'minimo': 100,
             'maximo': 1000,
             'media': 500,
@@ -202,7 +202,7 @@ class OutliersViewTest(TestCase):
         }
 
         expected_query = """
-                SELECT B.pacote_atribuicao,
+                SELECT B.cod_atribuicao,
                 B.minimo,
                 B.maximo,
                 B.media,
@@ -214,11 +214,10 @@ class OutliersViewTest(TestCase):
                 B.hout
                 FROM exadata_aux.tb_acervo A
                 INNER JOIN exadata_aux.tb_distribuicao B
-                ON A.pacote_atribuicao = B.pacote_atribuicao
+                ON A.cod_atribuicao = B.cod_atribuicao
                 AND A.dt_inclusao = B.dt_inclusao
                 WHERE A.cod_orgao = 0
-                AND A.tipo_acervo = 1
-                AND B.dt_inclusao = to_timestamp('2', 'yyyy-MM-dd')
+                AND B.dt_inclusao = to_timestamp('1', 'yyyy-MM-dd')
                 """
 
         _execute.assert_called_once_with(expected_query)
@@ -230,7 +229,7 @@ class OutliersViewTest(TestCase):
         _execute.return_value = []
         response = self.client.get(reverse(
             'dominio:outliers',
-            args=('0', '1', '2')))
+            args=('0', '1')))
 
         expected_response = {'detail': 'Não encontrado.'}
 
