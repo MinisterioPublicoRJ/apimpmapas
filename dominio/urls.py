@@ -34,7 +34,7 @@ urlpatterns = [
     ),
     path(
         'outliers/'
-        '<str:orgao_id>/<str:tipo_acervo>/<str:dt_calculo>',
+        '<str:orgao_id>/<str:dt_calculo>',
         OutliersView.as_view(),
         name='outliers'
     )

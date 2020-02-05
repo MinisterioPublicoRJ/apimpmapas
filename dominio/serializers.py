@@ -19,9 +19,9 @@ class AcervoVariationTopNSerializer(serializers.Serializer):
 
 
 class OutliersSerializer(serializers.Serializer):
-    pacote_atribuicao = serializers.CharField()
+    cod_atribuicao = serializers.IntegerField()
     minimo = serializers.IntegerField(min_value=0)
-    maximo = serializers.IntegerField()
+    maximo = serializers.IntegerField(min_value=0)
     media = serializers.FloatField()
     primeiro_quartil = serializers.FloatField()
     mediana = serializers.FloatField()

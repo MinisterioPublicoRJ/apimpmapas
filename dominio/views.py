@@ -199,12 +199,12 @@ class AcervoVariationTopNView(ListAPIView):
 
 class OutliersView(RetrieveAPIView):
 
-    def get_outliers(self, orgao_id, tipo_acervo, dt_calculo):
+    def get_outliers(self, orgao_id, dt_calculo):
 
         try:
             db_result = execute(
                 """
-                SELECT B.pacote_atribuicao,
+                SELECT B.cod_atribuicao,
                 B.minimo,
                 B.maximo,
                 B.media,
@@ -216,15 +216,13 @@ class OutliersView(RetrieveAPIView):
                 B.hout
                 FROM exadata_aux.tb_acervo A
                 INNER JOIN exadata_aux.tb_distribuicao B
-                ON A.pacote_atribuicao = B.pacote_atribuicao
+                ON A.cod_atribuicao = B.cod_atribuicao
                 AND A.dt_inclusao = B.dt_inclusao
                 WHERE A.cod_orgao = {orgao_id}
-                AND A.tipo_acervo = {tipo_acervo}
                 AND B.dt_inclusao = to_timestamp('{dt_calculo}', 'yyyy-MM-dd')
                 """
                 .format(
                     orgao_id=orgao_id,
-                    tipo_acervo=tipo_acervo,
                     dt_calculo=dt_calculo
                 )
             )
@@ -238,19 +236,17 @@ class OutliersView(RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs['orgao_id'])
-        tipo_acervo = int(self.kwargs['tipo_acervo'])
         dt_calculo = str(self.kwargs['dt_calculo'])
 
         data = self.get_outliers(
             orgao_id=orgao_id,
-            tipo_acervo=tipo_acervo,
             dt_calculo=dt_calculo
         )
 
         if not data:
             raise Http404
 
-        fields = ['pacote_atribuicao', 'minimo', 'maximo',
+        fields = ['cod_atribuicao', 'minimo', 'maximo',
                   'media', 'primeiro_quartil', 'mediana', 'terceiro_quartil',
                   'iqr', 'lout', 'hout']
         data_obj = {fieldname: value for fieldname, value in zip(fields, data)}
