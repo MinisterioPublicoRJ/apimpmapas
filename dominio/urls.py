@@ -23,7 +23,7 @@ urlpatterns = [
     ),
     path(
         'acervo_variation/'
-        '<str:orgao_id>/<str:tipo_acervo>/<str:dt_inicio>/<str:dt_fim>',
+        '<str:orgao_id>/<str:dt_inicio>/<str:dt_fim>',
         AcervoVariationView.as_view(),
         name='acervo_variation'
     ),

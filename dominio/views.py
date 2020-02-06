@@ -65,42 +65,47 @@ class AcervoView(RetrieveAPIView):
 
 class AcervoVariationView(RetrieveAPIView):
 
-    def get_acervo_increase(self, orgao_id, tipo_acervo, dt_inicio, dt_fim):
+    def get_acervo_increase(self, orgao_id, dt_inicio, dt_fim):
         try:
             db_result = execute(
                 """
-                SELECT
-                    tb_data_fim.acervo as acervo_fim,
-                    tb_data_inicio.acervo_inicio,
-                    (acervo - acervo_inicio)/acervo_inicio as variacao
-                FROM exadata_aux.tb_acervo tb_data_fim
-                INNER JOIN (
+                SELECT 
+                    acervo_fim,
+                    acervo_inicio,
+                    (acervo_fim - acervo_inicio)/acervo_inicio as variacao
+                FROM (
                     SELECT
-                        acervo as acervo_inicio,
-                        dt_inclusao as data_inicio,
-                        cod_orgao,
-                        tipo_acervo
-                    FROM exadata_aux.tb_acervo
-                    WHERE dt_inclusao = to_timestamp(
-                        '{dt_inicio}', 'yyyy-MM-dd')
-                    ) tb_data_inicio
-                ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
-                AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
-                WHERE tb_data_fim.dt_inclusao = to_timestamp(
-                    '{dt_fim}', 'yyyy-MM-dd')
-                AND tb_data_fim.cod_orgao = {orgao_id}
-                AND tb_data_fim.tipo_acervo = {tipo_acervo};
+                        SUM(tb_data_fim.acervo) as acervo_fim,
+                        SUM(tb_data_inicio.acervo_inicio) as acervo_inicio
+                        FROM exadata_aux.tb_acervo tb_data_fim
+                    INNER JOIN (
+                        SELECT
+                            acervo as acervo_inicio,
+                            dt_inclusao as data_inicio,
+                            cod_orgao,
+                            tipo_acervo
+                        FROM exadata_aux.tb_acervo
+                        WHERE dt_inclusao = to_timestamp(
+                            '{dt_inicio}', 'yyyy-MM-dd')
+                        ) tb_data_inicio
+                    ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
+                        AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
+                    INNER JOIN exadata_aux.tb_regra_negocio_investigacao regras
+                    ON regras.cod_atribuicao = tb_data_fim.cod_atribuicao
+                        AND regras.classe_documento = tb_data_fim.tipo_acervo
+                    WHERE tb_data_fim.dt_inclusao = to_timestamp(
+                        '{dt_fim}', 'yyyy-MM-dd')
+                    AND tb_data_fim.cod_orgao = {orgao_id}) t
                 """
                 .format(
                     orgao_id=orgao_id,
-                    tipo_acervo=tipo_acervo,
                     dt_inicio=dt_inicio,
                     dt_fim=dt_fim
                 )
             )
         except QueryError:
             return None
-
+        print(db_result)
         if db_result and db_result[0]:
             return db_result[0]
 
@@ -108,13 +113,11 @@ class AcervoVariationView(RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs['orgao_id'])
-        tipo_acervo = int(self.kwargs['tipo_acervo'])
         dt_inicio = str(self.kwargs['dt_inicio'])
         dt_fim = str(self.kwargs['dt_fim'])
 
         data = self.get_acervo_increase(
             orgao_id=orgao_id,
-            tipo_acervo=tipo_acervo,
             dt_inicio=dt_inicio,
             dt_fim=dt_fim
         )

@@ -49,7 +49,7 @@ class AcervoVariationViewTest(TestCase):
         _execute.return_value = [('100', '100', '0.0')]
         response = self.client.get(reverse(
             'dominio:acervo_variation',
-            args=('0', '1', '2', '3')))
+            args=('0', '1', '2')))
 
         expected_response = {
             'acervo_fim': 100,
@@ -58,27 +58,33 @@ class AcervoVariationViewTest(TestCase):
         }
 
         expected_query = """
-                SELECT
-                    tb_data_fim.acervo as acervo_fim,
-                    tb_data_inicio.acervo_inicio,
-                    (acervo - acervo_inicio)/acervo_inicio as variacao
-                FROM exadata_aux.tb_acervo tb_data_fim
-                INNER JOIN (
+                SELECT 
+                    acervo_fim,
+                    acervo_inicio,
+                    (acervo_fim - acervo_inicio)/acervo_inicio as variacao
+                FROM (
                     SELECT
-                        acervo as acervo_inicio,
-                        dt_inclusao as data_inicio,
-                        cod_orgao,
-                        tipo_acervo
-                    FROM exadata_aux.tb_acervo
-                    WHERE dt_inclusao = to_timestamp(
+                        SUM(tb_data_fim.acervo) as acervo_fim,
+                        SUM(tb_data_inicio.acervo_inicio) as acervo_inicio
+                        FROM exadata_aux.tb_acervo tb_data_fim
+                    INNER JOIN (
+                        SELECT
+                            acervo as acervo_inicio,
+                            dt_inclusao as data_inicio,
+                            cod_orgao,
+                            tipo_acervo
+                        FROM exadata_aux.tb_acervo
+                        WHERE dt_inclusao = to_timestamp(
+                            '1', 'yyyy-MM-dd')
+                        ) tb_data_inicio
+                    ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
+                        AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
+                    INNER JOIN exadata_aux.tb_regra_negocio_investigacao regras
+                    ON regras.cod_atribuicao = tb_data_fim.cod_atribuicao
+                        AND regras.classe_documento = tb_data_fim.tipo_acervo
+                    WHERE tb_data_fim.dt_inclusao = to_timestamp(
                         '2', 'yyyy-MM-dd')
-                    ) tb_data_inicio
-                ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
-                AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
-                WHERE tb_data_fim.dt_inclusao = to_timestamp(
-                    '3', 'yyyy-MM-dd')
-                AND tb_data_fim.cod_orgao = 0
-                AND tb_data_fim.tipo_acervo = 1;
+                    AND tb_data_fim.cod_orgao = 0) t
                 """
 
         _execute.assert_called_once_with(expected_query)
@@ -91,7 +97,7 @@ class AcervoVariationViewTest(TestCase):
         _execute.return_value = []
         response = self.client.get(reverse(
             'dominio:acervo_variation',
-            args=('0', '1', '2', '3')))
+            args=('0', '1', '2')))
 
         expected_response = {'detail': 'Não encontrado.'}
 
