@@ -29,3 +29,11 @@ class OutliersSerializer(serializers.Serializer):
     iqr = serializers.FloatField()
     lout = serializers.FloatField()
     hout = serializers.FloatField()
+
+
+class SaidasSerializer(serializers.Serializer):
+    saidas = serializers.IntegerField(min_value=0)
+    id_orgao = serializers.IntegerField()
+    cod_pct = serializers.IntegerField()
+    percent_rank = serializers.FloatField()
+    dt_calculo = serializers.DateTimeField()

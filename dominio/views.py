@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from .db_connectors import execute
 from .serializers import (
     AcervoSerializer,
+    SaidasSerializer,
     AcervoVariationSerializer,
     AcervoVariationTopNSerializer,
     OutliersSerializer  # , AlertaSerializer
@@ -251,4 +252,39 @@ class OutliersView(RetrieveAPIView):
                   'iqr', 'lout', 'hout']
         data_obj = {fieldname: value for fieldname, value in zip(fields, data)}
         data = OutliersSerializer(data_obj).data
+        return Response(data)
+
+
+class SaidasView(RetrieveAPIView):
+
+    def get_saidas(self, orgao_id):
+
+        try:
+            db_result = execute(
+                """"""
+                .format(
+                    orgao_id=orgao_id
+                )
+            )
+        except QueryError:
+            return None
+
+        if db_result and db_result[0]:
+            return db_result[0]
+
+        return None
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(self.kwargs['orgao_id'])
+
+        data = self.get_saidas(
+            orgao_id=orgao_id
+        )
+
+        if not data:
+            raise Http404
+
+        fields = ['saidas', 'id_orgao', 'cod_pct', 'percent_rank', 'dt_calculo']
+        data_obj = {fieldname: value for fieldname, value in zip(fields, data)}
+        data = SaidasSerializer(data_obj).data
         return Response(data)

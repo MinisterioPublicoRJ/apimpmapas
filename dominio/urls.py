@@ -2,6 +2,7 @@ from django.urls import path
 
 from .views import (
     AcervoView,
+    SaidasView,
     AcervoVariationView,
     AcervoVariationTopNView,
     OutliersView  # , AlertasListView
@@ -37,5 +38,10 @@ urlpatterns = [
         '<str:orgao_id>/<str:dt_calculo>',
         OutliersView.as_view(),
         name='outliers'
+    ),
+    path(
+        'saidas/<str:orgao_id>',
+        SaidasView.as_view(),
+        name='saidas'
     )
 ]
