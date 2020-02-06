@@ -261,7 +261,11 @@ class SaidasView(RetrieveAPIView):
 
         try:
             db_result = execute(
-                """"""
+                """
+                SELECT saidas, id_orgao, cod_pct, percent_rank, dt_calculo
+                FROM exadata_aux.tb_saida
+                WHERE id_orgao = {orgao_id}
+                """
                 .format(
                     orgao_id=orgao_id
                 )

@@ -245,7 +245,7 @@ class SaidasViewTest(TestCase):
             ('0', '100', '25', '0.7', '2020-02-06 17:19:08.952040000')]
         response = self.client.get(reverse(
             'dominio:saidas',
-            args=('1')))
+            args=('100',)))
 
         expected_response = {
             'saidas': 0,
@@ -255,7 +255,11 @@ class SaidasViewTest(TestCase):
             'dt_calculo': '2020-02-06 17:19:08.952040000'
         }
 
-        expected_query = """"""
+        expected_query = """
+                SELECT saidas, id_orgao, cod_pct, percent_rank, dt_calculo
+                FROM exadata_aux.tb_saida
+                WHERE id_orgao = 100
+                """
 
         _execute.assert_called_once_with(expected_query)
         self.assertEqual(response.status_code, 200)
@@ -266,7 +270,7 @@ class SaidasViewTest(TestCase):
         _execute.return_value = []
         response = self.client.get(reverse(
             'dominio:saidas',
-            args=('1')))
+            args=('1',)))
 
         expected_response = {'detail': 'Não encontrado.'}
 
