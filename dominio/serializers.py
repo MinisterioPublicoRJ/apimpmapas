@@ -12,10 +12,11 @@ class AcervoVariationSerializer(serializers.Serializer):
 
 
 class AcervoVariationTopNSerializer(serializers.Serializer):
+    cod_orgao = serializers.IntegerField()
+    nm_orgao = serializers.CharField()
     acervo_fim = serializers.IntegerField(min_value=0)
     acervo_inicio = serializers.IntegerField(min_value=0)
     variacao = serializers.FloatField()
-    cod_orgao = serializers.IntegerField()
 
 
 class OutliersSerializer(serializers.Serializer):

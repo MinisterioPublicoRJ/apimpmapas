@@ -110,9 +110,9 @@ class AcervoVariationTopNViewTest(TestCase):
     @mock.patch('dominio.views.execute')
     def test_acervo_variation_result(self, _execute):
         _execute.return_value = [
-            ('100', '50', '100.0', 1),
-            ('50', '100', '-50.0', 2),
-            ('300', '100', '200.0', 3)
+            (1, 'PROMO1' ,'100', '50', '100.0'),
+            (2, 'PROMO2' ,'50', '100', '-50.0'),
+            (3, 'PROMO3' ,'300', '100', '200.0')
         ]
         response = self.client.get(reverse(
             'dominio:acervo_variation_topn',
@@ -120,47 +120,69 @@ class AcervoVariationTopNViewTest(TestCase):
 
         expected_response = [
             {
+                'cod_orgao': 1,
+                'nm_orgao': 'PROMO1',
                 'acervo_fim': 100,
                 'acervo_inicio': 50,
                 'variacao': 100.0,
-                'cod_orgao': 1
             },
             {
+                'cod_orgao': 2,
+                'nm_orgao': 'PROMO2',
                 'acervo_fim': 50,
                 'acervo_inicio': 100,
                 'variacao': -50.0,
-                'cod_orgao': 2
             },
             {
+                'cod_orgao': 3,
+                'nm_orgao': 'PROMO3',
                 'acervo_fim': 300,
                 'acervo_inicio': 100,
-                'variacao': 200.0,
-                'cod_orgao': 3
+                'variacao': 200.0
             }
         ]
 
         expected_query = """
                 SELECT
-                    tb_data_fim.acervo as acervo_fim,
-                    tb_data_inicio.acervo_inicio,
-                    (acervo - acervo_inicio)/acervo_inicio as variacao,
-                    tb_data_fim.cod_orgao as cod_orgao
-                FROM exadata_aux.tb_acervo tb_data_fim
-                INNER JOIN (
+                    cod_orgao,
+                    orgi_nm_orgao,
+                    acervo_fim,
+                    acervo_inicio,
+                    (acervo_fim - acervo_inicio)/acervo_inicio as variacao
+                FROM (
                     SELECT
-                        acervo as acervo_inicio,
-                        dt_inclusao as data_inicio,
-                        cod_orgao,
-                        tipo_acervo
-                    FROM exadata_aux.tb_acervo
-                    WHERE dt_inclusao = to_timestamp(
-                        '1', 'yyyy-MM-dd')
-                    ) tb_data_inicio
-                ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
-                AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
-                WHERE tb_data_fim.dt_inclusao = to_timestamp(
-                    '2', 'yyyy-MM-dd')
-                AND tb_data_fim.tipo_acervo = 0
+                        tb_data_fim.cod_orgao,
+                        SUM(tb_data_fim.acervo) as acervo_fim,
+                        SUM(tb_data_inicio.acervo_inicio) as acervo_inicio
+                        FROM exadata_aux.tb_acervo tb_data_fim
+                    INNER JOIN (
+                        SELECT
+                            acervo as acervo_inicio,
+                            dt_inclusao as data_inicio,
+                            cod_orgao,
+                            tipo_acervo
+                        FROM exadata_aux.tb_acervo
+                        WHERE dt_inclusao = to_timestamp(
+                            '1', 'yyyy-MM-dd')
+                        ) tb_data_inicio
+                    ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
+                    AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
+                    INNER JOIN exadata_aux.tb_regra_negocio_investigacao regras
+                    ON regras.cod_atribuicao = tb_data_fim.cod_atribuicao
+                        AND regras.classe_documento = tb_data_fim.tipo_acervo
+                    WHERE tb_data_fim.dt_inclusao = to_timestamp(
+                        '2', 'yyyy-MM-dd')
+                    GROUP BY tb_data_fim.cod_orgao
+                    ) t
+                INNER JOIN exadata.orgi_orgao ON orgi_orgao.orgi_dk = cod_orgao
+                WHERE cod_orgao IN (
+                    SELECT cast(id_orgao as int)
+                    FROM cluster.atualizacao_pj_pacote A
+                    INNER JOIN (
+                        SELECT cod_pct
+                        FROM cluster.atualizacao_pj_pacote
+                        WHERE id_orgao = '0') B
+                    ON A.cod_pct = B.cod_pct)
                 ORDER BY variacao DESC
                 LIMIT 3;
                 """

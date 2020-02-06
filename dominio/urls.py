@@ -29,7 +29,7 @@ urlpatterns = [
     ),
     path(
         'acervo_variation_topn/'
-        '<str:tipo_acervo>/<str:dt_inicio>/<str:dt_fim>/<str:n>',
+        '<str:orgao_id>/<str:dt_inicio>/<str:dt_fim>/<str:n>',
         AcervoVariationTopNView.as_view(),
         name='acervo_variation_topn'
     ),
