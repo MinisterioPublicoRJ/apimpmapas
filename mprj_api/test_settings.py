@@ -105,7 +105,7 @@ DATABASES = {
     )
 }
 
-DATABASE_ROUTERS = ['routers.DominioRouter']
+DATABASE_ROUTERS = ['mprj_api.db_routers.DominioRouter']
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
