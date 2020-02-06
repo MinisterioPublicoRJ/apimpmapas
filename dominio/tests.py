@@ -235,3 +235,40 @@ class OutliersViewTest(TestCase):
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.data, expected_response)
+
+
+class SaidasViewTest(TestCase):
+
+    @mock.patch('dominio.views.execute')
+    def test_saidas_result(self, _execute):
+        _execute.return_value = [
+            ('0', '100', '25', '0.7', '2020-02-06 17:19:08.952040000')]
+        response = self.client.get(reverse(
+            'dominio:saidas',
+            args=('1')))
+
+        expected_response = {
+            'saidas': 0,
+            'id_orgao': 100,
+            'cod_pct': 25,
+            'percent_rank': 0.7,
+            'dt_calculo': '2020-02-06 17:19:08.952040000'
+        }
+
+        expected_query = """"""
+
+        _execute.assert_called_once_with(expected_query)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected_response)
+
+    @mock.patch('dominio.views.execute')
+    def test_saidas_no_result(self, _execute):
+        _execute.return_value = []
+        response = self.client.get(reverse(
+            'dominio:saidas',
+            args=('1')))
+
+        expected_response = {'detail': 'Não encontrado.'}
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.data, expected_response)
