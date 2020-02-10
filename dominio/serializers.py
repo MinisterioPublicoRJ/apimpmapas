@@ -12,10 +12,11 @@ class AcervoVariationSerializer(serializers.Serializer):
 
 
 class AcervoVariationTopNSerializer(serializers.Serializer):
+    cod_orgao = serializers.IntegerField()
+    nm_orgao = serializers.CharField()
     acervo_fim = serializers.IntegerField(min_value=0)
     acervo_inicio = serializers.IntegerField(min_value=0)
     variacao = serializers.FloatField()
-    cod_orgao = serializers.IntegerField()
 
 
 class OutliersSerializer(serializers.Serializer):
@@ -29,3 +30,11 @@ class OutliersSerializer(serializers.Serializer):
     iqr = serializers.FloatField()
     lout = serializers.FloatField()
     hout = serializers.FloatField()
+
+
+class SaidasSerializer(serializers.Serializer):
+    saidas = serializers.IntegerField(min_value=0)
+    id_orgao = serializers.IntegerField()
+    cod_pct = serializers.IntegerField()
+    percent_rank = serializers.FloatField()
+    dt_calculo = serializers.DateTimeField()
