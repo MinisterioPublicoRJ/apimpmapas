@@ -56,7 +56,7 @@ class RunQuery(TestCase):
         resp = run_query(query)
 
         _execute.assert_called_once_with(query)
-        self.assertEqual(resp, "result set")
+        self.assertEqual(resp, [("result set",)])
 
     @mock.patch("dominio.db_connectors.execute")
     def test_run_query_error(self, _execute):

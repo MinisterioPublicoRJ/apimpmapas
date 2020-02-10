@@ -32,5 +32,5 @@ def run_query(query):
     except QueryError:
         return None
     if db_result and db_result[0]:
-        return db_result[0][0]
+        return db_result
     return None

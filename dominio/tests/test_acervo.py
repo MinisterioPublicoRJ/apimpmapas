@@ -10,7 +10,7 @@ class AcervoViewTest(TestCase):
 
     @mock.patch('dominio.views.run_query')
     def test_acervo_variation_result(self, _run_query):
-        _run_query.return_value = '10'
+        _run_query.return_value = [('10',), ]
         response = self.client.get(reverse(
             'dominio:acervo',
             args=('0', '1', '2')))
@@ -46,7 +46,7 @@ class AcervoVariationViewTest(TestCase):
 
     @mock.patch('dominio.views.run_query')
     def test_acervo_variation_result(self, _run_query):
-        _run_query.return_value = ('100', '100', '0.0')
+        _run_query.return_value = [('100', '100', '0.0'), ]
         response = self.client.get(reverse(
             'dominio:acervo_variation',
             args=('0', '1', '2')))
@@ -210,8 +210,8 @@ class OutliersViewTest(TestCase):
     @mock.patch('dominio.views.run_query')
     def test_outliers_result(self, _run_query):
         _run_query.return_value = \
-            ('20', '100', '1000', '500', '300', '450', '700',
-             '400', '50', '950')
+            [('20', '100', '1000', '500', '300', '450', '700',
+             '400', '50', '950'),]
         response = self.client.get(reverse(
             'dominio:outliers',
             args=('0', '1')))
@@ -270,7 +270,7 @@ class SaidasViewTest(TestCase):
     @mock.patch('dominio.views.run_query')
     def test_saidas_result(self, _run_query):
         _run_query.return_value = \
-            ('0', '100', '25', '0.7', '2020-02-06 17:19:08.952040000')
+            [('0', '100', '25', '0.7', '2020-02-06 17:19:08.952040000'),]
         response = self.client.get(reverse(
             'dominio:saidas',
             args=('100',)))

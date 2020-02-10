@@ -10,7 +10,6 @@ from .serializers import (
     AcervoVariationTopNSerializer,
     OutliersSerializer
 )
-from lupa.exceptions import QueryError
 
 
 class AcervoView(APIView):
@@ -43,7 +42,7 @@ class AcervoView(APIView):
         if not acervo_qtd:
             raise Http404
 
-        acervo = {'acervo_qtd': acervo_qtd}
+        acervo = {'acervo_qtd': acervo_qtd[0][0]}
         data = AcervoSerializer(acervo).data
         return Response(data)
 
@@ -101,7 +100,7 @@ class AcervoVariationView(APIView):
             raise Http404
 
         fields = ['acervo_fim', 'acervo_inicio', 'variacao']
-        data_obj = {fieldname: value for fieldname, value in zip(fields, data)}
+        data_obj = {fieldname: value for fieldname, value in zip(fields, data[0])}
         data = AcervoVariationSerializer(data_obj).data
         return Response(data)
 
@@ -227,7 +226,7 @@ class OutliersView(APIView):
         fields = ['cod_atribuicao', 'minimo', 'maximo',
                   'media', 'primeiro_quartil', 'mediana', 'terceiro_quartil',
                   'iqr', 'lout', 'hout']
-        data_obj = {fieldname: value for fieldname, value in zip(fields, data)}
+        data_obj = {fieldname: value for fieldname, value in zip(fields, data[0])}
         data = OutliersSerializer(data_obj).data
         return Response(data)
 
@@ -255,6 +254,6 @@ class SaidasView(APIView):
             raise Http404
 
         fields = ['saidas', 'id_orgao', 'cod_pct', 'percent_rank', 'dt_calculo']
-        data_obj = {fieldname: value for fieldname, value in zip(fields, data)}
+        data_obj = {fieldname: value for fieldname, value in zip(fields, data[0])}
         data = SaidasSerializer(data_obj).data
         return Response(data)
