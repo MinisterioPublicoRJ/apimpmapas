@@ -1,3 +1,4 @@
+from decouple import config
 from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -17,11 +18,12 @@ class AcervoView(APIView):
     def get_acervo(self, orgao_id, tipo_acervo, data):
         query = (
             "SELECT acervo "
-            "FROM exadata_aux.tb_acervo "
+            "FROM {namespace}.tb_acervo "
             "WHERE cod_orgao = {orgao_id} "
             "AND tipo_acervo = {tipo_acervo} "
             "AND dt_inclusao = to_timestamp('{data}', 'yyyy-MM-dd')"
             .format(
+                namespace=config('TABLE_NAMESPACE'),
                 orgao_id=orgao_id,
                 tipo_acervo=tipo_acervo,
                 data=data
@@ -59,26 +61,27 @@ class AcervoVariationView(APIView):
                 SELECT
                     SUM(tb_data_fim.acervo) as acervo_fim,
                     SUM(tb_data_inicio.acervo_inicio) as acervo_inicio
-                FROM exadata_aux.tb_acervo tb_data_fim
+                FROM {namespace}.tb_acervo tb_data_fim
                 INNER JOIN (
                     SELECT
                         acervo as acervo_inicio,
                         dt_inclusao as data_inicio,
                         cod_orgao,
                         tipo_acervo
-                    FROM exadata_aux.tb_acervo
+                    FROM {namespace}.tb_acervo
                     WHERE dt_inclusao = to_timestamp(
                         '{dt_inicio}', 'yyyy-MM-dd')
                     ) tb_data_inicio
                 ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
                     AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
-                INNER JOIN exadata_aux.tb_regra_negocio_investigacao regras
+                INNER JOIN {namespace}.tb_regra_negocio_investigacao regras
                 ON regras.cod_atribuicao = tb_data_fim.cod_atribuicao
                     AND regras.classe_documento = tb_data_fim.tipo_acervo
                 WHERE tb_data_fim.dt_inclusao = to_timestamp(
                     '{dt_fim}', 'yyyy-MM-dd')
                 AND tb_data_fim.cod_orgao = {orgao_id}) t
             """.format(
+                namespace=config('TABLE_NAMESPACE'),
                 orgao_id=orgao_id,
                 dt_inicio=dt_inicio,
                 dt_fim=dt_fim
@@ -121,20 +124,20 @@ class AcervoVariationTopNView(APIView):
                         tb_data_fim.cod_orgao,
                         SUM(tb_data_fim.acervo) as acervo_fim,
                         SUM(tb_data_inicio.acervo_inicio) as acervo_inicio
-                        FROM exadata_aux.tb_acervo tb_data_fim
+                        FROM {namespace}.tb_acervo tb_data_fim
                     INNER JOIN (
                         SELECT
                             acervo as acervo_inicio,
                             dt_inclusao as data_inicio,
                             cod_orgao,
                             tipo_acervo
-                        FROM exadata_aux.tb_acervo
+                        FROM {namespace}.tb_acervo
                         WHERE dt_inclusao = to_timestamp(
                             '{dt_inicio}', 'yyyy-MM-dd')
                         ) tb_data_inicio
                     ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
                     AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
-                    INNER JOIN exadata_aux.tb_regra_negocio_investigacao regras
+                    INNER JOIN {namespace}.tb_regra_negocio_investigacao regras
                     ON regras.cod_atribuicao = tb_data_fim.cod_atribuicao
                         AND regras.classe_documento = tb_data_fim.tipo_acervo
                     WHERE tb_data_fim.dt_inclusao = to_timestamp(
@@ -153,6 +156,7 @@ class AcervoVariationTopNView(APIView):
                 ORDER BY variacao DESC
                 LIMIT {n};
                 """.format(
+                    namespace=config('TABLE_NAMESPACE'),
                     orgao_id=orgao_id,
                     dt_inicio=dt_inicio,
                     dt_fim=dt_fim,
@@ -199,13 +203,14 @@ class OutliersView(APIView):
                 B.iqr,
                 B.lout,
                 B.hout
-                FROM exadata_aux.tb_acervo A
-                INNER JOIN exadata_aux.tb_distribuicao B
+                FROM {namespace}.tb_acervo A
+                INNER JOIN {namespace}.tb_distribuicao B
                 ON A.cod_atribuicao = B.cod_atribuicao
                 AND A.dt_inclusao = B.dt_inclusao
                 WHERE A.cod_orgao = {orgao_id}
                 AND B.dt_inclusao = to_timestamp('{dt_calculo}', 'yyyy-MM-dd')
                 """.format(
+                    namespace=config('TABLE_NAMESPACE'),
                     orgao_id=orgao_id,
                     dt_calculo=dt_calculo
                 )
@@ -237,9 +242,12 @@ class SaidasView(APIView):
 
         query = """
                 SELECT saidas, id_orgao, cod_pct, percent_rank, dt_calculo
-                FROM exadata_aux.tb_saida
+                FROM {namespace}.tb_saida
                 WHERE id_orgao = {orgao_id}
-                """.format(orgao_id=orgao_id)
+                """.format(
+                    orgao_id=orgao_id,
+                    namespace=config('TABLE_NAMESPACE')
+                )
 
         return run_query(query)
 
