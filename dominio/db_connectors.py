@@ -24,3 +24,13 @@ def execute(query):
             except BDA_Error as e:
                 logger.error("Error on query: " + str(e))
                 raise QueryError(str(e)) from e
+
+
+def run_query(query):
+    try:
+        db_result = execute(query)
+    except QueryError:
+        return None
+    if db_result and db_result[0]:
+        return db_result[0][0]
+    return None

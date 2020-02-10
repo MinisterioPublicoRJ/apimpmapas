@@ -1,48 +1,33 @@
 from django.http import Http404
-from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from .db_connectors import execute
+from .db_connectors import run_query
 from .serializers import (
     AcervoSerializer,
     SaidasSerializer,
     AcervoVariationSerializer,
     AcervoVariationTopNSerializer,
-    OutliersSerializer  # , AlertaSerializer
+    OutliersSerializer
 )
 from lupa.exceptions import QueryError
 
 
-# Create your views here.
-# class AlertasListView(ListAPIView):
-#     queryset = Alerta.objects.all()
-#     serializer_class = AlertaSerializer
-
-
-class AcervoView(RetrieveAPIView):
+class AcervoView(APIView):
 
     def get_acervo(self, orgao_id, tipo_acervo, data):
-
-        try:
-            db_result = execute(
-                "SELECT acervo "
-                "FROM exadata_aux.tb_acervo "
-                "WHERE cod_orgao = {orgao_id} "
-                "AND tipo_acervo = {tipo_acervo} "
-                "AND dt_inclusao = to_timestamp('{data}', 'yyyy-MM-dd')"
-                .format(
-                    orgao_id=orgao_id,
-                    tipo_acervo=tipo_acervo,
-                    data=data
-                )
-            )
-        except QueryError:
-            return None
-
-        if db_result and db_result[0]:
-            return db_result[0][0]
-
-        return None
+        query = (
+            "SELECT acervo "
+            "FROM exadata_aux.tb_acervo "
+            "WHERE cod_orgao = {orgao_id} "
+            "AND tipo_acervo = {tipo_acervo} "
+            "AND dt_inclusao = to_timestamp('{data}', 'yyyy-MM-dd')"
+            .format(
+                orgao_id=orgao_id,
+                tipo_acervo=tipo_acervo,
+                data=data
+            ))
+        return run_query(query)
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs['orgao_id'])
@@ -63,52 +48,43 @@ class AcervoView(RetrieveAPIView):
         return Response(data)
 
 
-class AcervoVariationView(RetrieveAPIView):
+class AcervoVariationView(APIView):
 
     def get_acervo_increase(self, orgao_id, dt_inicio, dt_fim):
-        try:
-            db_result = execute(
-                """
-                SELECT 
-                    acervo_fim,
-                    acervo_inicio,
-                    (acervo_fim - acervo_inicio)/acervo_inicio as variacao
-                FROM (
+        query = """
+            SELECT
+                acervo_fim,
+                acervo_inicio,
+                (acervo_fim - acervo_inicio)/acervo_inicio as variacao
+            FROM (
+                SELECT
+                    SUM(tb_data_fim.acervo) as acervo_fim,
+                    SUM(tb_data_inicio.acervo_inicio) as acervo_inicio
+                FROM exadata_aux.tb_acervo tb_data_fim
+                INNER JOIN (
                     SELECT
-                        SUM(tb_data_fim.acervo) as acervo_fim,
-                        SUM(tb_data_inicio.acervo_inicio) as acervo_inicio
-                        FROM exadata_aux.tb_acervo tb_data_fim
-                    INNER JOIN (
-                        SELECT
-                            acervo as acervo_inicio,
-                            dt_inclusao as data_inicio,
-                            cod_orgao,
-                            tipo_acervo
-                        FROM exadata_aux.tb_acervo
-                        WHERE dt_inclusao = to_timestamp(
-                            '{dt_inicio}', 'yyyy-MM-dd')
-                        ) tb_data_inicio
-                    ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
-                        AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
-                    INNER JOIN exadata_aux.tb_regra_negocio_investigacao regras
-                    ON regras.cod_atribuicao = tb_data_fim.cod_atribuicao
-                        AND regras.classe_documento = tb_data_fim.tipo_acervo
-                    WHERE tb_data_fim.dt_inclusao = to_timestamp(
-                        '{dt_fim}', 'yyyy-MM-dd')
-                    AND tb_data_fim.cod_orgao = {orgao_id}) t
-                """
-                .format(
-                    orgao_id=orgao_id,
-                    dt_inicio=dt_inicio,
-                    dt_fim=dt_fim
-                )
+                        acervo as acervo_inicio,
+                        dt_inclusao as data_inicio,
+                        cod_orgao,
+                        tipo_acervo
+                    FROM exadata_aux.tb_acervo
+                    WHERE dt_inclusao = to_timestamp(
+                        '{dt_inicio}', 'yyyy-MM-dd')
+                    ) tb_data_inicio
+                ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
+                    AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
+                INNER JOIN exadata_aux.tb_regra_negocio_investigacao regras
+                ON regras.cod_atribuicao = tb_data_fim.cod_atribuicao
+                    AND regras.classe_documento = tb_data_fim.tipo_acervo
+                WHERE tb_data_fim.dt_inclusao = to_timestamp(
+                    '{dt_fim}', 'yyyy-MM-dd')
+                AND tb_data_fim.cod_orgao = {orgao_id}) t
+            """.format(
+                orgao_id=orgao_id,
+                dt_inicio=dt_inicio,
+                dt_fim=dt_fim
             )
-        except QueryError:
-            return None
-        if db_result and db_result[0]:
-            return db_result[0]
-
-        return None
+        return run_query(query)
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs['orgao_id'])
@@ -130,13 +106,11 @@ class AcervoVariationView(RetrieveAPIView):
         return Response(data)
 
 
-class AcervoVariationTopNView(ListAPIView):
+class AcervoVariationTopNView(APIView):
     queryset = ''
 
     def get_acervo_increase_topn(self, orgao_id, dt_inicio, dt_fim, n=3):
-        try:
-            db_result = execute(
-                """
+        query ="""
                 SELECT
                     cod_orgao,
                     orgi_nm_orgao,
@@ -179,21 +153,13 @@ class AcervoVariationTopNView(ListAPIView):
                     ON A.cod_pct = B.cod_pct)
                 ORDER BY variacao DESC
                 LIMIT {n};
-                """
-                .format(
+                """.format(
                     orgao_id=orgao_id,
                     dt_inicio=dt_inicio,
                     dt_fim=dt_fim,
                     n=n
                 )
-            )
-        except QueryError:
-            return None
-
-        if db_result and db_result[0]:
-            return db_result
-
-        return None
+        return run_query(query)
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs['orgao_id'])
@@ -219,13 +185,11 @@ class AcervoVariationTopNView(ListAPIView):
         return Response(data)
 
 
-class OutliersView(RetrieveAPIView):
+class OutliersView(APIView):
 
     def get_outliers(self, orgao_id, dt_calculo):
 
-        try:
-            db_result = execute(
-                """
+        query = """
                 SELECT B.cod_atribuicao,
                 B.minimo,
                 B.maximo,
@@ -242,19 +206,11 @@ class OutliersView(RetrieveAPIView):
                 AND A.dt_inclusao = B.dt_inclusao
                 WHERE A.cod_orgao = {orgao_id}
                 AND B.dt_inclusao = to_timestamp('{dt_calculo}', 'yyyy-MM-dd')
-                """
-                .format(
+                """.format(
                     orgao_id=orgao_id,
                     dt_calculo=dt_calculo
                 )
-            )
-        except QueryError:
-            return None
-
-        if db_result and db_result[0]:
-            return db_result[0]
-
-        return None
+        return run_query(query)
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs['orgao_id'])
@@ -276,28 +232,17 @@ class OutliersView(RetrieveAPIView):
         return Response(data)
 
 
-class SaidasView(RetrieveAPIView):
+class SaidasView(APIView):
 
     def get_saidas(self, orgao_id):
 
-        try:
-            db_result = execute(
-                """
+        query = """
                 SELECT saidas, id_orgao, cod_pct, percent_rank, dt_calculo
                 FROM exadata_aux.tb_saida
                 WHERE id_orgao = {orgao_id}
-                """
-                .format(
-                    orgao_id=orgao_id
-                )
-            )
-        except QueryError:
-            return None
+                """.format(orgao_id=orgao_id)
 
-        if db_result and db_result[0]:
-            return db_result[0]
-
-        return None
+        return run_query(query)
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs['orgao_id'])

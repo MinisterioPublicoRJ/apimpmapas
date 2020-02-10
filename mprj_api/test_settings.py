@@ -105,6 +105,10 @@ DATABASES = {
     )
 }
 
+MIGRATION_MODULES = {
+    'dominio': 'dominio.test_migrations'
+}
+
 DATABASE_ROUTERS = ['mprj_api.db_routers.DominioRouter']
 
 # Password validation

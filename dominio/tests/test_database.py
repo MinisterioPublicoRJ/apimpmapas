@@ -4,7 +4,7 @@ from django.test import TestCase
 
 
 from mprj_api.db_routers import DominioRouter
-from dominio.db_connectors import BDA_Error, execute
+from dominio.db_connectors import BDA_Error, execute, run_query
 from lupa.exceptions import QueryError
 
 
@@ -44,3 +44,33 @@ class DominioDbTest(TestCase):
             execute(query)
 
         cursor.execute.assert_called_once_with(query)
+
+    def test_query_error(self):
+        pass
+
+
+class RunQuery(TestCase):
+    @mock.patch("dominio.db_connectors.execute", return_value=[("result set", )])
+    def test_run_query(self, _execute):
+        query = "SELECT * FROM dual()"
+        resp = run_query(query)
+
+        _execute.assert_called_once_with(query)
+        self.assertEqual(resp, "result set")
+
+    @mock.patch("dominio.db_connectors.execute")
+    def test_run_query_error(self, _execute):
+        _execute.side_effect = QueryError
+        query = "SELECT * FROM dual()"
+        resp = run_query(query)
+
+        _execute.assert_called_once_with(query)
+        self.assertEqual(resp, None)
+
+    @mock.patch("dominio.db_connectors.execute", return_value=[])
+    def test_run_query_empty_response(self, _execute):
+        query = "SELECT * FROM dual()"
+        resp = run_query(query)
+
+        _execute.assert_called_once_with(query)
+        self.assertEqual(resp, None)

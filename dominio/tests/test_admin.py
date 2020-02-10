@@ -1,6 +1,5 @@
 from django.contrib.admin.sites import AdminSite
-from model_mommy.mommy import make
-from unittest import TestCase
+from unittest import mock, TestCase
 import pytest
 
 from dominio.admin import DocumentoAdmin
@@ -11,9 +10,11 @@ from dominio.models import Documento
 class TestDocumentoClasse(TestCase):
     def setUp(self):
         self.adminsite = AdminSite()
-        self.classe = make('dominio.DoctoClasse', descricao='classe')
-        self.doc_class = make('dominio.Documento', classe=self.classe)
-        self.doc_classless = make('dominio.Documento', classe=None)
+        self.classe_descr = 'classe'
+        self.doc_class = mock.MagicMock(
+            classe=mock.MagicMock(descricao=self.classe_descr)
+        )
+        self.doc_classless = mock.MagicMock(classe=None)
         self.classless_msg = 'SEM CLASSE DEFINIDA'
 
     def test_document_classes(self):
@@ -24,5 +25,5 @@ class TestDocumentoClasse(TestCase):
         classed = self.docto_admin.get_classe(self.doc_class)
         classless = self.docto_admin.get_classe(self.doc_classless)
 
-        self.assertEqual(classed, self.classe.descricao)
+        self.assertEqual(classed, self.classe_descr)
         self.assertEqual(classless, self.classless_msg)

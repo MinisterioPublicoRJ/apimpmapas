@@ -8,9 +8,9 @@ from django.urls import reverse
 
 class AcervoViewTest(TestCase):
 
-    @mock.patch('dominio.views.execute')
-    def test_acervo_variation_result(self, _execute):
-        _execute.return_value = [('10',)]
+    @mock.patch('dominio.views.run_query')
+    def test_acervo_variation_result(self, _run_query):
+        _run_query.return_value = '10'
         response = self.client.get(reverse(
             'dominio:acervo',
             args=('0', '1', '2')))
@@ -24,14 +24,14 @@ class AcervoViewTest(TestCase):
                 "AND tipo_acervo = 1 "
                 "AND dt_inclusao = to_timestamp('2', 'yyyy-MM-dd')")
 
-        _execute.assert_called_once_with(expected_query)
+        _run_query.assert_called_once_with(expected_query)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected_response)
 
-    @mock.patch('dominio.views.execute')
-    def test_acervo_variation_no_result(self, _execute):
-        _execute.return_value = []
+    @mock.patch('dominio.views.run_query')
+    def test_acervo_variation_no_result(self, _run_query):
+        _run_query.return_value = []
         response = self.client.get(reverse(
             'dominio:acervo',
             args=('0', '1', '2')))
@@ -44,9 +44,9 @@ class AcervoViewTest(TestCase):
 
 class AcervoVariationViewTest(TestCase):
 
-    @mock.patch('dominio.views.execute')
-    def test_acervo_variation_result(self, _execute):
-        _execute.return_value = [('100', '100', '0.0')]
+    @mock.patch('dominio.views.run_query')
+    def test_acervo_variation_result(self, _run_query):
+        _run_query.return_value = ('100', '100', '0.0')
         response = self.client.get(reverse(
             'dominio:acervo_variation',
             args=('0', '1', '2')))
@@ -58,43 +58,43 @@ class AcervoVariationViewTest(TestCase):
         }
 
         expected_query = """
-                SELECT 
-                    acervo_fim,
-                    acervo_inicio,
-                    (acervo_fim - acervo_inicio)/acervo_inicio as variacao
-                FROM (
+            SELECT
+                acervo_fim,
+                acervo_inicio,
+                (acervo_fim - acervo_inicio)/acervo_inicio as variacao
+            FROM (
+                SELECT
+                    SUM(tb_data_fim.acervo) as acervo_fim,
+                    SUM(tb_data_inicio.acervo_inicio) as acervo_inicio
+                FROM exadata_aux.tb_acervo tb_data_fim
+                INNER JOIN (
                     SELECT
-                        SUM(tb_data_fim.acervo) as acervo_fim,
-                        SUM(tb_data_inicio.acervo_inicio) as acervo_inicio
-                        FROM exadata_aux.tb_acervo tb_data_fim
-                    INNER JOIN (
-                        SELECT
-                            acervo as acervo_inicio,
-                            dt_inclusao as data_inicio,
-                            cod_orgao,
-                            tipo_acervo
-                        FROM exadata_aux.tb_acervo
-                        WHERE dt_inclusao = to_timestamp(
-                            '1', 'yyyy-MM-dd')
-                        ) tb_data_inicio
-                    ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
-                        AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
-                    INNER JOIN exadata_aux.tb_regra_negocio_investigacao regras
-                    ON regras.cod_atribuicao = tb_data_fim.cod_atribuicao
-                        AND regras.classe_documento = tb_data_fim.tipo_acervo
-                    WHERE tb_data_fim.dt_inclusao = to_timestamp(
-                        '2', 'yyyy-MM-dd')
-                    AND tb_data_fim.cod_orgao = 0) t
-                """
+                        acervo as acervo_inicio,
+                        dt_inclusao as data_inicio,
+                        cod_orgao,
+                        tipo_acervo
+                    FROM exadata_aux.tb_acervo
+                    WHERE dt_inclusao = to_timestamp(
+                        '1', 'yyyy-MM-dd')
+                    ) tb_data_inicio
+                ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
+                    AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
+                INNER JOIN exadata_aux.tb_regra_negocio_investigacao regras
+                ON regras.cod_atribuicao = tb_data_fim.cod_atribuicao
+                    AND regras.classe_documento = tb_data_fim.tipo_acervo
+                WHERE tb_data_fim.dt_inclusao = to_timestamp(
+                    '2', 'yyyy-MM-dd')
+                AND tb_data_fim.cod_orgao = 0) t
+            """
 
-        _execute.assert_called_once_with(expected_query)
+        _run_query.assert_called_once_with(expected_query)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected_response)
 
-    @mock.patch('dominio.views.execute')
-    def test_acervo_variation_no_result(self, _execute):
-        _execute.return_value = []
+    @mock.patch('dominio.views.run_query')
+    def test_acervo_variation_no_result(self, _run_query):
+        _run_query.return_value = []
         response = self.client.get(reverse(
             'dominio:acervo_variation',
             args=('0', '1', '2')))
@@ -107,9 +107,9 @@ class AcervoVariationViewTest(TestCase):
 
 class AcervoVariationTopNViewTest(TestCase):
 
-    @mock.patch('dominio.views.execute')
-    def test_acervo_variation_result(self, _execute):
-        _execute.return_value = [
+    @mock.patch('dominio.views.run_query')
+    def test_acervo_variation_result(self, _run_query):
+        _run_query.return_value = [
             (1, 'PROMO1' ,'100', '50', '100.0'),
             (2, 'PROMO2' ,'50', '100', '-50.0'),
             (3, 'PROMO3' ,'300', '100', '200.0')
@@ -187,14 +187,14 @@ class AcervoVariationTopNViewTest(TestCase):
                 LIMIT 3;
                 """
 
-        _execute.assert_called_once_with(expected_query)
+        _run_query.assert_called_once_with(expected_query)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected_response)
 
-    @mock.patch('dominio.views.execute')
-    def test_acervo_variation_no_result(self, _execute):
-        _execute.return_value = []
+    @mock.patch('dominio.views.run_query')
+    def test_acervo_variation_no_result(self, _run_query):
+        _run_query.return_value = []
         response = self.client.get(reverse(
             'dominio:acervo_variation_topn',
             args=('0', '1', '2', '3')))
@@ -207,11 +207,11 @@ class AcervoVariationTopNViewTest(TestCase):
 
 class OutliersViewTest(TestCase):
 
-    @mock.patch('dominio.views.execute')
-    def test_outliers_result(self, _execute):
-        _execute.return_value = [
+    @mock.patch('dominio.views.run_query')
+    def test_outliers_result(self, _run_query):
+        _run_query.return_value = \
             ('20', '100', '1000', '500', '300', '450', '700',
-             '400', '50', '950')]
+             '400', '50', '950')
         response = self.client.get(reverse(
             'dominio:outliers',
             args=('0', '1')))
@@ -248,13 +248,13 @@ class OutliersViewTest(TestCase):
                 AND B.dt_inclusao = to_timestamp('1', 'yyyy-MM-dd')
                 """
 
-        _execute.assert_called_once_with(expected_query)
+        _run_query.assert_called_once_with(expected_query)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected_response)
 
-    @mock.patch('dominio.views.execute')
-    def test_outliers_no_result(self, _execute):
-        _execute.return_value = []
+    @mock.patch('dominio.views.run_query')
+    def test_outliers_no_result(self, _run_query):
+        _run_query.return_value = []
         response = self.client.get(reverse(
             'dominio:outliers',
             args=('0', '1')))
@@ -267,10 +267,10 @@ class OutliersViewTest(TestCase):
 
 class SaidasViewTest(TestCase):
 
-    @mock.patch('dominio.views.execute')
-    def test_saidas_result(self, _execute):
-        _execute.return_value = [
-            ('0', '100', '25', '0.7', '2020-02-06 17:19:08.952040000')]
+    @mock.patch('dominio.views.run_query')
+    def test_saidas_result(self, _run_query):
+        _run_query.return_value = \
+            ('0', '100', '25', '0.7', '2020-02-06 17:19:08.952040000')
         response = self.client.get(reverse(
             'dominio:saidas',
             args=('100',)))
@@ -289,13 +289,13 @@ class SaidasViewTest(TestCase):
                 WHERE id_orgao = 100
                 """
 
-        _execute.assert_called_once_with(expected_query)
+        _run_query.assert_called_once_with(expected_query)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected_response)
 
-    @mock.patch('dominio.views.execute')
-    def test_saidas_no_result(self, _execute):
-        _execute.return_value = []
+    @mock.patch('dominio.views.run_query')
+    def test_saidas_no_result(self, _run_query):
+        _run_query.return_value = []
         response = self.client.get(reverse(
             'dominio:saidas',
             args=('1',)))
