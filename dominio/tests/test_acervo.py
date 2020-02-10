@@ -13,16 +13,20 @@ class AcervoViewTest(TestCase):
         _run_query.return_value = [('10',), ]
         response = self.client.get(reverse(
             'dominio:acervo',
-            args=('0', '1', '2')))
+            args=('0', '1')))
 
         expected_response = {'acervo_qtd': 10}
 
         expected_query = (
-                "SELECT acervo "
-                "FROM exadata_aux.tb_acervo "
-                "WHERE cod_orgao = 0 "
-                "AND tipo_acervo = 1 "
-                "AND dt_inclusao = to_timestamp('2', 'yyyy-MM-dd')")
+            "SELECT SUM(acervo) "
+            "FROM exadata_aux.tb_acervo A "
+            "INNER JOIN cluster.atualizacao_pj_pacote B "
+            "ON A.cod_orgao = cast(B.id_orgao as int) "
+            "INNER JOIN exadata_aux.tb_regra_negocio_investigacao C "
+            "ON C.cod_atribuicao = B.cod_pct "
+            "AND C.classe_documento = A.tipo_acervo "
+            "WHERE cod_orgao = 0 "
+            "AND dt_inclusao = to_timestamp('1', 'yyyy-MM-dd')")
 
         _run_query.assert_called_once_with(expected_query)
 
@@ -34,7 +38,7 @@ class AcervoViewTest(TestCase):
         _run_query.return_value = []
         response = self.client.get(reverse(
             'dominio:acervo',
-            args=('0', '1', '2')))
+            args=('0', '1')))
 
         expected_response = {'detail': 'Não encontrado.'}
 

@@ -17,7 +17,7 @@ urlpatterns = [
     #     name='lista_alertas'
     # ),
     path(
-        'acervo/<str:orgao_id>/<str:tipo_acervo>/<str:data>',
+        'acervo/<str:orgao_id>/<str:data>',
         AcervoView.as_view(),
         name='acervo'
     ),

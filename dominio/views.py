@@ -14,28 +14,29 @@ from .serializers import (
 
 class AcervoView(APIView):
 
-    def get_acervo(self, orgao_id, tipo_acervo, data):
+    def get_acervo(self, orgao_id, data):
         query = (
-            "SELECT acervo "
-            "FROM exadata_aux.tb_acervo "
+            "SELECT SUM(acervo) "
+            "FROM exadata_aux.tb_acervo A "
+            "INNER JOIN cluster.atualizacao_pj_pacote B "
+            "ON A.cod_orgao = cast(B.id_orgao as int) "
+            "INNER JOIN exadata_aux.tb_regra_negocio_investigacao C "
+            "ON C.cod_atribuicao = B.cod_pct "
+            "AND C.classe_documento = A.tipo_acervo "
             "WHERE cod_orgao = {orgao_id} "
-            "AND tipo_acervo = {tipo_acervo} "
             "AND dt_inclusao = to_timestamp('{data}', 'yyyy-MM-dd')"
             .format(
                 orgao_id=orgao_id,
-                tipo_acervo=tipo_acervo,
                 data=data
             ))
         return run_query(query)
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs['orgao_id'])
-        tipo_acervo = int(self.kwargs['tipo_acervo'])
         data = str(self.kwargs['data'])
 
         acervo_qtd = self.get_acervo(
             orgao_id=orgao_id,
-            tipo_acervo=tipo_acervo,
             data=data
         )
 
