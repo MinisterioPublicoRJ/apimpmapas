@@ -105,6 +105,8 @@ DATABASES = {
     )
 }
 
+TABLE_NAMESPACE = config('TABLE_NAMESPACE')
+
 MIGRATION_MODULES = {
     'dominio': 'dominio.test_migrations'
 }

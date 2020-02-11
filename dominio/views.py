@@ -1,4 +1,4 @@
-from decouple import config
+from django.conf import settings
 from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -27,7 +27,7 @@ class AcervoView(APIView):
             "WHERE cod_orgao = {orgao_id} "
             "AND dt_inclusao = to_timestamp('{data}', 'yyyy-MM-dd')"
             .format(
-                namespace=config('TABLE_NAMESPACE'),
+                namespace=settings.TABLE_NAMESPACE,
                 orgao_id=orgao_id,
                 data=data
             ))
@@ -82,7 +82,7 @@ class AcervoVariationView(APIView):
                     '{dt_fim}', 'yyyy-MM-dd')
                 AND tb_data_fim.cod_orgao = {orgao_id}) t
             """.format(
-                namespace=config('TABLE_NAMESPACE'),
+                namespace=settings.TABLE_NAMESPACE,
                 orgao_id=orgao_id,
                 dt_inicio=dt_inicio,
                 dt_fim=dt_fim
@@ -159,7 +159,7 @@ class AcervoVariationTopNView(APIView):
                 ORDER BY variacao DESC
                 LIMIT {n};
                 """.format(
-                    namespace=config('TABLE_NAMESPACE'),
+                    namespace=settings.TABLE_NAMESPACE,
                     orgao_id=orgao_id,
                     dt_inicio=dt_inicio,
                     dt_fim=dt_fim,
@@ -219,7 +219,7 @@ class OutliersView(APIView):
                 WHERE A.cod_orgao = {orgao_id}
                 AND B.dt_inclusao = to_timestamp('{dt_calculo}', 'yyyy-MM-dd')
                 """.format(
-                    namespace=config('TABLE_NAMESPACE'),
+                    namespace=settings.TABLE_NAMESPACE,
                     orgao_id=orgao_id,
                     dt_calculo=dt_calculo
                 )
@@ -257,7 +257,7 @@ class SaidasView(APIView):
                 WHERE id_orgao = {orgao_id}
                 """.format(
                     orgao_id=orgao_id,
-                    namespace=config('TABLE_NAMESPACE')
+                    namespace=settings.TABLE_NAMESPACE
                 )
 
         return run_query(query)

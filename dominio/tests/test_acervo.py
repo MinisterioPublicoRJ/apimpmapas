@@ -1,6 +1,6 @@
-from decouple import config
 from unittest import mock
 
+from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 
@@ -28,7 +28,7 @@ class AcervoViewTest(TestCase):
             "AND C.classe_documento = A.tipo_acervo "
             "WHERE cod_orgao = 0 "
             "AND dt_inclusao = to_timestamp('1', 'yyyy-MM-dd')".format(
-              namespace=config('TABLE_NAMESPACE')
+              namespace=settings.TABLE_NAMESPACE
             ))
         _run_query.assert_called_once_with(expected_query)
 
@@ -91,7 +91,7 @@ class AcervoVariationViewTest(TestCase):
                 WHERE tb_data_fim.dt_inclusao = to_timestamp(
                     '2', 'yyyy-MM-dd')
                 AND tb_data_fim.cod_orgao = 0) t
-            """.format(namespace=config('TABLE_NAMESPACE'))
+            """.format(namespace=settings.TABLE_NAMESPACE)
 
         _run_query.assert_called_once_with(expected_query)
 
@@ -191,7 +191,7 @@ class AcervoVariationTopNViewTest(TestCase):
                     ON A.cod_pct = B.cod_pct)
                 ORDER BY variacao DESC
                 LIMIT 3;
-                """.format(namespace=config('TABLE_NAMESPACE'))
+                """.format(namespace=settings.TABLE_NAMESPACE)
 
         _run_query.assert_called_once_with(expected_query)
 
@@ -256,7 +256,7 @@ class OutliersViewTest(TestCase):
                 AND A.dt_inclusao = B.dt_inclusao
                 WHERE A.cod_orgao = 0
                 AND B.dt_inclusao = to_timestamp('1', 'yyyy-MM-dd')
-                """.format(namespace=config('TABLE_NAMESPACE'))
+                """.format(namespace=settings.TABLE_NAMESPACE)
 
         _run_query.assert_called_once_with(expected_query)
         self.assertEqual(response.status_code, 200)
@@ -299,7 +299,7 @@ class SaidasViewTest(TestCase):
                 SELECT saidas, id_orgao, cod_pct, percent_rank, dt_calculo
                 FROM {namespace}.tb_saida
                 WHERE id_orgao = 100
-                """.format(namespace=config('TABLE_NAMESPACE'))
+                """.format(namespace=settings.TABLE_NAMESPACE)
 
         _run_query.assert_called_once_with(expected_query)
         self.assertEqual(response.status_code, 200)

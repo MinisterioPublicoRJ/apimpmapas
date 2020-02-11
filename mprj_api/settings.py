@@ -105,6 +105,8 @@ DATABASES = {
     )
 }
 
+TABLE_NAMESPACE = config('TABLE_NAMESPACE')
+
 DATABASE_ROUTERS = ['mprj_api.db_routers.DominioRouter']
 
 # Password validation
