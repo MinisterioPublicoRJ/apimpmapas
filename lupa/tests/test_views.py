@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 import jwt
 import pytest
-from model_mommy.mommy import make
+from model_bakery.baker import make
 import responses
 from rest_framework.response import Response
 

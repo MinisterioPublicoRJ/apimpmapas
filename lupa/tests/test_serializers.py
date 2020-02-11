@@ -2,7 +2,7 @@ from unittest import mock
 
 from django.test import TestCase
 
-from model_mommy.mommy import make
+from model_bakery.baker import make
 
 from lupa.models import TipoDado
 from lupa.serializers import DadoDetalheSerializer, DadoEntidadeSerializer

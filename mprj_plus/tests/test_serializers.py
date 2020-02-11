@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from django.test import TestCase
-from model_mommy.mommy import make
+from model_bakery.baker import make
 
 from mprj_plus.serializers import AreaSerializer, TemaSerializer
 
