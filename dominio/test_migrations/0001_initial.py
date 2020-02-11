@@ -14,8 +14,17 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='DoctoClasse',
             fields=[
-                ('cldc_dk', models.IntegerField(primary_key=True, serialize=False)),
-                ('descricao', models.CharField(db_column='cldc_ds_classe', max_length=150)),
+                (
+                    'cldc_dk',
+                    models.IntegerField(primary_key=True, serialize=False)
+                ),
+                (
+                    'descricao',
+                    models.CharField(
+                        db_column='cldc_ds_classe',
+                        max_length=150
+                    )
+                ),
             ],
             options={
                 'db_table': 'MCPR_CLASSE_DOCTO_MP',
@@ -25,8 +34,14 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Documento',
             fields=[
-                ('docu_dk', models.IntegerField(primary_key=True, serialize=False)),
-                ('num_mp', models.CharField(db_column='docu_nr_mp', max_length=15)),
+                (
+                    'docu_dk',
+                    models.IntegerField(primary_key=True, serialize=False)
+                ),
+                (
+                    'num_mp',
+                    models.CharField(db_column='docu_nr_mp', max_length=15)
+                ),
             ],
             options={
                 'db_table': 'MCPR_DOCUMENTO',

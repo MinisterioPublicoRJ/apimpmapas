@@ -104,7 +104,9 @@ class AcervoVariationView(APIView):
             raise Http404
 
         fields = ['acervo_fim', 'acervo_inicio', 'variacao']
-        data_obj = {fieldname: value for fieldname, value in zip(fields, data[0])}
+        data_obj = {
+            fieldname: value for fieldname, value in zip(fields, data[0])
+        }
         data = AcervoVariationSerializer(data_obj).data
         return Response(data)
 
@@ -113,7 +115,7 @@ class AcervoVariationTopNView(APIView):
     queryset = ''
 
     def get_acervo_increase_topn(self, orgao_id, dt_inicio, dt_fim, n=3):
-        query ="""
+        query = """
                 SELECT
                     cod_orgao,
                     orgi_nm_orgao,
@@ -181,7 +183,13 @@ class AcervoVariationTopNView(APIView):
         if not data:
             raise Http404
 
-        fields = ['cod_orgao', 'nm_orgao', 'acervo_fim', 'acervo_inicio', 'variacao']
+        fields = [
+            'cod_orgao',
+            'nm_orgao',
+            'acervo_fim',
+            'acervo_inicio',
+            'variacao'
+        ]
         data_obj = [
             {fieldname: value for fieldname, value in zip(fields, row)}
             for row in data]
@@ -232,7 +240,9 @@ class OutliersView(APIView):
         fields = ['cod_atribuicao', 'minimo', 'maximo',
                   'media', 'primeiro_quartil', 'mediana', 'terceiro_quartil',
                   'iqr', 'lout', 'hout']
-        data_obj = {fieldname: value for fieldname, value in zip(fields, data[0])}
+        data_obj = {
+            fieldname: value for fieldname, value in zip(fields, data[0])
+        }
         data = OutliersSerializer(data_obj).data
         return Response(data)
 
@@ -262,7 +272,15 @@ class SaidasView(APIView):
         if not data:
             raise Http404
 
-        fields = ['saidas', 'id_orgao', 'cod_pct', 'percent_rank', 'dt_calculo']
-        data_obj = {fieldname: value for fieldname, value in zip(fields, data[0])}
+        fields = [
+            'saidas',
+            'id_orgao',
+            'cod_pct',
+            'percent_rank',
+            'dt_calculo'
+        ]
+        data_obj = {
+            fieldname: value for fieldname, value in zip(fields, data[0])
+        }
         data = SaidasSerializer(data_obj).data
         return Response(data)

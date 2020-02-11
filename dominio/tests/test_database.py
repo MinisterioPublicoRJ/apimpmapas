@@ -50,7 +50,9 @@ class DominioDbTest(TestCase):
 
 
 class RunQuery(TestCase):
-    @mock.patch("dominio.db_connectors.execute", return_value=[("result set", )])
+    @mock.patch(
+        "dominio.db_connectors.execute", return_value=[("result set", )]
+    )
     def test_run_query(self, _execute):
         query = "SELECT * FROM dual()"
         resp = run_query(query)
