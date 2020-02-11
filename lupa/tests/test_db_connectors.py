@@ -1,6 +1,6 @@
 from unittest import TestCase, mock
 
-from decouple import config
+from django.conf import settings
 
 from lupa.db_connectors import (
     bda_access,
@@ -43,10 +43,10 @@ class PostgresAccess(CommonSetup):
         postgres_access(self.query, self.domain_id)
 
         _pg_connect.assert_called_once_with(
-            host=config('PG_HOST'),
-            dbname=config('PG_BASE'),
-            user=config('PG_USER'),
-            password=config('PG_PASSWORD')
+            host=settings.PG_HOST,
+            dbname=settings.PG_BASE,
+            user=settings.PG_USER,
+            password=settings.PG_PASSWORD
         )
 
     def test_generate_query_postgres(self):
@@ -126,9 +126,9 @@ class OracleAccess(CommonSetup):
         oracle_access(self.query, self.domain_id)
 
         _ora_connect.assert_called_once_with(
-            user=config('ORA_USER'),
-            password=config('ORA_PASS'),
-            dsn=config('ORA_HOST')
+            user=settings.ORA_USER,
+            password=settings.ORA_PASS,
+            dsn=settings.ORA_HOST
         )
 
     def test_generate_query_oracle(self):
@@ -207,8 +207,8 @@ class BdaAccess(CommonSetup):
         bda_access(self.query, (self.domain_id,))
 
         _bda_connect.assert_called_once_with(
-            host=config('IMPALA_HOST'),
-            port=config('IMPALA_PORT', cast=int)
+            host=settings.IMPALA_HOST,
+            port=settings.IMPALA_PORT
         )
 
     def test_generate_query_bda(self):

@@ -1,7 +1,7 @@
 import os
 import logging
 
-from decouple import config
+from django.conf import settings
 from impala.dbapi import connect as bda_connect
 from impala.error import HiveServer2Error as BDA_Error
 
@@ -14,8 +14,8 @@ os.environ['NLS_LANG'] = 'American_America.UTF8'
 
 def execute(query):
     with bda_connect(
-        host=config('IMPALA_HOST'),
-        port=config('IMPALA_PORT', cast=int)
+        host=settings.IMPALA_HOST,
+        port=settings.IMPALA_PORT
     ) as conn:
         with conn.cursor() as curs:
             try:

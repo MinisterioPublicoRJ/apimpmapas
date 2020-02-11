@@ -106,6 +106,18 @@ DATABASES = {
 }
 
 TABLE_NAMESPACE = config('TABLE_NAMESPACE')
+IMPALA_HOST = config('IMPALA_HOST')
+IMPALA_PORT = config('IMPALA_PORT', cast=int)
+
+PG_HOST = config('PG_HOST')
+PG_BASE = config('PG_BASE')
+PG_USER = config('PG_USER')
+PG_PASSWORD = config('PG_PASSWORD', "")
+
+ORA_USER = config('ORA_USER')
+ORA_PASS = config('ORA_PASS')
+ORA_HOST = config('ORA_HOST')
+
 
 DATABASE_ROUTERS = ['mprj_api.db_routers.DominioRouter']
 

@@ -1,7 +1,7 @@
 import os
 import logging
 
-from decouple import config
+from django.conf import settings
 from psycopg2 import connect as pg_connect, Error as PG_Error
 from cx_Oracle import connect as ora_connect, DatabaseError as ORA_Error
 from impala.dbapi import connect as bda_connect
@@ -141,10 +141,10 @@ def generate_geospatial_query(schema, table, geojson_column,
 
 def postgres_access(query, extra_parameters):
     with pg_connect(
-        host=config('PG_HOST'),
-        dbname=config('PG_BASE'),
-        user=config('PG_USER'),
-        password=config('PG_PASSWORD', "")
+        host=settings.PG_HOST,
+        dbname=settings.PG_BASE,
+        user=settings.PG_USER,
+        password=settings.PG_PASSWORD
     ) as conn:
         with conn.cursor() as curs:
             try:
@@ -157,9 +157,9 @@ def postgres_access(query, extra_parameters):
 
 def oracle_access(query, extra_parameters):
     with ora_connect(
-        user=config('ORA_USER'),
-        password=config('ORA_PASS'),
-        dsn=config('ORA_HOST')
+        user=settings.ORA_USER,
+        password=settings.ORA_PASS,
+        dsn=settings.ORA_HOST
     ) as conn:
         with conn.cursor() as curs:
             try:
@@ -172,8 +172,8 @@ def oracle_access(query, extra_parameters):
 
 def bda_access(query, extra_parameters):
     with bda_connect(
-        host=config('IMPALA_HOST'),
-        port=config('IMPALA_PORT', cast=int)
+        host=settings.IMPALA_HOST,
+        port=settings.IMPALA_PORT
     ) as conn:
         with conn.cursor() as curs:
             try:
