@@ -186,3 +186,5 @@ CSRF_TRUSTED_ORIGINS = ['*']
 
 # E-mail
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+CACHE_TIMEOUT = config("CACHE_TIMEOUT", default=300, cast=int)

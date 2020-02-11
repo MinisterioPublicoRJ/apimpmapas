@@ -16,7 +16,7 @@ from .serializers import (
 
 
 @method_decorator(
-    cache_page(300, key_prefix="dominio_acervo"),
+    cache_page(settings.CACHE_TIMEOUT, key_prefix="dominio_acervo"),
     name="dispatch"
 )
 class AcervoView(APIView):
@@ -57,7 +57,7 @@ class AcervoView(APIView):
 
 
 @method_decorator(
-    cache_page(300, key_prefix="dominio_acervo_variation"),
+    cache_page(settings.CACHE_TIMEOUT, key_prefix="dominio_acervo_variation"),
     name="dispatch"
 )
 class AcervoVariationView(APIView):
@@ -122,7 +122,9 @@ class AcervoVariationView(APIView):
 
 
 @method_decorator(
-    cache_page(300, key_prefix="dominio_acervo_variation_topn"),
+    cache_page(
+        settings.CACHE_TIMEOUT,
+        key_prefix="dominio_acervo_variation_topn"),
     name="dispatch"
 )
 class AcervoVariationTopNView(APIView):
