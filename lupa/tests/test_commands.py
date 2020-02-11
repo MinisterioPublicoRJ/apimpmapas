@@ -4,7 +4,7 @@ from unittest.mock import call, patch
 
 from django.core.management import call_command
 from django.test import TestCase
-from model_mommy.mommy import make
+from model_bakery.baker import make
 
 from lupa.management.commands.checkconsistency import (
     Command,

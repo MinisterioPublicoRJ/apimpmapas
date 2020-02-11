@@ -4,7 +4,7 @@ from unittest import mock
 import pytest
 from django.test import TestCase
 from freezegun import freeze_time
-from model_mommy.mommy import make
+from model_bakery.baker import make
 from rest_framework.response import Response
 
 from lupa.cache import (

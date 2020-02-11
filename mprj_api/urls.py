@@ -27,6 +27,7 @@ urlpatterns = [
     path('nested_admin/', include('nested_admin.urls')),
     path('mpplus/', include('mprj_plus.urls')),
     path('lupa/', include('lupa.urls', namespace='lupa')),
+    path('dominio/', include('dominio.urls', namespace='dominio')),
     path(
         'desaparecidos/',
         include('desaparecidos.urls', namespace='desaparecidos')

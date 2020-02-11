@@ -1,5 +1,5 @@
 from django.contrib.admin.sites import AdminSite
-from model_mommy.mommy import make
+from model_bakery.baker import make
 from unittest import TestCase, mock
 from lupa.admin import remove_data_from_cache, remove_entity_from_cache
 from lupa.models import DadoEntidade, DadoDetalhe, Entidade
