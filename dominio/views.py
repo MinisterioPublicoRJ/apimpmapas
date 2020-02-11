@@ -1,4 +1,6 @@
 from django.conf import settings
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -13,6 +15,10 @@ from .serializers import (
 )
 
 
+@method_decorator(
+    cache_page(300, key_prefix="dominio_acervo"),
+    name="dispatch"
+)
 class AcervoView(APIView):
 
     def get_acervo(self, orgao_id, data):
@@ -50,6 +56,10 @@ class AcervoView(APIView):
         return Response(data)
 
 
+@method_decorator(
+    cache_page(300, key_prefix="dominio_acervo_variation"),
+    name="dispatch"
+)
 class AcervoVariationView(APIView):
 
     def get_acervo_increase(self, orgao_id, dt_inicio, dt_fim):
@@ -111,6 +121,10 @@ class AcervoVariationView(APIView):
         return Response(data)
 
 
+@method_decorator(
+    cache_page(300, key_prefix="dominio_acervo_variation_topn"),
+    name="dispatch"
+)
 class AcervoVariationTopNView(APIView):
     queryset = ''
 
@@ -197,6 +211,10 @@ class AcervoVariationTopNView(APIView):
         return Response(data)
 
 
+@method_decorator(
+    cache_page(300, key_prefix="dominio_outliers"),
+    name="dispatch"
+)
 class OutliersView(APIView):
 
     def get_outliers(self, orgao_id, dt_calculo):
@@ -247,6 +265,10 @@ class OutliersView(APIView):
         return Response(data)
 
 
+@method_decorator(
+    cache_page(300, key_prefix="dominio_saidas"),
+    name="dispatch"
+)
 class SaidasView(APIView):
 
     def get_saidas(self, orgao_id):
