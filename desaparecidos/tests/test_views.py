@@ -11,7 +11,7 @@ class Desaparecidos(TestCase):
     @mock.patch("desaparecidos.views.client")
     def test_correct_response(self, _client, _rank):
         _client.return_value = "cursor"
-        _rank.return_value = {"result": "1234"}
+        _rank.return_value = [{"result": "1234"}]
 
         url = reverse('desaparecidos:busca', kwargs={"id_sinalid": "1234"})
 
