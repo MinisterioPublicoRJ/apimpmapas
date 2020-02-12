@@ -11,7 +11,8 @@ from .serializers import (
     SaidasSerializer,
     AcervoVariationSerializer,
     AcervoVariationTopNSerializer,
-    OutliersSerializer
+    OutliersSerializer,
+    EntradasSerializer,
 )
 
 
@@ -307,4 +308,67 @@ class SaidasView(APIView):
             fieldname: value for fieldname, value in zip(fields, data[0])
         }
         data = SaidasSerializer(data_obj).data
+        return Response(data)
+
+
+@method_decorator(
+    cache_page(300, key_prefix="dominio_entradas"),
+    name="dispatch"
+)
+class EntradasView(APIView):
+
+    def get_entradas(self, orgao_id, cod_matricula):
+
+        query = """
+                SELECT
+                    nr_entradas_hoje,
+                    minimo,
+                    maximo,
+                    media,
+                    primeiro_quartil,
+                    mediana,
+                    terceiro_quartil,
+                    iqr,
+                    lout,
+                    hout
+                FROM {namespace}.tb_dist_entradas
+                WHERE comb_orga_dk = {orgao_id}
+                AND comb_cdmatricula = '{cod_matricula}'
+                """.format(
+                    orgao_id=orgao_id,
+                    cod_matricula=cod_matricula,
+                    namespace=settings.TABLE_NAMESPACE
+                )
+
+        return run_query(query)
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(self.kwargs['orgao_id'])
+        # Matricula has 8 digits, with leading zeros
+        cod_matricula = str(int(self.kwargs['cod_matricula'])).zfill(8)
+
+        data = self.get_entradas(
+            orgao_id=orgao_id,
+            cod_matricula=cod_matricula
+        )
+
+        if not data:
+            raise Http404
+
+        fields = [
+            'nr_entradas_hoje',
+            'minimo',
+            'maximo',
+            'media',
+            'primeiro_quartil',
+            'mediana',
+            'terceiro_quartil',
+            'iqr',
+            'lout',
+            'hout'
+        ]
+        data_obj = {
+            fieldname: value for fieldname, value in zip(fields, data[0])
+        }
+        data = EntradasSerializer(data_obj).data
         return Response(data)
