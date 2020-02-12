@@ -1,15 +1,16 @@
 from busca_desaparecidos.dao import client, rank
-from decouple import config
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from desaparecidos import settings as d_settings
 
 
 class DesaparecidosView(APIView):
     def get(self, request, *args, **kwargs):
         cursor = client(
-            config("DESAPARECIDOS_DB_USER"),
-            config("DESAPARECIDOS_DB_PWD"),
-            config("DESAPARECIDOS_DB_HOST")
+            d_settings.DESAPARECIDOS_DB_USER,
+            d_settings.DESAPARECIDOS_DB_PWD,
+            d_settings.DESAPARECIDOS_DB_HOST
         )
         result = rank(cursor, kwargs.get("id_sinalid"))
         status = 404 if "erro" in result.keys() else 200
