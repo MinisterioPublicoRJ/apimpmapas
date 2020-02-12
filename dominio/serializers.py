@@ -38,3 +38,16 @@ class SaidasSerializer(serializers.Serializer):
     cod_pct = serializers.IntegerField()
     percent_rank = serializers.FloatField()
     dt_calculo = serializers.DateTimeField()
+
+
+class EntradasSerializer(serializers.Serializer):
+    nr_entradas_hoje = serializers.IntegerField(min_value=0)
+    minimo = serializers.IntegerField(min_value=0)
+    maximo = serializers.IntegerField(min_value=0)
+    media = serializers.FloatField()
+    primeiro_quartil = serializers.FloatField()
+    mediana = serializers.FloatField()
+    terceiro_quartil = serializers.FloatField()
+    iqr = serializers.FloatField()
+    lout = serializers.FloatField()
+    hout = serializers.FloatField()
