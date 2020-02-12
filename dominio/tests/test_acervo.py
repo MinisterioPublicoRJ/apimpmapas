@@ -1,13 +1,19 @@
 from unittest import mock
 
 from django.conf import settings
+from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
 # Create your tests here.
 
 
-class AcervoViewTest(TestCase):
+class NoCacheTestCase:
+    def tearDown(self):
+        cache.clear()
+
+
+class AcervoViewTest(NoCacheTestCase, TestCase):
 
     @mock.patch('dominio.views.run_query')
     def test_acervo_variation_result(self, _run_query):
@@ -48,7 +54,7 @@ class AcervoViewTest(TestCase):
         self.assertEqual(response.data, expected_response)
 
 
-class AcervoVariationViewTest(TestCase):
+class AcervoVariationViewTest(NoCacheTestCase, TestCase):
 
     @mock.patch('dominio.views.run_query')
     def test_acervo_variation_result(self, _run_query):
@@ -111,7 +117,7 @@ class AcervoVariationViewTest(TestCase):
         self.assertEqual(response.data, expected_response)
 
 
-class AcervoVariationTopNViewTest(TestCase):
+class AcervoVariationTopNViewTest(NoCacheTestCase, TestCase):
 
     @mock.patch('dominio.views.run_query')
     def test_acervo_variation_result(self, _run_query):
@@ -211,7 +217,7 @@ class AcervoVariationTopNViewTest(TestCase):
         self.assertEqual(response.data, expected_response)
 
 
-class OutliersViewTest(TestCase):
+class OutliersViewTest(NoCacheTestCase, TestCase):
 
     @mock.patch('dominio.views.run_query')
     def test_outliers_result(self, _run_query):
@@ -275,7 +281,7 @@ class OutliersViewTest(TestCase):
         self.assertEqual(response.data, expected_response)
 
 
-class SaidasViewTest(TestCase):
+class SaidasViewTest(NoCacheTestCase, TestCase):
 
     @mock.patch('dominio.views.run_query')
     def test_saidas_result(self, _run_query):
@@ -285,7 +291,7 @@ class SaidasViewTest(TestCase):
             ]
         response = self.client.get(reverse(
             'dominio:saidas',
-            args=('100',)))
+            args=('120',)))
 
         expected_response = {
             'saidas': 0,
@@ -298,7 +304,7 @@ class SaidasViewTest(TestCase):
         expected_query = """
                 SELECT saidas, id_orgao, cod_pct, percent_rank, dt_calculo
                 FROM {namespace}.tb_saida
-                WHERE id_orgao = 100
+                WHERE id_orgao = 120
                 """.format(namespace=settings.TABLE_NAMESPACE)
 
         _run_query.assert_called_once_with(expected_query)
@@ -310,7 +316,66 @@ class SaidasViewTest(TestCase):
         _run_query.return_value = []
         response = self.client.get(reverse(
             'dominio:saidas',
-            args=('1',)))
+            args=('120',)))
+
+        expected_response = {'detail': 'Não encontrado.'}
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.data, expected_response)
+
+
+class EntradasViewTest(TestCase, NoCacheTestCase):
+
+    @mock.patch('dominio.views.run_query')
+    def test_entradas_result(self, _run_query):
+        _run_query.return_value = \
+            [
+                ('5', '0', '10', '4.2', '0.0', '3.0', '5.0', '2.0', '1.0', '5.0'),
+            ]
+        response = self.client.get(reverse(
+            'dominio:entradas',
+            args=('1', '2')))
+
+        expected_response = {
+            'nr_entradas_hoje': 5,
+            'minimo': 0,
+            'maximo': 10,
+            'media': 4.2,
+            'primeiro_quartil': 0.0,
+            'mediana': 3.0,
+            'terceiro_quartil': 5.0,
+            'iqr': 2.0,
+            'lout': 1.0,
+            'hout': 5.0
+        }
+
+        expected_query = """
+                SELECT
+                    nr_entradas_hoje,
+                    minimo,
+                    maximo,
+                    media,
+                    primeiro_quartil,
+                    mediana,
+                    terceiro_quartil,
+                    iqr,
+                    lout,
+                    hout
+                FROM {namespace}.tb_dist_entradas
+                WHERE comb_orga_dk = 1
+                AND comb_cdmatricula = '00000002'
+                """.format(namespace=settings.TABLE_NAMESPACE)
+
+        _run_query.assert_called_once_with(expected_query)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected_response)
+
+    @mock.patch('dominio.views.run_query')
+    def test_entradas_no_result(self, _run_query):
+        _run_query.return_value = []
+        response = self.client.get(reverse(
+            'dominio:entradas',
+            args=('1', '2')))
 
         expected_response = {'detail': 'Não encontrado.'}
 
