@@ -330,7 +330,10 @@ class EntradasViewTest(TestCase, NoCacheTestCase):
     def test_entradas_result(self, _run_query):
         _run_query.return_value = \
             [
-                ('5', '0', '10', '4.2', '0.0', '3.0', '5.0', '2.0', '1.0', '5.0'),
+                (
+                    '5', '0', '10', '4.2', '0.0',
+                    '3.0', '5.0', '2.0', '1.0', '5.0'
+                ),
             ]
         response = self.client.get(reverse(
             'dominio:entradas',
