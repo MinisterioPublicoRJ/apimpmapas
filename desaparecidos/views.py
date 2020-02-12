@@ -11,4 +11,6 @@ class DesaparecidosView(APIView):
             config("DESAPARECIDOS_DB_PWD"),
             config("DESAPARECIDOS_DB_HOST")
         )
-        return Response(rank(cursor, kwargs.get("id_sinalid")), status=200)
+        result = rank(cursor, kwargs.get("id_sinalid"))
+        status = 404 if "erro" in result.keys() else 200
+        return Response(result, status=status)
