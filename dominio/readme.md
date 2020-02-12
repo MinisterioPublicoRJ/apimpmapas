@@ -25,7 +25,7 @@ Vary: Accept
 
 
 ```
-GET acervo_variation/<id_orgao>/<yyyy-MM-dd>/<yyyy-MM-dd>
+GET dominio/acervo_variation/<id_orgao>/<yyyy-MM-dd>/<yyyy-MM-dd>
 ```
 
 ```
@@ -44,7 +44,7 @@ Vary: Accept
 #### Maiores variações do Acervo
 
 ```
-GET acervo_variation_topn/<id_orgao>/<yyyy-MM-dd>/<yyyy-MM-dd>/<n>
+GET dominio/acervo_variation_topn/<id_orgao>/<yyyy-MM-dd>/<yyyy-MM-dd>/<n>
 ```
 
 ```
