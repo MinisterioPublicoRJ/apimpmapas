@@ -391,17 +391,39 @@ class SuaMesaViewTest(TestCase, NoCacheTestCase):
 
     @mock.patch('dominio.views.run_query')
     def test_sua_mesa_get_regras_investigacao(self, _run_query):
-        SuaMesaView.get_regras(10, 'investigacao')
+        _run_query.return_value = [(20,), (30,)]
 
-        expected_query = ""
+        output = SuaMesaView.get_regras(10, 'investigacao')
+        expected_output = [20, 30]
+
+        expected_query = """
+            SELECT r.classe_documento
+            FROM {namespace}.atualizacao_pj_pacote pct
+            JOIN {namespace}.tb_regra_negocio_investigacao r
+            ON r.cod_atribuicao = pct.cod_pct
+            WHERE pct.id_orgao = 10
+        """.format(namespace=settings.TABLE_NAMESPACE)
+
         _run_query.assert_called_once_with(expected_query)
+        self.assertEqual(output, expected_output)
 
     @mock.patch('dominio.views.run_query')
     def test_sua_mesa_get_regras_processo(self, _run_query):
-        SuaMesaView.get_regras(10, 'processo')
+        _run_query.return_value = [(20,), (30,)]
 
-        expected_query = ""
+        output = SuaMesaView.get_regras(10, 'processo')
+        expected_output = [20, 30]
+
+        expected_query = """
+            SELECT r.classe_documento
+            FROM {namespace}.atualizacao_pj_pacote pct
+            JOIN {namespace}.tb_regra_negocio_processo r
+            ON r.cod_atribuicao = pct.cod_pct
+            WHERE pct.id_orgao = 10
+        """.format(namespace=settings.TABLE_NAMESPACE)
+
         _run_query.assert_called_once_with(expected_query)
+        self.assertEqual(output, expected_output)
 
     @mock.patch('dominio.views.run_query')
     def test_sua_mesa_get_vistas_abertas(self, _run_query):
@@ -450,7 +472,7 @@ class SuaMesaViewTest(TestCase, NoCacheTestCase):
             'vistas_abertas': 50,
             'investigacoes_curso': 128,
             'processos_juizo': 63,
-            'finalizados': 120 
+            'finalizados': 120
         }
 
         self.assertEqual(response.status_code, 200)
