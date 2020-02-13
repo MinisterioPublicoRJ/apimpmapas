@@ -383,10 +383,12 @@ class SuaMesaView(APIView):
 
     @staticmethod
     def get_investigacoes(orgao_id, regras):
+        # if not regras...?
         return [(25,)]
 
     @staticmethod
     def get_processos(orgao_id, regras):
+        # if not regras...?
         return [(35,)]
 
     @staticmethod
@@ -396,31 +398,46 @@ class SuaMesaView(APIView):
     @staticmethod
     def get_regras(orgao_id, tipo='investigacao'):
         table_switcher = {
-            'investigacao': 'tb_regra_negocio_investigacao', #config('TB_REGRA_INVESTIGACAO'),
-            'processo': 'tb_regra_negocio_processo' #config('TB_REGRA_PROCESSO')
+            'investigacao': 'tb_regra_negocio_investigacao',
+            'processo': 'tb_regra_negocio_processo'
         }
         regras_table = table_switcher.get(tipo, None)
         
-        # if not regras_table:
-            # raise Error
+        if not regras_table:
+            # Melhor fazer de outra forma? Raise error?
+            return None
 
-        # Roda query
+        query = """
+            SELECT r.classe_documento
+            FROM {namespace}.atualizacao_pj_pacote pct
+            JOIN {namespace}.{regras_table} r
+            ON r.cod_atribuicao = pct.cod_pct
+            WHERE pct.id_orgao = {orgao_id}
+        """.format(
+            orgao_id=orgao_id,
+            regras_table=regras_table,
+            namespace=settings.TABLE_NAMESPACE
+        )
 
-        return [(300,), (301,), (302,)] 
+        return [row[0] for row in run_query(query)]
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs['orgao_id'])
         cod_matricula = str(int(self.kwargs['cod_matricula'])).zfill(8)
 
-        regras_investigacao = self.get_regras(orgao_id, tipo='investigacao')
+        regras_investig = self.get_regras(orgao_id, tipo='investigacao')
         regras_processo = self.get_regras(orgao_id, tipo='processo')
 
         data_vistas = self.get_vistas_abertas(orgao_id, cod_matricula)
-        data_investigacoes = self.get_investigacoes(orgao_id, regras_investigacao)
+        data_investigacoes = self.get_investigacoes(orgao_id, regras_investig)
         data_processos = self.get_processos(orgao_id, regras_processo)
         data_finalizados = self.get_finalizados(orgao_id)
 
-        if not data_vistas or not data_investigacoes or not data_processos or not data_finalizados:
+        if (not data_vistas
+                or not data_investigacoes
+                or not data_processos
+                or not data_finalizados):
+            # Checar todos juntos? Se pelo menos um existir, melhor mandar...
             raise Http404
 
         fields = [
