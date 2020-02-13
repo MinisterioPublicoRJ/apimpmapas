@@ -5,6 +5,7 @@ from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
+from dominio.views import SuaMesaView
 # Create your tests here.
 
 
@@ -378,6 +379,88 @@ class EntradasViewTest(TestCase, NoCacheTestCase):
         _run_query.return_value = []
         response = self.client.get(reverse(
             'dominio:entradas',
+            args=('1', '2')))
+
+        expected_response = {'detail': 'Não encontrado.'}
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.data, expected_response)
+
+
+class SuaMesaViewTest(TestCase, NoCacheTestCase):
+
+    @mock.patch('dominio.views.run_query')
+    def test_sua_mesa_get_regras_investigacao(self, _run_query):
+        SuaMesaView.get_regras(10, 'investigacao')
+
+        expected_query = ""
+        _run_query.assert_called_once_with(expected_query)
+
+    @mock.patch('dominio.views.run_query')
+    def test_sua_mesa_get_regras_processo(self, _run_query):
+        SuaMesaView.get_regras(10, 'processo')
+
+        expected_query = ""
+        _run_query.assert_called_once_with(expected_query)
+
+    @mock.patch('dominio.views.run_query')
+    def test_sua_mesa_get_vistas_abertas(self, _run_query):
+        SuaMesaView.get_vistas_abertas(10, '00002933')
+
+        expected_query = ""
+        _run_query.assert_called_once_with(expected_query)
+
+    @mock.patch('dominio.views.run_query')
+    def test_sua_mesa_get_investigacoes(self, _run_query):
+        SuaMesaView.get_investigacoes(10, [(30,), (50,)])
+
+        expected_query = ""
+        _run_query.assert_called_once_with(expected_query)
+
+    @mock.patch('dominio.views.run_query')
+    def test_sua_mesa_get_processos(self, _run_query):
+        SuaMesaView.get_processos(10, [(30,), (50,)])
+
+        expected_query = ""
+        _run_query.assert_called_once_with(expected_query)
+
+    @mock.patch('dominio.views.run_query')
+    def test_sua_mesa_get_finalizados(self, _run_query):
+        SuaMesaView.get_finalizados(10)
+
+        expected_query = ""
+        _run_query.assert_called_once_with(expected_query)
+
+    @mock.patch('dominio.views.run_query')
+    def test_sua_mesa_result(self, _run_query):
+        _run_query.side_effect = \
+            [
+                [(30,), (40,), (70,)],
+                [(30,), (40,), (70,)],
+                [(50,)],
+                [(128,)],
+                [(63,)],
+                [(120,)]
+            ]
+        response = self.client.get(reverse(
+            'dominio:sua_mesa',
+            args=('1', '2')))
+
+        expected_response = {
+            'vistas_abertas': 50,
+            'investigacoes_curso': 128,
+            'processos_juizo': 63,
+            'finalizados': 120 
+        }
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected_response)
+
+    @mock.patch('dominio.views.run_query')
+    def test_sua_mesa_no_result(self, _run_query):
+        _run_query.return_value = []
+        response = self.client.get(reverse(
+            'dominio:sua_mesa',
             args=('1', '2')))
 
         expected_response = {'detail': 'Não encontrado.'}
