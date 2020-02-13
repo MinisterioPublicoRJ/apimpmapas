@@ -13,6 +13,7 @@ from .serializers import (
     AcervoVariationTopNSerializer,
     OutliersSerializer,
     EntradasSerializer,
+    SuaMesaSerializer
 )
 
 
@@ -372,3 +373,72 @@ class EntradasView(APIView):
         }
         data = EntradasSerializer(data_obj).data
         return Response(data)
+
+
+class SuaMesaView(APIView):
+
+    @staticmethod
+    def get_vistas_abertas(orgao_id, cod_matricula):
+        return [(10,)]
+
+    @staticmethod
+    def get_investigacoes(orgao_id, regras):
+        return [(25,)]
+
+    @staticmethod
+    def get_processos(orgao_id, regras):
+        return [(35,)]
+
+    @staticmethod
+    def get_finalizados(orgao_id):
+        return [(50,)]
+
+    @staticmethod
+    def get_regras(orgao_id, tipo='investigacao'):
+        table_switcher = {
+            'investigacao': 'tb_regra_negocio_investigacao', #config('TB_REGRA_INVESTIGACAO'),
+            'processo': 'tb_regra_negocio_processo' #config('TB_REGRA_PROCESSO')
+        }
+        regras_table = table_switcher.get(tipo, None)
+        
+        # if not regras_table:
+            # raise Error
+
+        # Roda query
+
+        return [(300,), (301,), (302,)] 
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(self.kwargs['orgao_id'])
+        cod_matricula = str(int(self.kwargs['cod_matricula'])).zfill(8)
+
+        regras_investigacao = self.get_regras(orgao_id, tipo='investigacao')
+        regras_processo = self.get_regras(orgao_id, tipo='processo')
+
+        data_vistas = self.get_vistas_abertas(orgao_id, cod_matricula)
+        data_investigacoes = self.get_investigacoes(orgao_id, regras_investigacao)
+        data_processos = self.get_processos(orgao_id, regras_processo)
+        data_finalizados = self.get_finalizados(orgao_id)
+
+        if not data_vistas or not data_investigacoes or not data_processos or not data_finalizados:
+            raise Http404
+
+        fields = [
+            'vistas_abertas',
+            'investigacoes_curso',
+            'processos_juizo',
+            'finalizados'
+        ]
+        values = [
+            data_vistas[0][0],
+            data_investigacoes[0][0],
+            data_processos[0][0],
+            data_finalizados[0][0]
+        ]
+        data_obj = {
+            fieldname: value for fieldname, value in zip(fields, values)
+        }
+
+        data = SuaMesaSerializer(data_obj).data
+        return Response(data)
+
