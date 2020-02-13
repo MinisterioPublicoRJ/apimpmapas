@@ -381,11 +381,11 @@ class SuaMesaView(APIView):
     def get_vistas_abertas(orgao_id, cod_matricula):
         """Busca o número de vistas abertas para um dado órgão e matrícula
         na base do Oracle.
-        
+
         Arguments:
             orgao_id {integer} -- ID do órgão a ser procurado.
-            cod_matricula {string} -- Matrícula da pessoa no formato 'XXXXXXXX'.
-        
+            cod_matricula {string} -- Matrícula no formato 'XXXXXXXX'.
+
         Returns:
             List[Tuple] -- Lista com o resultado da query.
         """
@@ -395,12 +395,12 @@ class SuaMesaView(APIView):
     def get_investigacoes(orgao_id, regras):
         """Busca o número de investigações em curso para um dado órgão e
         regras de negócio na base do Oracle.
-        
+
         Arguments:
             orgao_id {integer} -- ID do órgão a ser procurado.
             regras {List[integer]} -- Lista de IDs de classes de documento
                 relevantes para classificar uma investigação.
-        
+
         Returns:
             List[Tuple] -- Lista com o resultado da query.
         """
@@ -411,12 +411,12 @@ class SuaMesaView(APIView):
     def get_processos(orgao_id, regras):
         """Busca o número de investigações em curso para um dado órgão e
         regras de negócio na base do Oracle.
-        
+
         Arguments:
             orgao_id {integer} -- ID do órgão a ser procurado.
             regras {List[integer]} -- Lista de IDs de classes de documento
                 relevantes para classificar um processo.
-        
+
         Returns:
             List[Tuple] -- Lista com o resultado da query.
         """
@@ -426,10 +426,10 @@ class SuaMesaView(APIView):
     @staticmethod
     def get_finalizados(orgao_id):
         """[summary]
-        
+
         Arguments:
             orgao_id {[type]} -- [description]
-        
+
         Returns:
             [type] -- [description]
         """
@@ -440,24 +440,23 @@ class SuaMesaView(APIView):
     def get_regras(orgao_id, tipo='investigacao'):
         """Busca as regras de negócio relativas a investigação ou processo,
         para um dado órgão.
-        
+
         Arguments:
             orgao_id {integer} -- ID do órgão a ser procurado.
-        
+
         Keyword Arguments:
             tipo {str} -- Tipo de regra a ser procurada.
             Pode ser 'investigacao' ou 'processo'. (default: {'investigacao'})
-        
+
         Returns:
             List[integer] -- Lista de IDs de classes de documentos.
-        """        
-        #
+        """
         table_switcher = {
             'investigacao': 'tb_regra_negocio_investigacao',
             'processo': 'tb_regra_negocio_processo'
         }
         regras_table = table_switcher.get(tipo, None)
-        
+
         if not regras_table:
             # Melhor fazer de outra forma? Raise error?
             return None
@@ -513,4 +512,3 @@ class SuaMesaView(APIView):
 
         data = SuaMesaSerializer(data_obj).data
         return Response(data)
-

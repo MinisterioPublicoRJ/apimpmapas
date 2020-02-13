@@ -6,8 +6,8 @@ from .views import (
     EntradasView,
     AcervoVariationView,
     AcervoVariationTopNView,
-    OutliersView, 
-    SuaMesaView, # , AlertasListView
+    OutliersView,
+    SuaMesaView,  # , AlertasListView
 )
 
 app_name = 'dominio'
