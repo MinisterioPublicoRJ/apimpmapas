@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .db_connectors import run_query
+from .models import Vista
 from .serializers import (
     AcervoSerializer,
     SaidasSerializer,
@@ -378,20 +379,6 @@ class EntradasView(APIView):
 class SuaMesaView(APIView):
 
     @staticmethod
-    def get_vistas_abertas(orgao_id, cod_matricula):
-        """Busca o número de vistas abertas para um dado órgão e matrícula
-        na base do Oracle.
-
-        Arguments:
-            orgao_id {integer} -- ID do órgão a ser procurado.
-            cod_matricula {string} -- Matrícula no formato 'XXXXXXXX'.
-
-        Returns:
-            List[Tuple] -- Lista com o resultado da query.
-        """
-        return [(10,)]
-
-    @staticmethod
     def get_investigacoes(orgao_id, regras):
         """Busca o número de investigações em curso para um dado órgão e
         regras de negócio na base do Oracle.
@@ -473,23 +460,31 @@ class SuaMesaView(APIView):
             namespace=settings.TABLE_NAMESPACE
         )
 
-        return [row[0] for row in run_query(query)]
+        result = run_query(query)
+        return [row[0] for row in result] if result else []
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs['orgao_id'])
-        cod_matricula = str(int(self.kwargs['cod_matricula'])).zfill(8)
+        cpf = '00000000000'  # Aguardando resolver o sistema de login
 
         regras_investig = self.get_regras(orgao_id, tipo='investigacao')
         regras_processo = self.get_regras(orgao_id, tipo='processo')
 
-        data_vistas = self.get_vistas_abertas(orgao_id, cod_matricula)
-        data_investigacoes = self.get_investigacoes(orgao_id, regras_investig)
-        data_processos = self.get_processos(orgao_id, regras_processo)
+        data_vistas = Vista.vistas.abertas_promotor(orgao_id=orgao_id, cpf=cpf)
+        data_investigacoes = (
+            self.get_investigacoes(orgao_id, regras_investig)
+            if regras_investig
+            else [(0,)]
+        )
+        data_processos = (
+            self.get_processos(orgao_id, regras_processo)
+            if regras_processo
+            else [(0,)]
+        )
         data_finalizados = self.get_finalizados(orgao_id)
 
-        if (not data_vistas
-                or not data_investigacoes
-                or not data_processos
+        if (not data_investigacoes
+            or not data_processos
                 or not data_finalizados):
             # Checar todos juntos? Se pelo menos um existir, melhor mandar...
             raise Http404
@@ -501,7 +496,7 @@ class SuaMesaView(APIView):
             'finalizados'
         ]
         values = [
-            data_vistas[0][0],
+            data_vistas.count(),
             data_investigacoes[0][0],
             data_processos[0][0],
             data_finalizados[0][0]
