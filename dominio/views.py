@@ -370,3 +370,47 @@ class SuaMesaDetalheView(APIView):
             raise Http404
 
         return Response(mesa_detalhe)
+
+
+@method_decorator(
+    cache_page(settings.CACHE_TIMEOUT, key_prefix="dominio_detalhe_processos"),
+    name="dispatch"
+)
+class DetalheProcessosJuizoView(APIView):
+
+    @staticmethod
+    def get_numero_acoes_propostas_pacote_atribuicao(orgao_id, dt_inicio, dt_fim):
+        query = """
+            """
+        #return run_query(query)
+        return [(1, 1), (2, 2), (3, 3), (4, 4), (5, 5)]
+
+    @staticmethod
+    def get_porcentagem_aumento_acoes_promotoria(orgao_id, dt_inicio, dt_fim):
+        query = """
+            """
+        #return run_query(query)
+        return [()]
+
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(self.kwargs['orgao_id'])
+        dt_inicio = str(self.kwargs['dt_inicio'])
+        dt_fim = str(self.kwargs['dt_fim'])
+
+        data_acoes = self.get_numero_acoes_propostas_pacote_atribuicao(
+            orgao_id=orgao_id,
+            dt_inicio=dt_inicio,
+            dt_fim=dt_fim
+        )
+        data_porcentagem = self.get_porcentagem_aumento_acoes_promotoria()
+
+        if not data:
+            raise Http404
+
+        fields = ['acervo_fim', 'acervo_inicio', 'variacao']
+        data_obj = {
+            fieldname: value for fieldname, value in zip(fields, data[0])
+        }
+        data = AcervoVariationSerializer(data_obj).data
+        return Response(data)
