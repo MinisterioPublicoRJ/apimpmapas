@@ -6,6 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from dominio.views import DetalheAcervoView
+from dominio.views import DetalheProcessosJuizoView
 
 # Create your tests here.
 
@@ -424,3 +425,57 @@ class TestSuaMesaDetalheVitas(TestCase):
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 404)
+
+
+class DetalheProcessosJuizoViewTest(TestCase, NoCacheTestCase):
+
+    @mock.patch('dominio.views.run_query')
+    def test_get_numero_acoes_propostas_pacote_atribuicao(self, _run_query):
+        DetalheProcessosJuizoView.get_numero_acoes_propostas_pacote_atribuicao(1, 2, 3)
+
+        expected_query = ""
+        _run_query.assert_called_once_with(expected_query)
+
+
+    @mock.patch('dominio.views.run_query')
+    def test_get_porcentagem_aumento_acoes_promotoria(self, _run_query):
+        DetalheProcessosJuizoView.get_porcentagem_aumento_acoes_promotoria(1, 2, 3)
+
+        expected_query = ""
+        _run_query.assert_called_once_with(expected_query)
+
+    @mock.patch('dominio.views.run_query')
+    def test_detalhe_processos_result(self, _run_query):
+        _run_query.side_effect = \
+            [
+                [(1, 50), (2, 30), (3, 40), (4, 100), (5, 20)],
+                [(10, 20, 1.0)]
+            ]
+        response = self.client.get(reverse(
+            'dominio:detalhe_processos',
+            args=('1', '2', '3')))
+
+        expected_response = {
+            'nr_acoes_propostas': 20,
+            'variacao': 1.0,
+            'top_n': [
+                {'nome': 'TC 4', 'nr_acoes': 100},
+                {'nome': 'TC 1', 'nr_acoes': 50},
+                {'nome': 'TC 3', 'nr_acoes': 40}]
+        }
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected_response)
+
+    @mock.patch('dominio.views.run_query')
+    def test_detalhe_processos_no_result(self, _run_query):
+        _run_query.return_value = []
+        response = self.client.get(reverse(
+            'dominio:detalhe_processos',
+            args=('1', '2', '3')))
+
+        expected_response = {'detail': 'Não encontrado.'}
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.data, expected_response)
+
