@@ -1,7 +1,6 @@
 from django.urls import path
 
 from .views import (
-    AcervoView,
     SaidasView,
     EntradasView,
     AcervoVariationView,
@@ -17,11 +16,6 @@ urlpatterns = [
     #     AlertasListView.as_view(),
     #     name='lista_alertas'
     # ),
-    path(
-        'acervo/<str:orgao_id>/<str:data>',
-        AcervoView.as_view(),
-        name='acervo'
-    ),
     path(
         'acervo_variation/'
         '<str:orgao_id>/<str:dt_inicio>/<str:dt_fim>',

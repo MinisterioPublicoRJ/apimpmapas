@@ -13,47 +13,6 @@ class NoCacheTestCase:
         cache.clear()
 
 
-class AcervoViewTest(NoCacheTestCase, TestCase):
-
-    @mock.patch('dominio.views.run_query')
-    def test_acervo_variation_result(self, _run_query):
-        _run_query.return_value = [('10',), ]
-        response = self.client.get(reverse(
-            'dominio:acervo',
-            args=('0', '1')))
-
-        expected_response = {'acervo_qtd': 10}
-
-        expected_query = (
-            "SELECT SUM(acervo) "
-            "FROM {namespace}.tb_acervo A "
-            "INNER JOIN cluster.atualizacao_pj_pacote B "
-            "ON A.cod_orgao = cast(B.id_orgao as int) "
-            "INNER JOIN {namespace}.tb_regra_negocio_investigacao C "
-            "ON C.cod_atribuicao = B.cod_pct "
-            "AND C.classe_documento = A.tipo_acervo "
-            "WHERE cod_orgao = 0 "
-            "AND dt_inclusao = to_timestamp('1', 'yyyy-MM-dd')".format(
-              namespace=settings.TABLE_NAMESPACE
-            ))
-        _run_query.assert_called_once_with(expected_query)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, expected_response)
-
-    @mock.patch('dominio.views.run_query')
-    def test_acervo_variation_no_result(self, _run_query):
-        _run_query.return_value = []
-        response = self.client.get(reverse(
-            'dominio:acervo',
-            args=('0', '1')))
-
-        expected_response = {'detail': 'Não encontrado.'}
-
-        self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.data, expected_response)
-
-
 class AcervoVariationViewTest(NoCacheTestCase, TestCase):
 
     @mock.patch('dominio.views.run_query')
@@ -221,18 +180,20 @@ class OutliersViewTest(NoCacheTestCase, TestCase):
 
     @mock.patch('dominio.views.run_query')
     def test_outliers_result(self, _run_query):
-        _run_query.return_value = \
+        _run_query.side_effect = \
             [
-                (
+                [(
                     '20', '100', '1000', '500', '300',
                     '450', '700', '400', '50', '950'
-                ),
+                )],
+                [('10',)],
             ]
         response = self.client.get(reverse(
             'dominio:outliers',
             args=('0', '1')))
 
         expected_response = {
+            'acervo_qtd': 10,
             'cod_atribuicao': 20,
             'minimo': 100,
             'maximo': 1000,
@@ -245,7 +206,7 @@ class OutliersViewTest(NoCacheTestCase, TestCase):
             'hout': 950
         }
 
-        expected_query = """
+        expected_query_outliers = mock.call("""
                 SELECT B.cod_atribuicao,
                 B.minimo,
                 B.maximo,
@@ -262,9 +223,24 @@ class OutliersViewTest(NoCacheTestCase, TestCase):
                 AND A.dt_inclusao = B.dt_inclusao
                 WHERE A.cod_orgao = 0
                 AND B.dt_inclusao = to_timestamp('1', 'yyyy-MM-dd')
-                """.format(namespace=settings.TABLE_NAMESPACE)
+                """.format(namespace=settings.TABLE_NAMESPACE))
 
-        _run_query.assert_called_once_with(expected_query)
+        expected_query_acervo = mock.call(
+            "SELECT SUM(acervo) "
+            "FROM {namespace}.tb_acervo A "
+            "INNER JOIN cluster.atualizacao_pj_pacote B "
+            "ON A.cod_orgao = cast(B.id_orgao as int) "
+            "INNER JOIN {namespace}.tb_regra_negocio_investigacao C "
+            "ON C.cod_atribuicao = B.cod_pct "
+            "AND C.classe_documento = A.tipo_acervo "
+            "WHERE cod_orgao = 0 "
+            "AND dt_inclusao = to_timestamp('1', 'yyyy-MM-dd')".format(
+              namespace=settings.TABLE_NAMESPACE
+            ))
+
+        _run_query.assert_has_calls([
+            expected_query_outliers,
+            expected_query_acervo])
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected_response)
 
