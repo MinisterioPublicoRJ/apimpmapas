@@ -1,10 +1,6 @@
 from rest_framework import serializers
 
 
-class AcervoSerializer(serializers.Serializer):
-    acervo_qtd = serializers.IntegerField()
-
-
 class AcervoVariationSerializer(serializers.Serializer):
     acervo_fim = serializers.IntegerField(min_value=0)
     acervo_inicio = serializers.IntegerField(min_value=0)
@@ -20,6 +16,7 @@ class AcervoVariationTopNSerializer(serializers.Serializer):
 
 
 class OutliersSerializer(serializers.Serializer):
+    acervo_qtd = serializers.IntegerField(min_value=0)
     cod_atribuicao = serializers.IntegerField()
     minimo = serializers.IntegerField(min_value=0)
     maximo = serializers.IntegerField(min_value=0)

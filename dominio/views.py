@@ -7,54 +7,12 @@ from rest_framework.views import APIView
 
 from .db_connectors import run_query
 from .serializers import (
-    AcervoSerializer,
     SaidasSerializer,
     AcervoVariationSerializer,
     AcervoVariationTopNSerializer,
     OutliersSerializer,
     EntradasSerializer,
 )
-
-
-@method_decorator(
-    cache_page(settings.CACHE_TIMEOUT, key_prefix="dominio_acervo"),
-    name="dispatch"
-)
-class AcervoView(APIView):
-
-    def get_acervo(self, orgao_id, data):
-        query = (
-            "SELECT SUM(acervo) "
-            "FROM {namespace}.tb_acervo A "
-            "INNER JOIN cluster.atualizacao_pj_pacote B "
-            "ON A.cod_orgao = cast(B.id_orgao as int) "
-            "INNER JOIN {namespace}.tb_regra_negocio_investigacao C "
-            "ON C.cod_atribuicao = B.cod_pct "
-            "AND C.classe_documento = A.tipo_acervo "
-            "WHERE cod_orgao = {orgao_id} "
-            "AND dt_inclusao = to_timestamp('{data}', 'yyyy-MM-dd')"
-            .format(
-                namespace=settings.TABLE_NAMESPACE,
-                orgao_id=orgao_id,
-                data=data
-            ))
-        return run_query(query)
-
-    def get(self, request, *args, **kwargs):
-        orgao_id = int(self.kwargs['orgao_id'])
-        data = str(self.kwargs['data'])
-
-        acervo_qtd = self.get_acervo(
-            orgao_id=orgao_id,
-            data=data
-        )
-
-        if not acervo_qtd:
-            raise Http404
-
-        acervo = {'acervo_qtd': acervo_qtd[0][0]}
-        data = AcervoSerializer(acervo).data
-        return Response(data)
 
 
 @method_decorator(
@@ -220,6 +178,24 @@ class AcervoVariationTopNView(APIView):
 )
 class OutliersView(APIView):
 
+    def get_acervo(self, orgao_id, data):
+        query = (
+            "SELECT SUM(acervo) "
+            "FROM {namespace}.tb_acervo A "
+            "INNER JOIN cluster.atualizacao_pj_pacote B "
+            "ON A.cod_orgao = cast(B.id_orgao as int) "
+            "INNER JOIN {namespace}.tb_regra_negocio_investigacao C "
+            "ON C.cod_atribuicao = B.cod_pct "
+            "AND C.classe_documento = A.tipo_acervo "
+            "WHERE cod_orgao = {orgao_id} "
+            "AND dt_inclusao = to_timestamp('{data}', 'yyyy-MM-dd')"
+            .format(
+                namespace=settings.TABLE_NAMESPACE,
+                orgao_id=orgao_id,
+                data=data
+            ))
+        return run_query(query)
+
     def get_outliers(self, orgao_id, dt_calculo):
 
         query = """
@@ -254,8 +230,12 @@ class OutliersView(APIView):
             orgao_id=orgao_id,
             dt_calculo=dt_calculo
         )
+        acervo_qtd = self.get_acervo(
+            orgao_id=orgao_id,
+            data=dt_calculo
+        )
 
-        if not data:
+        if not data or not acervo_qtd:
             raise Http404
 
         fields = ['cod_atribuicao', 'minimo', 'maximo',
@@ -264,6 +244,7 @@ class OutliersView(APIView):
         data_obj = {
             fieldname: value for fieldname, value in zip(fields, data[0])
         }
+        data_obj['acervo_qtd'] = acervo_qtd[0][0]
         data = OutliersSerializer(data_obj).data
         return Response(data)
 
