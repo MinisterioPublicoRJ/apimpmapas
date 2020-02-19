@@ -507,3 +507,13 @@ class SuaMesaView(APIView):
 
         data = SuaMesaSerializer(data_obj).data
         return Response(data)
+
+
+class SuaMesaDetalheView(APIView):
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id", -1))
+        cpf = kwargs.get("cpf", "")
+
+        mesa_detalhe = Vista.vistas.abertas_por_dias_abertura(orgao_id, cpf)
+
+        return Response(mesa_detalhe)

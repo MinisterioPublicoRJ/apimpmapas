@@ -482,3 +482,26 @@ class SuaMesaViewTest(TestCase, NoCacheTestCase):
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.data, expected_response)
+
+
+class TestSuaMesaDetalhe(TestCase):
+    @mock.patch('dominio.views.Vista')
+    def test_correct_response(self, _Vista):
+        expected_resp = {
+            'soma_ate_vinte': 25,
+            'soma_vinte_trinta': 2,
+            'soma_trinta_mais': 4
+        }
+        _Vista.vistas.abertas_por_dias_abertura.return_value = expected_resp
+
+        url = reverse('dominio:sua_mesa_detalhe', args=('1', '2'))
+
+        resp = self.client.get(url)
+        expected_resp = {
+            'soma_ate_vinte': 25,
+            'soma_vinte_trinta': 2,
+            'soma_trinta_mais': 4
+        }
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, expected_resp)

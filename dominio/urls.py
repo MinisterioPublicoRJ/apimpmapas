@@ -8,6 +8,7 @@ from .views import (
     AcervoVariationTopNView,
     OutliersView,
     SuaMesaView,  # , AlertasListView
+    SuaMesaDetalheView,
 )
 
 app_name = 'dominio'
@@ -55,5 +56,10 @@ urlpatterns = [
         'sua_mesa/<str:orgao_id>/<str:cod_matricula>',
         SuaMesaView.as_view(),
         name='sua_mesa'
-    )
+    ),
+    path(
+        'sua_mesa_detalhe/<str:orgao_id>/<str:cpf>',
+        SuaMesaDetalheView.as_view(),
+        name='sua_mesa_detalhe'
+    ),
 ]

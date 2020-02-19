@@ -63,6 +63,7 @@ class Vista(models.Model):
         'Documento',
         db_column='VIST_DOCU_DK',
         on_delete=models.SET_NULL,
+        null=True,
     )
     orgao = models.ForeignKey(
         'Orgao',
