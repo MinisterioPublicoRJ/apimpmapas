@@ -497,11 +497,21 @@ class TestSuaMesaDetalhe(TestCase):
         url = reverse('dominio:sua_mesa_detalhe', args=('1', '2'))
 
         resp = self.client.get(url)
-        expected_resp = {
-            'soma_ate_vinte': 25,
-            'soma_vinte_trinta': 2,
-            'soma_trinta_mais': 4
-        }
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, expected_resp)
+
+    @mock.patch('dominio.views.Vista')
+    def test_404_response(self, _Vista):
+        query_resp = {
+            'soma_ate_vinte': None,
+            'soma_vinte_trinta': None,
+            'soma_trinta_mais': None
+        }
+        _Vista.vistas.abertas_por_dias_abertura.return_value = query_resp
+
+        url = reverse('dominio:sua_mesa_detalhe', args=('1', '2'))
+
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 404)

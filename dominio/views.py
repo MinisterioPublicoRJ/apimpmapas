@@ -511,9 +511,11 @@ class SuaMesaView(APIView):
 
 class SuaMesaDetalheView(APIView):
     def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get("orgao_id", -1))
-        cpf = kwargs.get("cpf", "")
+        orgao_id = int(kwargs.get("orgao_id"))
+        cpf = kwargs.get("cpf")
 
         mesa_detalhe = Vista.vistas.abertas_por_dias_abertura(orgao_id, cpf)
+        if all([v is None for v in mesa_detalhe.values()]):
+            raise Http404
 
         return Response(mesa_detalhe)
