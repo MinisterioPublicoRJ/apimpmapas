@@ -1,11 +1,13 @@
 from django.db import models
 
-from .managers import VistaManager
+from .managers import VistaManager, InvestigacoesManager
 
 # Create your models here.
 
 
 class Documento(models.Model):
+    investigacoes = InvestigacoesManager()
+
     docu_dk = models.IntegerField(primary_key=True)
     num_mp = models.CharField(max_length=15, db_column='docu_nr_mp')
     docu_tpst_dk = models.IntegerField(
@@ -18,6 +20,17 @@ class Documento(models.Model):
     docu_orgi_orga_dk_carga = models.IntegerField(
         db_column="DOCU_ORGI_ORGA_DK_CARGA",
         null=True
+    )
+    docu_orgi_orga_dk_responsavel = models.IntegerField(
+        db_column="DOCU_ORGI_ORGA_DK_RESPONSAVEL",
+        null=True
+    )
+    docu_cldc_dk = models.IntegerField(
+        db_column="DOCU_CLDC_DK",
+        null=True
+    )
+    docu_fsdc_dk = models.IntegerField(
+        db_column="DOCU_FSDC_DK",
     )
     classe = models.ForeignKey(
         'DoctoClasse',

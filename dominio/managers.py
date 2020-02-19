@@ -76,3 +76,12 @@ class VistaManager(models.Manager):
             soma_vinte_trinta=Sum('vinte_trinta'),
             soma_trinta_mais=Sum('trinta_mais')
         )
+
+
+class InvestigacoesManager(models.Manager):
+    def em_curso(self, orgao_id, regras):
+        return self.get_queryset().filter(
+            docu_orgi_orga_dk_responsavel=orgao_id,
+            docu_cldc_dk__in=regras,
+            docu_fsdc_dk=1
+        ).count()

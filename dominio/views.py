@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .db_connectors import run_query
-from .models import Vista
+from .models import Vista, Documento
 from .serializers import (
     AcervoSerializer,
     SaidasSerializer,
@@ -392,7 +392,7 @@ class SuaMesaView(APIView):
             List[Tuple] -- Lista com o resultado da query.
         """
         # if not regras...?
-        return [(25,)]
+        return Documento.investigacoes.em_curso(orgao_id, regras)
 
     @staticmethod
     def get_processos(orgao_id, regras):
