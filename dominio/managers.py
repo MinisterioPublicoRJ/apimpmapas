@@ -84,4 +84,9 @@ class InvestigacoesManager(models.Manager):
             docu_orgi_orga_dk_responsavel=orgao_id,
             docu_cldc_dk__in=regras,
             docu_fsdc_dk=1
-        ).count()
+        )
+
+
+class ProcessosManager(InvestigacoesManager):
+    def em_juizo(self, orgao_id, regras):
+        return super().em_curso(orgao_id, regras)

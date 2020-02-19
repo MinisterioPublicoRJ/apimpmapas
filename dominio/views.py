@@ -392,7 +392,7 @@ class SuaMesaView(APIView):
             List[Tuple] -- Lista com o resultado da query.
         """
         # if not regras...?
-        return Documento.investigacoes.em_curso(orgao_id, regras)
+        return Documento.investigacoes.em_curso(orgao_id, regras).count()
 
     @staticmethod
     def get_processos(orgao_id, regras):
@@ -408,7 +408,7 @@ class SuaMesaView(APIView):
             List[Tuple] -- Lista com o resultado da query.
         """
         # if not regras...?
-        return [(35,)]
+        return Documento.processos.em_juizo(orgao_id, regras).count()
 
     @staticmethod
     def get_finalizados(orgao_id):

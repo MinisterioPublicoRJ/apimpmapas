@@ -1,12 +1,13 @@
 from django.db import models
 
-from .managers import VistaManager, InvestigacoesManager
+from .managers import VistaManager, InvestigacoesManager, ProcessosManager
 
 # Create your models here.
 
 
 class Documento(models.Model):
     investigacoes = InvestigacoesManager()
+    processos = ProcessosManager()
 
     docu_dk = models.IntegerField(primary_key=True)
     num_mp = models.CharField(max_length=15, db_column='docu_nr_mp')
