@@ -426,13 +426,6 @@ class SuaMesaViewTest(TestCase, NoCacheTestCase):
         self.assertEqual(output, expected_output)
 
     @mock.patch('dominio.views.run_query')
-    def test_sua_mesa_get_vistas_abertas(self, _run_query):
-        SuaMesaView.get_vistas_abertas(10, '00002933')
-
-        expected_query = ""
-        _run_query.assert_called_once_with(expected_query)
-
-    @mock.patch('dominio.views.run_query')
     def test_sua_mesa_get_investigacoes(self, _run_query):
         SuaMesaView.get_investigacoes(10, [(30,), (50,)])
 
