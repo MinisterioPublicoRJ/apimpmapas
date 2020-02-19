@@ -429,6 +429,12 @@ class TestSuaMesaDetalheVitas(TestCase):
 
 class DetalheProcessosJuizoViewTest(TestCase, NoCacheTestCase):
 
+    def test_get_nr_acoes_orgao():
+        pass
+
+    def test_get_top_n_orgaos():
+        pass
+
     @mock.patch('dominio.views.run_query')
     def test_get_numero_acoes_propostas_pacote_atribuicao(self, _run_query):
         DetalheProcessosJuizoView.get_numero_acoes_propostas_pacote_atribuicao(1, 2, 3)
