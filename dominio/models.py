@@ -8,6 +8,17 @@ from .managers import VistaManager
 class Documento(models.Model):
     docu_dk = models.IntegerField(primary_key=True)
     num_mp = models.CharField(max_length=15, db_column='docu_nr_mp')
+    docu_tpst_dk = models.IntegerField(
+        db_column='DOCU_TPST_DK'
+    )
+    docu_orgi_orga_dk_responsavel = models.IntegerField(
+        db_column="DOCU_ORGI_ORGA_DK_RESPONSAVEL",
+        null=True
+    )
+    docu_orgi_orga_dk_carga = models.IntegerField(
+        db_column="DOCU_ORGI_ORGA_DK_CARGA",
+        null=True
+    )
     classe = models.ForeignKey(
         'DoctoClasse',
         null=True,
@@ -46,6 +57,12 @@ class Vista(models.Model):
     )
     data_abertura = models.DateField(
         db_column='VIST_DT_ABERTURA_VISTA'
+    )
+
+    documento = models.ForeignKey(
+        'Documento',
+        db_column='VIST_DOCU_DK',
+        on_delete=models.SET_NULL,
     )
     orgao = models.ForeignKey(
         'Orgao',

@@ -30,7 +30,11 @@ class VistaManager(models.Manager):
         Returns:
             List[Tuple] -- Lista com o resultado da query.
         """
-        return self.abertas().filter(orgao=orgao_id, responsavel__cpf=cpf)
+        return self.abertas().filter(
+            Q(documento__docu_orgi_orga_dk_responsavel=orgao_id) |
+            Q(documento__docu_orgi_orga_dk_carga=orgao_id),
+            responsavel__cpf=cpf
+        ).exclude(documento__docu_tpst_dk=11)
 
     def abertas_por_dias_abertura(self, orgao_id, cpf):
         """
@@ -50,7 +54,7 @@ class VistaManager(models.Manager):
         queryset = queryset.annotate(
             ate_vinte=Case(
                 When(
-                    Q(dias_abertura__gt=0) & Q(dias_abertura__lt=20),
+                    Q(dias_abertura__gte=0) & Q(dias_abertura__lt=20),
                     then=Value(1)),
                 default=Value(0), output_field=models.IntegerField()
             ),
