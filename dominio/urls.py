@@ -40,7 +40,7 @@ urlpatterns = [
         name='saidas'
     ),
     path(
-        'entradas/<str:orgao_id>/<str:cod_matricula>',
+        'entradas/<str:orgao_id>/<str:nr_cpf>',
         EntradasView.as_view(),
         name='entradas'
     )
