@@ -12,7 +12,8 @@ from .serializers import (
     SaidasSerializer,
     OutliersSerializer,
     EntradasSerializer,
-    DetalheAcervoSerializer
+    DetalheAcervoSerializer,
+    DetalheProcessosJuizoSerializer
 )
 
 
@@ -380,18 +381,35 @@ class DetalheProcessosJuizoView(APIView):
 
     @staticmethod
     def get_numero_acoes_propostas_pacote_atribuicao(orgao_id, dt_inicio, dt_fim):
+        # Ações = andamentos com tppr_dk = 6251
         query = """
             """
         #return run_query(query)
-        return [(1, 1), (2, 2), (3, 3), (4, 4), (5, 5)]
+        return [(1, 'Nome1', 1), (2, 'Nome2', 2), (3, 'Nome3', 3), (4, 'Nome4', 4), (5, 'Nome5', 5)]
 
     @staticmethod
     def get_porcentagem_aumento_acoes_promotoria(orgao_id, dt_inicio, dt_fim):
         query = """
             """
         #return run_query(query)
-        return [()]
+        return [(0.25, )]
 
+    @staticmethod
+    def get_nr_acoes_orgao(l, orgao_id):
+        for element in l:
+            # orgao_id comes in position 0 of each element
+            if element[0] == orgao_id:
+                return element[2]
+        return None
+
+    @staticmethod
+    def get_top_n_orgaos(l):
+        sorted_list = sorted(l, key=lambda el: el[2], reverse=True)
+        result_list = [
+            {'nm_promotoria': el[1], 'nr_acoes_propostas': el[2]}
+            for el in sorted_list
+        ]
+        return result_list
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs['orgao_id'])
@@ -403,14 +421,24 @@ class DetalheProcessosJuizoView(APIView):
             dt_inicio=dt_inicio,
             dt_fim=dt_fim
         )
-        data_porcentagem = self.get_porcentagem_aumento_acoes_promotoria()
+        data_variacao = self.get_porcentagem_aumento_acoes_promotoria(
+            orgao_id=orgao_id,
+            dt_inicio=dt_inicio,
+            dt_fim=dt_fim
+        )
 
-        if not data:
+        if not data_acoes or not data_variacao:
             raise Http404
 
-        fields = ['acervo_fim', 'acervo_inicio', 'variacao']
+        nr_acoes_propostas = self.get_nr_acoes_orgao(
+            data_acoes, orgao_id)
+        top_n = self.get_top_n_orgaos(data_acoes)
+
         data_obj = {
-            fieldname: value for fieldname, value in zip(fields, data[0])
+            'nr_acoes_propostas': nr_acoes_propostas,
+            'variacao': data_variacao[0][0],
+            'top_n': top_n
         }
-        data = AcervoVariationSerializer(data_obj).data
+
+        data = DetalheProcessosJuizoSerializer(data_obj).data
         return Response(data)
