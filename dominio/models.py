@@ -44,6 +44,9 @@ class Vista(models.Model):
         null=True,
         db_column='VIST_DT_FECHAMENTO_VISTA'
     )
+    data_abertura = models.DateField(
+        db_column='VIST_DT_ABERTURA_VISTA'
+    )
     orgao = models.ForeignKey(
         'Orgao',
         db_column='VIST_ORGI_ORGA_DK',
