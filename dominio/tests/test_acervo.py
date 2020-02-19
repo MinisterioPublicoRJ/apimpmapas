@@ -342,7 +342,7 @@ class EntradasViewTest(TestCase, NoCacheTestCase):
                     hout
                 FROM {namespace}.tb_dist_entradas
                 WHERE comb_orga_dk = 1
-                AND comb_cdmatricula = '00000002'
+                AND comb_cpf = '2'
                 """.format(namespace=settings.TABLE_NAMESPACE)
 
         _run_query.assert_called_once_with(expected_query)

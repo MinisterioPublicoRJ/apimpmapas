@@ -298,7 +298,7 @@ class SaidasView(APIView):
 )
 class EntradasView(APIView):
 
-    def get_entradas(self, orgao_id, cod_matricula):
+    def get_entradas(self, orgao_id, nr_cpf):
 
         query = """
                 SELECT
@@ -314,10 +314,10 @@ class EntradasView(APIView):
                     hout
                 FROM {namespace}.tb_dist_entradas
                 WHERE comb_orga_dk = {orgao_id}
-                AND comb_cdmatricula = '{cod_matricula}'
+                AND comb_cpf = '{nr_cpf}'
                 """.format(
                     orgao_id=orgao_id,
-                    cod_matricula=cod_matricula,
+                    nr_cpf=nr_cpf,
                     namespace=settings.TABLE_NAMESPACE
                 )
 
@@ -325,12 +325,11 @@ class EntradasView(APIView):
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs['orgao_id'])
-        # Matricula has 8 digits, with leading zeros
-        cod_matricula = str(int(self.kwargs['cod_matricula'])).zfill(8)
+        nr_cpf = str(self.kwargs['nr_cpf'])
 
         data = self.get_entradas(
             orgao_id=orgao_id,
-            cod_matricula=cod_matricula
+            nr_cpf=nr_cpf
         )
 
         if not data:
