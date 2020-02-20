@@ -1,20 +1,6 @@
 from rest_framework import serializers
 
 
-class AcervoVariationSerializer(serializers.Serializer):
-    acervo_fim = serializers.IntegerField(min_value=0)
-    acervo_inicio = serializers.IntegerField(min_value=0)
-    variacao = serializers.FloatField()
-
-
-class AcervoVariationTopNSerializer(serializers.Serializer):
-    cod_orgao = serializers.IntegerField()
-    nm_orgao = serializers.CharField()
-    acervo_fim = serializers.IntegerField(min_value=0)
-    acervo_inicio = serializers.IntegerField(min_value=0)
-    variacao = serializers.FloatField()
-
-
 class OutliersSerializer(serializers.Serializer):
     acervo_qtd = serializers.IntegerField(min_value=0)
     cod_atribuicao = serializers.IntegerField()
@@ -48,3 +34,13 @@ class EntradasSerializer(serializers.Serializer):
     iqr = serializers.FloatField()
     lout = serializers.FloatField()
     hout = serializers.FloatField()
+
+
+class DetalheAcervoSerializer(serializers.Serializer):
+
+    class VariacaoPromotoriaSerializer(serializers.Serializer):
+        nm_promotoria = serializers.CharField()
+        variacao_acervo = serializers.FloatField(min_value=0)
+
+    variacao_acervo = serializers.FloatField()
+    top_n = VariacaoPromotoriaSerializer(many=True)
