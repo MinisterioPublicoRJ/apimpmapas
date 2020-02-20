@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 import pytest
-from model_mommy.mommy import make
+from model_bakery.baker import make
 
 
 @pytest.mark.django_db(transaction=True)

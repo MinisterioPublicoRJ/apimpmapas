@@ -5,7 +5,7 @@ from django.test import TestCase
 
 from lupa.serializers import EntidadeSerializer, QueryError
 
-from model_mommy.mommy import make
+from model_bakery.baker import make
 
 
 class MapTest(TestCase):

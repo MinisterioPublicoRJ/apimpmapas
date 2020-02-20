@@ -6,7 +6,7 @@ from freezegun import freeze_time
 import pytest
 from django.core.exceptions import ValidationError
 from django.db.models.query import QuerySet
-from model_mommy.mommy import make
+from model_bakery.baker import make
 
 from lupa.cache import (
     ENTITY_KEY_PREFIX,
