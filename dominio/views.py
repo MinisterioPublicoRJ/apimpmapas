@@ -403,13 +403,13 @@ class DetalheProcessosJuizoView(APIView):
         return None
 
     @staticmethod
-    def get_top_n_orgaos(l):
+    def get_top_n_orgaos(l, n=3):
         sorted_list = sorted(l, key=lambda el: el[2], reverse=True)
         result_list = [
             {'nm_promotoria': el[1], 'nr_acoes_propostas': el[2]}
             for el in sorted_list
         ]
-        return result_list
+        return result_list[:n]
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs['orgao_id'])
@@ -432,7 +432,7 @@ class DetalheProcessosJuizoView(APIView):
 
         nr_acoes_propostas = self.get_nr_acoes_orgao(
             data_acoes, orgao_id)
-        top_n = self.get_top_n_orgaos(data_acoes)
+        top_n = self.get_top_n_orgaos(data_acoes, n=3)
 
         data_obj = {
             'nr_acoes_propostas': nr_acoes_propostas,

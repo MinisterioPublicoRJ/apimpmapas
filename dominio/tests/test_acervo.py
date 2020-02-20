@@ -429,11 +429,35 @@ class TestSuaMesaDetalheVitas(TestCase):
 
 class DetalheProcessosJuizoViewTest(TestCase, NoCacheTestCase):
 
-    def test_get_nr_acoes_orgao():
-        pass
+    def test_get_nr_acoes_orgao(self):
+        test_orgao_id = 42
+        test_list = [
+            (1, 'Nome1', 220),
+            (10, 'Nome2', 140),
+            (42, 'Nome3', 150),
+            (60, 'Nome4', 65)
+        ]
+        output = DetalheProcessosJuizoView.get_nr_acoes_orgao(
+            test_list, test_orgao_id)
+        expected_output = 150
 
-    def test_get_top_n_orgaos():
-        pass
+        self.assertEqual(output, expected_output)
+
+    def test_get_top_n_orgaos(self):
+        test_list = [
+            (1, 'Nome1', 220),
+            (10, 'Nome2', 140),
+            (42, 'Nome3', 150),
+            (60, 'Nome4', 65)
+        ]
+        output = DetalheProcessosJuizoView.get_top_n_orgaos(test_list, n=3)
+        expected_output = [
+            {'nm_promotoria': 'Nome1', 'nr_acoes_propostas': 220},
+            {'nm_promotoria': 'Nome3', 'nr_acoes_propostas': 150},
+            {'nm_promotoria': 'Nome2', 'nr_acoes_propostas': 140}
+        ]
+
+        self.assertEqual(output, expected_output)
 
     @mock.patch('dominio.views.run_query')
     def test_get_numero_acoes_propostas_pacote_atribuicao(self, _run_query):
