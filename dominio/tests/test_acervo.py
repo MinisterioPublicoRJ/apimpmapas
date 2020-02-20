@@ -13,149 +13,72 @@ class NoCacheTestCase:
         cache.clear()
 
 
-class AcervoVariationViewTest(NoCacheTestCase, TestCase):
-
-    @mock.patch('dominio.views.run_query')
-    def test_acervo_variation_result(self, _run_query):
-        _run_query.return_value = [('100', '100', '0.0'), ]
-        response = self.client.get(reverse(
-            'dominio:acervo_variation',
-            args=('0', '1', '2')))
-
-        expected_response = {
-            'acervo_fim': 100,
-            'acervo_inicio': 100,
-            'variacao': 0.0
-        }
-
-        expected_query = """
-            SELECT
-                acervo_fim,
-                acervo_inicio,
-                (acervo_fim - acervo_inicio)/acervo_inicio as variacao
-            FROM (
-                SELECT
-                    SUM(tb_data_fim.acervo) as acervo_fim,
-                    SUM(tb_data_inicio.acervo_inicio) as acervo_inicio
-                FROM {namespace}.tb_acervo tb_data_fim
-                INNER JOIN (
-                    SELECT
-                        acervo as acervo_inicio,
-                        dt_inclusao as data_inicio,
-                        cod_orgao,
-                        tipo_acervo
-                    FROM {namespace}.tb_acervo
-                    WHERE dt_inclusao = to_timestamp(
-                        '1', 'yyyy-MM-dd')
-                    ) tb_data_inicio
-                ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
-                    AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
-                INNER JOIN {namespace}.tb_regra_negocio_investigacao regras
-                ON regras.cod_atribuicao = tb_data_fim.cod_atribuicao
-                    AND regras.classe_documento = tb_data_fim.tipo_acervo
-                WHERE tb_data_fim.dt_inclusao = to_timestamp(
-                    '2', 'yyyy-MM-dd')
-                AND tb_data_fim.cod_orgao = 0) t
-            """.format(namespace=settings.TABLE_NAMESPACE)
-
-        _run_query.assert_called_once_with(expected_query)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, expected_response)
-
-    @mock.patch('dominio.views.run_query')
-    def test_acervo_variation_no_result(self, _run_query):
-        _run_query.return_value = []
-        response = self.client.get(reverse(
-            'dominio:acervo_variation',
-            args=('0', '1', '2')))
-
-        expected_response = {'detail': 'Não encontrado.'}
-
-        self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.data, expected_response)
-
-
-class AcervoVariationTopNViewTest(NoCacheTestCase, TestCase):
+class DetalheAcervoViewTest(NoCacheTestCase, TestCase):
 
     @mock.patch('dominio.views.run_query')
     def test_acervo_variation_result(self, _run_query):
         _run_query.return_value = [
+            (0, 'PROMO0', '30', '60', '-60.0'),
             (1, 'PROMO1', '100', '50', '100.0'),
             (2, 'PROMO2', '50', '100', '-50.0'),
             (3, 'PROMO3', '300', '100', '200.0')
         ]
         response = self.client.get(reverse(
-            'dominio:acervo_variation_topn',
+            'dominio:detalhe_acervo',
             args=('0', '1', '2', '3')))
 
-        expected_response = [
-            {
-                'cod_orgao': 1,
-                'nm_orgao': 'PROMO1',
-                'acervo_fim': 100,
-                'acervo_inicio': 50,
-                'variacao': 100.0,
-            },
-            {
-                'cod_orgao': 2,
-                'nm_orgao': 'PROMO2',
-                'acervo_fim': 50,
-                'acervo_inicio': 100,
-                'variacao': -50.0,
-            },
-            {
-                'cod_orgao': 3,
-                'nm_orgao': 'PROMO3',
-                'acervo_fim': 300,
-                'acervo_inicio': 100,
-                'variacao': 200.0
-            }
-        ]
+        expected_response = {
+            "variacao_acervo": "-60.0",
+            "top_n": [
+                {
+                    'nm_promotoria': 'PROMO3',
+                    'variacao_acervo': 200.0,
+                },
+                {
+                    'nm_promotoria': 'PROMO1',
+                    'variacao_acervo': 100.0,
+                },
+                {
+                    'nm_promotoria': 'PROMO2',
+                    'variacao_acervo': -50.0,
+                }
+            ]
+        }
 
         expected_query = """
-                SELECT
-                    cod_orgao,
-                    orgi_nm_orgao,
-                    acervo_fim,
-                    acervo_inicio,
-                    (acervo_fim - acervo_inicio)/acervo_inicio as variacao
-                FROM (
-                    SELECT
-                        tb_data_fim.cod_orgao,
-                        SUM(tb_data_fim.acervo) as acervo_fim,
-                        SUM(tb_data_inicio.acervo_inicio) as acervo_inicio
-                        FROM {namespace}.tb_acervo tb_data_fim
-                    INNER JOIN (
-                        SELECT
-                            acervo as acervo_inicio,
-                            dt_inclusao as data_inicio,
-                            cod_orgao,
-                            tipo_acervo
-                        FROM {namespace}.tb_acervo
-                        WHERE dt_inclusao = to_timestamp(
-                            '1', 'yyyy-MM-dd')
-                        ) tb_data_inicio
-                    ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
-                    AND tb_data_fim.tipo_acervo = tb_data_inicio.tipo_acervo
-                    INNER JOIN {namespace}.tb_regra_negocio_investigacao regras
-                    ON regras.cod_atribuicao = tb_data_fim.cod_atribuicao
-                        AND regras.classe_documento = tb_data_fim.tipo_acervo
-                    WHERE tb_data_fim.dt_inclusao = to_timestamp(
-                        '2', 'yyyy-MM-dd')
-                    GROUP BY tb_data_fim.cod_orgao
-                    ) t
-                INNER JOIN exadata.orgi_orgao ON orgi_orgao.orgi_dk = cod_orgao
-                WHERE cod_orgao IN (
-                    SELECT cast(id_orgao as int)
-                    FROM cluster.atualizacao_pj_pacote A
+                WITH tb_acervo_orgao_pct as (
+                    SELECT *
+                    FROM {namespace}.tb_acervo ac
                     INNER JOIN (
                         SELECT cod_pct
-                        FROM cluster.atualizacao_pj_pacote
-                        WHERE id_orgao = '0') B
-                    ON A.cod_pct = B.cod_pct)
-                ORDER BY variacao DESC
-                LIMIT 3;
+                        FROM {namespace}.atualizacao_pj_pacote
+                        WHERE id_orgao = 0
+                        ) org
+                    ON org.cod_pct = ac.cod_atribuicao)
+                SELECT
+                    tb_data_fim.cod_orgao,
+                    tb_data_fim.acervo_fim,
+                    tb_data_inicio.acervo_inicio,
+                    (acervo_fim - acervo_inicio)/acervo_inicio as variacao
+                FROM (
+                    SELECT cod_orgao, SUM(acervo) as acervo_fim
+                    FROM tb_acervo_orgao_pct acpc
+                    INNER JOIN {namespace}.tb_regra_negocio_investigacao regras
+                        ON regras.cod_atribuicao = acpc.cod_atribuicao
+                        AND regras.classe_documento = acpc.tipo_acervo
+                    WHERE dt_inclusao = to_timestamp('2', 'yyyy-MM-dd')
+                    GROUP BY cod_orgao
+                    ) tb_data_fim
+                INNER JOIN (
+                    SELECT cod_orgao, SUM(acervo) as acervo_inicio
+                    FROM tb_acervo_orgao_pct acpc
+                    INNER JOIN {namespace}.tb_regra_negocio_investigacao regras
+                        ON regras.cod_atribuicao = acpc.cod_atribuicao
+                        AND regras.classe_documento = acpc.tipo_acervo
+                    WHERE dt_inclusao = to_timestamp('1', 'yyyy-MM-dd')
+                    GROUP BY cod_orgao
+                    ) tb_data_inicio
+                ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
                 """.format(namespace=settings.TABLE_NAMESPACE)
 
         _run_query.assert_called_once_with(expected_query)
@@ -167,7 +90,7 @@ class AcervoVariationTopNViewTest(NoCacheTestCase, TestCase):
     def test_acervo_variation_no_result(self, _run_query):
         _run_query.return_value = []
         response = self.client.get(reverse(
-            'dominio:acervo_variation_topn',
+            'dominio:detalhe_acervo',
             args=('0', '1', '2', '3')))
 
         expected_response = {'detail': 'Não encontrado.'}
