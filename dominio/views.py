@@ -15,7 +15,6 @@ from .serializers import (
     AcervoVariationTopNSerializer,
     OutliersSerializer,
     EntradasSerializer,
-    SuaMesaSerializer
 )
 
 
@@ -377,53 +376,7 @@ class EntradasView(APIView):
         return Response(data)
 
 
-class SuaMesaView(APIView):
-
-    @staticmethod
-    def get_investigacoes(orgao_id, regras):
-        """Busca o número de investigações em curso para um dado órgão e
-        regras de negócio na base do Oracle.
-
-        Arguments:
-            orgao_id {integer} -- ID do órgão a ser procurado.
-            regras {List[integer]} -- Lista de IDs de classes de documento
-                relevantes para classificar uma investigação.
-
-        Returns:
-            List[Tuple] -- Lista com o resultado da query.
-        """
-        # if not regras...?
-        return Documento.investigacoes.em_curso(orgao_id, regras).count()
-
-    @staticmethod
-    def get_processos(orgao_id, regras):
-        """Busca o número de investigações em curso para um dado órgão e
-        regras de negócio na base do Oracle.
-
-        Arguments:
-            orgao_id {integer} -- ID do órgão a ser procurado.
-            regras {List[integer]} -- Lista de IDs de classes de documento
-                relevantes para classificar um processo.
-
-        Returns:
-            List[Tuple] -- Lista com o resultado da query.
-        """
-        # if not regras...?
-        return Documento.processos.em_juizo(orgao_id, regras).count()
-
-    @staticmethod
-    def get_finalizados(orgao_id, regras_saidas):
-        """[summary]
-
-        Arguments:
-            orgao_id {[type]} -- [description]
-
-        Returns:
-            [type] -- [description]
-        """
-        # São vistas finalizadas? Investigações finalizadas?
-        return SubAndamento.finalizados.trinta_dias(orgao_id, regras_saidas)
-
+class SuaMesa:
     @ring.lru()
     @staticmethod
     def get_regras(orgao_id, tipo='investigacao'):
@@ -465,51 +418,6 @@ class SuaMesaView(APIView):
         result = run_query(query)
         return [row[0] for row in result] if result else []
 
-    def get(self, request, *args, **kwargs):
-        orgao_id = int(self.kwargs['orgao_id'])
-        cpf = '00000000000'  # Aguardando resolver o sistema de login
-
-        regras_investig = self.get_regras(orgao_id, tipo='investigacao')
-        regras_processo = self.get_regras(orgao_id, tipo='processo')
-
-        data_vistas = Vista.vistas.abertas_promotor(orgao_id=orgao_id, cpf=cpf)
-        data_investigacoes = (
-            self.get_investigacoes(orgao_id, regras_investig)
-            if regras_investig
-            else [(0,)]
-        )
-        data_processos = (
-            self.get_processos(orgao_id, regras_processo)
-            if regras_processo
-            else [(0,)]
-        )
-        data_finalizados = self.get_finalizados(orgao_id)
-
-        if (not data_investigacoes
-            or not data_processos
-                or not data_finalizados):
-            # Checar todos juntos? Se pelo menos um existir, melhor mandar...
-            raise Http404
-
-        fields = [
-            'vistas_abertas',
-            'investigacoes_curso',
-            'processos_juizo',
-            'finalizados'
-        ]
-        values = [
-            data_vistas.count(),
-            data_investigacoes[0][0],
-            data_processos[0][0],
-            data_finalizados[0][0]
-        ]
-        data_obj = {
-            fieldname: value for fieldname, value in zip(fields, values)
-        }
-
-        data = SuaMesaSerializer(data_obj).data
-        return Response(data)
-
 
 @method_decorator(
     cache_page(
@@ -531,7 +439,7 @@ class SuaMesaInvestigacoes(APIView):
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
 
-        regras_investigacoes = SuaMesaView.get_regras(
+        regras_investigacoes = SuaMesa.get_regras(
             orgao_id,
             tipo='investigacao'
         )
@@ -545,10 +453,7 @@ class SuaMesaProcessos(APIView):
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
 
-        regras_processos = SuaMesaView.get_regras(
-            orgao_id,
-            tipo='processo'
-        )
+        regras_processos = SuaMesa.get_regras(orgao_id, tipo='processo')
         doc_count = Documento.processos.em_juizo(
             orgao_id, regras_processos).count()
 

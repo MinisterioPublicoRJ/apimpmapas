@@ -5,7 +5,7 @@ from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
-from dominio.views import SuaMesaView
+from dominio.views import SuaMesa
 # Create your tests here.
 
 
@@ -393,7 +393,7 @@ class SuaMesaViewTest(TestCase, NoCacheTestCase):
     def test_sua_mesa_get_regras_investigacao(self, _run_query):
         _run_query.return_value = [(20,), (30,)]
 
-        output = SuaMesaView.get_regras(10, 'investigacao')
+        output = SuaMesa.get_regras(10, 'investigacao')
         expected_output = [20, 30]
 
         expected_query = """
@@ -411,7 +411,7 @@ class SuaMesaViewTest(TestCase, NoCacheTestCase):
     def test_sua_mesa_get_regras_processo(self, _run_query):
         _run_query.return_value = [(20,), (30,)]
 
-        output = SuaMesaView.get_regras(10, 'processo')
+        output = SuaMesa.get_regras(10, 'processo')
         expected_output = [20, 30]
 
         expected_query = """
@@ -425,7 +425,7 @@ class SuaMesaViewTest(TestCase, NoCacheTestCase):
         _run_query.assert_called_once_with(expected_query)
         self.assertEqual(output, expected_output)
 
-    @mock.patch.object(SuaMesaView, 'get_regras')
+    @mock.patch.object(SuaMesa, 'get_regras')
     @mock.patch('dominio.views.Documento')
     def test_sua_mesa_investigacoes(self, _Documento, _get_regras):
         manager_mock = mock.MagicMock()
@@ -446,7 +446,7 @@ class SuaMesaViewTest(TestCase, NoCacheTestCase):
         )
         manager_mock.count.assert_called_once_with()
 
-    @mock.patch.object(SuaMesaView, 'get_regras')
+    @mock.patch.object(SuaMesa, 'get_regras')
     @mock.patch('dominio.views.Documento')
     def test_sua_mesa_processos(self, _Documento, _get_regras):
         manager_mock = mock.MagicMock()
@@ -502,18 +502,6 @@ class SuaMesaViewTest(TestCase, NoCacheTestCase):
             int(orgao_id), cpf
         )
         manager_mock.count.assert_called_once_with()
-
-    @mock.patch('dominio.views.run_query')
-    def test_sua_mesa_no_result(self, _run_query):
-        _run_query.return_value = []
-        response = self.client.get(reverse(
-            'dominio:sua_mesa',
-            args=('1', '2')))
-
-        expected_response = {'detail': 'Não encontrado.'}
-
-        self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.data, expected_response)
 
 
 class TestSuaMesaDetalhe(TestCase):

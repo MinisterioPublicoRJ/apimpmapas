@@ -7,7 +7,6 @@ from .views import (
     AcervoVariationView,
     AcervoVariationTopNView,
     OutliersView,
-    SuaMesaView,  # , AlertasListView
     SuaMesaVistasAbertas,
     SuaMesaInvestigacoes,
     SuaMesaProcessos,
@@ -75,11 +74,6 @@ urlpatterns = [
         'suamesa/finalizados/<str:orgao_id>',
         SuaMesaFinalizados.as_view(),
         name='suamesa-finalizados'
-    ),
-    path(
-        'sua_mesa/<str:orgao_id>/<str:cod_matricula>',
-        SuaMesaView.as_view(),
-        name='sua_mesa'
     ),
     path(
         'sua_mesa_detalhe/<str:orgao_id>/<str:cpf>',
