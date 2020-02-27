@@ -525,6 +525,20 @@ class SuaMesaInvestigacoes(APIView):
         return Response(data={"suamesa_investigacoes": doc_count})
 
 
+class SuaMesaProcessos(APIView):
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+
+        regras_processos = SuaMesaView.get_regras(
+            orgao_id,
+            tipo='processo'
+        )
+        doc_count = Documento.processos.em_juizo(
+            orgao_id, regras_processos).count()
+
+        return Response(data={"suamesa_processos": doc_count})
+
+
 class SuaMesaDetalheView(APIView):
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))

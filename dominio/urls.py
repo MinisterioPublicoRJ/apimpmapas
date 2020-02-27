@@ -9,6 +9,7 @@ from .views import (
     OutliersView,
     SuaMesaView,  # , AlertasListView
     SuaMesaInvestigacoes,
+    SuaMesaProcessos,
     SuaMesaDetalheView,
 )
 
@@ -57,6 +58,11 @@ urlpatterns = [
         'suamesa/investigacoes/<str:orgao_id>',
         SuaMesaInvestigacoes.as_view(),
         name='suamesa-investigacoes'
+    ),
+    path(
+        'suamesa/processos/<str:orgao_id>',
+        SuaMesaProcessos.as_view(),
+        name='suamesa-processos'
     ),
     path(
         'sua_mesa/<str:orgao_id>/<str:cod_matricula>',

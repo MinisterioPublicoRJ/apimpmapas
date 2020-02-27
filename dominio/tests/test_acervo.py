@@ -439,23 +439,29 @@ class SuaMesaViewTest(TestCase, NoCacheTestCase):
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 200)
+        _get_regras.assert_called_once_with(int(orgao_id), tipo='investigacao')
         _Documento.investigacoes.em_curso.assert_called_once_with(
             int(orgao_id), regras
         )
         manager_mock.count.assert_called_once_with()
 
+    @mock.patch.object(SuaMesaView, 'get_regras')
     @mock.patch('dominio.views.Documento')
-    def test_sua_mesa_get_processos(self, _Documento):
+    def test_sua_mesa_processos(self, _Documento, _get_regras):
         manager_mock = mock.MagicMock()
         manager_mock.count.return_value = 1
         _Documento.processos.em_juizo.return_value = manager_mock
-        orgao_id = 10
+        orgao_id = '10'
         regras = [(30,), (50,)]
-        n_processos = SuaMesaView.get_processos(orgao_id, regras)
+        _get_regras.return_value = regras
 
-        self.assertEqual(n_processos, 1)
+        url = reverse('dominio:suamesa-processos', args=(orgao_id, ))
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
+        _get_regras.assert_called_once_with(int(orgao_id), tipo='processo')
         _Documento.processos.em_juizo.assert_called_once_with(
-            orgao_id, regras
+            int(orgao_id), regras
         )
         manager_mock.count.assert_called_once_with()
 
