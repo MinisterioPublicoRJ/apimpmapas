@@ -1,3 +1,4 @@
+import ring
 from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -6,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .db_connectors import run_query
-from .models import Vista, Documento
+from .models import Vista, Documento, SubAndamento
 from .serializers import (
     AcervoSerializer,
     SaidasSerializer,
@@ -411,7 +412,7 @@ class SuaMesaView(APIView):
         return Documento.processos.em_juizo(orgao_id, regras).count()
 
     @staticmethod
-    def get_finalizados(orgao_id):
+    def get_finalizados(orgao_id, regras_saidas):
         """[summary]
 
         Arguments:
@@ -421,8 +422,9 @@ class SuaMesaView(APIView):
             [type] -- [description]
         """
         # São vistas finalizadas? Investigações finalizadas?
-        return [(50,)]
+        return SubAndamento.finalizados.trinta_dias(orgao_id, regras_saidas)
 
+    @ring.lru()
     @staticmethod
     def get_regras(orgao_id, tipo='investigacao'):
         """Busca as regras de negócio relativas a investigação ou processo,
@@ -507,6 +509,20 @@ class SuaMesaView(APIView):
 
         data = SuaMesaSerializer(data_obj).data
         return Response(data)
+
+
+class SuaMesaInvestigacoes(APIView):
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+
+        regras_investigacoes = SuaMesaView.get_regras(
+            orgao_id,
+            tipo='investigacao'
+        )
+        doc_count = Documento.investigacoes.em_curso(
+            orgao_id, regras_investigacoes).count()
+
+        return Response(data={"suamesa_investigacoes": doc_count})
 
 
 class SuaMesaDetalheView(APIView):

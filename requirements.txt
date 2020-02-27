@@ -20,5 +20,6 @@ psycopg2-binary
 pyjwt
 python-decouple
 redis
+ring==0.7.3
 requests
 responses

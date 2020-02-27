@@ -1,11 +1,17 @@
 from django.db import models
 
-from .managers import VistaManager, InvestigacoesManager, ProcessosManager
+from .managers import (
+    VistaManager,
+    InvestigacoesManager,
+    ProcessosManager,
+    FinalizadosManager,
+)
 
 # Create your models here.
 
 
 class Documento(models.Model):
+    objects = models.Manager()
     investigacoes = InvestigacoesManager()
     processos = ProcessosManager()
 
@@ -55,6 +61,7 @@ class DoctoClasse(models.Model):
 
 
 class Vista(models.Model):
+    objects = models.Manager()
     vistas = VistaManager()
 
     vist_dk = models.IntegerField(primary_key=True)
@@ -77,6 +84,7 @@ class Vista(models.Model):
         'Documento',
         db_column='VIST_DOCU_DK',
         on_delete=models.SET_NULL,
+        related_name="documentos",
         null=True,
     )
     orgao = models.ForeignKey(
@@ -115,4 +123,42 @@ class Orgao(models.Model):
 
     class Meta:
         db_table = 'ORGI_ORGAO'
+        managed = False
+
+
+class Andamento(models.Model):
+    pcao_dk = models.IntegerField(primary_key=True)
+    pcao_dt_andamento = models.DateField(
+        db_column="PCAO_DT_ANDAMENTO"
+    )
+
+    vista = models.ForeignKey(
+        "Vista",
+        db_column="PCAO_VIST_DK",
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    class Meta:
+        db_table = 'MCPR_ANDAMENTO'
+        managed = False
+
+
+class SubAndamento(models.Model):
+    finalizados = FinalizadosManager()
+
+    stao_dk = models.IntegerField(primary_key=True)
+    stao_tppr_dk = models.IntegerField(
+        db_column="STAO_TPPR_DK",
+    )
+
+    andamento = models.ForeignKey(
+        "Andamento",
+        db_column="STAO_PCAO_DK",
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    class Meta:
+        db_table = "MCPR_SUB_ANDAMENTO"
         managed = False

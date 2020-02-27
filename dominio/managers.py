@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 from django.db import models
 from django.db.models import (
@@ -90,3 +90,17 @@ class InvestigacoesManager(models.Manager):
 class ProcessosManager(InvestigacoesManager):
     def em_juizo(self, orgao_id, regras):
         return super().em_curso(orgao_id, regras)
+
+
+class FinalizadosManager(models.Manager):
+    def no_orgao(self, orgao_id, regras_saidas):
+        return self.get_queryset().filter(
+            andamento__vista__documento__docu_orgi_orga_dk_responsavel=orgao_id,
+            stao_tppr_dk__in=regras_saidas
+        )
+
+    def trinta_dias(self, orgao_id, regras_saidas):
+        finalizados = self.no_orgao(orgao_id, regras_saidas)
+        return finalizados.filter(
+            andamento__pcao_dt_andamento__gte=date.today()
+            - timedelta(days=30)).count()
