@@ -76,8 +76,8 @@ urlpatterns = [
         name='suamesa-finalizados'
     ),
     path(
-        'sua_mesa_detalhe/<str:orgao_id>/<str:cpf>',
+        'suamesa/detalhe/vistas/<str:orgao_id>/<str:cpf>',
         SuaMesaDetalheView.as_view(),
-        name='sua_mesa_detalhe'
+        name='suamesa-detalhe-vistas'
     ),
 ]

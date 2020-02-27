@@ -504,7 +504,7 @@ class SuaMesaViewTest(TestCase, NoCacheTestCase):
         manager_mock.count.assert_called_once_with()
 
 
-class TestSuaMesaDetalhe(TestCase):
+class TestSuaMesaDetalheVitas(TestCase):
     @mock.patch('dominio.views.Vista')
     def test_correct_response(self, _Vista):
         expected_resp = {
@@ -514,7 +514,7 @@ class TestSuaMesaDetalhe(TestCase):
         }
         _Vista.vistas.abertas_por_dias_abertura.return_value = expected_resp
 
-        url = reverse('dominio:sua_mesa_detalhe', args=('1', '2'))
+        url = reverse('dominio:suamesa-detalhe-vistas', args=('1', '2'))
 
         resp = self.client.get(url)
 
@@ -530,7 +530,7 @@ class TestSuaMesaDetalhe(TestCase):
         }
         _Vista.vistas.abertas_por_dias_abertura.return_value = query_resp
 
-        url = reverse('dominio:sua_mesa_detalhe', args=('1', '2'))
+        url = reverse('dominio:suamesa-detalhe-vistas', args=('1', '2'))
 
         resp = self.client.get(url)
 
