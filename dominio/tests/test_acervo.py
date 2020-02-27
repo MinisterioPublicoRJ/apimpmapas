@@ -438,6 +438,7 @@ class SuaMesaViewTest(TestCase, NoCacheTestCase):
         url = reverse('dominio:suamesa-investigacoes', args=(orgao_id, ))
         resp = self.client.get(url)
 
+        self.assertEqual(resp.data, {"suamesa_investigacoes": 1})
         self.assertEqual(resp.status_code, 200)
         _get_regras.assert_called_once_with(int(orgao_id), tipo='investigacao')
         _Documento.investigacoes.em_curso.assert_called_once_with(
@@ -458,6 +459,7 @@ class SuaMesaViewTest(TestCase, NoCacheTestCase):
         url = reverse('dominio:suamesa-processos', args=(orgao_id, ))
         resp = self.client.get(url)
 
+        self.assertEqual(resp.data, {"suamesa_processos": 1})
         self.assertEqual(resp.status_code, 200)
         _get_regras.assert_called_once_with(int(orgao_id), tipo='processo')
         _Documento.processos.em_juizo.assert_called_once_with(
@@ -465,37 +467,41 @@ class SuaMesaViewTest(TestCase, NoCacheTestCase):
         )
         manager_mock.count.assert_called_once_with()
 
-    @mock.patch('dominio.views.run_query')
-    def test_sua_mesa_get_finalizados(self, _run_query):
-        SuaMesaView.get_finalizados(10)
+    @mock.patch('dominio.views.SubAndamento')
+    def test_sua_mesa_finalizados(self, _SubAndamento):
+        regras_saidas = (6251, 6657, 6655, 6644, 6326)
+        manager_mock = mock.MagicMock()
+        manager_mock.count.return_value = 1
+        _SubAndamento.finalizados.trinta_dias.return_value = manager_mock
+        orgao_id = '10'
 
-        expected_query = ""
-        _run_query.assert_called_once_with(expected_query)
+        url = reverse('dominio:suamesa-finalizados', args=(orgao_id, ))
+        resp = self.client.get(url)
 
-    @mock.patch('dominio.views.run_query')
-    def test_sua_mesa_result(self, _run_query):
-        _run_query.side_effect = \
-            [
-                [(30,), (40,), (70,)],
-                [(30,), (40,), (70,)],
-                [(50,)],
-                [(128,)],
-                [(63,)],
-                [(120,)]
-            ]
-        response = self.client.get(reverse(
-            'dominio:sua_mesa',
-            args=('1', '2')))
+        self.assertEqual(resp.data, {"suamesa_finalizados": 1})
+        self.assertEqual(resp.status_code, 200)
+        _SubAndamento.finalizados.trinta_dias.assert_called_once_with(
+            int(orgao_id), regras_saidas
+        )
+        manager_mock.count.assert_called_once_with()
 
-        expected_response = {
-            'vistas_abertas': 50,
-            'investigacoes_curso': 128,
-            'processos_juizo': 63,
-            'finalizados': 120
-        }
+    @mock.patch('dominio.views.Vista')
+    def test_sua_mesa_vistas_abertas(self, _Vista):
+        manager_mock = mock.MagicMock()
+        manager_mock.count.return_value = 1
+        _Vista.vistas.abertas_promotor.return_value = manager_mock
+        orgao_id = '10'
+        cpf = '123456789'
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, expected_response)
+        url = reverse('dominio:suamesa-vistas', args=(orgao_id, cpf))
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, {"suamesa_vistas": 1})
+        _Vista.vistas.abertas_promotor.assert_called_once_with(
+            int(orgao_id), cpf
+        )
+        manager_mock.count.assert_called_once_with()
 
     @mock.patch('dominio.views.run_query')
     def test_sua_mesa_no_result(self, _run_query):

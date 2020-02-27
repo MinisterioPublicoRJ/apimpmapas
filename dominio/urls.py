@@ -8,8 +8,10 @@ from .views import (
     AcervoVariationTopNView,
     OutliersView,
     SuaMesaView,  # , AlertasListView
+    SuaMesaVistasAbertas,
     SuaMesaInvestigacoes,
     SuaMesaProcessos,
+    SuaMesaFinalizados,
     SuaMesaDetalheView,
 )
 
@@ -55,6 +57,11 @@ urlpatterns = [
         name='entradas'
     ),
     path(
+        'suamesa/vistas/<str:orgao_id>/<str:cpf>',
+        SuaMesaVistasAbertas.as_view(),
+        name='suamesa-vistas'
+    ),
+    path(
         'suamesa/investigacoes/<str:orgao_id>',
         SuaMesaInvestigacoes.as_view(),
         name='suamesa-investigacoes'
@@ -63,6 +70,11 @@ urlpatterns = [
         'suamesa/processos/<str:orgao_id>',
         SuaMesaProcessos.as_view(),
         name='suamesa-processos'
+    ),
+    path(
+        'suamesa/finalizados/<str:orgao_id>',
+        SuaMesaFinalizados.as_view(),
+        name='suamesa-finalizados'
     ),
     path(
         'sua_mesa/<str:orgao_id>/<str:cod_matricula>',

@@ -103,4 +103,4 @@ class FinalizadosManager(models.Manager):
         finalizados = self.no_orgao(orgao_id, regras_saidas)
         return finalizados.filter(
             andamento__pcao_dt_andamento__gte=date.today()
-            - timedelta(days=30)).count()
+            - timedelta(days=30))

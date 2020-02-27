@@ -511,6 +511,22 @@ class SuaMesaView(APIView):
         return Response(data)
 
 
+@method_decorator(
+    cache_page(
+        settings.CACHE_TIMEOUT,
+        key_prefix="dominio_suamesa_vistas"),
+    name="dispatch"
+)
+class SuaMesaVistasAbertas(APIView):
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+        cpf = kwargs.get("cpf")
+
+        doc_count = Vista.vistas.abertas_promotor(orgao_id, cpf).count()
+
+        return Response(data={"suamesa_vistas": doc_count})
+
+
 class SuaMesaInvestigacoes(APIView):
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
@@ -537,6 +553,23 @@ class SuaMesaProcessos(APIView):
             orgao_id, regras_processos).count()
 
         return Response(data={"suamesa_processos": doc_count})
+
+
+@method_decorator(
+    cache_page(
+        settings.CACHE_TIMEOUT,
+        key_prefix="dominio_suamesa_finalizados"),
+    name="dispatch"
+)
+class SuaMesaFinalizados(APIView):
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+
+        regras_saidas = (6251, 6657, 6655, 6644, 6326)
+        doc_count = SubAndamento.finalizados.trinta_dias(
+            orgao_id, regras_saidas).count()
+
+        return Response(data={"suamesa_finalizados": doc_count})
 
 
 class SuaMesaDetalheView(APIView):
