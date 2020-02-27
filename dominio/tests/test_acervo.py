@@ -440,12 +440,20 @@ class SuaMesaViewTest(TestCase, NoCacheTestCase):
         )
         manager_mock.count.assert_called_once_with()
 
-    @mock.patch('dominio.views.run_query')
-    def test_sua_mesa_get_processos(self, _run_query):
-        SuaMesaView.get_processos(10, [(30,), (50,)])
+    @mock.patch('dominio.views.Documento')
+    def test_sua_mesa_get_processos(self, _Documento):
+        manager_mock = mock.MagicMock()
+        manager_mock.count.return_value = 1
+        _Documento.processos.em_juizo.return_value = manager_mock
+        orgao_id = 10
+        regras = [(30,), (50,)]
+        n_processos = SuaMesaView.get_processos(orgao_id, regras)
 
-        expected_query = ""
-        _run_query.assert_called_once_with(expected_query)
+        self.assertEqual(n_processos, 1)
+        _Documento.processos.em_juizo.assert_called_once_with(
+            orgao_id, regras
+        )
+        manager_mock.count.assert_called_once_with()
 
     @mock.patch('dominio.views.run_query')
     def test_sua_mesa_get_finalizados(self, _run_query):
