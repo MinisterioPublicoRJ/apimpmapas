@@ -50,33 +50,34 @@ class DetalheAcervoViewTest(NoCacheTestCase, TestCase):
                     SELECT *
                     FROM {namespace}.tb_acervo ac
                     INNER JOIN (
-                        SELECT cod_pct
+                        SELECT cod_pct, orgi_nm_orgao as nm_orgao
                         FROM {namespace}.atualizacao_pj_pacote
                         WHERE id_orgao = :orgao_id
                         ) org
                     ON org.cod_pct = ac.cod_atribuicao)
                 SELECT
                     tb_data_fim.cod_orgao,
+                    tb_data_fim.nm_orgao,
                     tb_data_fim.acervo_fim,
                     tb_data_inicio.acervo_inicio,
                     (acervo_fim - acervo_inicio)/acervo_inicio as variacao
                 FROM (
-                    SELECT cod_orgao, SUM(acervo) as acervo_fim
+                    SELECT cod_orgao, nm_orgao, SUM(acervo) as acervo_fim
                     FROM tb_acervo_orgao_pct acpc
                     INNER JOIN {namespace}.tb_regra_negocio_investigacao regras
                         ON regras.cod_atribuicao = acpc.cod_atribuicao
                         AND regras.classe_documento = acpc.tipo_acervo
                     WHERE dt_inclusao = to_timestamp(:dt_fim, 'yyyy-MM-dd')
-                    GROUP BY cod_orgao
+                    GROUP BY cod_orgao, nm_orgao
                     ) tb_data_fim
                 INNER JOIN (
-                    SELECT cod_orgao, SUM(acervo) as acervo_inicio
+                    SELECT cod_orgao, nm_orgao, SUM(acervo) as acervo_inicio
                     FROM tb_acervo_orgao_pct acpc
                     INNER JOIN {namespace}.tb_regra_negocio_investigacao regras
                         ON regras.cod_atribuicao = acpc.cod_atribuicao
                         AND regras.classe_documento = acpc.tipo_acervo
                     WHERE dt_inclusao = to_timestamp(:dt_inicio, 'yyyy-MM-dd')
-                    GROUP BY cod_orgao
+                    GROUP BY cod_orgao, nm_orgao
                     ) tb_data_inicio
                 ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
                 """.format(namespace=settings.TABLE_NAMESPACE)
