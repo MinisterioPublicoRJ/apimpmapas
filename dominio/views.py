@@ -27,14 +27,14 @@ class DetalheAcervoView(APIView):
         for element in l:
             # orgao_id comes in position 0 of each element
             if element[0] == orgao_id:
-                return element[3]
+                return element[4]
         return None
 
     @staticmethod
     def get_top_n_orgaos(l, n=3):
-        sorted_list = sorted(l, key=lambda el: el[3], reverse=True)
+        sorted_list = sorted(l, key=lambda el: float(el[4]), reverse=True)
         result_list = [
-            {'nm_promotoria': el[0], 'variacao_acervo': el[3]}
+            {'nm_promotoria': el[1], 'variacao_acervo': el[4]}
             for el in sorted_list
         ]
         return result_list[:n]

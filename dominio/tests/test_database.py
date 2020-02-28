@@ -26,9 +26,9 @@ class DominioDbTest(TestCase):
         _bda_connect.return_value.__enter__\
             .return_value.cursor.return_value.__enter__\
             .return_value = cursor
-        execute(query)
+        execute(query, None)
 
-        cursor.execute.assert_called_once_with(query)
+        cursor.execute.assert_called_once_with(query, None)
 
     @mock.patch('dominio.db_connectors.bda_connect')
     def test_impala_query_fail(self, _bda_connect):
@@ -41,9 +41,9 @@ class DominioDbTest(TestCase):
             _bda_connect.return_value.__enter__\
                 .return_value.cursor.return_value.__enter__\
                 .return_value = cursor
-            execute(query)
+            execute(query, None)
 
-        cursor.execute.assert_called_once_with(query)
+        cursor.execute.assert_called_once_with(query, None)
 
     def test_query_error(self):
         pass
@@ -57,7 +57,7 @@ class RunQuery(TestCase):
         query = "SELECT * FROM dual()"
         resp = run_query(query)
 
-        _execute.assert_called_once_with(query)
+        _execute.assert_called_once_with(query, None)
         self.assertEqual(resp, [("result set",)])
 
     @mock.patch("dominio.db_connectors.execute")
@@ -66,7 +66,7 @@ class RunQuery(TestCase):
         query = "SELECT * FROM dual()"
         resp = run_query(query)
 
-        _execute.assert_called_once_with(query)
+        _execute.assert_called_once_with(query, None)
         self.assertEqual(resp, None)
 
     @mock.patch("dominio.db_connectors.execute", return_value=[])
@@ -74,5 +74,5 @@ class RunQuery(TestCase):
         query = "SELECT * FROM dual()"
         resp = run_query(query)
 
-        _execute.assert_called_once_with(query)
+        _execute.assert_called_once_with(query, None)
         self.assertEqual(resp, None)
