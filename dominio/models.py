@@ -17,6 +17,13 @@ class Documento(models.Model):
 
     docu_dk = models.IntegerField(primary_key=True)
     num_mp = models.CharField(max_length=15, db_column='docu_nr_mp')
+    docu_nr_externo = models.CharField(
+        max_length=255,
+        db_column="DOCU_NR_EXTERNO"
+    )
+    docu_ano = models.IntegerField(
+        db_column="DOCU_ANO"
+    )
     docu_tpst_dk = models.IntegerField(
         db_column='DOCU_TPST_DK'
     )

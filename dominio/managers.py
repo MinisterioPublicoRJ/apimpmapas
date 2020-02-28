@@ -8,8 +8,9 @@ from django.db.models import (
     ExpressionWrapper,
     Value,
     Sum,
-    When
+    When,
 )
+from django.db.models.functions import Substr
 
 
 class VistaManager(models.Manager):
@@ -89,13 +90,24 @@ class InvestigacoesManager(models.Manager):
 
 class ProcessosManager(InvestigacoesManager):
     def em_juizo(self, orgao_id, regras):
-        return super().em_curso(orgao_id, regras)
+        """
+        Para um documento estar em Juízo este precisa de um número do TJRJ.
+        Para tal, o número 819 deve estar presente entre as posicoes 14⁻17
+        e a string entre as posicoes 10-14 deve ser igual ao campo DOCU_ANO
+        """
+
+        docs_tj = super().em_curso(orgao_id, regras)
+        docs_tj = docs_tj.annotate(
+            nr_ano=Substr("docu_nr_externo", 10, 4),
+            codigo_tj=Substr("docu_nr_externo", 14, 3)
+        )
+        return docs_tj.filter(nr_ano=F("docu_ano"), codigo_tj="819")
 
 
 class FinalizadosManager(models.Manager):
-    def no_orgao(self, orgao_id, regras_saidas):
+    def no_orgao(self, org_id, regras_saidas):
         return self.get_queryset().filter(
-            andamento__vista__documento__docu_orgi_orga_dk_responsavel=orgao_id,
+            andamento__vista__documento__docu_orgi_orga_dk_responsavel=org_id,
             stao_tppr_dk__in=regras_saidas
         )
 
