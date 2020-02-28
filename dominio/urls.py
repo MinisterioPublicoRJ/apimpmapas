@@ -16,12 +16,8 @@ from .views import (
 
 app_name = 'dominio'
 
-urlpatterns = [
-    # path(
-    #     'dominio/alertas/<str:orgao_id>',
-    #     AlertasListView.as_view(),
-    #     name='lista_alertas'
-    # ),
+
+acervo_patterns = [
     path(
         'acervo/<str:orgao_id>/<str:data>',
         AcervoView.as_view(),
@@ -39,22 +35,10 @@ urlpatterns = [
         AcervoVariationTopNView.as_view(),
         name='acervo_variation_topn'
     ),
-    path(
-        'outliers/'
-        '<str:orgao_id>/<str:dt_calculo>',
-        OutliersView.as_view(),
-        name='outliers'
-    ),
-    path(
-        'saidas/<str:orgao_id>',
-        SaidasView.as_view(),
-        name='saidas'
-    ),
-    path(
-        'entradas/<str:orgao_id>/<str:cod_matricula>',
-        EntradasView.as_view(),
-        name='entradas'
-    ),
+]
+
+
+suamesa_patterns = [
     path(
         'suamesa/vistas/<str:orgao_id>/<str:cpf>',
         SuaMesaVistasAbertas.as_view(),
@@ -81,3 +65,26 @@ urlpatterns = [
         name='suamesa-detalhe-vistas'
     ),
 ]
+
+
+stats_patterns = [
+    path(
+        'outliers/'
+        '<str:orgao_id>/<str:dt_calculo>',
+        OutliersView.as_view(),
+        name='outliers'
+    ),
+    path(
+        'saidas/<str:orgao_id>',
+        SaidasView.as_view(),
+        name='saidas'
+    ),
+    path(
+        'entradas/<str:orgao_id>/<str:cod_matricula>',
+        EntradasView.as_view(),
+        name='entradas'
+    ),
+]
+
+
+urlpatterns = acervo_patterns + suamesa_patterns + stats_patterns
