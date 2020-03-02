@@ -36,6 +36,13 @@ class EntradasSerializer(serializers.Serializer):
     hout = serializers.FloatField()
 
 
+class SuaMesaSerializer(serializers.Serializer):
+    vistas_abertas = serializers.IntegerField(min_value=0)
+    investigacoes_curso = serializers.IntegerField(min_value=0)
+    processos_juizo = serializers.IntegerField(min_value=0)
+    finalizados = serializers.IntegerField(min_value=0)
+
+
 class DetalheAcervoSerializer(serializers.Serializer):
 
     class VariacaoPromotoriaSerializer(serializers.Serializer):

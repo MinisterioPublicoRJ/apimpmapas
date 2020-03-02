@@ -5,7 +5,9 @@ from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from dominio import suamesa
 from .db_connectors import run_query
+from .models import Vista, Documento, SubAndamento
 from .serializers import (
     SaidasSerializer,
     OutliersSerializer,
@@ -298,3 +300,73 @@ class EntradasView(APIView):
         }
         data = EntradasSerializer(data_obj).data
         return Response(data)
+
+
+@method_decorator(
+    cache_page(
+        settings.CACHE_TIMEOUT,
+        key_prefix="dominio_suamesa_vistas"),
+    name="dispatch"
+)
+class SuaMesaVistasAbertas(APIView):
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+        cpf = kwargs.get("cpf")
+
+        doc_count = Vista.vistas.abertas_promotor(orgao_id, cpf).count()
+
+        return Response(data={"suamesa_vistas": doc_count})
+
+
+class SuaMesaInvestigacoes(APIView):
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+
+        regras_investigacoes = suamesa.get_regras(
+            orgao_id,
+            tipo='investigacao'
+        )
+        doc_count = Documento.investigacoes.em_curso(
+            orgao_id, regras_investigacoes).count()
+
+        return Response(data={"suamesa_investigacoes": doc_count})
+
+
+class SuaMesaProcessos(APIView):
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+
+        regras_processos = suamesa.get_regras(orgao_id, tipo='processo')
+        doc_count = Documento.processos.em_juizo(
+            orgao_id, regras_processos).count()
+
+        return Response(data={"suamesa_processos": doc_count})
+
+
+@method_decorator(
+    cache_page(
+        settings.CACHE_TIMEOUT,
+        key_prefix="dominio_suamesa_finalizados"),
+    name="dispatch"
+)
+class SuaMesaFinalizados(APIView):
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+
+        regras_saidas = (6251, 6657, 6655, 6644, 6326)
+        doc_count = SubAndamento.finalizados.trinta_dias(
+            orgao_id, regras_saidas).count()
+
+        return Response(data={"suamesa_finalizados": doc_count})
+
+
+class SuaMesaDetalheView(APIView):
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+        cpf = kwargs.get("cpf")
+
+        mesa_detalhe = Vista.vistas.abertas_por_dias_abertura(orgao_id, cpf)
+        if all([v is None for v in mesa_detalhe.values()]):
+            raise Http404
+
+        return Response(mesa_detalhe)

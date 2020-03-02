@@ -125,3 +125,93 @@ Vary: Accept
     "dt_calculo": "2020-02-11T16:27:09.273000Z"
 }
  ```
+
+## Sua Mesa
+
+### Vistas Abertas
+
+```
+GET /dominio/suamesa/vistas/<id_orgao>/<cpf>
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "suamesa_vistas": 1
+}
+```
+
+### Investigações em curso
+
+```
+GET /dominio/suamesa/investigacoes/<id_orgao>
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "suamesa_investigacoes": 0
+}
+```
+
+### Processos em juízo
+
+```
+GET /dominio/suamesa/processos/<id_orgao>
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "suamesa_processos": 0
+}
+```
+
+### Finalizados nos últimos 30 dias
+
+```
+GET /dominio/suamesa/finalizados/<id_orgao>
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "suamesa_finalizados": 0
+}
+```
+
+
+## Detalhe Vistas Abertas Sua Mesa
+
+```
+GET /dominio/suamesa/detalhe/vistas/<id_orgao>/<cpf>
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "soma_ate_vinte": 0,
+    "soma_vinte_trinta": 0,
+    "soma_trinta_mais": 1
+}
+```
