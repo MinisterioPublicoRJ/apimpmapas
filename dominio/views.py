@@ -382,6 +382,14 @@ class DetalheProcessosJuizoView(APIView):
     @staticmethod
     def get_numero_acoes_propostas_pacote_atribuicao(orgao_id, dt_inicio, dt_fim):
         # Ações = andamentos com tppr_dk = 6251
+        # -- Filtrar pelo pacote de atribuição
+        #     SELECT A.docu_orgi_orga_dk_responsavel, G.orgi_nm_orgao, nvl(count(C.pcao_dt_andamento), 0)
+        #     FROM (SELECT * FROM exadata_dev.mcpr_documento WHERE docu_orgi_orga_dk_responsavel = 400554) A
+        #     JOIN exadata_dev.mcpr_vista B on B.vist_docu_dk = A.DOCU_DK
+        #     JOIN (SELECT * FROM exadata_dev.mcpr_andamento WHERE to_date(pcao_dt_andamento) > '2019-01-01' AND to_date(pcao_dt_andamento) <= '2020-02-30') C on C.pcao_vist_dk = B.vist_dk 
+        #     JOIN (SELECT * FROM exadata_dev.mcpr_sub_andamento WHERE stao_tppr_dk = 6251) D on D.stao_pcao_dk = C.pcao_dk
+        #     JOIN exadata.orgi_orgao G ON cast(G.orgi_cdorgao as int) = A.docu_orgi_orga_dk_responsavel
+        #     GROUP BY A.docu_orgi_orga_dk_responsavel, G.orgi_nm_orgao;
         query = """
             """
         #return run_query(query)
