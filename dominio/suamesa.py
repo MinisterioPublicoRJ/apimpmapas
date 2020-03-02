@@ -10,7 +10,7 @@ QUERY_REGRAS = """
     FROM {namespace}.atualizacao_pj_pacote pct
     JOIN {namespace}.{regras_table} r
     ON r.cod_atribuicao = pct.cod_pct
-    WHERE pct.id_orgao = {orgao_id}
+    WHERE pct.id_orgao = :orgao_id
     """
 
 
@@ -40,10 +40,12 @@ def get_regras(orgao_id, tipo='investigacao'):
         return None
 
     query = QUERY_REGRAS.format(
-        orgao_id=orgao_id,
         regras_table=regras_table,
         namespace=settings.TABLE_NAMESPACE
     )
+    parameters = {
+        'orgao_id': orgao_id
+    }
 
-    result = run_query(query)
+    result = run_query(query, parameters)
     return [row[0] for row in result] if result else []

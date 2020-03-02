@@ -16,11 +16,13 @@ class TestSuaMesa(TestCase):
 
         expected_query = QUERY_REGRAS.format(
             regras_table="tb_regra_negocio_investigacao",
-            namespace=settings.TABLE_NAMESPACE,
-            orgao_id=orgao_id,
+            namespace=settings.TABLE_NAMESPACE
         )
+        expected_parameters = {
+            'orgao_id': orgao_id
+        }
 
-        _run_query.assert_called_once_with(expected_query)
+        _run_query.assert_called_once_with(expected_query, expected_parameters)
         self.assertEqual(output, expected_output)
 
     @mock.patch('dominio.suamesa.run_query')
@@ -33,9 +35,11 @@ class TestSuaMesa(TestCase):
 
         expected_query = QUERY_REGRAS.format(
             regras_table="tb_regra_negocio_processo",
-            namespace=settings.TABLE_NAMESPACE,
-            orgao_id=orgao_id,
+            namespace=settings.TABLE_NAMESPACE
         )
+        expected_parameters = {
+            'orgao_id': orgao_id
+        }
 
-        _run_query.assert_called_once_with(expected_query)
+        _run_query.assert_called_once_with(expected_query, expected_parameters)
         self.assertEqual(output, expected_output)
