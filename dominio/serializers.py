@@ -41,7 +41,7 @@ class SuaMesaSerializer(serializers.Serializer):
     investigacoes_curso = serializers.IntegerField(min_value=0)
     processos_juizo = serializers.IntegerField(min_value=0)
     finalizados = serializers.IntegerField(min_value=0)
-  
+
 
 class DetalheAcervoSerializer(serializers.Serializer):
 
@@ -51,4 +51,3 @@ class DetalheAcervoSerializer(serializers.Serializer):
 
     variacao_acervo = serializers.FloatField()
     top_n = VariacaoPromotoriaSerializer(many=True)
-
