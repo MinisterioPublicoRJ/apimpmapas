@@ -182,7 +182,7 @@ Vary: Accept
 ### Finalizados nos últimos 30 dias
 
 ```
-GET /dominio/suamesa/processos/<id_orgao>
+GET /dominio/suamesa/finalizados/<id_orgao>
 ```
 
 ```
