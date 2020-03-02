@@ -5,9 +5,6 @@ from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
-from dominio.views import SuaMesa
-# Create your tests here.
-
 
 class NoCacheTestCase:
     def tearDown(self):
@@ -388,44 +385,7 @@ class EntradasViewTest(TestCase, NoCacheTestCase):
 
 
 class SuaMesaViewTest(TestCase, NoCacheTestCase):
-
-    @mock.patch('dominio.views.run_query')
-    def test_sua_mesa_get_regras_investigacao(self, _run_query):
-        _run_query.return_value = [(20,), (30,)]
-
-        output = SuaMesa.get_regras(10, 'investigacao')
-        expected_output = [20, 30]
-
-        expected_query = """
-            SELECT r.classe_documento
-            FROM {namespace}.atualizacao_pj_pacote pct
-            JOIN {namespace}.tb_regra_negocio_investigacao r
-            ON r.cod_atribuicao = pct.cod_pct
-            WHERE pct.id_orgao = 10
-        """.format(namespace=settings.TABLE_NAMESPACE)
-
-        _run_query.assert_called_once_with(expected_query)
-        self.assertEqual(output, expected_output)
-
-    @mock.patch('dominio.views.run_query')
-    def test_sua_mesa_get_regras_processo(self, _run_query):
-        _run_query.return_value = [(20,), (30,)]
-
-        output = SuaMesa.get_regras(10, 'processo')
-        expected_output = [20, 30]
-
-        expected_query = """
-            SELECT r.classe_documento
-            FROM {namespace}.atualizacao_pj_pacote pct
-            JOIN {namespace}.tb_regra_negocio_processo r
-            ON r.cod_atribuicao = pct.cod_pct
-            WHERE pct.id_orgao = 10
-        """.format(namespace=settings.TABLE_NAMESPACE)
-
-        _run_query.assert_called_once_with(expected_query)
-        self.assertEqual(output, expected_output)
-
-    @mock.patch.object(SuaMesa, 'get_regras')
+    @mock.patch('dominio.views.suamesa.get_regras')
     @mock.patch('dominio.views.Documento')
     def test_sua_mesa_investigacoes(self, _Documento, _get_regras):
         manager_mock = mock.MagicMock()
@@ -446,7 +406,7 @@ class SuaMesaViewTest(TestCase, NoCacheTestCase):
         )
         manager_mock.count.assert_called_once_with()
 
-    @mock.patch.object(SuaMesa, 'get_regras')
+    @mock.patch('dominio.views.suamesa.get_regras')
     @mock.patch('dominio.views.Documento')
     def test_sua_mesa_processos(self, _Documento, _get_regras):
         manager_mock = mock.MagicMock()

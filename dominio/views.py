@@ -1,4 +1,3 @@
-import ring
 from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -6,6 +5,7 @@ from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from dominio import suamesa
 from .db_connectors import run_query
 from .models import Vista, Documento, SubAndamento
 from .serializers import (
@@ -376,49 +376,6 @@ class EntradasView(APIView):
         return Response(data)
 
 
-class SuaMesa:
-    @ring.lru()
-    @staticmethod
-    def get_regras(orgao_id, tipo='investigacao'):
-        """Busca as regras de negócio relativas a investigação ou processo,
-        para um dado órgão.
-
-        Arguments:
-            orgao_id {integer} -- ID do órgão a ser procurado.
-
-        Keyword Arguments:
-            tipo {str} -- Tipo de regra a ser procurada.
-            Pode ser 'investigacao' ou 'processo'. (default: {'investigacao'})
-
-        Returns:
-            List[integer] -- Lista de IDs de classes de documentos.
-        """
-        table_switcher = {
-            'investigacao': 'tb_regra_negocio_investigacao',
-            'processo': 'tb_regra_negocio_processo'
-        }
-        regras_table = table_switcher.get(tipo, None)
-
-        if not regras_table:
-            # Melhor fazer de outra forma? Raise error?
-            return None
-
-        query = """
-            SELECT r.classe_documento
-            FROM {namespace}.atualizacao_pj_pacote pct
-            JOIN {namespace}.{regras_table} r
-            ON r.cod_atribuicao = pct.cod_pct
-            WHERE pct.id_orgao = {orgao_id}
-        """.format(
-            orgao_id=orgao_id,
-            regras_table=regras_table,
-            namespace=settings.TABLE_NAMESPACE
-        )
-
-        result = run_query(query)
-        return [row[0] for row in result] if result else []
-
-
 @method_decorator(
     cache_page(
         settings.CACHE_TIMEOUT,
@@ -439,7 +396,7 @@ class SuaMesaInvestigacoes(APIView):
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
 
-        regras_investigacoes = SuaMesa.get_regras(
+        regras_investigacoes = suamesa.get_regras(
             orgao_id,
             tipo='investigacao'
         )
@@ -453,7 +410,7 @@ class SuaMesaProcessos(APIView):
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
 
-        regras_processos = SuaMesa.get_regras(orgao_id, tipo='processo')
+        regras_processos = suamesa.get_regras(orgao_id, tipo='processo')
         doc_count = Documento.processos.em_juizo(
             orgao_id, regras_processos).count()
 
