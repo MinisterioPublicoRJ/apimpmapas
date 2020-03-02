@@ -1,25 +1,8 @@
 from rest_framework import serializers
 
 
-class AcervoSerializer(serializers.Serializer):
-    acervo_qtd = serializers.IntegerField()
-
-
-class AcervoVariationSerializer(serializers.Serializer):
-    acervo_fim = serializers.IntegerField(min_value=0)
-    acervo_inicio = serializers.IntegerField(min_value=0)
-    variacao = serializers.FloatField()
-
-
-class AcervoVariationTopNSerializer(serializers.Serializer):
-    cod_orgao = serializers.IntegerField()
-    nm_orgao = serializers.CharField()
-    acervo_fim = serializers.IntegerField(min_value=0)
-    acervo_inicio = serializers.IntegerField(min_value=0)
-    variacao = serializers.FloatField()
-
-
 class OutliersSerializer(serializers.Serializer):
+    acervo_qtd = serializers.IntegerField(min_value=0)
     cod_atribuicao = serializers.IntegerField()
     minimo = serializers.IntegerField(min_value=0)
     maximo = serializers.IntegerField(min_value=0)
@@ -58,3 +41,14 @@ class SuaMesaSerializer(serializers.Serializer):
     investigacoes_curso = serializers.IntegerField(min_value=0)
     processos_juizo = serializers.IntegerField(min_value=0)
     finalizados = serializers.IntegerField(min_value=0)
+  
+
+class DetalheAcervoSerializer(serializers.Serializer):
+
+    class VariacaoPromotoriaSerializer(serializers.Serializer):
+        nm_promotoria = serializers.CharField()
+        variacao_acervo = serializers.FloatField(min_value=0)
+
+    variacao_acervo = serializers.FloatField()
+    top_n = VariacaoPromotoriaSerializer(many=True)
+

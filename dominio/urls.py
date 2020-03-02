@@ -1,17 +1,15 @@
 from django.urls import path
 
 from .views import (
-    AcervoView,
     SaidasView,
     EntradasView,
-    AcervoVariationView,
-    AcervoVariationTopNView,
     OutliersView,
     SuaMesaVistasAbertas,
     SuaMesaInvestigacoes,
     SuaMesaProcessos,
     SuaMesaFinalizados,
     SuaMesaDetalheView,
+    DetalheAcervoView,
 )
 
 app_name = 'dominio'
@@ -19,21 +17,10 @@ app_name = 'dominio'
 
 acervo_patterns = [
     path(
-        'acervo/<str:orgao_id>/<str:data>',
-        AcervoView.as_view(),
-        name='acervo'
-    ),
-    path(
-        'acervo_variation/'
-        '<str:orgao_id>/<str:dt_inicio>/<str:dt_fim>',
-        AcervoVariationView.as_view(),
-        name='acervo_variation'
-    ),
-    path(
-        'acervo_variation_topn/'
+        'detalhe_acervo/'
         '<str:orgao_id>/<str:dt_inicio>/<str:dt_fim>/<str:n>',
-        AcervoVariationTopNView.as_view(),
-        name='acervo_variation_topn'
+        DetalheAcervoView.as_view(),
+        name='detalhe_acervo'
     ),
 ]
 
@@ -80,7 +67,7 @@ stats_patterns = [
         name='saidas'
     ),
     path(
-        'entradas/<str:orgao_id>/<str:cod_matricula>',
+        'entradas/<str:orgao_id>/<str:nr_cpf>',
         EntradasView.as_view(),
         name='entradas'
     ),
