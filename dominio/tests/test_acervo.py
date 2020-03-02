@@ -5,6 +5,8 @@ from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
+from dominio.views import DetalheAcervoView
+
 # Create your tests here.
 
 
@@ -14,6 +16,11 @@ class NoCacheTestCase:
 
 
 class DetalheAcervoViewTest(NoCacheTestCase, TestCase):
+    def test_get_variacao_orgao_return_none(self):
+        view = DetalheAcervoView()
+        resp = view.get_variacao_orgao([], orgao_id=10)
+
+        self.assertTrue(resp is None)
 
     @mock.patch('dominio.views.run_query')
     def test_acervo_variation_result(self, _run_query):
