@@ -9,6 +9,7 @@ from .views import (
     SuaMesaProcessos,
     SuaMesaFinalizados,
     SuaMesaDetalheView,
+    SuaMesaVistasListaView,
     DetalheAcervoView,
     DetalheProcessosJuizoView,
 )
@@ -51,6 +52,11 @@ suamesa_patterns = [
         'suamesa/detalhe/processos/<str:orgao_id>',
         DetalheProcessosJuizoView.as_view(),
         name='suamesa-detalhe-processos'
+    ),
+    path(
+        'suamesa/lista/vistas/<str:orgao_id>/<str:cpf>',
+        SuaMesaVistasListaView.as_view(),
+        name='suamesa-lista-vistas'
     ),
 ]
 

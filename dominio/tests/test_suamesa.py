@@ -164,3 +164,12 @@ class TestSuaMesaDetalheVistas(TestCase):
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 404)
+
+
+class TestSuaMesaListaVistasAbertas(TestCase):
+    def test_correct_response(self):
+        url = reverse('dominio:suamesa-lista-vistas', args=('1', '2'))
+
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 200)

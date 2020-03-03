@@ -449,3 +449,8 @@ class DetalheProcessosJuizoView(APIView):
 
         data = DetalheProcessosJuizoSerializer(data_obj).data
         return Response(data)
+
+
+class SuaMesaVistasListaView(APIView):
+    def get(self, request, *args, **kwargs):
+        return Response()
