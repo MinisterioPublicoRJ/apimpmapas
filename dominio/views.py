@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -85,13 +87,18 @@ class DetalheAcervoView(APIView):
             'dt_inicio': dt_inicio,
             'dt_fim': dt_fim
         }
+        print(parameters)
         return run_query(query, parameters)
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs['orgao_id'])
-        dt_inicio = str(self.kwargs['dt_inicio'])
-        dt_fim = str(self.kwargs['dt_fim'])
-        n = int(self.kwargs['n'])
+
+        date_today = datetime.now().date()
+        dt_fim = str(date_today)
+        dt_inicio = date_today - timedelta(30)
+        dt_inicio = '2020-02-10' if datetime(2020, 2, 10).date() > dt_inicio \
+            else str(dt_inicio)
+        n = 3
 
         data = self.get_acervo_increase(
             orgao_id=orgao_id,
@@ -109,6 +116,7 @@ class DetalheAcervoView(APIView):
             'variacao_acervo': variacao_acervo,
             'top_n': top_n
         }
+
         data = DetalheAcervoSerializer(data_obj).data
         return Response(data)
 
