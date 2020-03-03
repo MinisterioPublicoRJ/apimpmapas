@@ -12,7 +12,8 @@ from .serializers import (
     SaidasSerializer,
     OutliersSerializer,
     EntradasSerializer,
-    DetalheAcervoSerializer
+    DetalheAcervoSerializer,
+    DetalheProcessosJuizoSerializer
 )
 
 
@@ -370,3 +371,73 @@ class SuaMesaDetalheView(APIView):
             raise Http404
 
         return Response(mesa_detalhe)
+
+
+@method_decorator(
+    cache_page(settings.CACHE_TIMEOUT, key_prefix="dominio_detalhe_processos"),
+    name="dispatch"
+)
+class DetalheProcessosJuizoView(APIView):
+
+    @staticmethod
+    def get_numero_acoes_propostas_pacote_atribuicao(orgao_id):
+        query = """
+            SELECT
+                orgao_id,
+                nm_orgao,
+                nr_acoes_ultimos_60_dias,
+                variacao_12_meses,
+                nr_acoes_ultimos_30_dias
+            FROM {namespace}.tb_detalhe_processo t1
+            JOIN (
+                SELECT cod_pct
+                FROM {namespace}.tb_detalhe_processo
+                WHERE orgao_id = :orgao_id) t2
+              ON t1.cod_pct = t2.cod_pct
+        """.format(namespace=settings.TABLE_NAMESPACE)
+        parameters = {
+            'orgao_id': orgao_id
+        }
+        return run_query(query, parameters)
+
+    @staticmethod
+    def get_value_from_orgao(l, orgao_id, value_position=2):
+        for element in l:
+            # orgao_id comes in position 0 of each element
+            if element[0] == orgao_id:
+                return element[value_position]
+        return None
+
+    @staticmethod
+    def get_top_n_orgaos(l, n=3):
+        sorted_list = sorted(l, key=lambda el: el[4], reverse=True)
+        result_list = [
+            {'nm_promotoria': el[1], 'nr_acoes_propostas_30_dias': el[4]}
+            for el in sorted_list
+        ]
+        return result_list[:n]
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(self.kwargs['orgao_id'])
+
+        data_acoes = self.get_numero_acoes_propostas_pacote_atribuicao(
+            orgao_id=orgao_id
+        )
+
+        if not data_acoes:
+            raise Http404
+
+        nr_acoes_60_dias = self.get_value_from_orgao(
+            data_acoes, orgao_id, value_position=2)
+        variacao_acoes_12_meses = self.get_value_from_orgao(
+            data_acoes, orgao_id, value_position=3)
+        top_n = self.get_top_n_orgaos(data_acoes, n=3)
+
+        data_obj = {
+            'nr_acoes_propostas_60_dias': nr_acoes_60_dias,
+            'variacao_12_meses': variacao_acoes_12_meses,
+            'top_n': top_n
+        }
+
+        data = DetalheProcessosJuizoSerializer(data_obj).data
+        return Response(data)

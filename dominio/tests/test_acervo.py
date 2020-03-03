@@ -6,6 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from dominio.views import DetalheAcervoView
+from dominio.views import DetalheProcessosJuizoView
 
 # Create your tests here.
 
@@ -424,3 +425,99 @@ class TestSuaMesaDetalheVitas(TestCase):
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 404)
+
+
+class DetalheProcessosJuizoViewTest(TestCase, NoCacheTestCase):
+
+    def test_get_value_from_orgao(self):
+        test_orgao_id = 42
+        test_list = [
+            (1, 'Nome1', 220),
+            (10, 'Nome2', 140),
+            (42, 'Nome3', 150),
+            (60, 'Nome4', 65)
+        ]
+        output = DetalheProcessosJuizoView.get_value_from_orgao(
+            test_list, test_orgao_id, value_position=2)
+        expected_output = 150
+
+        self.assertEqual(output, expected_output)
+
+    def test_get_top_n_orgaos(self):
+        test_list = [
+            (1, 'Nome1', 220, 0.5, 10),
+            (10, 'Nome2', 140, 0.3, 5),
+            (42, 'Nome3', 150, -0.10, 20),
+            (60, 'Nome4', 65, 1.0, 2)
+        ]
+        output = DetalheProcessosJuizoView.get_top_n_orgaos(test_list, n=3)
+        expected_output = [
+            {'nm_promotoria': 'Nome3', 'nr_acoes_propostas_30_dias': 20},
+            {'nm_promotoria': 'Nome1', 'nr_acoes_propostas_30_dias': 10},
+            {'nm_promotoria': 'Nome2', 'nr_acoes_propostas_30_dias': 5}
+        ]
+
+        self.assertEqual(output, expected_output)
+
+    @mock.patch('dominio.views.run_query')
+    def test_get_numero_acoes_propostas_pacote_atribuicao(self, _run_query):
+        DetalheProcessosJuizoView\
+            .get_numero_acoes_propostas_pacote_atribuicao(1)
+
+        expected_query = """
+            SELECT
+                orgao_id,
+                nm_orgao,
+                nr_acoes_ultimos_60_dias,
+                variacao_12_meses,
+                nr_acoes_ultimos_30_dias
+            FROM {namespace}.tb_detalhe_processo t1
+            JOIN (
+                SELECT cod_pct
+                FROM {namespace}.tb_detalhe_processo
+                WHERE orgao_id = :orgao_id) t2
+              ON t1.cod_pct = t2.cod_pct
+        """.format(namespace=settings.TABLE_NAMESPACE)
+        expected_parameters = {
+            "orgao_id": 1
+        }
+
+        _run_query.assert_called_once_with(expected_query, expected_parameters)
+
+    @mock.patch('dominio.views.run_query')
+    def test_detalhe_processos_result(self, _run_query):
+        _run_query.side_effect = \
+            [
+                [(1, 'TC 1', 20, 1.0, 50),
+                 (2, 'TC 2', 30, 0.5, 10),
+                 (3, 'TC 3', 40, 0.75, 40),
+                 (4, 'TC 4', 10, 0.75, 100),
+                 (5, 'TC 5', 40, 0.75, 30)]
+            ]
+        response = self.client.get(reverse(
+            'dominio:detalhe_processos',
+            args=('1')))
+
+        expected_response = {
+            'nr_acoes_propostas_60_dias': 20,
+            'variacao_12_meses': 1.0,
+            'top_n': [
+                {'nm_promotoria': 'TC 4', 'nr_acoes_propostas_30_dias': 100},
+                {'nm_promotoria': 'TC 1', 'nr_acoes_propostas_30_dias': 50},
+                {'nm_promotoria': 'TC 3', 'nr_acoes_propostas_30_dias': 40}]
+        }
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected_response)
+
+    @mock.patch('dominio.views.run_query')
+    def test_detalhe_processos_no_result(self, _run_query):
+        _run_query.return_value = []
+        response = self.client.get(reverse(
+            'dominio:detalhe_processos',
+            args=('1')))
+
+        expected_response = {'detail': 'Não encontrado.'}
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.data, expected_response)

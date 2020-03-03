@@ -10,6 +10,7 @@ from .views import (
     SuaMesaFinalizados,
     SuaMesaDetalheView,
     DetalheAcervoView,
+    DetalheProcessosJuizoView,
 )
 
 app_name = 'dominio'
@@ -71,6 +72,11 @@ stats_patterns = [
         EntradasView.as_view(),
         name='entradas'
     ),
+    path(
+        'detalhe_processos/<str:orgao_id>',
+        DetalheProcessosJuizoView.as_view(),
+        name='detalhe_processos'
+    )
 ]
 
 
