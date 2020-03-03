@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from unittest import mock
 
 from django.conf import settings
@@ -32,8 +33,8 @@ class DetalheAcervoViewTest(NoCacheTestCase, TestCase):
             (3, 'PROMO3', '300', '100', '200.0')
         ]
         response = self.client.get(reverse(
-            'dominio:detalhe_acervo',
-            args=('0', '1', '2', '3')))
+            'dominio:suamesa-detalhe-investigacoes',
+            args=('0')))
 
         expected_response = {
             "variacao_acervo": -60.0,
@@ -90,10 +91,13 @@ class DetalheAcervoViewTest(NoCacheTestCase, TestCase):
                 ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
                 """.format(namespace=settings.TABLE_NAMESPACE)
 
+        dt_inicio = datetime.now().date() - timedelta(30)
+        dt_inicio = '2020-02-10' if datetime(2020, 2, 10).date() > dt_inicio \
+            else str(dt_inicio)
         expected_parameters = {
             'orgao_id': 0,
-            'dt_inicio': '1',
-            'dt_fim': '2'
+            'dt_inicio': dt_inicio,
+            'dt_fim': str(datetime.now().date())
         }
 
         _run_query.assert_called_once_with(expected_query, expected_parameters)
@@ -105,8 +109,8 @@ class DetalheAcervoViewTest(NoCacheTestCase, TestCase):
     def test_acervo_variation_no_result(self, _run_query):
         _run_query.return_value = []
         response = self.client.get(reverse(
-            'dominio:detalhe_acervo',
-            args=('0', '1', '2', '3')))
+            'dominio:suamesa-detalhe-investigacoes',
+            args=('0')))
 
         expected_response = {'detail': 'Não encontrado.'}
 
@@ -495,7 +499,7 @@ class DetalheProcessosJuizoViewTest(TestCase, NoCacheTestCase):
                  (5, 'TC 5', 40, 0.75, 30)]
             ]
         response = self.client.get(reverse(
-            'dominio:detalhe_processos',
+            'dominio:suamesa-detalhe-processos',
             args=('1')))
 
         expected_response = {
@@ -514,7 +518,7 @@ class DetalheProcessosJuizoViewTest(TestCase, NoCacheTestCase):
     def test_detalhe_processos_no_result(self, _run_query):
         _run_query.return_value = []
         response = self.client.get(reverse(
-            'dominio:detalhe_processos',
+            'dominio:suamesa-detalhe-processos',
             args=('1')))
 
         expected_response = {'detail': 'Não encontrado.'}

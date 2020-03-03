@@ -16,16 +16,6 @@ from .views import (
 app_name = 'dominio'
 
 
-acervo_patterns = [
-    path(
-        'detalhe_acervo/'
-        '<str:orgao_id>/<str:dt_inicio>/<str:dt_fim>/<str:n>',
-        DetalheAcervoView.as_view(),
-        name='detalhe_acervo'
-    ),
-]
-
-
 suamesa_patterns = [
     path(
         'suamesa/vistas/<str:orgao_id>/<str:cpf>',
@@ -52,6 +42,16 @@ suamesa_patterns = [
         SuaMesaDetalheView.as_view(),
         name='suamesa-detalhe-vistas'
     ),
+    path(
+        'suamesa/detalhe/investigacoes/<str:orgao_id>',
+        DetalheAcervoView.as_view(),
+        name='suamesa-detalhe-investigacoes'
+    ),
+    path(
+        'suamesa/detalhe/processos/<str:orgao_id>',
+        DetalheProcessosJuizoView.as_view(),
+        name='suamesa-detalhe-processos'
+    ),
 ]
 
 
@@ -72,12 +72,7 @@ stats_patterns = [
         EntradasView.as_view(),
         name='entradas'
     ),
-    path(
-        'detalhe_processos/<str:orgao_id>',
-        DetalheProcessosJuizoView.as_view(),
-        name='detalhe_processos'
-    )
 ]
 
 
-urlpatterns = acervo_patterns + suamesa_patterns + stats_patterns
+urlpatterns = suamesa_patterns + stats_patterns
