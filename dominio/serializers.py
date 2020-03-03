@@ -57,10 +57,8 @@ class DetalheProcessosJuizoSerializer(serializers.Serializer):
 
     class AcoesPromotoriaSerializer(serializers.Serializer):
         nm_promotoria = serializers.CharField()
-        nr_acoes_propostas = serializers.IntegerField(min_value=0)
+        nr_acoes_propostas_30_dias = serializers.IntegerField(min_value=0)
 
-    nr_acoes_propostas = serializers.IntegerField(min_value=0) 
-    variacao = serializers.FloatField()
+    nr_acoes_propostas_60_dias = serializers.IntegerField(min_value=0)
+    variacao_12_meses = serializers.FloatField()
     top_n = AcoesPromotoriaSerializer(many=True)
-
-    # dict of nm_promotoria - nr_acoes_propostas

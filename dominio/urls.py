@@ -73,7 +73,7 @@ stats_patterns = [
         name='entradas'
     ),
     path(
-        'detalhe_processos/<str:orgao_id>/<str:dt_inicio>/<str:dt_fim>',
+        'detalhe_processos/<str:orgao_id>',
         DetalheProcessosJuizoView.as_view(),
         name='detalhe_processos'
     )
