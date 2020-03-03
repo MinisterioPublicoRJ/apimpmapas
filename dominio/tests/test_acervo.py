@@ -91,9 +91,12 @@ class DetalheAcervoViewTest(NoCacheTestCase, TestCase):
                 ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
                 """.format(namespace=settings.TABLE_NAMESPACE)
 
+        dt_inicio = datetime.now().date() - timedelta(30)
+        dt_inicio = '2020-02-10' if datetime(2020, 2, 10).date() > dt_inicio \
+            else str(dt_inicio)
         expected_parameters = {
             'orgao_id': 0,
-            'dt_inicio': str(datetime.now().date() - timedelta(30)),
+            'dt_inicio': dt_inicio,
             'dt_fim': str(datetime.now().date())
         }
 
