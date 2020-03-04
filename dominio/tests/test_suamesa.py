@@ -213,3 +213,16 @@ class TestSuaMesaListaVistasAbertas(TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, expected)
+
+    def test_return_404_for_incorrcect_data_abertura_value(self):
+        url = reverse(
+            'dominio:suamesa-lista-vistas',
+            args=('1', '2', "invalid")
+        )
+
+        resp = self.client.get(url)
+        expected_msg = "data_abertura inválida. Opções são: ate_vinte, "\
+            "vinte_trinta, trinta_mais"
+
+        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.data, expected_msg)

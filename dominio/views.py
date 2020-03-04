@@ -458,6 +458,12 @@ class SuaMesaVistasListaView(APIView):
         orgao_id = int(kwargs.get("orgao_id"))
         cpf = kwargs.get("cpf")
         abertura = kwargs.get("abertura")
+        lista_aberturas = ("ate_vinte", "vinte_trinta", "trinta_mais")
+
+        if abertura not in lista_aberturas:
+            msg = "data_abertura inválida. "\
+                  f"Opções são: {', '.join(lista_aberturas)}"
+            return Response(data=msg, status=404)
 
         data = Vista.vistas.abertas_por_data(orgao_id, cpf).filter(
             **{abertura: 1}
