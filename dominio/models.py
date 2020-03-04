@@ -21,6 +21,10 @@ class Documento(models.Model):
         max_length=255,
         db_column="DOCU_NR_EXTERNO"
     )
+    docu_nr_mp = models.CharField(
+        max_length=255,
+        db_column="DOCU_NR_MP"
+    )
     docu_ano = models.IntegerField(
         db_column="DOCU_ANO"
     )

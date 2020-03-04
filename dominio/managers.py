@@ -37,7 +37,7 @@ class VistaManager(models.Manager):
             responsavel__cpf=cpf
         ).exclude(documento__docu_tpst_dk=11)
 
-    def abertas_por_dias_abertura(self, orgao_id, cpf):
+    def abertas_por_data(self, orgao_id, cpf):
         """
         Busca o número de vistas abertas para um um dado órgão e matrícula
         agrupadas com a contagem de dias que estão abertas
@@ -72,7 +72,10 @@ class VistaManager(models.Manager):
                 default=Value(0), output_field=models.IntegerField()
             )
         )
-        return queryset.aggregate(
+        return queryset
+
+    def agg_abertas_por_data(self, orgao_id, cpf):
+        return self.abertas_por_data(orgao_id, cpf).aggregate(
             soma_ate_vinte=Sum('ate_vinte'),
             soma_vinte_trinta=Sum('vinte_trinta'),
             soma_trinta_mais=Sum('trinta_mais')

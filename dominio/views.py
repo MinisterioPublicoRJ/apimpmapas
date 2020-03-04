@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from django.conf import settings
+from django.db.models import F
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.http import Http404
@@ -15,7 +16,8 @@ from .serializers import (
     OutliersSerializer,
     EntradasSerializer,
     DetalheAcervoSerializer,
-    DetalheProcessosJuizoSerializer
+    DetalheProcessosJuizoSerializer,
+    SuaMesaListaVistasSerializer,
 )
 
 
@@ -376,7 +378,7 @@ class SuaMesaDetalheView(APIView):
         orgao_id = int(kwargs.get("orgao_id"))
         cpf = kwargs.get("cpf")
 
-        mesa_detalhe = Vista.vistas.abertas_por_dias_abertura(orgao_id, cpf)
+        mesa_detalhe = Vista.vistas.agg_abertas_por_data(orgao_id, cpf)
         if all([v is None for v in mesa_detalhe.values()]):
             raise Http404
 
@@ -451,3 +453,36 @@ class DetalheProcessosJuizoView(APIView):
 
         data = DetalheProcessosJuizoSerializer(data_obj).data
         return Response(data)
+
+
+@method_decorator(
+    cache_page(
+        settings.CACHE_TIMEOUT,
+        key_prefix="dominio_lista_vistas_abertas"),
+    name="dispatch"
+)
+class SuaMesaVistasListaView(APIView):
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+        cpf = kwargs.get("cpf")
+        abertura = kwargs.get("abertura")
+        lista_aberturas = ("ate_vinte", "vinte_trinta", "trinta_mais")
+
+        if abertura not in lista_aberturas:
+            msg = "data_abertura inválida. "\
+                  f"Opções são: {', '.join(lista_aberturas)}"
+            return Response(data=msg, status=404)
+
+        data = Vista.vistas.abertas_por_data(orgao_id, cpf).filter(
+            **{abertura: 1}
+        ).values(
+            numero_mprj=F("documento__docu_nr_mp"),
+            numero_externo=F("documento__docu_nr_externo"),
+            dt_abertura=F("data_abertura"),
+            classe=F("documento__classe__descricao")
+
+        )
+
+        vistas_lista = SuaMesaListaVistasSerializer(data, many=True).data
+
+        return Response(data=vistas_lista)

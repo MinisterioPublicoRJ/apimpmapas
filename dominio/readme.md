@@ -215,3 +215,34 @@ Vary: Accept
     "soma_trinta_mais": 1
 }
 ```
+
+## Listas Vistas Abertas Sua Mesa
+
+```
+GET /dominio/suamesa/lista/vistas/<id_orgao>/<cpf>/<abertura>
+
+valores possíveis para abertura: ate_vinte, vinte_trinta, trinta_mais
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+
+[
+    {
+        "numero_mprj": "1234567890",
+        "numero_externo": "0987654321",
+        "dt_abertura": "2020-01-01",
+        "classe": "CLASSE 1"
+    },
+    {
+        "numero_mprj": "0987654321",
+        "numero_externo": "1234567890",
+        "dt_abertura": "2020-01-01",
+        "classe": "CLASSE 2"
+    }
+]
+```
