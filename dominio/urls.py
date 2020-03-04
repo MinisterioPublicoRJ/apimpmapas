@@ -54,7 +54,7 @@ suamesa_patterns = [
         name='suamesa-detalhe-processos'
     ),
     path(
-        'suamesa/lista/vistas/<str:orgao_id>/<str:cpf>',
+        'suamesa/lista/vistas/<str:orgao_id>/<str:cpf>/<str:abertura>',
         SuaMesaVistasListaView.as_view(),
         name='suamesa-lista-vistas'
     ),

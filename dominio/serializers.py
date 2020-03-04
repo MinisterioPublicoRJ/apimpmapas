@@ -43,6 +43,13 @@ class SuaMesaSerializer(serializers.Serializer):
     finalizados = serializers.IntegerField(min_value=0)
 
 
+class SuaMesaListaVistasSerializer(serializers.Serializer):
+    numero_mprj = serializers.CharField()
+    numero_externo = serializers.CharField()
+    dt_abertura = serializers.DateField()
+    classe = serializers.CharField()
+
+
 class DetalheAcervoSerializer(serializers.Serializer):
 
     class VariacaoPromotoriaSerializer(serializers.Serializer):

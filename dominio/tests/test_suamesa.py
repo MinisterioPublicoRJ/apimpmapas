@@ -1,3 +1,4 @@
+from datetime import date
 from unittest import mock
 
 from django.conf import settings
@@ -141,7 +142,7 @@ class TestSuaMesaDetalheVistas(TestCase):
             'soma_vinte_trinta': 2,
             'soma_trinta_mais': 4
         }
-        _Vista.vistas.abertas_por_dias_abertura.return_value = expected_resp
+        _Vista.vistas.agg_abertas_por_data.return_value = expected_resp
 
         url = reverse('dominio:suamesa-detalhe-vistas', args=('1', '2'))
 
@@ -157,7 +158,7 @@ class TestSuaMesaDetalheVistas(TestCase):
             'soma_vinte_trinta': None,
             'soma_trinta_mais': None
         }
-        _Vista.vistas.abertas_por_dias_abertura.return_value = query_resp
+        _Vista.vistas.agg_abertas_por_data.return_value = query_resp
 
         url = reverse('dominio:suamesa-detalhe-vistas', args=('1', '2'))
 
@@ -167,9 +168,48 @@ class TestSuaMesaDetalheVistas(TestCase):
 
 
 class TestSuaMesaListaVistasAbertas(TestCase):
-    def test_correct_response(self):
-        url = reverse('dominio:suamesa-lista-vistas', args=('1', '2'))
+    @mock.patch('dominio.views.Vista')
+    def test_correct_response(self, _Vista):
+        manager_mock = mock.MagicMock()
+        filter_mock = mock.MagicMock()
+        filter_mock.values.return_value = [
+            {
+                "numero_mprj": "1234",
+                "numero_externo": "tj1234",
+                "dt_abertura": date(2020, 1, 1),
+                "classe": "classe 1",
+            },
+            {
+                "numero_mprj": "9012",
+                "numero_externo": "tj9012",
+                "dt_abertura": date(2018, 1, 1),
+                "classe": "classe 3",
+            },
+        ]
+        manager_mock.filter.return_value = filter_mock
+
+        _Vista.vistas.abertas_por_data.return_value = manager_mock
+
+        expected = [
+            {
+                "numero_mprj": "1234",
+                "numero_externo": "tj1234",
+                "dt_abertura": '2020-01-01',
+                "classe": "classe 1",
+            },
+            {
+                "numero_mprj": "9012",
+                "numero_externo": "tj9012",
+                "dt_abertura": '2018-01-01',
+                "classe": "classe 3",
+            },
+        ]
+        url = reverse(
+            'dominio:suamesa-lista-vistas',
+            args=('1', '2', "trinta_mais")
+        )
 
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, expected)
