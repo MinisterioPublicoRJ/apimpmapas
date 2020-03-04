@@ -453,6 +453,12 @@ class DetalheProcessosJuizoView(APIView):
         return Response(data)
 
 
+@method_decorator(
+    cache_page(
+        settings.CACHE_TIMEOUT,
+        key_prefix="dominio_lista_vistas_abertas"),
+    name="dispatch"
+)
 class SuaMesaVistasListaView(APIView):
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
