@@ -173,3 +173,11 @@ class SubAndamento(models.Model):
     class Meta:
         db_table = "MCPR_SUB_ANDAMENTO"
         managed = False
+
+
+class AlertaSession(models.Model):
+    pass
+
+
+class Alerta(models.Model):
+    pass

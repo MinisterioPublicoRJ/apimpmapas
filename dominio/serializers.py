@@ -72,7 +72,9 @@ class DetalheProcessosJuizoSerializer(serializers.Serializer):
 
 
 class AlertasListaSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
+    sigla = serializers.CharField()
+    descricao = serializers.CharField()
+    doc_dk = serializers.IntegerField()
     num_doc = serializers.CharField()
     num_ext = serializers.CharField()
     etiqueta = serializers.CharField()

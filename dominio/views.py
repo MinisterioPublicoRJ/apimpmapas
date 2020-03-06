@@ -514,7 +514,7 @@ class AlertasView(PaginatorMixin, APIView):
         orgao_id = int(kwargs.get("orgao_id"))
         page = int(request.GET.get("page", 1))
 
-        data = Alerta.alertas.lista_por_orgao(orgao_id)
+        data = Alerta.validos.lista_por_orgao(orgao_id)
 
         page_data = self.paginate(
             data,

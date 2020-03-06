@@ -119,3 +119,8 @@ class FinalizadosManager(models.Manager):
         return finalizados.filter(
             andamento__pcao_dt_andamento__gte=date.today()
             - timedelta(days=30))
+
+
+class AlertaManager(models.Manager):
+    def validos(self):
+        return self.get_queryset().order_by('-alerta_session__data_fim')
