@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 
 from dominio import suamesa
 from .db_connectors import run_query
-from .models import Vista, Documento, SubAndamento
+from .models import Vista, Documento, SubAndamento, Alerta
 from .serializers import (
     SaidasSerializer,
     OutliersSerializer,
@@ -19,6 +19,7 @@ from .serializers import (
     DetalheAcervoSerializer,
     DetalheProcessosJuizoSerializer,
     SuaMesaListaVistasSerializer,
+    AlertasListaSerializer,
 )
 
 
@@ -498,11 +499,16 @@ class SuaMesaVistasListaView(APIView):
 
         return Response(data=vistas_lista)
 
+
 @method_decorator(
     cache_page(300, key_prefix="dominio_alertas"),
     name="dispatch"
 )
 class AlertasView(APIView):
     def get(self, request, *args, **kwargs):
-        pass
+        orgao_id = int(kwargs.get("orgao_id"))
 
+        data = Alerta.alertas.lista_por_orgao(orgao_id)
+        alertas_lista = AlertasListaSerializer(data, many=True)
+
+        return Response(data=alertas_lista)

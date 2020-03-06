@@ -12,10 +12,7 @@ from .views import (
     SuaMesaVistasListaView,
     DetalheAcervoView,
     DetalheProcessosJuizoView,
-    AcervoVariationView,
-    AcervoVariationTopNView,
-    AlertasView
-
+    AlertasView,
 )
 
 app_name = 'dominio'
