@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from django.conf import settings
+from django.core.paginator import EmptyPage, Paginator
 from django.db.models import F
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -462,11 +463,21 @@ class DetalheProcessosJuizoView(APIView):
     name="dispatch"
 )
 class SuaMesaVistasListaView(APIView):
+    def paginate(self, model_response, page):
+        paginator = Paginator(model_response, suamesa.VISTAS_PAGE_SIZE)
+        try:
+            page_data = paginator.page(page).object_list
+        except EmptyPage:
+            page_data = []
+
+        return page_data
+
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
         cpf = kwargs.get("cpf")
         abertura = kwargs.get("abertura")
         lista_aberturas = ("ate_vinte", "vinte_trinta", "trinta_mais")
+        page = int(request.GET.get("page", 1))
 
         if abertura not in lista_aberturas:
             msg = "data_abertura inválida. "\
@@ -475,14 +486,14 @@ class SuaMesaVistasListaView(APIView):
 
         data = Vista.vistas.abertas_por_data(orgao_id, cpf).filter(
             **{abertura: 1}
-        ).values(
+        ).order_by('-data_abertura').values(
             numero_mprj=F("documento__docu_nr_mp"),
             numero_externo=F("documento__docu_nr_externo"),
             dt_abertura=F("data_abertura"),
             classe=F("documento__classe__descricao")
-
         )
+        page_data = self.paginate(data, page=page)
 
-        vistas_lista = SuaMesaListaVistasSerializer(data, many=True).data
+        vistas_lista = SuaMesaListaVistasSerializer(page_data, many=True).data
 
         return Response(data=vistas_lista)
