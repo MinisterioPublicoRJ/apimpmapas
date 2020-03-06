@@ -6,12 +6,27 @@ from django.core.cache import cache
 from django.urls import reverse
 from django.test import TestCase
 
-from dominio.suamesa import get_regras, QUERY_REGRAS, VISTAS_PAGE_SIZE
+from dominio.suamesa import (
+    format_text,
+    get_regras,
+    QUERY_REGRAS,
+    VISTAS_PAGE_SIZE,
+)
 
 
 class NoCacheTestCase:
     def tearDown(self):
         cache.clear()
+
+
+class TestSuaMesaUtils(TestCase):
+    def test_format_string(self):
+        text = "PROMOTORIA DA CAPITAL"
+        expected = "Promotoria da Capital"
+
+        f_text = format_text(text)
+
+        self.assertEqual(f_text, expected)
 
 
 class TestSuaMesa(TestCase):
