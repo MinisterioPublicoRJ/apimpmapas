@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 
 from dominio import suamesa
 from .db_connectors import run_query
+from .mixins import PaginatorMixin
 from .models import Vista, Documento, SubAndamento, Alerta
 from .serializers import (
     SaidasSerializer,
@@ -469,16 +470,7 @@ class DetalheProcessosJuizoView(APIView):
         key_prefix="dominio_lista_vistas_abertas"),
     name="dispatch"
 )
-class SuaMesaVistasListaView(APIView):
-    def paginate(self, model_response, page):
-        paginator = Paginator(model_response, suamesa.VISTAS_PAGE_SIZE)
-        try:
-            page_data = paginator.page(page).object_list
-        except EmptyPage:
-            page_data = []
-
-        return page_data
-
+class SuaMesaVistasListaView(PaginatorMixin, APIView):
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
         cpf = kwargs.get("cpf")
@@ -499,7 +491,11 @@ class SuaMesaVistasListaView(APIView):
             dt_abertura=F("data_abertura"),
             classe=F("documento__classe__descricao")
         )
-        page_data = self.paginate(data, page=page)
+        page_data = self.paginate(
+            data,
+            page=page,
+            page_size=suamesa.VISTAS_PAGE_SIZE
+        )
 
         vistas_lista = SuaMesaListaVistasSerializer(page_data, many=True).data
 
@@ -510,11 +506,22 @@ class SuaMesaVistasListaView(APIView):
     cache_page(300, key_prefix="dominio_alertas"),
     name="dispatch"
 )
-class AlertasView(APIView):
+class AlertasView(PaginatorMixin, APIView):
+    # TODO: Mover constante para um lugar decente
+    ALERTAS_SIZE = 25
+
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
+        page = int(request.GET.get("page", 1))
 
         data = Alerta.alertas.lista_por_orgao(orgao_id)
-        alertas_lista = AlertasListaSerializer(data, many=True)
+
+        page_data = self.paginate(
+            data,
+            page=page,
+            page_size=self.ALERTAS_SIZE
+        )
+
+        alertas_lista = AlertasListaSerializer(page_data, many=True)
 
         return Response(data=alertas_lista)

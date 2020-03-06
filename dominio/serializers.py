@@ -69,3 +69,15 @@ class DetalheProcessosJuizoSerializer(serializers.Serializer):
     nr_acoes_propostas_60_dias = serializers.IntegerField(min_value=0)
     variacao_12_meses = serializers.FloatField()
     top_n = AcoesPromotoriaSerializer(many=True)
+
+
+class AlertasListaSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    num_doc = serializers.CharField()
+    num_ext = serializers.CharField()
+    etiqueta = serializers.CharField()
+    classe_doc = serializers.CharField()
+    data_alerta = serializers.DateField()
+    orgao = serializers.IntegerField()
+    classe_hier = serializers.CharField()
+    dias_passados = serializers.IntegerField()
