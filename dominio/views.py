@@ -42,7 +42,10 @@ class DetalheAcervoView(APIView):
     def get_top_n_orgaos(l, n=3):
         sorted_list = sorted(l, key=lambda el: float(el[4]), reverse=True)
         result_list = [
-            {'nm_promotoria': el[1], 'variacao_acervo': el[4]}
+            {
+                'nm_promotoria': suamesa.format_text(el[1]),
+                'variacao_acervo': el[4]
+            }
             for el in sorted_list
         ]
         return result_list[:n]
@@ -425,7 +428,10 @@ class DetalheProcessosJuizoView(APIView):
     def get_top_n_orgaos(l, n=3):
         sorted_list = sorted(l, key=lambda el: el[4], reverse=True)
         result_list = [
-            {'nm_promotoria': el[1], 'nr_acoes_propostas_30_dias': el[4]}
+            {
+                'nm_promotoria': suamesa.format_text(el[1]),
+                'nr_acoes_propostas_30_dias': el[4]
+            }
             for el in sorted_list
         ]
         return result_list[:n]

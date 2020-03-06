@@ -40,15 +40,15 @@ class DetalheAcervoViewTest(NoCacheTestCase, TestCase):
             "variacao_acervo": -60.0,
             "top_n": [
                 {
-                    'nm_promotoria': 'PROMO3',
+                    'nm_promotoria': 'Promo3',
                     'variacao_acervo': 200.0,
                 },
                 {
-                    'nm_promotoria': 'PROMO1',
+                    'nm_promotoria': 'Promo1',
                     'variacao_acervo': 100.0,
                 },
                 {
-                    'nm_promotoria': 'PROMO2',
+                    'nm_promotoria': 'Promo2',
                     'variacao_acervo': -50.0,
                 }
             ]
@@ -395,9 +395,9 @@ class DetalheProcessosJuizoViewTest(TestCase, NoCacheTestCase):
             'nr_acoes_propostas_60_dias': 20,
             'variacao_12_meses': 1.0,
             'top_n': [
-                {'nm_promotoria': 'TC 4', 'nr_acoes_propostas_30_dias': 100},
-                {'nm_promotoria': 'TC 1', 'nr_acoes_propostas_30_dias': 50},
-                {'nm_promotoria': 'TC 3', 'nr_acoes_propostas_30_dias': 40}]
+                {'nm_promotoria': 'tc 4', 'nr_acoes_propostas_30_dias': 100},
+                {'nm_promotoria': 'tc 1', 'nr_acoes_propostas_30_dias': 50},
+                {'nm_promotoria': 'tc 3', 'nr_acoes_propostas_30_dias': 40}]
         }
 
         self.assertEqual(response.status_code, 200)
