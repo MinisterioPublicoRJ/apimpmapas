@@ -219,9 +219,12 @@ Vary: Accept
 ## Listas Vistas Abertas Sua Mesa
 
 ```
-GET /dominio/suamesa/lista/vistas/<id_orgao>/<cpf>/<abertura>
+GET /dominio/suamesa/lista/vistas/<id_orgao>/<cpf>/<abertura>?page=<int>
 
 valores possíveis para abertura: ate_vinte, vinte_trinta, trinta_mais
+
+page: default=1
+page_size (elementos por página): 20
 ```
 
 ```
