@@ -497,3 +497,12 @@ class SuaMesaVistasListaView(APIView):
         vistas_lista = SuaMesaListaVistasSerializer(page_data, many=True).data
 
         return Response(data=vistas_lista)
+
+@method_decorator(
+    cache_page(300, key_prefix="dominio_alertas"),
+    name="dispatch"
+)
+class AlertasView(APIView):
+    def get(self, request, *args, **kwargs):
+        pass
+

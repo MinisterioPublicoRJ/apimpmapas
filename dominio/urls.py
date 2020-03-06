@@ -12,6 +12,10 @@ from .views import (
     SuaMesaVistasListaView,
     DetalheAcervoView,
     DetalheProcessosJuizoView,
+    AcervoVariationView,
+    AcervoVariationTopNView,
+    AlertasView
+
 )
 
 app_name = 'dominio'
@@ -80,5 +84,13 @@ stats_patterns = [
     ),
 ]
 
+alertas_patterns = [
+    path(
+        'alertas/<str:orgao_id>',
+        AlertasView.as_view(),
+        name='lista_alertas'
+    ),
+]
 
-urlpatterns = suamesa_patterns + stats_patterns
+
+urlpatterns = suamesa_patterns + stats_patterns + alertas_patterns
