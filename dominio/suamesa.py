@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from decouple import config
 from django.conf import settings
 
 from .db_connectors import run_query
@@ -12,6 +13,9 @@ QUERY_REGRAS = """
     ON r.cod_atribuicao = pct.cod_pct
     WHERE pct.id_orgao = :orgao_id
     """
+
+
+VISTAS_PAGE_SIZE = config('VISTAS_PAGE_SIZE', cast=int, default=20)
 
 
 @lru_cache()
