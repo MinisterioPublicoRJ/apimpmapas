@@ -59,3 +59,13 @@ class TestSuaPromotoria(TestCase):
             radar_query.format(orgao_id=1, schema=settings.TABLE_NAMESPACE)
         )
         self.assertEqual(resp.data, expected_data)
+
+    @mock.patch("dominio.radar_views.run_query")
+    def test_404_response(self, _run_query):
+        _run_query.return_value = None
+
+        url = reverse('dominio:radar', args=('nonexist', ))
+
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 404)

@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.http import Http404
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from rest_framework.response import Response
@@ -26,4 +27,7 @@ class SuaPromotoriaView(APIView):
     def get(self, request, *args, **kwargs):
         orgao_id = kwargs.get("orgao_id")
         radar_data = self.get_radar_data(orgao_id)
+        if radar_data is None:
+            raise Http404
+
         return Response(data=dict(zip(field_names, radar_data[0])))
