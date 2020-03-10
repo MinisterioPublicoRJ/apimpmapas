@@ -49,7 +49,7 @@ class TestSuaPromotoria(TestCase):
         ]
         _run_query.return_value = run_query_resp
 
-        url = reverse('dominio:radar-suapromotoria', args=('1', ))
+        url = reverse('dominio:radar', args=('1', ))
         expected_data = dict(zip(field_names, run_query_resp[0]))
 
         resp = self.client.get(url)

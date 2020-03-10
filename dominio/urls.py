@@ -84,9 +84,9 @@ stats_patterns = [
 
 radar_patterns = [
     path(
-        "radar/suapromotoria/<str:orgao_id>",
+        "radar/<str:orgao_id>",
         SuaPromotoriaView.as_view(),
-        name="radar-suapromotoria"
+        name="radar"
     ),
 ]
 
