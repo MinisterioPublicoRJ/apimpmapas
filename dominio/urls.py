@@ -14,7 +14,7 @@ from .views import (
     DetalheProcessosJuizoView,
     AlertasView,
 )
-from dominio.radar_views import SuaPromotoriaView
+from .radar_views import SuaPromotoriaView
 
 app_name = 'dominio'
 
@@ -62,7 +62,6 @@ suamesa_patterns = [
     ),
 ]
 
-
 stats_patterns = [
     path(
         'outliers/'
@@ -98,4 +97,7 @@ radar_patterns = [
     ),
 ]
 
-urlpatterns = suamesa_patterns + stats_patterns + alertas_patterns + radar_patterns
+urlpatterns = suamesa_patterns + \
+    stats_patterns + \
+    alertas_patterns + \
+    radar_patterns

@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 
 from django.conf import settings
-from django.core.paginator import EmptyPage, Paginator
 from django.db.models import F
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page

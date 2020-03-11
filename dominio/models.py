@@ -214,7 +214,7 @@ class Alerta:
                 'classe_hier': row[7],
                 'dias_passados': row[8],
                 'descricao': row[9],
-                'sigla': row[10],               
+                'sigla': row[10],
             }
             dataset.append(dict_row)
 
