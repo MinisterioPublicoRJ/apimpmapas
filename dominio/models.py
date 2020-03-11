@@ -201,4 +201,21 @@ class Alerta:
 
         data = run_query(query, parameters)
 
-        return data
+        dataset = []
+        for row in data:
+            dict_row = {
+                'doc_dk': row[0],
+                'num_doc': row[1],
+                'num_ext': row[2],
+                'etiqueta': row[3],
+                'classe_doc': row[4],
+                'data_alerta': row[5],
+                'orgao': row[6],
+                'classe_hier': row[7],
+                'dias_passados': row[8],
+                'descricao': row[9],
+                'sigla': row[10],               
+            }
+            dataset.append(dict_row)
+
+        return dataset

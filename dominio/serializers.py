@@ -79,7 +79,7 @@ class AlertasListaSerializer(serializers.Serializer):
     num_ext = serializers.CharField()
     etiqueta = serializers.CharField()
     classe_doc = serializers.CharField()
-    data_alerta = serializers.DateField()
+    data_alerta = serializers.DateTimeField()
     orgao = serializers.IntegerField()
     classe_hier = serializers.CharField()
     dias_passados = serializers.IntegerField()
