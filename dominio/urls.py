@@ -14,6 +14,7 @@ from .views import (
     DetalheProcessosJuizoView,
     AlertasView,
 )
+from dominio.radar_views import SuaPromotoriaView
 
 app_name = 'dominio'
 
@@ -89,5 +90,12 @@ alertas_patterns = [
     ),
 ]
 
+radar_patterns = [
+    path(
+        "radar/<str:orgao_id>",
+        SuaPromotoriaView.as_view(),
+        name="radar"
+    ),
+]
 
-urlpatterns = suamesa_patterns + stats_patterns + alertas_patterns
+urlpatterns = suamesa_patterns + stats_patterns + alertas_patterns + radar_patterns
