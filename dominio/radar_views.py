@@ -18,21 +18,12 @@ from dominio.suamesa import format_text
 )
 class SuaPromotoriaView(APIView):
     def prepare_response(self, resp):
-        resp["nm_max_arquivamentos"] = format_text(
-            resp["nm_max_arquivamentos"]
-        )
-        resp["nm_max_indeferimentos"] = format_text(
-            resp["nm_max_indeferimentos"]
-        )
-        resp["nm_max_instauracoes"] = format_text(
-            resp["nm_max_instauracoes"]
-        )
-        resp["nm_max_tac"] = format_text(
-            resp["nm_max_tac"]
-        )
-        resp["nm_max_acoes"] = format_text(
-            resp["nm_max_acoes"]
-        )
+        format_fields = [
+            "nm_max_arquivamentos", "nm_max_indeferimentos",
+            "nm_max_instauracoes", "nm_max_tac", "nm_max_acoes"
+        ]
+        for field in format_fields:
+            resp[field] = format_text(resp[field])
 
         return resp
 
