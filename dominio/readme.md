@@ -249,3 +249,53 @@ Vary: Accept
     }
 ]
 ```
+
+## Radar Performance
+
+```
+GET /dominio/radar/<id_orgao>
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "pacote_atribuicao": "Tutela Coletiva",
+    "orgao_id": 123456.9,
+    "nr_arquivamentos": 179,
+    "nr_indeferimentos": 25,
+    "nr_instauracaoes": 12,
+    "nr_tac": 0,
+    "nr_acoes": 0,
+    "dt_calculo": "2019-03-09T14:50:11.324000",
+    "nm_max_arquivamentos": "Promotoria 5",
+    "max_pacote_arquivamentos": 25,
+    "nm_max_indeferimentos": "Promotoria 4",
+    "max_pacote_indeferimentos": 10,
+    "nm_max_instauracoes": "Promtoria 3",
+    "max_pacote_instauracoes": 50,
+    "nm_max_tac": "Promotoria 2",
+    "max_pacote_tac": 100,
+    "nm_max_acoes": "Promotoria 1",
+    "max_pacote_acoes": 100,
+    "codigo_pacote": 569,
+    "med_pacote_aquivamentos": 149,
+    "med_pacote_tac": 3,
+    "med_pacote_indeferimentos": 70,
+    "med_pacote_instauracoes": 32,
+    "med_pacote_acoes": 4,
+    "perc_arquivamentos": 64.38848920863309,
+    "perc_tac": 0.0,
+    "perc_indeferimentos": 16.55629139072848,
+    "perc_instauracaoes": 18.461538461538463,
+    "perc_acoes": 0.0,
+    "var_med_arquivamentos": 0.20134228187919462,
+    "var_med_tac": 0.0,
+    "var_med_indeferimentos": -0.6428571428571429,
+    "var_med_instauracoes": -0.625,
+    "var_med_acoes": 0.0
+}
+```
