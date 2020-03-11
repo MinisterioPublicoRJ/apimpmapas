@@ -1,18 +1,92 @@
 query = """
     WITH MAX_DADOS_PACOTE AS (
-        SELECT cod_pct, MAX(nr_arquivamentos) as pct_max_arq,
-        max(nr_indeferimentos) as pct_max_ind,
-        max(nr_instauracao) as pct_max_inst,
-        max(nr_tac) as pct_max_tac,
-        max(nr_acoes) as pct_max_acoes
-        FROM {schema}.tb_radar_performance
-        INNER JOIN {schema}.atualizacao_pj_pacote
-        ON id_orgao = orgao_id
-        WHERE cod_pct IN (SELECT cod_pct
-                          FROM {schema}.atualizacao_pj_pacote
-                          WHERE id_orgao = {orgao_id})
-        AND orgao_id <> {orgao_id}
-        GROUP BY cod_pct
+        select  p.orgi_nm_orgao as nm_max_arq, p.max_value as pct_max_arq,
+        p1.orgi_nm_orgao as nm_max_indef, p1.max_value as pct_max_ind,
+        p2.orgi_nm_orgao as nm_max_inst, p2.max_value as pct_max_inst,
+        p3.orgi_nm_orgao as nm_max_tac, p3.max_value as pct_max_tac,
+        p4.orgi_nm_orgao as nm_max_acoes, p4.max_value as pct_max_acoes,
+        p.cod_pct
+        from (
+            select *
+            from (
+                select  a.orgi_nm_orgao,
+                        row_number() over (partition by a.cod_pct order by
+                            nr_arquivamentos desc) as num_row,
+                        max(nr_arquivamentos) over (partition by a.cod_pct)
+                            as max_value,
+                        a.cod_pct
+                from {schema}.tb_radar_performance p
+                join {schema}.atualizacao_pj_pacote a
+                on p.orgao_id = a.id_orgao
+            ) p
+            where p.num_row = 1
+        ) p
+        join (
+            select *
+            from (
+                select  a.orgi_nm_orgao,
+                        row_number() over (partition by a.cod_pct order by
+                            nr_indeferimentos desc) as num_row,
+                        max(nr_indeferimentos) over (partition by a.cod_pct)
+                            as max_value,
+                        a.cod_pct
+                from {schema}.tb_radar_performance p
+                join {schema}.atualizacao_pj_pacote a
+                on p.orgao_id = a.id_orgao
+            ) p
+            where p.num_row = 1
+
+        ) p1 on p.cod_pct = p1.cod_pct
+        join (
+            select *
+            from (
+                select  a.orgi_nm_orgao,
+                        row_number() over (partition by a.cod_pct order by
+                            nr_instauracao desc) as num_row,
+                        max(nr_instauracao) over (partition by a.cod_pct)
+                            as max_value,
+                        a.cod_pct
+                from {schema}.tb_radar_performance p
+                join {schema}.atualizacao_pj_pacote a
+                on p.orgao_id = a.id_orgao
+            ) p
+            where p.num_row = 1
+
+        ) p2 on p.cod_pct = p2.cod_pct
+        join (
+            select *
+            from (
+                select  a.orgi_nm_orgao,
+                        row_number() over (partition by a.cod_pct order by
+                            nr_tac desc) as num_row,
+                        max(nr_tac) over (partition by a.cod_pct) as max_value,
+                        a.cod_pct
+                from {schema}.tb_radar_performance p
+                join {schema}.atualizacao_pj_pacote a
+                on p.orgao_id = a.id_orgao
+            ) p
+            where p.num_row = 1
+
+        ) p3 on p.cod_pct = p3.cod_pct
+        join (
+            select *
+            from (
+                select  a.orgi_nm_orgao,
+                        row_number() over (partition by a.cod_pct order
+                            by nr_acoes desc) as num_row,
+                        max(nr_acoes) over (partition by a.cod_pct)
+                            as max_value,
+                        a.cod_pct
+                from {schema}.tb_radar_performance p
+                join {schema}.atualizacao_pj_pacote a
+                on p.orgao_id = a.id_orgao
+            ) p
+            where p.num_row = 1
+
+        ) p4 on p.cod_pct = p4.cod_pct
+        where p.cod_pct IN (SELECT cod_pct
+            FROM {schema}.atualizacao_pj_pacote WHERE
+            id_orgao = :orgao_id)
     ),
     MED_ARQUIV_PACOTE AS (
         SELECT cod_pct, appx_median(DISTINCT nr_arquivamentos)
@@ -22,8 +96,7 @@ query = """
         ON id_orgao = orgao_id
         WHERE cod_pct IN (SELECT cod_pct
                           FROM {schema}.atualizacao_pj_pacote
-                          WHERE id_orgao = {orgao_id})
-        AND orgao_id <> {orgao_id}
+                          WHERE id_orgao = :orgao_id)
         GROUP BY cod_pct
     ),
     MED_TAC_PACOTE AS (
@@ -33,8 +106,7 @@ query = """
         ON id_orgao = orgao_id
         WHERE cod_pct IN (SELECT cod_pct
                           FROM {schema}.atualizacao_pj_pacote
-                          WHERE id_orgao = {orgao_id})
-        AND orgao_id <> {orgao_id}
+                          WHERE id_orgao = :orgao_id)
         GROUP BY cod_pct
     ),
     MED_ACOES_PACOTE AS (
@@ -44,8 +116,7 @@ query = """
         ON id_orgao = orgao_id
         WHERE cod_pct IN (SELECT cod_pct
                           FROM {schema}.atualizacao_pj_pacote
-                          WHERE id_orgao = {orgao_id})
-        AND orgao_id <> {orgao_id}
+                          WHERE id_orgao = :orgao_id)
         GROUP BY cod_pct
     ),
     MED_INSTAU_PACOTE AS (
@@ -55,8 +126,7 @@ query = """
         ON id_orgao = orgao_id
         WHERE cod_pct IN (SELECT cod_pct
                           FROM {schema}.atualizacao_pj_pacote
-                          WHERE id_orgao = {orgao_id})
-        AND orgao_id <> {orgao_id}
+                          WHERE id_orgao = :orgao_id)
         GROUP BY cod_pct
     ),
     MED_INDEF_PACOTE AS (
@@ -66,14 +136,13 @@ query = """
         ON id_orgao = orgao_id
         WHERE cod_pct IN (SELECT cod_pct
                           FROM {schema}.atualizacao_pj_pacote
-                          WHERE id_orgao = {orgao_id})
-        AND orgao_id <> {orgao_id}
+                          WHERE id_orgao = :orgao_id)
         GROUP BY cod_pct
     ),
     DADOS_ORGAO AS (SELECT * FROM {schema}.tb_radar_performance
     INNER JOIN {schema}.atualizacao_pj_pacote
     ON id_orgao = orgao_id
-    WHERE orgao_id = {orgao_id}
+    WHERE orgao_id = :orgao_id
     )
     SELECT
         DADOS_ORGAO.pacote_atribuicao,
@@ -163,12 +232,17 @@ field_names = [
     "nr_tac",
     "nr_acoes",
     "dt_calculo",
-    "codigo_pacote",
+    "nm_max_arquivamentos",
     "max_pacote_arquivamentos",
+    "nm_max_indeferimentos",
     "max_pacote_indeferimentos",
+    "nm_max_instauracoes",
     "max_pacote_instauracoes",
+    "nm_max_tac",
     "max_pacote_tac",
+    "nm_max_acoes",
     "max_pacote_acoes",
+    "codigo_pacote",
     "med_pacote_aquivamentos",
     "med_pacote_tac",
     "med_pacote_indeferimentos",
