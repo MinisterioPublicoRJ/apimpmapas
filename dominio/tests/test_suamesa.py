@@ -183,7 +183,7 @@ class TestSuaMesaDetalheVistas(TestCase):
 
 
 class TestSuaMesaListaVistasAbertas(TestCase):
-    @mock.patch('dominio.views.Paginator')
+    @mock.patch('dominio.mixins.Paginator')
     @mock.patch('dominio.views.Vista')
     def test_correct_response(self, _Vista, _Paginator):
         page_mock = mock.MagicMock()
