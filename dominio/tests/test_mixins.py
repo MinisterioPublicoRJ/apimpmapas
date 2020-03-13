@@ -45,3 +45,12 @@ class TestCacheMixin(TestCase):
         cache.cache_key = 'another_cache_key'
 
         self.assertEqual(cache.cache_key, 'another_cache_key')
+
+    def test_return_cache_key_with_correct_attr_name(self):
+        cache = CacheMixin()
+        expected_cache_key = 'cache_mixin_key'
+
+        with self.assertRaises(AttributeError):
+            cache.another_attr
+
+        self.assertEqual(cache.cache_key, expected_cache_key)

@@ -19,6 +19,9 @@ class CacheMixin:
     cache_timeout = settings.CACHE_TIMEOUT
 
     def __getattr__(self, key):
+        if key != "cache_key":
+            raise AttributeError
+
         class_name = self.__class__.__name__
         return '{}_key'.format(
             ''.join(
