@@ -2,7 +2,7 @@ from unittest import mock, TestCase
 
 from django.core.paginator import EmptyPage
 
-from dominio.mixins import PaginatorMixin
+from dominio.mixins import CacheMixin, PaginatorMixin
 
 
 class TestMixins(TestCase):
@@ -33,3 +33,15 @@ class TestMixins(TestCase):
         page_mock.page.assert_called_once_with(1)
 
         self.assertEqual(resp, [])
+
+
+class TestCacheMixin(TestCase):
+    def test_cache_key(self):
+        cache = CacheMixin()
+        expected_cache_key = 'cache_mixin_key'
+
+        self.assertEqual(cache.cache_key, expected_cache_key)
+
+        cache.cache_key = 'another_cache_key'
+
+        self.assertEqual(cache.cache_key, 'another_cache_key')
