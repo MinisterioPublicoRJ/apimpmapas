@@ -1,22 +1,17 @@
 from django.conf import settings
 from django.http import Http404
-from django.views.decorators.cache import cache_page
-from django.utils.decorators import method_decorator
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from dominio.db_connectors import run_query
+from dominio.mixins import CacheMixin
 from dominio.radar_queries import field_names, query
 from dominio.suamesa import format_text
 
 
-@method_decorator(
-    cache_page(
-        settings.CACHE_TIMEOUT,
-        key_prefix="dominio_radar"),
-    name="dispatch"
-)
-class SuaPromotoriaView(APIView):
+class SuaPromotoriaView(CacheMixin, APIView):
+    cache_config = 'SUAPROMOTORIA_CACHE_TIMEOUT'
+
     def prepare_response(self, resp):
         format_fields = [
             "nm_max_arquivamentos", "nm_max_indeferimentos",
