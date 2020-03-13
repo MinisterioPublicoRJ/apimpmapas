@@ -23,11 +23,9 @@ class CacheMixin:
             raise AttributeError
 
         class_name = self.__class__.__name__
-        return '{}_key'.format(
-            ''.join(
-                [f'_{l.lower()}' if l.isupper() and i else l.lower()
-                 for i, l in enumerate(class_name)]
-            )
+        return ''.join(
+            [f'_{l.lower()}' if l.isupper() and i else l.lower()
+             for i, l in enumerate(class_name)]
         )
 
     def dispatch(self, request, *args, **kwargs):
