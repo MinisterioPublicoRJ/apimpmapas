@@ -29,3 +29,9 @@ class CacheMixin:
                  for i, l in enumerate(class_name)]
             )
         )
+
+    def dispatch(self, request, *args, **kwargs):
+        return cache_page(
+            self.cache_timeout,
+            key_prefix=self.cache_key
+        )(super().dispatch)(request, *args, **kwargs)

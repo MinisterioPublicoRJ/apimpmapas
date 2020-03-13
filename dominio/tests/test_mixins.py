@@ -54,3 +54,25 @@ class TestCacheMixin(TestCase):
             cache.another_attr
 
         self.assertEqual(cache.cache_key, expected_cache_key)
+
+    @mock.patch('%s.super' % __name__, create=True)
+    @mock.patch('dominio.mixins.cache_page')
+    def test_cached_dispatch_method(self, _cache_page, _super_func):
+        dispatch_mock = mock.MagicMock()
+        _cache_page.return_value = dispatch_mock
+
+        class Parent:
+            def dispatch(self, request, *args, **kwargs):
+                pass
+
+        class CacheChild(CacheMixin, Parent):
+            pass
+
+        cache_obj = CacheChild()
+        cache_obj.dispatch('request', 1, 2, a=1, b=2)
+
+        _cache_page.assert_called_once_with(
+            cache_obj.cache_timeout,
+            key_prefix=cache_obj.cache_key
+        )
+        dispatch_mock.assert_called()
