@@ -1,5 +1,6 @@
 from unittest import mock, TestCase
 
+from django.conf import settings
 from django.core.paginator import EmptyPage
 
 from dominio.mixins import CacheMixin, PaginatorMixin
@@ -72,7 +73,28 @@ class TestCacheMixin(TestCase):
         cache_obj.dispatch('request', 1, 2, a=1, b=2)
 
         _cache_page.assert_called_once_with(
-            cache_obj.cache_timeout,
+            cache_obj.get_timeout(),
             key_prefix=cache_obj.cache_key
         )
         dispatch_mock.assert_called()
+
+    @mock.patch('dominio.mixins.config', return_value=100)
+    def test_cache_config_string(self, _config):
+        cache_obj = CacheMixin()
+        cache_obj.cache_config = 'CACHE_CONFIG'
+
+        timeout = cache_obj.get_timeout()
+
+        self.assertEqual(timeout, 100)
+        _config.assert_called_once_with(
+            'CACHE_CONFIG',
+            cast=int,
+            default=settings.CACHE_TIMEOUT
+        )
+
+    def test_cache_config_none(self):
+        cache_obj = CacheMixin()
+
+        timeout = cache_obj.get_timeout()
+
+        self.assertEqual(timeout, settings.CACHE_TIMEOUT)

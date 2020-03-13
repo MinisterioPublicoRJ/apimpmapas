@@ -22,6 +22,7 @@ from .serializers import (
 
 
 class DetalheAcervoView(CacheMixin, APIView):
+    cache_config = 'DETALHE_ACERVO_CACHE_TIMEOUT'
 
     @staticmethod
     def get_variacao_orgao(l, orgao_id):
@@ -123,6 +124,7 @@ class DetalheAcervoView(CacheMixin, APIView):
 
 
 class OutliersView(CacheMixin, APIView):
+    cache_config = 'OUTLIERS_CACHE_TIMEOUT'
 
     def get_acervo(self, orgao_id, data):
         query = (
@@ -200,6 +202,7 @@ class OutliersView(CacheMixin, APIView):
 
 
 class SaidasView(CacheMixin, APIView):
+    cache_config = 'SAIDAS_CACHE_TIMEOUT'
 
     def get_saidas(self, orgao_id):
 
@@ -241,6 +244,7 @@ class SaidasView(CacheMixin, APIView):
 
 
 class EntradasView(CacheMixin, APIView):
+    cache_config = 'ENTRADAS_CACHE_TIMEOUT'
 
     def get_entradas(self, orgao_id, nr_cpf):
 
@@ -301,6 +305,8 @@ class EntradasView(CacheMixin, APIView):
 
 
 class SuaMesaVistasAbertas(CacheMixin, APIView):
+    cache_config = 'SUAMESAVISTAS_CACHE_TIMEOUT'
+
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
         cpf = kwargs.get("cpf")
@@ -311,6 +317,8 @@ class SuaMesaVistasAbertas(CacheMixin, APIView):
 
 
 class SuaMesaInvestigacoes(CacheMixin, APIView):
+    cache_config = 'SUAMESAINVESTIGACOES_CACHE_TIMEOUT'
+
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
 
@@ -325,6 +333,8 @@ class SuaMesaInvestigacoes(CacheMixin, APIView):
 
 
 class SuaMesaProcessos(CacheMixin, APIView):
+    cache_config = 'SUAMESAPROCESSOS_CACHE_TIMEOUT'
+
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
 
@@ -336,6 +346,8 @@ class SuaMesaProcessos(CacheMixin, APIView):
 
 
 class SuaMesaFinalizados(CacheMixin, APIView):
+    cache_config = 'SUAMESAFINALIZADOS_CACHE_TIMEOUT'
+
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
 
@@ -347,6 +359,8 @@ class SuaMesaFinalizados(CacheMixin, APIView):
 
 
 class SuaMesaDetalheView(CacheMixin, APIView):
+    cache_config = 'SUAMESADETALHE_CACHE_TIMEOUT'
+
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
         cpf = kwargs.get("cpf")
@@ -359,6 +373,7 @@ class SuaMesaDetalheView(CacheMixin, APIView):
 
 
 class DetalheProcessosJuizoView(CacheMixin, APIView):
+    cache_config = 'DETALHEPROCESSO_CACHE_TIMEOUT'
 
     @staticmethod
     def get_numero_acoes_propostas_pacote_atribuicao(orgao_id):
@@ -428,6 +443,8 @@ class DetalheProcessosJuizoView(CacheMixin, APIView):
 
 
 class SuaMesaVistasListaView(CacheMixin, PaginatorMixin, APIView):
+    cache_config = 'SUAMESAVISTASLISTA_CACHE_TIMEOUT'
+
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
         cpf = kwargs.get("cpf")
@@ -460,6 +477,7 @@ class SuaMesaVistasListaView(CacheMixin, PaginatorMixin, APIView):
 
 
 class AlertasView(CacheMixin, PaginatorMixin, APIView):
+    cache_config = 'ALERTAS_CACHE_TIMEOUT'
     # TODO: Mover constante para um lugar decente
     ALERTAS_SIZE = 25
 
