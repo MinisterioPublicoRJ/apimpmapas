@@ -83,3 +83,7 @@ class AlertasListaSerializer(serializers.Serializer):
     orgao = serializers.IntegerField()
     classe_hier = serializers.CharField()
     dias_passados = serializers.IntegerField()
+
+
+class TempoTramitacaoSerializer(serializers.Serializer):
+    pass
