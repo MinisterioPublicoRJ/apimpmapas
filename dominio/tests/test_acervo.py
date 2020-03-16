@@ -336,6 +336,20 @@ class DetalheProcessosJuizoViewTest(TestCase, NoCacheTestCase):
 
         self.assertEqual(output, expected_output)
 
+    def test_get_value_from_invalid_orgao(self):
+        test_orgao_id = 33
+        test_list = [
+            (1, 'Nome1', 220),
+            (10, 'Nome2', 140),
+            (42, 'Nome3', 150),
+            (60, 'Nome4', 65)
+        ]
+        output = DetalheProcessosJuizoView.get_value_from_orgao(
+            test_list, test_orgao_id, value_position=2)
+        expected_output = None
+
+        self.assertEqual(output, expected_output)
+
     def test_get_top_n_orgaos(self):
         test_list = [
             (1, 'Nome1', 220, 0.5, 10),

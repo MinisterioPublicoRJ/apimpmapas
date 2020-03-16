@@ -1,10 +1,7 @@
 from datetime import datetime, timedelta
 
 from django.conf import settings
-from django.core.paginator import EmptyPage, Paginator
 from django.db.models import F
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from django.http import Http404, JsonResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -12,7 +9,8 @@ from rest_framework.views import APIView
 
 from dominio import suamesa
 from .db_connectors import run_query
-from .models import Vista, Documento, SubAndamento
+from .mixins import CacheMixin, PaginatorMixin
+from .models import Vista, Documento, SubAndamento, Alerta
 from .serializers import (
     SaidasSerializer,
     OutliersSerializer,
@@ -20,6 +18,7 @@ from .serializers import (
     DetalheAcervoSerializer,
     DetalheProcessosJuizoSerializer,
     SuaMesaListaVistasSerializer,
+    AlertasListaSerializer,
 )
 from login.jwtlogin import authenticate_integra
 
@@ -30,13 +29,8 @@ def login(request):
     return JsonResponse(response)
 
 
-@method_decorator(
-    cache_page(
-        settings.CACHE_TIMEOUT,
-        key_prefix="dominio_acervo_variation_topn"),
-    name="dispatch"
-)
-class DetalheAcervoView(APIView):
+class DetalheAcervoView(CacheMixin, APIView):
+    cache_config = 'DETALHE_ACERVO_CACHE_TIMEOUT'
 
     @staticmethod
     def get_variacao_orgao(l, orgao_id):
@@ -137,11 +131,8 @@ class DetalheAcervoView(APIView):
         return Response(data)
 
 
-@method_decorator(
-    cache_page(300, key_prefix="dominio_outliers"),
-    name="dispatch"
-)
-class OutliersView(APIView):
+class OutliersView(CacheMixin, APIView):
+    cache_config = 'OUTLIERS_CACHE_TIMEOUT'
 
     def get_acervo(self, orgao_id, data):
         query = (
@@ -218,11 +209,8 @@ class OutliersView(APIView):
         return Response(data)
 
 
-@method_decorator(
-    cache_page(300, key_prefix="dominio_saidas"),
-    name="dispatch"
-)
-class SaidasView(APIView):
+class SaidasView(CacheMixin, APIView):
+    cache_config = 'SAIDAS_CACHE_TIMEOUT'
 
     def get_saidas(self, orgao_id):
 
@@ -263,11 +251,8 @@ class SaidasView(APIView):
         return Response(data)
 
 
-@method_decorator(
-    cache_page(300, key_prefix="dominio_entradas"),
-    name="dispatch"
-)
-class EntradasView(APIView):
+class EntradasView(CacheMixin, APIView):
+    cache_config = 'ENTRADAS_CACHE_TIMEOUT'
 
     def get_entradas(self, orgao_id, nr_cpf):
 
@@ -327,13 +312,9 @@ class EntradasView(APIView):
         return Response(data)
 
 
-@method_decorator(
-    cache_page(
-        settings.CACHE_TIMEOUT,
-        key_prefix="dominio_suamesa_vistas"),
-    name="dispatch"
-)
-class SuaMesaVistasAbertas(APIView):
+class SuaMesaVistasAbertas(CacheMixin, APIView):
+    cache_config = 'SUAMESAVISTAS_CACHE_TIMEOUT'
+
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
         cpf = kwargs.get("cpf")
@@ -343,7 +324,9 @@ class SuaMesaVistasAbertas(APIView):
         return Response(data={"suamesa_vistas": doc_count})
 
 
-class SuaMesaInvestigacoes(APIView):
+class SuaMesaInvestigacoes(CacheMixin, APIView):
+    cache_config = 'SUAMESAINVESTIGACOES_CACHE_TIMEOUT'
+
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
 
@@ -357,7 +340,9 @@ class SuaMesaInvestigacoes(APIView):
         return Response(data={"suamesa_investigacoes": doc_count})
 
 
-class SuaMesaProcessos(APIView):
+class SuaMesaProcessos(CacheMixin, APIView):
+    cache_config = 'SUAMESAPROCESSOS_CACHE_TIMEOUT'
+
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
 
@@ -368,13 +353,9 @@ class SuaMesaProcessos(APIView):
         return Response(data={"suamesa_processos": doc_count})
 
 
-@method_decorator(
-    cache_page(
-        settings.CACHE_TIMEOUT,
-        key_prefix="dominio_suamesa_finalizados"),
-    name="dispatch"
-)
-class SuaMesaFinalizados(APIView):
+class SuaMesaFinalizados(CacheMixin, APIView):
+    cache_config = 'SUAMESAFINALIZADOS_CACHE_TIMEOUT'
+
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
 
@@ -385,7 +366,9 @@ class SuaMesaFinalizados(APIView):
         return Response(data={"suamesa_finalizados": doc_count})
 
 
-class SuaMesaDetalheView(APIView):
+class SuaMesaDetalheView(CacheMixin, APIView):
+    cache_config = 'SUAMESADETALHE_CACHE_TIMEOUT'
+
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
         cpf = kwargs.get("cpf")
@@ -397,11 +380,8 @@ class SuaMesaDetalheView(APIView):
         return Response(mesa_detalhe)
 
 
-@method_decorator(
-    cache_page(settings.CACHE_TIMEOUT, key_prefix="dominio_detalhe_processos"),
-    name="dispatch"
-)
-class DetalheProcessosJuizoView(APIView):
+class DetalheProcessosJuizoView(CacheMixin, APIView):
+    cache_config = 'DETALHEPROCESSO_CACHE_TIMEOUT'
 
     @staticmethod
     def get_numero_acoes_propostas_pacote_atribuicao(orgao_id):
@@ -470,21 +450,8 @@ class DetalheProcessosJuizoView(APIView):
         return Response(data)
 
 
-@method_decorator(
-    cache_page(
-        settings.CACHE_TIMEOUT,
-        key_prefix="dominio_lista_vistas_abertas"),
-    name="dispatch"
-)
-class SuaMesaVistasListaView(APIView):
-    def paginate(self, model_response, page):
-        paginator = Paginator(model_response, suamesa.VISTAS_PAGE_SIZE)
-        try:
-            page_data = paginator.page(page).object_list
-        except EmptyPage:
-            page_data = []
-
-        return page_data
+class SuaMesaVistasListaView(CacheMixin, PaginatorMixin, APIView):
+    cache_config = 'SUAMESAVISTASLISTA_CACHE_TIMEOUT'
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
@@ -506,8 +473,33 @@ class SuaMesaVistasListaView(APIView):
             dt_abertura=F("data_abertura"),
             classe=F("documento__classe__descricao")
         )
-        page_data = self.paginate(data, page=page)
+        page_data = self.paginate(
+            data,
+            page=page,
+            page_size=suamesa.VISTAS_PAGE_SIZE
+        )
 
         vistas_lista = SuaMesaListaVistasSerializer(page_data, many=True).data
 
         return Response(data=vistas_lista)
+
+
+class AlertasView(CacheMixin, PaginatorMixin, APIView):
+    cache_config = 'ALERTAS_CACHE_TIMEOUT'
+    # TODO: Mover constante para um lugar decente
+    ALERTAS_SIZE = 25
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+        page = int(request.GET.get("page", 1))
+
+        data = Alerta.validos_por_orgao(orgao_id)
+        page_data = self.paginate(
+            data,
+            page=page,
+            page_size=self.ALERTAS_SIZE
+        )
+
+        alertas_lista = AlertasListaSerializer(page_data, many=True)
+
+        return Response(data=alertas_lista.data)
