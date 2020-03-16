@@ -1,6 +1,9 @@
 from django.urls import path
+from rest_framework_jwt.views import verify_jwt_token, refresh_jwt_token
+
 
 from .views import (
+    login,
     SaidasView,
     EntradasView,
     OutliersView,
@@ -15,7 +18,13 @@ from .views import (
 )
 from dominio.radar_views import SuaPromotoriaView
 
+
 app_name = 'dominio'
+
+
+jwt_patterns = [
+    path('token/login/', login),
+]
 
 
 suamesa_patterns = [
@@ -91,4 +100,4 @@ radar_patterns = [
 ]
 
 
-urlpatterns = suamesa_patterns + stats_patterns + radar_patterns
+urlpatterns = suamesa_patterns + stats_patterns + radar_patterns + jwt_patterns

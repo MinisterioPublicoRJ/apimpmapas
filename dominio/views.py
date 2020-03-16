@@ -5,9 +5,10 @@ from django.core.paginator import EmptyPage, Paginator
 from django.db.models import F
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
 
 from dominio import suamesa
 from .db_connectors import run_query
@@ -20,6 +21,13 @@ from .serializers import (
     DetalheProcessosJuizoSerializer,
     SuaMesaListaVistasSerializer,
 )
+from login.jwtlogin import authenticate_integra
+
+
+def login(request):
+    response = authenticate_integra(request)
+
+    return JsonResponse(response)
 
 
 @method_decorator(
