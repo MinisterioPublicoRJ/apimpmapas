@@ -2,9 +2,13 @@ import jwt
 from django.conf import settings
 
 
-def authenticate_integra(request):
+def get_jwt_from_header(request):
     token_part = request.headers['AUTHORIZATION']
-    token_part = token_part.split(' ')[1]
+    return token_part.split(' ')[1]
+
+
+def authenticate_integra(request):
+    token_part = get_jwt_from_header(request)
     payload = jwt.decode(token_part, verify=False)
 
     user_name = payload['user_name']
@@ -30,3 +34,12 @@ def authenticate_integra(request):
     payload['token'] = token.decode('latin1')
 
     return payload
+
+
+def unpack_jwt(request):
+    token = get_jwt_from_header(request)
+    return jwt.decode(
+        token,
+        settings.JWT_SECRET,
+        algorithm='HS256'
+    )

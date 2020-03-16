@@ -1,7 +1,11 @@
+from functools import wraps
 from decouple import config
 from django.conf import settings
 from django.core.paginator import EmptyPage, Paginator
+from django.http import HttpResponseForbidden
 from django.views.decorators.cache import cache_page
+from jwt import InvalidSignatureError, DecodeError
+from login.jwtlogin import unpack_jwt
 
 
 class PaginatorMixin:
@@ -49,3 +53,15 @@ class CacheMixin:
             self.get_timeout(),
             key_prefix=self.cache_key
         )(super().dispatch)(request, *args, **kwargs)
+
+
+def jwt_dominio(func):
+    @wraps
+    def wrapper(*args, **kwargs):
+        request = args[1]
+        try:
+            unpack_jwt(request)
+            return func(*args, **kwargs)
+        except (InvalidSignatureError, DecodeError):
+            return HttpResponseForbidden()
+    return wrapper

@@ -3,13 +3,14 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.db.models import F
 from django.http import Http404, JsonResponse
+from django.utils.decorators import method_decorator
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 
 from dominio import suamesa
 from .db_connectors import run_query
-from .mixins import CacheMixin, PaginatorMixin
+from .mixins import CacheMixin, PaginatorMixin, jwt_dominio
 from .models import Vista, Documento, SubAndamento, Alerta
 from .serializers import (
     SaidasSerializer,
@@ -29,6 +30,7 @@ def login(request):
     return JsonResponse(response)
 
 
+@method_decorator(jwt_dominio, name='dispatch')
 class DetalheAcervoView(CacheMixin, APIView):
     cache_config = 'DETALHE_ACERVO_CACHE_TIMEOUT'
 
