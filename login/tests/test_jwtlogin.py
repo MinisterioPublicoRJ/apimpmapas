@@ -2,7 +2,11 @@ from unittest import mock, TestCase
 
 from django.conf import settings
 
-from login.jwtlogin import authenticate_integra, get_jwt_from_header
+from login.jwtlogin import (
+    authenticate_integra,
+    get_jwt_from_header,
+    unpack_jwt,
+)
 
 
 class TestJWTLogin(TestCase):
@@ -46,3 +50,15 @@ class TestJWTLogin(TestCase):
             algorithm='HS256',
         )
         self.assertEqual(resp_payload, expected_payload)
+
+    @mock.patch('login.jwtlogin.jwt.decode', return_value="payload")
+    @mock.patch('login.jwtlogin.get_jwt_from_header', return_value="TOKEN")
+    def test_unpack_jwt(self, _get_jwt, _decode):
+        resp = unpack_jwt('request')
+        _get_jwt.assert_called_once_with('request')
+        _decode.assert_called_once_with(
+            "TOKEN",
+            settings.JWT_SECRET,
+            algorithm='HS256',
+        )
+        self.assertEqual(resp, "payload")
