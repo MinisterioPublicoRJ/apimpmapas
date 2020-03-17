@@ -2,6 +2,8 @@ from unittest import mock, TestCase
 
 from django.conf import settings
 from django.core.paginator import EmptyPage
+from django.http import HttpResponseForbidden
+from jwt import DecodeError
 
 from dominio.mixins import CacheMixin, JWTAuthMixin, PaginatorMixin
 
@@ -115,3 +117,21 @@ class TestJWTMixin(TestCase):
         jwt_mixin.dispatch('request')
 
         _unpack_jwt.assert_called_once_with('request')
+
+    @mock.patch('dominio.mixins.unpack_jwt')
+    def test_unpack_jwt_throw_error(self, _unpack_jwt):
+        _unpack_jwt.side_effect = DecodeError
+
+        class Parent:
+            def dispatch(self, request, *args, **kwargs):
+                pass
+
+        class Child(JWTAuthMixin, Parent):
+            def dispatch(self, request, *args, **kwargs):
+                return super().dispatch(request, *args, **kwargs)
+
+        jwt_mixin = Child()
+        handler = jwt_mixin.dispatch('request')
+
+        _unpack_jwt.assert_called_once_with('request')
+        self.assertTrue(isinstance(handler, HttpResponseForbidden))
