@@ -19,6 +19,17 @@ class NoCacheTestCase:
         cache.clear()
 
 
+class NoJWTTestCase:
+    def setUp(self):
+        self.mock_jwt = mock.patch('dominio.mixins.unpack_jwt')
+        super().setUp()
+        self.mock_jwt.start()
+
+    def tearDown(self):
+        super().tearDown()
+        self.mock_jwt.stop()
+
+
 class TestSuaMesaUtils(TestCase):
     def test_format_string(self):
         text = "PROMOTORIA DA CAPITAL"
@@ -69,7 +80,7 @@ class TestSuaMesa(TestCase):
         self.assertEqual(output, expected_output)
 
 
-class SuaMesaViewTest(TestCase, NoCacheTestCase):
+class SuaMesaViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
     @mock.patch('dominio.views.suamesa.get_regras')
     @mock.patch('dominio.views.Documento')
     def test_sua_mesa_investigacoes(self, _Documento, _get_regras):
@@ -149,7 +160,7 @@ class SuaMesaViewTest(TestCase, NoCacheTestCase):
         manager_mock.count.assert_called_once_with()
 
 
-class TestSuaMesaDetalheVistas(TestCase):
+class TestSuaMesaDetalheVistas(NoJWTTestCase, NoCacheTestCase, TestCase):
     @mock.patch('dominio.views.Vista')
     def test_correct_response(self, _Vista):
         expected_resp = {
@@ -182,7 +193,7 @@ class TestSuaMesaDetalheVistas(TestCase):
         self.assertEqual(resp.status_code, 404)
 
 
-class TestSuaMesaListaVistasAbertas(TestCase):
+class TestSuaMesaListaVistasAbertas(NoJWTTestCase, NoCacheTestCase, TestCase):
     @mock.patch('dominio.mixins.Paginator')
     @mock.patch('dominio.views.Vista')
     def test_correct_response(self, _Vista, _Paginator):

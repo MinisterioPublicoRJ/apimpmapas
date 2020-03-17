@@ -1,4 +1,3 @@
-from functools import wraps
 from decouple import config
 from django.conf import settings
 from django.core.paginator import EmptyPage, Paginator
@@ -55,13 +54,10 @@ class CacheMixin:
         )(super().dispatch)(request, *args, **kwargs)
 
 
-def jwt_dominio(func):
-    @wraps
-    def wrapper(*args, **kwargs):
-        request = args[1]
+class JWTAuthMixin:
+    def dispatch(self, request, *args, **kwargs):
         try:
             unpack_jwt(request)
-            return func(*args, **kwargs)
+            return super().dispatch(request, *args, **kwargs)
         except (InvalidSignatureError, DecodeError):
             return HttpResponseForbidden()
-    return wrapper

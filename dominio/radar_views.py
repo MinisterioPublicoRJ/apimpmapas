@@ -4,12 +4,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from dominio.db_connectors import run_query
-from dominio.mixins import CacheMixin
+from dominio.mixins import CacheMixin, JWTAuthMixin
 from dominio.radar_queries import field_names, query
 from dominio.suamesa import format_text
 
 
-class SuaPromotoriaView(CacheMixin, APIView):
+class SuaPromotoriaView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAPROMOTORIA_CACHE_TIMEOUT'
 
     def prepare_response(self, resp):

@@ -11,7 +11,18 @@ class NoCacheTestCase:
         cache.clear()
 
 
-class AlertaListaTest(TestCase, NoCacheTestCase):
+class NoJWTTestCase:
+    def setUp(self):
+        self.mock_jwt = mock.patch('dominio.mixins.unpack_jwt')
+        super().setUp()
+        self.mock_jwt.start()
+
+    def tearDown(self):
+        super().tearDown()
+        self.mock_jwt.stop()
+
+
+class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
     @mock.patch('dominio.views.Alerta')
     def test_alert_list(self, _Alerta):

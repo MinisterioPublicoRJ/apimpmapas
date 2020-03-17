@@ -3,7 +3,7 @@ from django.conf import settings
 
 
 def get_jwt_from_header(request):
-    token_part = request.headers['AUTHORIZATION']
+    token_part = request.headers.get('AUTHORIZATION', 'Bearer None')
     return token_part.split(' ')[1]
 
 

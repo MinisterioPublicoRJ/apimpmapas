@@ -17,7 +17,18 @@ class NoCacheTestCase:
         cache.clear()
 
 
-class DetalheAcervoViewTest(NoCacheTestCase, TestCase):
+class NoJWTTestCase:
+    def setUp(self):
+        self.mock_jwt = mock.patch('dominio.mixins.unpack_jwt')
+        super().setUp()
+        self.mock_jwt.start()
+
+    def tearDown(self):
+        super().tearDown()
+        self.mock_jwt.stop()
+
+
+class DetalheAcervoViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
     def test_get_variacao_orgao_return_none(self):
         view = DetalheAcervoView()
         resp = view.get_variacao_orgao([], orgao_id=10)
@@ -120,7 +131,7 @@ class DetalheAcervoViewTest(NoCacheTestCase, TestCase):
         self.assertEqual(response.data, expected_response)
 
 
-class OutliersViewTest(NoCacheTestCase, TestCase):
+class OutliersViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
     @mock.patch('dominio.views.run_query')
     def test_outliers_result(self, _run_query):
@@ -210,7 +221,7 @@ class OutliersViewTest(NoCacheTestCase, TestCase):
         self.assertEqual(response.data, expected_response)
 
 
-class SaidasViewTest(NoCacheTestCase, TestCase):
+class SaidasViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
     @mock.patch('dominio.views.run_query')
     def test_saidas_result(self, _run_query):
@@ -254,7 +265,7 @@ class SaidasViewTest(NoCacheTestCase, TestCase):
         self.assertEqual(response.data, expected_response)
 
 
-class EntradasViewTest(TestCase, NoCacheTestCase):
+class EntradasViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
     @mock.patch('dominio.views.run_query')
     def test_entradas_result(self, _run_query):
@@ -320,7 +331,7 @@ class EntradasViewTest(TestCase, NoCacheTestCase):
         self.assertEqual(response.data, expected_response)
 
 
-class DetalheProcessosJuizoViewTest(TestCase, NoCacheTestCase):
+class DetalheProcessosJuizoViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
     def test_get_value_from_orgao(self):
         test_orgao_id = 42
