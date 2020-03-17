@@ -101,6 +101,15 @@ class TestCacheMixin(TestCase):
 
         self.assertEqual(timeout, settings.CACHE_TIMEOUT)
 
+    def test_user_cache_timeout(self):
+        cache = CacheMixin()
+        cache.cache_timeout = 100
+
+        cache_timeout = cache.get_timeout()
+        expected_cache_timeout = 100
+
+        self.assertEqual(cache_timeout, expected_cache_timeout)
+
 
 class TestJWTMixin(TestCase):
     @mock.patch('dominio.mixins.unpack_jwt')
