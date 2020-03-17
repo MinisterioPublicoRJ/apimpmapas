@@ -3,7 +3,7 @@ from unittest import mock, TestCase
 from django.conf import settings
 from django.core.paginator import EmptyPage
 
-from dominio.mixins import CacheMixin, PaginatorMixin
+from dominio.mixins import CacheMixin, JWTAuthMixin, PaginatorMixin
 
 
 class TestMixins(TestCase):
@@ -98,3 +98,20 @@ class TestCacheMixin(TestCase):
         timeout = cache_obj.get_timeout()
 
         self.assertEqual(timeout, settings.CACHE_TIMEOUT)
+
+
+class TestJWTMixin(TestCase):
+    @mock.patch('dominio.mixins.unpack_jwt')
+    def test_call_unpack_jwt_before_dispatch(self, _unpack_jwt):
+        class Parent:
+            def dispatch(self, request, *args, **kwargs):
+                pass
+
+        class Child(JWTAuthMixin, Parent):
+            def dispatch(self, request, *args, **kwargs):
+                super().dispatch(request, *args, **kwargs)
+
+        jwt_mixin = Child()
+        jwt_mixin.dispatch('request')
+
+        _unpack_jwt.assert_called_once_with('request')
