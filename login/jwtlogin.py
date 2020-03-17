@@ -31,7 +31,7 @@ def authenticate_integra(request):
         algorithm='HS256'
     )
 
-    payload['token'] = token.decode('latin1')
+    payload = {**payload, **{"token": token.decode("latin-1")}}
 
     return payload
 
