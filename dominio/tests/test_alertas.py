@@ -1,17 +1,13 @@
 from datetime import datetime
 from unittest import mock
 
-from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
-
-class NoCacheTestCase:
-    def tearDown(self):
-        cache.clear()
+from .testconf import NoJWTTestCase, NoCacheTestCase
 
 
-class AlertaListaTest(TestCase, NoCacheTestCase):
+class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
     @mock.patch('dominio.views.Alerta')
     def test_alert_list(self, _Alerta):

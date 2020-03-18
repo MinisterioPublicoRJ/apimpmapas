@@ -2,13 +2,14 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.db.models import F
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+
 from dominio import suamesa
 from .db_connectors import run_query
-from .mixins import CacheMixin, PaginatorMixin
+from .mixins import CacheMixin, PaginatorMixin, JWTAuthMixin
 from .models import Vista, Documento, SubAndamento, Alerta
 from .serializers import (
     SaidasSerializer,
@@ -19,9 +20,16 @@ from .serializers import (
     SuaMesaListaVistasSerializer,
     AlertasListaSerializer,
 )
+from login.jwtlogin import authenticate_integra
 
 
-class DetalheAcervoView(CacheMixin, APIView):
+def login(request):
+    response = authenticate_integra(request)
+
+    return JsonResponse(response)
+
+
+class DetalheAcervoView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'DETALHE_ACERVO_CACHE_TIMEOUT'
 
     @staticmethod
@@ -123,7 +131,7 @@ class DetalheAcervoView(CacheMixin, APIView):
         return Response(data)
 
 
-class OutliersView(CacheMixin, APIView):
+class OutliersView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'OUTLIERS_CACHE_TIMEOUT'
 
     def get_acervo(self, orgao_id, data):
@@ -201,7 +209,7 @@ class OutliersView(CacheMixin, APIView):
         return Response(data)
 
 
-class SaidasView(CacheMixin, APIView):
+class SaidasView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SAIDAS_CACHE_TIMEOUT'
 
     def get_saidas(self, orgao_id):
@@ -243,7 +251,7 @@ class SaidasView(CacheMixin, APIView):
         return Response(data)
 
 
-class EntradasView(CacheMixin, APIView):
+class EntradasView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'ENTRADAS_CACHE_TIMEOUT'
 
     def get_entradas(self, orgao_id, nr_cpf):
@@ -304,7 +312,7 @@ class EntradasView(CacheMixin, APIView):
         return Response(data)
 
 
-class SuaMesaVistasAbertas(CacheMixin, APIView):
+class SuaMesaVistasAbertas(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAMESAVISTAS_CACHE_TIMEOUT'
 
     def get(self, request, *args, **kwargs):
@@ -316,7 +324,7 @@ class SuaMesaVistasAbertas(CacheMixin, APIView):
         return Response(data={"suamesa_vistas": doc_count})
 
 
-class SuaMesaInvestigacoes(CacheMixin, APIView):
+class SuaMesaInvestigacoes(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAMESAINVESTIGACOES_CACHE_TIMEOUT'
 
     def get(self, request, *args, **kwargs):
@@ -332,7 +340,7 @@ class SuaMesaInvestigacoes(CacheMixin, APIView):
         return Response(data={"suamesa_investigacoes": doc_count})
 
 
-class SuaMesaProcessos(CacheMixin, APIView):
+class SuaMesaProcessos(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAMESAPROCESSOS_CACHE_TIMEOUT'
 
     def get(self, request, *args, **kwargs):
@@ -345,7 +353,7 @@ class SuaMesaProcessos(CacheMixin, APIView):
         return Response(data={"suamesa_processos": doc_count})
 
 
-class SuaMesaFinalizados(CacheMixin, APIView):
+class SuaMesaFinalizados(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAMESAFINALIZADOS_CACHE_TIMEOUT'
 
     def get(self, request, *args, **kwargs):
@@ -358,7 +366,7 @@ class SuaMesaFinalizados(CacheMixin, APIView):
         return Response(data={"suamesa_finalizados": doc_count})
 
 
-class SuaMesaDetalheView(CacheMixin, APIView):
+class SuaMesaDetalheView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAMESADETALHE_CACHE_TIMEOUT'
 
     def get(self, request, *args, **kwargs):
@@ -372,7 +380,7 @@ class SuaMesaDetalheView(CacheMixin, APIView):
         return Response(mesa_detalhe)
 
 
-class DetalheProcessosJuizoView(CacheMixin, APIView):
+class DetalheProcessosJuizoView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'DETALHEPROCESSO_CACHE_TIMEOUT'
 
     @staticmethod
@@ -442,7 +450,8 @@ class DetalheProcessosJuizoView(CacheMixin, APIView):
         return Response(data)
 
 
-class SuaMesaVistasListaView(CacheMixin, PaginatorMixin, APIView):
+class SuaMesaVistasListaView(
+        JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
     cache_config = 'SUAMESAVISTASLISTA_CACHE_TIMEOUT'
 
     def get(self, request, *args, **kwargs):
@@ -476,7 +485,7 @@ class SuaMesaVistasListaView(CacheMixin, PaginatorMixin, APIView):
         return Response(data=vistas_lista)
 
 
-class AlertasView(CacheMixin, PaginatorMixin, APIView):
+class AlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
     cache_config = 'ALERTAS_CACHE_TIMEOUT'
     # TODO: Mover constante para um lugar decente
     ALERTAS_SIZE = 25

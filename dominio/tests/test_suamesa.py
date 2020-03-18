@@ -2,7 +2,6 @@ from datetime import date
 from unittest import mock
 
 from django.conf import settings
-from django.core.cache import cache
 from django.urls import reverse
 from django.test import TestCase
 
@@ -13,10 +12,7 @@ from dominio.suamesa import (
     VISTAS_PAGE_SIZE,
 )
 
-
-class NoCacheTestCase:
-    def tearDown(self):
-        cache.clear()
+from .testconf import NoJWTTestCase, NoCacheTestCase
 
 
 class TestSuaMesaUtils(TestCase):
@@ -69,7 +65,7 @@ class TestSuaMesa(TestCase):
         self.assertEqual(output, expected_output)
 
 
-class SuaMesaViewTest(TestCase, NoCacheTestCase):
+class SuaMesaViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
     @mock.patch('dominio.views.suamesa.get_regras')
     @mock.patch('dominio.views.Documento')
     def test_sua_mesa_investigacoes(self, _Documento, _get_regras):
@@ -149,7 +145,7 @@ class SuaMesaViewTest(TestCase, NoCacheTestCase):
         manager_mock.count.assert_called_once_with()
 
 
-class TestSuaMesaDetalheVistas(TestCase):
+class TestSuaMesaDetalheVistas(NoJWTTestCase, NoCacheTestCase, TestCase):
     @mock.patch('dominio.views.Vista')
     def test_correct_response(self, _Vista):
         expected_resp = {
@@ -182,7 +178,7 @@ class TestSuaMesaDetalheVistas(TestCase):
         self.assertEqual(resp.status_code, 404)
 
 
-class TestSuaMesaListaVistasAbertas(TestCase):
+class TestSuaMesaListaVistasAbertas(NoJWTTestCase, NoCacheTestCase, TestCase):
     @mock.patch('dominio.mixins.Paginator')
     @mock.patch('dominio.views.Vista')
     def test_correct_response(self, _Vista, _Paginator):

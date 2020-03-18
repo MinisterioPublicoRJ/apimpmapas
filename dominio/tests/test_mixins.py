@@ -2,8 +2,10 @@ from unittest import mock, TestCase
 
 from django.conf import settings
 from django.core.paginator import EmptyPage
+from django.http import HttpResponseForbidden
+from jwt import DecodeError
 
-from dominio.mixins import CacheMixin, PaginatorMixin
+from dominio.mixins import CacheMixin, JWTAuthMixin, PaginatorMixin
 
 
 class TestMixins(TestCase):
@@ -98,3 +100,47 @@ class TestCacheMixin(TestCase):
         timeout = cache_obj.get_timeout()
 
         self.assertEqual(timeout, settings.CACHE_TIMEOUT)
+
+    def test_user_cache_timeout(self):
+        cache = CacheMixin()
+        cache.cache_timeout = 100
+
+        cache_timeout = cache.get_timeout()
+        expected_cache_timeout = 100
+
+        self.assertEqual(cache_timeout, expected_cache_timeout)
+
+
+class TestJWTMixin(TestCase):
+    @mock.patch('dominio.mixins.unpack_jwt')
+    def test_call_unpack_jwt_before_dispatch(self, _unpack_jwt):
+        class Parent:
+            def dispatch(self, request, *args, **kwargs):
+                pass
+
+        class Child(JWTAuthMixin, Parent):
+            def dispatch(self, request, *args, **kwargs):
+                super().dispatch(request, *args, **kwargs)
+
+        jwt_mixin = Child()
+        jwt_mixin.dispatch('request')
+
+        _unpack_jwt.assert_called_once_with('request')
+
+    @mock.patch('dominio.mixins.unpack_jwt')
+    def test_unpack_jwt_throw_error(self, _unpack_jwt):
+        _unpack_jwt.side_effect = DecodeError
+
+        class Parent:
+            def dispatch(self, request, *args, **kwargs):
+                pass
+
+        class Child(JWTAuthMixin, Parent):
+            def dispatch(self, request, *args, **kwargs):
+                return super().dispatch(request, *args, **kwargs)
+
+        jwt_mixin = Child()
+        handler = jwt_mixin.dispatch('request')
+
+        _unpack_jwt.assert_called_once_with('request')
+        self.assertTrue(isinstance(handler, HttpResponseForbidden))

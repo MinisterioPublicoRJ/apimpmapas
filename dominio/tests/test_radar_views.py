@@ -9,8 +9,10 @@ from django.urls import reverse
 from dominio.radar_queries import field_names
 from dominio.radar_queries import query as radar_query
 
+from .testconf import NoJWTTestCase, NoCacheTestCase
 
-class TestSuaPromotoria(TestCase):
+
+class TestSuaPromotoria(NoJWTTestCase, NoCacheTestCase, TestCase):
     @mock.patch("dominio.radar_views.run_query")
     def test_correct_response(self, _run_query):
 
