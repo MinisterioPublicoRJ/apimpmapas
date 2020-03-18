@@ -428,3 +428,42 @@ class DetalheProcessosJuizoViewTest(TestCase, NoCacheTestCase):
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.data, expected_response)
+
+
+class RecursosViewTest(NoCacheTestCase, TestCase):
+
+    @mock.patch('dominio.views.run_query')
+    def test_recursos_result(self, _run_query):
+        _run_query.return_value = \
+            [
+                ('1', 'Recurso1'), ('2', 'Recurso2')
+            ]
+        response = self.client.get(reverse(
+            'dominio:recursos',
+            args=('100',)))
+
+        expected_response = [
+            {'nr_processo': '1', 'tp_recurso': 'Recurso1'},
+            {'nr_processo': '2', 'tp_recurso': 'Recurso2'}
+        ]
+
+        expected_query = """
+                {namespace}
+                """.format(namespace=settings.TABLE_NAMESPACE)
+        expected_parameters = {'orgao_id': 100}
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected_response)
+        _run_query.assert_called_once_with(expected_query, expected_parameters)
+
+    @mock.patch('dominio.views.run_query')
+    def test_saidas_no_result(self, _run_query):
+        _run_query.return_value = []
+        response = self.client.get(reverse(
+            'dominio:recursos',
+            args=('100',)))
+
+        expected_response = {'detail': 'Não encontrado.'}
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.data, expected_response)

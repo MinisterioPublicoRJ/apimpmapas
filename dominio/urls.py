@@ -13,6 +13,7 @@ from .views import (
     DetalheAcervoView,
     DetalheProcessosJuizoView,
     AlertasView,
+    RecursosView,
 )
 from .radar_views import SuaPromotoriaView
 
@@ -97,7 +98,16 @@ radar_patterns = [
     ),
 ]
 
+recursos_patterns = [
+    path(
+        "recursos/<str:orgao_id>",
+        RecursosView.as_view(),
+        name="recursos"
+    )
+]
+
 urlpatterns = suamesa_patterns + \
     stats_patterns + \
     alertas_patterns + \
-    radar_patterns
+    radar_patterns + \
+    recursos_patterns

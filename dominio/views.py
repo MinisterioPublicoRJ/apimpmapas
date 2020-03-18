@@ -18,6 +18,7 @@ from .serializers import (
     DetalheProcessosJuizoSerializer,
     SuaMesaListaVistasSerializer,
     AlertasListaSerializer,
+    RecursosSerializer,
 )
 
 
@@ -495,3 +496,42 @@ class AlertasView(CacheMixin, PaginatorMixin, APIView):
         alertas_lista = AlertasListaSerializer(page_data, many=True)
 
         return Response(data=alertas_lista.data)
+
+
+class RecursosView(CacheMixin, APIView):
+    cache_config = 'ENTRADAS_CACHE_TIMEOUT'
+
+    def get_recursos(self, orgao_id):
+
+        query = """
+                {namespace}
+                """.format(
+                    namespace=settings.TABLE_NAMESPACE
+                )
+        parameters = {
+            'orgao_id': orgao_id
+        }
+
+        return [('01', 'Apelação'), ('02', 'Agravo')]
+        #return run_query(query, parameters)
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(self.kwargs['orgao_id'])
+
+        data = self.get_recursos(
+            orgao_id=orgao_id
+        )
+
+        if not data:
+            raise Http404
+
+        fields = [
+            'nr_processo',
+            'tp_recurso',
+        ]
+        data_obj = [{
+            fieldname: value for fieldname, value in zip(fields, row)
+        } for row in data]
+
+        data = RecursosSerializer(data_obj, many=True).data
+        return Response(data)
