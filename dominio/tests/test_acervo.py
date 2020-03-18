@@ -2,32 +2,16 @@ from datetime import datetime, timedelta
 from unittest import mock
 
 from django.conf import settings
-from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
 from dominio.views import DetalheAcervoView
 from dominio.views import DetalheProcessosJuizoView
 
+from .testconf import NoJWTTestCase, NoCacheTestCase
+
+
 # Create your tests here.
-
-
-class NoCacheTestCase:
-    def tearDown(self):
-        cache.clear()
-
-
-class NoJWTTestCase:
-    def setUp(self):
-        self.mock_jwt = mock.patch('dominio.mixins.unpack_jwt')
-        super().setUp()
-        self.mock_jwt.start()
-
-    def tearDown(self):
-        super().tearDown()
-        self.mock_jwt.stop()
-
-
 class DetalheAcervoViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
     def test_get_variacao_orgao_return_none(self):
         view = DetalheAcervoView()

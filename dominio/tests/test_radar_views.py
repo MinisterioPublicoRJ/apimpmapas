@@ -3,28 +3,13 @@ from decimal import Decimal
 from unittest import mock
 
 from django.conf import settings
-from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
 from dominio.radar_queries import field_names
 from dominio.radar_queries import query as radar_query
 
-
-class NoCacheTestCase:
-    def tearDown(self):
-        cache.clear()
-
-
-class NoJWTTestCase:
-    def setUp(self):
-        self.mock_jwt = mock.patch('dominio.mixins.unpack_jwt')
-        super().setUp()
-        self.mock_jwt.start()
-
-    def tearDown(self):
-        super().tearDown()
-        self.mock_jwt.stop()
+from .testconf import NoJWTTestCase, NoCacheTestCase
 
 
 class TestSuaPromotoria(NoJWTTestCase, NoCacheTestCase, TestCase):

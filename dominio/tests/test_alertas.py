@@ -1,25 +1,10 @@
 from datetime import datetime
 from unittest import mock
 
-from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
-
-class NoCacheTestCase:
-    def tearDown(self):
-        cache.clear()
-
-
-class NoJWTTestCase:
-    def setUp(self):
-        self.mock_jwt = mock.patch('dominio.mixins.unpack_jwt')
-        super().setUp()
-        self.mock_jwt.start()
-
-    def tearDown(self):
-        super().tearDown()
-        self.mock_jwt.stop()
+from .testconf import NoJWTTestCase, NoCacheTestCase
 
 
 class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):

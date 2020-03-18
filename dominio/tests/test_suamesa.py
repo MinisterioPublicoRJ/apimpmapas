@@ -2,7 +2,6 @@ from datetime import date
 from unittest import mock
 
 from django.conf import settings
-from django.core.cache import cache
 from django.urls import reverse
 from django.test import TestCase
 
@@ -13,21 +12,7 @@ from dominio.suamesa import (
     VISTAS_PAGE_SIZE,
 )
 
-
-class NoCacheTestCase:
-    def tearDown(self):
-        cache.clear()
-
-
-class NoJWTTestCase:
-    def setUp(self):
-        self.mock_jwt = mock.patch('dominio.mixins.unpack_jwt')
-        super().setUp()
-        self.mock_jwt.start()
-
-    def tearDown(self):
-        super().tearDown()
-        self.mock_jwt.stop()
+from .testconf import NoJWTTestCase, NoCacheTestCase
 
 
 class TestSuaMesaUtils(TestCase):
