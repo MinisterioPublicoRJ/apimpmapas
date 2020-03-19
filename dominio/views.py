@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.db.models import F
 from django.http import Http404, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -23,6 +24,7 @@ from .serializers import (
 from login.jwtlogin import authenticate_integra
 
 
+@csrf_exempt
 def login(request):
     response = authenticate_integra(request)
 

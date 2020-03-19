@@ -4,24 +4,34 @@ from django.conf import settings
 
 from login.jwtlogin import (
     authenticate_integra,
-    get_jwt_from_header,
+    get_jwt_from_get,
+    get_jwt_from_post,
     unpack_jwt,
 )
 
 
 class TestJWTLogin(TestCase):
-    def test_get_jwt_from_header(self):
+    def test_get_jwt_from_get(self):
         req_mock = mock.MagicMock()
-        req_mock.headers = {'AUTHORIZATION': 'Bearer TOKEN'}
+        req_mock.GET = {'jwt': 'TOKEN'}
 
-        token = get_jwt_from_header(req_mock)
+        token = get_jwt_from_get(req_mock)
+        expected_token = 'TOKEN'
+
+        self.assertEqual(token, expected_token)
+
+    def test_get_jwt_from_post(self):
+        req_mock = mock.MagicMock()
+        req_mock.POST = {'jwt': 'TOKEN'}
+
+        token = get_jwt_from_post(req_mock)
         expected_token = 'TOKEN'
 
         self.assertEqual(token, expected_token)
 
     @mock.patch('login.jwtlogin.jwt.encode', return_value=b'encode_token')
     @mock.patch('login.jwtlogin.jwt.decode')
-    @mock.patch('login.jwtlogin.get_jwt_from_header')
+    @mock.patch('login.jwtlogin.get_jwt_from_post')
     def test_authenticate_integra(self, _get_jwt, _decode, _encode):
         _decode.return_value = {
             "user_name": "user_name",
@@ -52,7 +62,7 @@ class TestJWTLogin(TestCase):
         self.assertEqual(resp_payload, expected_payload)
 
     @mock.patch('login.jwtlogin.jwt.decode', return_value="payload")
-    @mock.patch('login.jwtlogin.get_jwt_from_header', return_value="TOKEN")
+    @mock.patch('login.jwtlogin.get_jwt_from_get', return_value="TOKEN")
     def test_unpack_jwt(self, _get_jwt, _decode):
         resp = unpack_jwt('request')
         _get_jwt.assert_called_once_with('request')
