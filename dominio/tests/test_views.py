@@ -12,14 +12,14 @@ from model_bakery.baker import make
 class TestLogin(TestCase):
     @mock.patch("dominio.views.authenticate_integra")
     def test_correct_response(self, _auth_integra):
-        _auth_integra.return_value = {"orgao": 12345}
+        _auth_integra.return_value = {"username": "username"}
         url = reverse("dominio:login")
 
         resp = self.client.post(url)
         expected_data = {
             "first_login": True,
             "first_login_today": True,
-            "orgao": 12345,
+            "username": "username",
         }
 
         self.assertEqual(resp.status_code, 200)
@@ -29,10 +29,10 @@ class TestLogin(TestCase):
     @freeze_time('2020-01-01')
     @mock.patch("dominio.views.authenticate_integra")
     def test_user_already_logged_in(self, _auth_integra):
-        _auth_integra.return_value = {"orgao": 12345}
+        _auth_integra.return_value = {"username": "username"}
         url = reverse("dominio:login")
 
-        make("dominio.Usuario", orgao_id=12345)
+        make("dominio.Usuario", username=12345)
 
         with mock.patch("dominio.models.date") as date_mock:
             date_mock.today.return_value = date(2020, 1, 2)
@@ -40,7 +40,7 @@ class TestLogin(TestCase):
         expected_data = {
             "first_login": False,
             "first_login_today": True,
-            "orgao": 12345,
+            "username": "username",
         }
 
         self.assertEqual(resp.status_code, 200)
@@ -50,10 +50,10 @@ class TestLogin(TestCase):
     @freeze_time('2020-01-01')
     @mock.patch("dominio.views.authenticate_integra")
     def test_user_already_logged_in_today(self, _auth_integra):
-        _auth_integra.return_value = {"orgao": 12345}
+        _auth_integra.return_value = {"username": "username"}
         url = reverse("dominio:login")
 
-        make("dominio.Usuario", orgao_id=12345)
+        make("dominio.Usuario", username="username")
 
         with mock.patch("dominio.models.date") as date_mock:
             date_mock.today.return_value = date(2020, 1, 1)
@@ -61,7 +61,7 @@ class TestLogin(TestCase):
         expected_data = {
             "first_login": False,
             "first_login_today": False,
-            "orgao": 12345,
+            "username": "username",
         }
 
         self.assertEqual(resp.status_code, 200)

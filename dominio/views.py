@@ -28,7 +28,7 @@ from login.jwtlogin import authenticate_integra
 def login(request):
     response = authenticate_integra(request)
     usuario, created = Usuario.objects.update_or_create(
-        defaults={"orgao_id": response["orgao"]}
+        defaults={"username": response["username"]}
     )
     response["first_login"] = created
     response["first_login_today"] = created or usuario.get_first_login_today()

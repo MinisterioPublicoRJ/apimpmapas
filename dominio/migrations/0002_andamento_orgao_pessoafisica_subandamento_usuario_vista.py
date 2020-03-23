@@ -75,7 +75,7 @@ class Migration(migrations.Migration):
             name='Usuario',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('orgao_id', models.IntegerField(unique=True)),
+                ('username', models.CharField(max_length=255, unique=True)),
                 ('last_login', models.DateField(auto_now=True)),
                 ('date_joined', models.DateTimeField(auto_now_add=True)),
             ],

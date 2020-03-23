@@ -13,7 +13,7 @@ from .managers import (
 
 
 class Usuario(models.Model):
-    orgao_id = models.IntegerField(unique=True)
+    username = models.CharField(max_length=255, unique=True)
     last_login = models.DateField(auto_now=True)
     date_joined = models.DateTimeField(auto_now_add=True)
 

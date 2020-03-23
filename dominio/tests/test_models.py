@@ -13,7 +13,7 @@ class TestUsuario(TestCase):
     @freeze_time('2020-01-02')
     def test_create_last_login_field(self):
         usuario = Usuario.objects.create(
-            orgao_id=5678
+            username="username"
         )
 
         self.assertEqual(usuario.last_login, date(2020, 1, 2))
@@ -21,7 +21,7 @@ class TestUsuario(TestCase):
     @freeze_time('2020-01-01')
     def test_get_first_login_today(self):
         usuario = Usuario.objects.create(
-            orgao_id=12345,
+            username="username",
             last_login=date(2020, 1, 1)
         )
         with mock.patch("dominio.models.date") as date_mock:
@@ -33,7 +33,7 @@ class TestUsuario(TestCase):
     @freeze_time('2020-01-01')
     def test_get_user_logged_in_today(self):
         usuario = Usuario.objects.create(
-            orgao_id=54321,
+            username="username",
             last_login=date(2020, 1, 1)
         )
         with mock.patch("dominio.models.date") as date_mock:
