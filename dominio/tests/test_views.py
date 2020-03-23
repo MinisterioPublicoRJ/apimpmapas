@@ -1,12 +1,14 @@
 from datetime import date
 from unittest import mock
 
+import pytest
 from django.test import TestCase
 from django.urls import reverse
 from freezegun import freeze_time
 from model_bakery.baker import make
 
 
+@pytest.mark.django_db(transaction=True)
 class TestLogin(TestCase):
     @mock.patch("dominio.views.authenticate_integra")
     def test_correct_response(self, _auth_integra):
