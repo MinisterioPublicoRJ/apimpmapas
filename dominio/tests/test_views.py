@@ -32,7 +32,7 @@ class TestLogin(TestCase):
         _auth_integra.return_value = {"username": "username"}
         url = reverse("dominio:login")
 
-        make("dominio.Usuario", username=12345)
+        make("dominio.Usuario", username="username")
 
         with mock.patch("dominio.models.date") as date_mock:
             date_mock.today.return_value = date(2020, 1, 2)
