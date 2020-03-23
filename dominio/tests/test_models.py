@@ -1,8 +1,33 @@
+from datetime import date
 from unittest import mock, TestCase
 
+import pytest
 from django.conf import settings
+from freezegun import freeze_time
 
-from dominio.models import Alerta
+from dominio.models import Alerta, Usuario
+
+
+@pytest.mark.django_db(transaction=True)
+class TestUsuario(TestCase):
+    @freeze_time('2020-01-02')
+    def test_create_last_login_field(self):
+        usuario = Usuario.objects.create(
+            orgao_id=5678
+        )
+
+        self.assertEqual(usuario.last_login, date(2020, 1, 2))
+
+    def test_get_first_login_today(self):
+        usuario = Usuario.objects.create(
+            orgao_id=12345,
+            last_login=date(2020, 1, 1)
+        )
+        with mock.patch("dominio.models.date") as date_mock:
+            date_mock.today.return_value = date(2020, 1, 2)
+            first_time_today = usuario.get_first_time_today()
+
+        self.assertFalse(first_time_today)
 
 
 class TestAlertaModels(TestCase):
