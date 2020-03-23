@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from dominio import suamesa
 from .db_connectors import run_query
 from .mixins import CacheMixin, PaginatorMixin, JWTAuthMixin
-from .models import Vista, Documento, SubAndamento, Alerta
+from .models import Vista, Documento, SubAndamento, Alerta, Usuario
 from .serializers import (
     SaidasSerializer,
     OutliersSerializer,
@@ -27,6 +27,11 @@ from login.jwtlogin import authenticate_integra
 @csrf_exempt
 def login(request):
     response = authenticate_integra(request)
+    usuario, created = Usuario.objects.update_or_create(
+        defaults={"orgao_id": response["orgao"]}
+    )
+    response["first_login"] = created
+    response["first_login_today"] = usuario.get_first_time_today()
 
     return JsonResponse(response)
 
