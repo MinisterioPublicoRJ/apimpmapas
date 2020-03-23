@@ -27,11 +27,12 @@ from login.jwtlogin import authenticate_integra
 @csrf_exempt
 def login(request):
     response = authenticate_integra(request)
-    usuario, created = Usuario.objects.update_or_create(
+    usuario, created = Usuario.objects.get_or_create(
         defaults={"username": response["username"]}
     )
     response["first_login"] = created
     response["first_login_today"] = created or usuario.get_first_login_today()
+    usuario.save()
 
     return JsonResponse(response)
 
