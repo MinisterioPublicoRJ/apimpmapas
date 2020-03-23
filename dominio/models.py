@@ -17,8 +17,8 @@ class Usuario(models.Model):
     last_login = models.DateField(auto_now=True)
     date_joined = models.DateTimeField(auto_now_add=True)
 
-    def get_first_time_today(self):
-        return self.last_login == date.today()
+    def get_first_login_today(self):
+        return not self.last_login == date.today()
 
 
 class Documento(models.Model):
