@@ -31,7 +31,7 @@ def login(request):
         defaults={"orgao_id": response["orgao"]}
     )
     response["first_login"] = created
-    response["first_login_today"] = usuario.get_first_time_today()
+    response["first_login_today"] = created or usuario.get_first_login_today()
 
     return JsonResponse(response)
 
