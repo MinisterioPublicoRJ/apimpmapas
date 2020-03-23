@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Documento
+from .models import Documento, Usuario
 
 # Register your models here.
 @admin.register(Documento)
@@ -12,3 +12,6 @@ class DocumentoAdmin(admin.ModelAdmin):
         if obj.classe:
             return obj.classe.descricao
         return 'SEM CLASSE DEFINIDA'
+
+
+admin.site.register(Usuario)

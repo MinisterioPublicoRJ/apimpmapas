@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.conf import settings
 from django.db import models
 
@@ -8,6 +10,15 @@ from .managers import (
     ProcessosManager,
     FinalizadosManager,
 )
+
+
+class Usuario(models.Model):
+    username = models.CharField(max_length=255, unique=True)
+    last_login = models.DateField(auto_now=True)
+    date_joined = models.DateTimeField(auto_now_add=True)
+
+    def get_first_login_today(self):
+        return not self.last_login == date.today()
 
 
 class Documento(models.Model):

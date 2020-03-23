@@ -23,7 +23,7 @@ app_name = 'dominio'
 
 
 jwt_patterns = [
-    path('token/login/', login),
+    path('token/login/', login, name="login"),
 ]
 
 
