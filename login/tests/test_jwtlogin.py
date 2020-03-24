@@ -7,6 +7,7 @@ from login.jwtlogin import (
     get_jwt_from_get,
     get_jwt_from_post,
     unpack_jwt,
+    tipo_orgao,
 )
 
 
@@ -40,6 +41,7 @@ class TestJWTLogin(TestCase):
                 "orgao": "1234",
                 "pessDK": "4567",
                 "nomeUsuario": "nome",
+                "nomeOrgaoUsuario": "Tutela Coletiva"
              }
         }
         jwt_payload = {
@@ -48,6 +50,7 @@ class TestJWTLogin(TestCase):
             "orgao": "1234",
             "pess_dk": "4567",
             "nome": "nome",
+            "tipo_orgao": 1
         }
         resp_payload = authenticate_integra('request')
         expected_payload = jwt_payload.copy()
@@ -60,6 +63,22 @@ class TestJWTLogin(TestCase):
             algorithm='HS256',
         )
         self.assertEqual(resp_payload, expected_payload)
+
+    def test_tipo_orgao(self):
+        nome_orgao_1 = "Tutela Coletiva"
+        nome_orgao_2 = "Promotoria da Capital"
+        nome_orgao_3 = "Tutela Coletiva da Infância"
+        nome_orgao_4 = "Tutela Coletiva Idoso"
+
+        tipo_orgao_1 = tipo_orgao(nome_orgao_1)
+        tipo_orgao_2 = tipo_orgao(nome_orgao_2)
+        tipo_orgao_3 = tipo_orgao(nome_orgao_3)
+        tipo_orgao_4 = tipo_orgao(nome_orgao_4)
+
+        self.assertEqual(tipo_orgao_1, 1)
+        self.assertEqual(tipo_orgao_2, 0)
+        self.assertEqual(tipo_orgao_3, 0)
+        self.assertEqual(tipo_orgao_4, 0)
 
     @mock.patch('login.jwtlogin.jwt.decode', return_value="payload")
     @mock.patch('login.jwtlogin.get_jwt_from_get', return_value="TOKEN")
