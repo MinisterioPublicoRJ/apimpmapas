@@ -100,7 +100,7 @@ class TestTempoTramitacao(TestCase):
             "maximo_orgao_t2": 1324,
             "mediana_orgao_t2": 2242.3232
         }
-        _run_query.return_value = expected
+        _run_query.return_value = [expected.values()]
         url = reverse("dominio:tempo-tramitacao", args=("1234", ))
         resp = self.client.get(url)
 
