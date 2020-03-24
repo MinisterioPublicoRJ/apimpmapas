@@ -20,7 +20,6 @@ from .serializers import (
     DetalheProcessosJuizoSerializer,
     SuaMesaListaVistasSerializer,
     AlertasListaSerializer,
-    TempoTramitacaoSerializer,
 )
 from login.jwtlogin import authenticate_integra
 
@@ -517,6 +516,33 @@ class AlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
 
 class TempoTramitacaoView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'TEMPO_TRAMITACAO_CACHE_TIMEOUT'
+    fields = [
+        "id_orgao",
+        "media_orgao",
+        "minimo_orgao",
+        "maximo_orgao",
+        "mediana_orgao",
+        "media_pacote",
+        "minimo_pacote",
+        "maximo_pacote",
+        "mediana_pacote",
+        "media_pacote_t1",
+        "minimo_pacote_t1",
+        "maximo_pacote_t1",
+        "mediana_pacote_t1",
+        "media_orgao_t1",
+        "minimo_orgao_t1",
+        "maximo_orgao_t1",
+        "mediana_orgao_t1",
+        "media_pacote_t2",
+        "minimo_pacote_t2",
+        "maximo_pacote_t2",
+        "mediana_pacote_t2",
+        "media_orgao_t2",
+        "minimo_orgao_t2",
+        "maximo_orgao_t2",
+        "mediana_orgao_t2",
+    ]
 
     def get_data(self, orgao_id):
         query = """
@@ -535,5 +561,5 @@ class TempoTramitacaoView(JWTAuthMixin, CacheMixin, APIView):
         if not data:
             raise Http404
 
-        serializer = TempoTramitacaoSerializer(data)
-        return Response(data=serializer.data)
+        ser_data = dict(zip(self.fields, data[0]))
+        return Response(ser_data)
