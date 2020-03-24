@@ -423,3 +423,74 @@ class DetalheProcessosJuizoViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.data, expected_response)
+
+
+class ListaProcessosViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
+
+    @mock.patch('dominio.views.run_query')
+    def test_lista_processos_result(self, _run_query):
+        _run_query.return_value = \
+            [
+                (
+                    '1', 'Ação1', '200', '300', None,
+                    'Personagens1', '2019-01-01 00:00:00',
+                    'Andamento1', 'Link1'
+                ),
+                (
+                    '1', 'Ação2', '200', '300', None,
+                    'Personagens2', '2019-01-01 00:00:00',
+                    'Andamento2', 'Link2'
+                ),
+            ]
+        response = self.client.get(reverse(
+            'dominio:lista-processos',
+            args=('1')))
+
+        expected_response = [
+            {
+                'id_orgao': 1,
+                'classe_documento': 'Ação1',
+                'docu_nr_mp': '200',
+                'docu_nr_externo': '300',
+                'docu_etiqueta': None,
+                'docu_personagens': 'Personagens1',
+                'dt_ultimo_andamento': '2019-01-01 00:00:00',
+                'ultimo_andamento': 'Andamento1',
+                'url_tjrj': 'Link1'
+            },
+            {
+                'id_orgao': 1,
+                'classe_documento': 'Ação2',
+                'docu_nr_mp': '200',
+                'docu_nr_externo': '300',
+                'docu_etiqueta': None,
+                'docu_personagens': 'Personagens2',
+                'dt_ultimo_andamento': '2019-01-01 00:00:00',
+                'ultimo_andamento': 'Andamento2',
+                'url_tjrj': 'Link2'
+            },
+        ]
+
+        expected_query = """
+            SELECT * FROM {namespace}.tb_lista_processos
+            WHERE orgao_dk = :orgao_id
+        """.format(namespace=settings.TABLE_NAMESPACE)
+        expected_parameters = {
+            'orgao_id': 1
+        }
+
+        _run_query.assert_called_once_with(expected_query, expected_parameters)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected_response)
+
+    @mock.patch('dominio.views.run_query')
+    def test_entradas_no_result(self, _run_query):
+        _run_query.return_value = []
+        response = self.client.get(reverse(
+            'dominio:lista-processos',
+            args=('1')))
+
+        expected_response = {'detail': 'Não encontrado.'}
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.data, expected_response)

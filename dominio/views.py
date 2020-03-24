@@ -537,3 +537,39 @@ class TempoTramitacaoView(JWTAuthMixin, CacheMixin, APIView):
 
         serializer = TempoTramitacaoSerializer(data)
         return Response(data=serializer.data)
+
+
+class ListaProcessosView(CacheMixin, APIView):
+    cache_config = 'LISTA_PROCESSOS_CACHE_TIMEOUT'
+
+    def get_data(self, orgao_id):
+        query = """
+            SELECT * FROM {namespace}.tb_lista_processos
+            WHERE orgao_dk = :orgao_id
+        """.format(namespace=settings.TABLE_NAMESPACE)
+        parameters = {"orgao_id": orgao_id}
+
+        return run_query(query, parameters)
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(self.kwargs['orgao_id'])
+
+        data = self.get_data(orgao_id)
+
+        if not data:
+            raise Http404
+
+        fields = [
+            'id_orgao',
+            'classe_documento',
+            'docu_nr_mp',
+            'docu_nr_externo',
+            'docu_etiqueta',
+            'docu_personagens',
+            'dt_ultimo_andamento',
+            'ultimo_andamento',
+            'url_tjrj'
+        ]
+        data_obj = [dict(zip(fields, row)) for row in data]
+
+        return Response(data=data_obj)
