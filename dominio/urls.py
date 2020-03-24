@@ -15,6 +15,7 @@ from .views import (
     DetalheAcervoView,
     DetalheProcessosJuizoView,
     AlertasView,
+    TempoTramitacaoView
 )
 from .radar_views import SuaPromotoriaView
 
@@ -105,8 +106,17 @@ radar_patterns = [
     ),
 ]
 
+tempotramitacao_patterns = [
+    path(
+        "tempo-tramitacao/<str:orgao_id>",
+        TempoTramitacaoView.as_view(),
+        name="tempo-tramitacao"
+    ),
+]
+
 urlpatterns = suamesa_patterns + \
-    stats_patterns + \
-    alertas_patterns + \
-    radar_patterns + \
-    jwt_patterns
+    stats_patterns \
+    + alertas_patterns \
+    + radar_patterns \
+    + jwt_patterns \
+    + tempotramitacao_patterns

@@ -20,6 +20,7 @@ from .serializers import (
     DetalheProcessosJuizoSerializer,
     SuaMesaListaVistasSerializer,
     AlertasListaSerializer,
+    TempoTramitacaoSerializer,
 )
 from login.jwtlogin import authenticate_integra
 
@@ -512,3 +513,27 @@ class AlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
         alertas_lista = AlertasListaSerializer(page_data, many=True)
 
         return Response(data=alertas_lista.data)
+
+
+class TempoTramitacaoView(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = 'TEMPO_TRAMITACAO_CACHE_TIMEOUT'
+
+    def get_data(self, orgao_id):
+        query = """
+            SELECT * FROM {namespace}.tb_tempo_tramitacao
+            WHERE id_orgao = :orgao_id
+        """.format(namespace=settings.TABLE_NAMESPACE)
+        parameters = {"orgao_id": orgao_id}
+
+        return run_query(query, parameters)
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(self.kwargs['orgao_id'])
+
+        data = self.get_data(orgao_id)
+
+        if not data:
+            raise Http404
+
+        serializer = TempoTramitacaoSerializer(data)
+        return Response(data=serializer.data)

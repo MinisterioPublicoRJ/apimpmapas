@@ -67,3 +67,42 @@ class TestLogin(TestCase):
         self.assertEqual(resp.status_code, 200)
         _auth_integra.assert_called()
         self.assertEqual(resp.json(), expected_data)
+
+
+class TestTempoTramitacao(TestCase):
+    @mock.patch('dominio.views.run_query')
+    @mock.patch("dominio.mixins.unpack_jwt")
+    def test_correct_response(self, _unpack_jwt, _run_query):
+        expected = {
+            "id_orgao": 12345,
+            "media_orgao": 10.1243,
+            "minimo_orgao": 0,
+            "maximo_orgao": 100,
+            "mediana_orgao": 10.2312,
+            "media_pacote": 11.4352,
+            "minimo_pacote": 0,
+            "maximo_pacote": 200,
+            "mediana_pacote": 56.3124,
+            "media_pacote_t1": 45.343,
+            "minimo_pacote_t1": 12,
+            "maximo_pacote_t1": 533,
+            "mediana_pacote_t1": 343.324,
+            "media_orgao_t1": 344.12,
+            "minimo_orgao_t1": 12,
+            "maximo_orgao_t1": 5023,
+            "mediana_orgao_t1": 2421.1223,
+            "media_pacote_t2": 343.1254,
+            "minimo_pacote_t2": 48,
+            "maximo_pacote_t2": 2335,
+            "mediana_pacote_t2": 7623.1224,
+            "media_orgao_t2": 43224.1132,
+            "minimo_orgao_t2": 432,
+            "maximo_orgao_t2": 1324,
+            "mediana_orgao_t2": 2242.3232
+        }
+        _run_query.return_value = expected
+        url = reverse("dominio:tempo-tramitacao", args=("1234", ))
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, expected)
