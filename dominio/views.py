@@ -515,7 +515,7 @@ class AlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
         return Response(data=alertas_lista.data)
 
 
-class TempoTramitacaoView(CacheMixin, APIView):
+class TempoTramitacaoView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'TEMPO_TRAMITACAO_CACHE_TIMEOUT'
 
     def get_data(self, orgao_id):
