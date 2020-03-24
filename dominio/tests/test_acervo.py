@@ -448,7 +448,7 @@ class ListaProcessosViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
         expected_response = [
             {
-                'id_orgao': 1,
+                'id_orgao': '1',
                 'classe_documento': 'Ação1',
                 'docu_nr_mp': '200',
                 'docu_nr_externo': '300',
@@ -459,7 +459,7 @@ class ListaProcessosViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'url_tjrj': 'Link1'
             },
             {
-                'id_orgao': 1,
+                'id_orgao': '1',
                 'classe_documento': 'Ação2',
                 'docu_nr_mp': '200',
                 'docu_nr_externo': '300',
