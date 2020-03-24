@@ -106,17 +106,17 @@ radar_patterns = [
     ),
 ]
 
-tempo_patterns = [
+tempotramitacao_patterns = [
     path(
-        "tempo/<str:orgao_id>",
+        "tempo-tramitacao/<str:orgao_id>",
         TempoTramitacaoView.as_view(),
-        name="tempo"
+        name="tempo-tramitacao"
     ),
 ]
 
 urlpatterns = suamesa_patterns + \
-    stats_patterns + \
-    alertas_patterns + \
-    radar_patterns + \
-    jwt_patterns +\
-    tempo_patterns
+    stats_patterns \
+    + alertas_patterns \
+    + radar_patterns \
+    + jwt_patterns \
+    + tempotramitacao_patterns
