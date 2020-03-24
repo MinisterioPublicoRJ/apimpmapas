@@ -27,7 +27,7 @@ def authenticate_integra(request):
     orgao = payload['scaUser']['orgao']
     pess_dk = payload['scaUser']['pessDK']
     nome_usuario = payload['scaUser']['nomeUsuario']
-    nome_orgao = payload['scaUser']['nomeOrgaoUsuario'].lower()
+    nome_orgao = payload['scaUser']['nomeOrgaoUsuario']
 
     payload = {
         'username': user_name,
