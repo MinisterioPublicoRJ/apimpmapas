@@ -106,3 +106,25 @@ class TestTempoTramitacao(TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, expected)
+
+
+class TestNumeroDesarquivamentos(TestCase):
+    @mock.patch("dominio.views.connections")
+    def test_correct_response(self, _connections):
+        cursor_mock = mock.MagicMock()
+        cursor_mock.execute.return_value.fetchall.return_value\
+            = [("nr_mp_1", 1), ("nr_mp_2", 2)]
+        conn_mock = mock.MagicMock()
+        conn_mock.cursor.return_value.__enter__.return_value = cursor_mock
+
+        _connections.__getitem__.return_value = conn_mock
+        url = reverse("dominio:desarquivamentos", args=("12345",))
+
+        resp = self.client.get(url)
+        expected = [
+            {"numero_mprj": "nr_mp_1", "qtd_desarq": 1},
+            {"numero_mprj": "nr_mp_2", "qtd_desarq": 2},
+        ]
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, expected)

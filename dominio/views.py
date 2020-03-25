@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from django.conf import settings
+from django.db import connections
 from django.db.models import F
 from django.http import Http404, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -563,3 +564,40 @@ class TempoTramitacaoView(JWTAuthMixin, CacheMixin, APIView):
 
         ser_data = dict(zip(self.fields, data[0]))
         return Response(ser_data)
+
+
+class DesarquivamentosView(APIView):
+    fields = ["numero_mprj", "qtd_desarq"]
+
+    def fetch_set(self, cursor):
+        return [dict(zip(self.fields, row)) for row in cursor.fetchall()]
+
+    def get_data(self, orgao_id):
+        with connections["dominio_db"].cursor() as cursor:
+            query = """
+                WITH AGRUPADOS AS (SELECT d.docu_nr_mp, COUNT(d.docu_nr_mp)
+                FROM MCPR_DOCUMENTO d
+                JOIN mcpr_vista v ON v.vist_docu_dk = d.docu_dk
+                JOIN mcpr_andamento a ON a.pcao_vist_dk = v.vist_dk
+                JOIN mcpr_sub_andamento sa ON sa.stao_pcao_dk = a.pcao_dk
+                JOIN mcpr_tp_andamento ta ON ta.tppr_dk = sa.stao_tppr_dk
+                WHERE sa.stao_tppr_dk IN (6075, 1028, 6798, 7245, 6307, 1027,
+                                          7803, 6003, 7802, 7801)
+                                          AND d.docu_cldc_dk = 392
+                AND d.DOCU_ORGI_ORGA_DK_RESPONSAVEL = %s
+                GROUP BY docu_nr_mp, a.pcao_dt_andamento)
+                SELECT docu_nr_mp, COUNT(docu_nr_mp)
+                FROM AGRUPADOS GROUP BY docu_nr_mp
+            """
+            result_set = cursor.execute(query, [orgao_id])
+            return self.fetch_set(result_set)
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(self.kwargs['orgao_id'])
+
+        data = self.get_data(orgao_id)
+
+        if not data:
+            raise Http404
+
+        return Response(data=data)
