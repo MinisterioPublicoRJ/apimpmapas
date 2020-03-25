@@ -594,10 +594,7 @@ class DesarquivamentosView(APIView):
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs['orgao_id'])
+        # TODO: pensar numa forma geral de discernir 404 de respostas
+        # vazias e respostas não existentes
 
-        data = self.get_data(orgao_id)
-
-        if not data:
-            raise Http404
-
-        return Response(data=data)
+        return Response(data=self.get_data(orgao_id))
