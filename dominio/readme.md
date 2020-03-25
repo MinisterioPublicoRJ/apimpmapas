@@ -341,6 +341,30 @@ Vary: Accept
 }
 ```
 
+## Desarquivamentos
+
+```
+GET /dominio/desarquivamentos/<id_orgao>
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+[
+  {
+    "numero_mprj": "123456789",
+    "qtd_desarq": 1
+  },
+  {
+    "numero_mprj": "987654321",
+    "qtd_desarq": 2
+  }
+]
+```
+
 ## Alertas
 
 ```
