@@ -7,6 +7,8 @@ from django.urls import reverse
 from freezegun import freeze_time
 from model_bakery.baker import make
 
+from dominio.tests.testconf import NoJWTTestCase
+
 
 @pytest.mark.django_db(transaction=True)
 class TestLogin(TestCase):
@@ -69,10 +71,9 @@ class TestLogin(TestCase):
         self.assertEqual(resp.json(), expected_data)
 
 
-class TestTempoTramitacao(TestCase):
+class TestTempoTramitacao(NoJWTTestCase, TestCase):
     @mock.patch('dominio.views.run_query')
-    @mock.patch("dominio.mixins.unpack_jwt")
-    def test_correct_response(self, _unpack_jwt, _run_query):
+    def test_correct_response(self, _run_query):
         expected = {
             "id_orgao": 12345,
             "media_orgao": 10.1243,
@@ -108,7 +109,7 @@ class TestTempoTramitacao(TestCase):
         self.assertEqual(resp.data, expected)
 
 
-class TestNumeroDesarquivamentos(TestCase):
+class TestNumeroDesarquivamentos(NoJWTTestCase, TestCase):
     @mock.patch("dominio.views.connections")
     def test_correct_response(self, _connections):
         cursor_mock = mock.MagicMock()

@@ -576,7 +576,8 @@ class TempoTramitacaoView(JWTAuthMixin, CacheMixin, APIView):
         return Response(ser_data)
 
 
-class DesarquivamentosView(APIView):
+class DesarquivamentosView(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = "DESARQUIVAMENTOS_CACHE_TIMEOUT"
     fields = ["numero_mprj", "qtd_desarq"]
 
     def fetch_set(self, cursor):
