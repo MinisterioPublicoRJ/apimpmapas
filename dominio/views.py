@@ -565,8 +565,9 @@ class TempoTramitacaoView(JWTAuthMixin, CacheMixin, APIView):
         return Response(ser_data)
 
 
-class ListaProcessosView(CacheMixin, APIView):
+class ListaProcessosView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
     cache_config = 'LISTA_PROCESSOS_CACHE_TIMEOUT'
+    PROCESSOS_SIZE = 20
 
     def get_data(self, orgao_id):
         query = """
@@ -579,6 +580,7 @@ class ListaProcessosView(CacheMixin, APIView):
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs['orgao_id'])
+        page = int(request.GET.get("page", 1))
 
         data = self.get_data(orgao_id)
 
@@ -598,4 +600,10 @@ class ListaProcessosView(CacheMixin, APIView):
         ]
         data_obj = [dict(zip(fields, row)) for row in data]
 
-        return Response(data=data_obj)
+        page_data = self.paginate(
+            data_obj,
+            page=page,
+            page_size=self.PROCESSOS_SIZE
+        )
+
+        return Response(data=page_data)

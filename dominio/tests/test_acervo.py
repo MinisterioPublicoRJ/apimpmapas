@@ -426,9 +426,11 @@ class DetalheProcessosJuizoViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
 
 class ListaProcessosViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
-
+    @mock.patch('dominio.views.ListaProcessosView.PROCESSOS_SIZE')
     @mock.patch('dominio.views.run_query')
-    def test_lista_processos_result(self, _run_query):
+    def test_lista_processos_result(self, _run_query, _PROCESSOS_SIZE):
+        _PROCESSOS_SIZE.return_value = 1
+
         _run_query.return_value = \
             [
                 (
@@ -442,11 +444,14 @@ class ListaProcessosViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                     'Andamento2', 'Link2'
                 ),
             ]
-        response = self.client.get(reverse(
+        response_1 = self.client.get(reverse(
             'dominio:lista-processos',
-            args=('1')))
+            args=('1')) + '?page=1')
+        response_2 = self.client.get(reverse(
+            'dominio:lista-processos',
+            args=('1')) + '?page=2')
 
-        expected_response = [
+        expected_response_page_1 = [
             {
                 'id_orgao': '1',
                 'classe_documento': 'Ação1',
@@ -457,7 +462,9 @@ class ListaProcessosViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'dt_ultimo_andamento': '2019-01-01 00:00:00',
                 'ultimo_andamento': 'Andamento1',
                 'url_tjrj': 'Link1'
-            },
+            }
+        ]
+        expected_response_page_2 = [
             {
                 'id_orgao': '1',
                 'classe_documento': 'Ação2',
@@ -468,7 +475,7 @@ class ListaProcessosViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'dt_ultimo_andamento': '2019-01-01 00:00:00',
                 'ultimo_andamento': 'Andamento2',
                 'url_tjrj': 'Link2'
-            },
+            }
         ]
 
         expected_query = """
@@ -479,9 +486,12 @@ class ListaProcessosViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
             'orgao_id': 1
         }
 
-        _run_query.assert_called_once_with(expected_query, expected_parameters)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, expected_response)
+        _run_query.assert_called_with(expected_query, expected_parameters)
+        self.assertEqual(_run_query.call_count, 2)
+        self.assertEqual(response_1.status_code, 200)
+        self.assertEqual(response_2.status_code, 200)
+        self.assertEqual(response_1.data, expected_response_page_1)
+        self.assertEqual(response_2.data, expected_response_page_2)
 
     @mock.patch('dominio.views.run_query')
     def test_entradas_no_result(self, _run_query):
