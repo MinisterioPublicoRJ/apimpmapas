@@ -377,3 +377,45 @@ GET /dominio/alertas/<id_orgao>
     }
 ]
 ```
+
+## Lista Processos da Promotoria
+
+```
+GET /dominio/lista/processos/<id_orgao>?page=<int>
+
+page: default=1
+page_size (elementos por página): 20
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+
+[
+    {
+        "id_orgao": 1,
+        "classe_documento": "Ação Civil de Improbidade Administrativa",
+        "docu_nr_mp": "1234",
+        "docu_nr_externo": "5678",
+        "docu_etiqueta": "ETIQUETA 1",
+        "docu_personagens": "FULANO DE TAL, e outros...",
+        "dt_ultimo_andamento": "2019-12-09T00:00:00",
+        "ultimo_andamento": "Andamento 1",
+        "url_tjrj": "http://www4.tjrj.jus.br/numeracaoUnica/faces/index.jsp?numProcesso=5678"
+    },
+    {
+        "id_orgao": 1,
+        "classe_documento": "Ação Civil de Improbidade Administrativa",
+        "docu_nr_mp": "4321",
+        "docu_nr_externo": "8765",
+        "docu_etiqueta": null,
+        "docu_personagens": "CICLANA DE TAL",
+        "dt_ultimo_andamento": "2020-02-20T00:00:00",
+        "ultimo_andamento": "Andamento 2",
+        "url_tjrj": "http://www4.tjrj.jus.br/numeracaoUnica/faces/index.jsp?numProcesso=8765"
+    }
+]
+```

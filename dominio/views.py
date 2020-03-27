@@ -563,3 +563,48 @@ class TempoTramitacaoView(JWTAuthMixin, CacheMixin, APIView):
 
         ser_data = dict(zip(self.fields, data[0]))
         return Response(ser_data)
+
+
+class ListaProcessosView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
+    cache_config = 'LISTA_PROCESSOS_CACHE_TIMEOUT'
+    PROCESSOS_SIZE = 20
+
+    def get_data(self, orgao_id):
+        query = """
+            SELECT * FROM {namespace}.tb_lista_processos
+            WHERE orgao_dk = :orgao_id
+            ORDER BY dt_ultimo_andamento DESC
+        """.format(namespace=settings.TABLE_NAMESPACE)
+        parameters = {"orgao_id": orgao_id}
+
+        return run_query(query, parameters)
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(self.kwargs['orgao_id'])
+        page = int(request.GET.get("page", 1))
+
+        data = self.get_data(orgao_id)
+
+        if not data:
+            raise Http404
+
+        fields = [
+            'id_orgao',
+            'classe_documento',
+            'docu_nr_mp',
+            'docu_nr_externo',
+            'docu_etiqueta',
+            'docu_personagens',
+            'dt_ultimo_andamento',
+            'ultimo_andamento',
+            'url_tjrj'
+        ]
+        data_obj = [dict(zip(fields, row)) for row in data]
+
+        page_data = self.paginate(
+            data_obj,
+            page=page,
+            page_size=self.PROCESSOS_SIZE
+        )
+
+        return Response(data=page_data)
