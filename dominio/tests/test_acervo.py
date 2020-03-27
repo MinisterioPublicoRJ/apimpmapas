@@ -481,6 +481,7 @@ class ListaProcessosViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         expected_query = """
             SELECT * FROM {namespace}.tb_lista_processos
             WHERE orgao_dk = :orgao_id
+            ORDER BY dt_ultimo_andamento DESC
         """.format(namespace=settings.TABLE_NAMESPACE)
         expected_parameters = {
             'orgao_id': 1
