@@ -16,6 +16,7 @@ class TestSuaPromotoria(NoJWTTestCase, NoCacheTestCase, TestCase):
         runquery_data = [
             (
                 123,
+                'Tutela Coletiva',
                 Decimal('12345'),
                 45,
                 29,

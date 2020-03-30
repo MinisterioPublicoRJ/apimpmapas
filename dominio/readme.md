@@ -263,7 +263,8 @@ Content-Type: application/json
 Vary: Accept
 
 {
-     "pacote_atribuicao": 123,
+     "cod_pct": 123,
+     "pacote_atribuicao": "Tutela Coletiva",
      "orgao_id": 12345.0,
      "nr_arquivamentos": 45,
      "nr_indeferimentos": 29,

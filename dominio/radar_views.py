@@ -11,6 +11,7 @@ from dominio.suamesa import format_text
 class RadarView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'RADAR_CACHE_TIMEOUT'
     field_names = [
+        "cod_pct",
         "pacote_atribuicao",
         "orgao_id",
         "nr_arquivamentos",
