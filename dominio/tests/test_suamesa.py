@@ -24,6 +24,14 @@ class TestSuaMesaUtils(TestCase):
 
         self.assertEqual(f_text, expected)
 
+    def test_format_string_with_word_rio(self):
+        text = "PROMOTORIA DO RIO DE JANEIRO"
+        expected = "Promotoria do Rio de Janeiro"
+
+        f_text = format_text(text)
+
+        self.assertEqual(f_text, expected)
+
 
 class TestSuaMesa(TestCase):
     @mock.patch('dominio.suamesa.run_query')

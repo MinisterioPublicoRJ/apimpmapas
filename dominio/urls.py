@@ -19,7 +19,7 @@ from .views import (
     TempoTramitacaoView,
     ListaProcessosView,
 )
-from .radar_views import SuaPromotoriaView
+from .radar_views import RadarView
 
 
 app_name = 'dominio'
@@ -103,7 +103,7 @@ alertas_patterns = [
 radar_patterns = [
     path(
         "radar/<str:orgao_id>",
-        SuaPromotoriaView.as_view(),
+        RadarView.as_view(),
         name="radar"
     ),
 ]
