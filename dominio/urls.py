@@ -16,7 +16,8 @@ from .views import (
     DetalheAcervoView,
     DetalheProcessosJuizoView,
     AlertasView,
-    TempoTramitacaoView
+    TempoTramitacaoView,
+    ListaProcessosView,
 )
 from .radar_views import SuaPromotoriaView
 
@@ -119,7 +120,15 @@ desarquivamentos_patterns = [
     path(
         "desarquivamentos/<str:orgao_id>",
         DesarquivamentosView.as_view(),
-        name="desarquivamentos",
+        name="desarquivamentos"
+    )
+]
+
+listaprocessos_patterns = [
+    path(
+        "lista/processos/<str:orgao_id>",
+        ListaProcessosView.as_view(),
+        name="lista-processos"
     )
 ]
 
@@ -128,5 +137,6 @@ urlpatterns = suamesa_patterns + \
     + alertas_patterns \
     + radar_patterns \
     + jwt_patterns \
-    + tempotramitacao_patterns\
+    + tempotramitacao_patterns \
+    + listaprocessos_patterns \
     + desarquivamentos_patterns
