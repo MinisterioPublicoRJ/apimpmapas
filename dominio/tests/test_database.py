@@ -1,9 +1,11 @@
 from unittest import mock
 
+import pytest
 from django.test import TestCase
 
 
 from mprj_api.db_routers import DominioRouter
+from mprj_api.exceptions import APIEmptyResultError, APIQueryError
 from dominio.db_connectors import BDA_Error, execute, run_query
 from lupa.exceptions import QueryError
 
@@ -64,15 +66,15 @@ class RunQuery(TestCase):
     def test_run_query_error(self, _execute):
         _execute.side_effect = QueryError
         query = "SELECT * FROM dual()"
-        resp = run_query(query)
 
-        _execute.assert_called_once_with(query, None)
-        self.assertEqual(resp, None)
+        with pytest.raises(APIQueryError):
+            run_query(query)
+            _execute.assert_called_once_with(query, None)
 
     @mock.patch("dominio.db_connectors.execute", return_value=[])
     def test_run_query_empty_response(self, _execute):
         query = "SELECT * FROM dual()"
-        resp = run_query(query)
 
-        _execute.assert_called_once_with(query, None)
-        self.assertEqual(resp, None)
+        with pytest.raises(APIEmptyResultError):
+            run_query(query)
+            _execute.assert_called_once_with(query, None)

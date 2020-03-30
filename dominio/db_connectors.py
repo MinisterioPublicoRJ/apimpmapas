@@ -6,6 +6,7 @@ from impala.dbapi import connect as bda_connect
 from impala.error import HiveServer2Error as BDA_Error
 
 from lupa.exceptions import QueryError
+from mprj_api.exceptions import APIQueryError, APIEmptyResultError
 
 
 logger = logging.getLogger(__name__)
@@ -29,8 +30,8 @@ def execute(query, parameters):
 def run_query(query, parameters=None):
     try:
         db_result = execute(query, parameters)
-    except QueryError:
-        return None
-    if db_result and db_result[0]:
+        if not (db_result and db_result[0]):
+            raise APIEmptyResultError()
         return db_result
-    return None
+    except QueryError:
+        raise APIQueryError()
