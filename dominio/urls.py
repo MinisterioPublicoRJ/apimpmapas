@@ -3,6 +3,7 @@ from django.urls import path
 
 from .views import (
     login,
+    DesarquivamentosView,
     SaidasView,
     EntradasView,
     OutliersView,
@@ -115,6 +116,14 @@ tempotramitacao_patterns = [
     ),
 ]
 
+desarquivamentos_patterns = [
+    path(
+        "desarquivamentos/<str:orgao_id>",
+        DesarquivamentosView.as_view(),
+        name="desarquivamentos"
+    )
+]
+
 listaprocessos_patterns = [
     path(
         "lista/processos/<str:orgao_id>",
@@ -129,4 +138,5 @@ urlpatterns = suamesa_patterns + \
     + radar_patterns \
     + jwt_patterns \
     + tempotramitacao_patterns \
-    + listaprocessos_patterns
+    + listaprocessos_patterns \
+    + desarquivamentos_patterns

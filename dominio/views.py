@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from django.conf import settings
+from django.db import connections
 from django.db.models import F
 from django.http import Http404, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -368,8 +369,18 @@ class SuaMesaFinalizados(JWTAuthMixin, CacheMixin, APIView):
         orgao_id = int(kwargs.get("orgao_id"))
 
         regras_saidas = (6251, 6657, 6655, 6644, 6326)
+        regras_arquiv = (7912, 6548, 6326, 6681, 6678, 6645, 6682, 6680, 6679,
+                         6644, 6668, 6666, 6665, 6669, 6667, 6664, 6655, 6662,
+                         6659, 6658, 6663, 6661, 6660, 6657, 6670, 6676, 6674,
+                         6673, 6677, 6675, 6672, 6018, 6341, 6338, 6019, 6017,
+                         6591, 6339, 6553, 7871, 6343, 6340, 6342, 6021, 6334,
+                         6331, 6022, 6020, 6593, 6332, 7872, 6336, 6333, 6335,
+                         7745, 6346, 6345, 6015, 6016, 6325, 6327, 6328, 6329,
+                         6330, 6337, 6344, 6656, 6671, 7869, 7870, 6324)
+
+        regras_finalizacoes = regras_saidas + regras_arquiv
         doc_count = SubAndamento.finalizados.trinta_dias(
-            orgao_id, regras_saidas).count()
+            orgao_id, regras_finalizacoes).count()
 
         return Response(data={"suamesa_finalizados": doc_count})
 
@@ -563,6 +574,41 @@ class TempoTramitacaoView(JWTAuthMixin, CacheMixin, APIView):
 
         ser_data = dict(zip(self.fields, data[0]))
         return Response(ser_data)
+
+
+class DesarquivamentosView(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = "DESARQUIVAMENTOS_CACHE_TIMEOUT"
+    fields = ["numero_mprj", "qtd_desarq"]
+
+    def fetch_set(self, cursor):
+        return [dict(zip(self.fields, row)) for row in cursor.fetchall()]
+
+    def get_data(self, orgao_id):
+        with connections["dominio_db"].cursor() as cursor:
+            query = """
+                WITH AGRUPADOS AS (SELECT d.docu_nr_mp, COUNT(d.docu_nr_mp)
+                FROM MCPR_DOCUMENTO d
+                JOIN mcpr_vista v ON v.vist_docu_dk = d.docu_dk
+                JOIN mcpr_andamento a ON a.pcao_vist_dk = v.vist_dk
+                JOIN mcpr_sub_andamento sa ON sa.stao_pcao_dk = a.pcao_dk
+                JOIN mcpr_tp_andamento ta ON ta.tppr_dk = sa.stao_tppr_dk
+                WHERE sa.stao_tppr_dk IN (6075, 1028, 6798, 7245, 6307, 1027,
+                                          7803, 6003, 7802, 7801)
+                                          AND d.docu_cldc_dk = 392
+                AND d.DOCU_ORGI_ORGA_DK_RESPONSAVEL = %s
+                GROUP BY docu_nr_mp, a.pcao_dt_andamento)
+                SELECT docu_nr_mp, COUNT(docu_nr_mp)
+                FROM AGRUPADOS GROUP BY docu_nr_mp
+            """
+            result_set = cursor.execute(query, [orgao_id])
+            return self.fetch_set(result_set)
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(self.kwargs['orgao_id'])
+        # TODO: pensar numa forma geral de discernir 404 de respostas
+        # vazias e respostas não existentes
+
+        return Response(data=self.get_data(orgao_id))
 
 
 class ListaProcessosView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):

@@ -7,6 +7,8 @@ from django.urls import reverse
 from freezegun import freeze_time
 from model_bakery.baker import make
 
+from dominio.tests.testconf import NoJWTTestCase
+
 
 @pytest.mark.django_db(transaction=True)
 class TestLogin(TestCase):
@@ -69,10 +71,9 @@ class TestLogin(TestCase):
         self.assertEqual(resp.json(), expected_data)
 
 
-class TestTempoTramitacao(TestCase):
+class TestTempoTramitacao(NoJWTTestCase, TestCase):
     @mock.patch('dominio.views.run_query')
-    @mock.patch("dominio.mixins.unpack_jwt")
-    def test_correct_response(self, _unpack_jwt, _run_query):
+    def test_correct_response(self, _run_query):
         expected = {
             "id_orgao": 12345,
             "media_orgao": 10.1243,
@@ -103,6 +104,28 @@ class TestTempoTramitacao(TestCase):
         _run_query.return_value = [expected.values()]
         url = reverse("dominio:tempo-tramitacao", args=("1234", ))
         resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, expected)
+
+
+class TestNumeroDesarquivamentos(NoJWTTestCase, TestCase):
+    @mock.patch("dominio.views.connections")
+    def test_correct_response(self, _connections):
+        cursor_mock = mock.MagicMock()
+        cursor_mock.execute.return_value.fetchall.return_value\
+            = [("nr_mp_1", 1), ("nr_mp_2", 2)]
+        conn_mock = mock.MagicMock()
+        conn_mock.cursor.return_value.__enter__.return_value = cursor_mock
+
+        _connections.__getitem__.return_value = conn_mock
+        url = reverse("dominio:desarquivamentos", args=("12345",))
+
+        resp = self.client.get(url)
+        expected = [
+            {"numero_mprj": "nr_mp_1", "qtd_desarq": 1},
+            {"numero_mprj": "nr_mp_2", "qtd_desarq": 2},
+        ]
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, expected)
