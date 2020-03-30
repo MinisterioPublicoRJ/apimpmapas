@@ -5,12 +5,46 @@ from rest_framework.views import APIView
 
 from dominio.db_connectors import run_query
 from dominio.mixins import CacheMixin, JWTAuthMixin
-from dominio.radar_queries import field_names, query
 from dominio.suamesa import format_text
 
 
-class SuaPromotoriaView(JWTAuthMixin, CacheMixin, APIView):
-    cache_config = 'SUAPROMOTORIA_CACHE_TIMEOUT'
+class RadarView(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = 'RADAR_CACHE_TIMEOUT'
+    field_names = [
+        "pacote_atribuicao",
+        "orgao_id",
+        "nr_arquivamentos",
+        "nr_indeferimentos",
+        "nr_instauracoes",
+        "nr_tac",
+        "nr_acoes",
+        "max_pacote_arquivamentos",
+        "max_pacote_indeferimentos",
+        "max_pacote_instauracoes",
+        "max_pacote_tac",
+        "max_pacote_acoes",
+        "perc_arquivamentos",
+        "perc_indeferimentos",
+        "perc_instauracoes",
+        "perc_acoes",
+        "perc_tac",
+        "med_pacote_aquivamentos",
+        "med_pacote_tac",
+        "med_pacote_indeferimentos",
+        "med_pacote_instauracoes",
+        "med_pacote_acoes",
+        "var_med_arquivamentos",
+        "var_med_tac",
+        "var_med_indeferimentos",
+        "var_med_instauracoes",
+        "var_med_acoes",
+        "dt_calculo",
+        "nm_max_arquivamentos",
+        "nm_max_indeferimentos",
+        "nm_max_instauracoes",
+        "nm_max_tac",
+        "nm_max_acoes",
+    ]
 
     def prepare_response(self, resp):
         format_fields = [
@@ -23,6 +57,10 @@ class SuaPromotoriaView(JWTAuthMixin, CacheMixin, APIView):
         return resp
 
     def get_radar_data(self, orgao_id):
+        query = """
+            SELECT * FROM {schema}.tb_radar_performance
+            WHERE orgao_id = :orgao_id
+        """
         f_query = query.format(
                 schema=settings.TABLE_NAMESPACE
         )
@@ -46,6 +84,6 @@ class SuaPromotoriaView(JWTAuthMixin, CacheMixin, APIView):
             raise Http404
 
         resp_data = self.prepare_response(
-            dict(zip(field_names, radar_data[0]))
+            dict(zip(self.field_names, radar_data[0]))
         )
         return Response(data=resp_data)
