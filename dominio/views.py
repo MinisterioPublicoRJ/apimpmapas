@@ -142,78 +142,60 @@ class DetalheAcervoView(JWTAuthMixin, CacheMixin, APIView):
 
 class OutliersView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'OUTLIERS_CACHE_TIMEOUT'
+    _fields = [
+        'cod_orgao',
+        'acervo_qtd',
+        'cod_atribuicao',
+        'minimo',
+        'maximo',
+        'media',
+        'primeiro_quartil',
+        'mediana',
+        'terceiro_quartil',
+        'iqr',
+        'lout',
+        'hout',
+        'dt_inclusao',
+    ]
 
-    def get_acervo(self, orgao_id, data):
-        query = (
-            "SELECT SUM(acervo) "
-            "FROM {namespace}.tb_acervo A "
-            "INNER JOIN cluster.atualizacao_pj_pacote B "
-            "ON A.cod_orgao = cast(B.id_orgao as int) "
-            "INNER JOIN {namespace}.tb_regra_negocio_investigacao C "
-            "ON C.cod_atribuicao = B.cod_pct "
-            "AND C.classe_documento = A.tipo_acervo "
-            "WHERE cod_orgao = :orgao_id "
-            "AND dt_inclusao = to_timestamp(:data, 'yyyy-MM-dd')"
-            .format(
-                namespace=settings.TABLE_NAMESPACE
-            ))
-        parameters = {
-            'orgao_id': orgao_id,
-            'data': data
-        }
-        return run_query(query, parameters)
-
-    def get_outliers(self, orgao_id, dt_calculo):
-
+    def get_data(self, orgao_id):
         query = """
-                SELECT B.cod_atribuicao,
-                B.minimo,
-                B.maximo,
-                B.media,
-                B.primeiro_quartil,
-                B.mediana,
-                B.terceiro_quartil,
-                B.iqr,
-                B.lout,
-                B.hout
-                FROM {namespace}.tb_acervo A
-                INNER JOIN {namespace}.tb_distribuicao B
-                ON A.cod_atribuicao = B.cod_atribuicao
-                AND A.dt_inclusao = B.dt_inclusao
-                WHERE A.cod_orgao = :orgao_id
-                AND B.dt_inclusao = to_timestamp(:dt_calculo, 'yyyy-MM-dd')
+                SELECT
+                cod_orgao,
+                acervo,
+                cod_atribuicao,
+                minimo,
+                maximo,
+                media,
+                primeiro_quartil,
+                mediana,
+                terceiro_quartil,
+                iqr,
+                lout,
+                hout,
+                dt_inclusao
+                FROM {namespace}.tb_distribuicao
+                WHERE cod_orgao = :orgao_id
                 """.format(
                     namespace=settings.TABLE_NAMESPACE
                 )
         parameters = {
-            'orgao_id': orgao_id,
-            'dt_calculo': dt_calculo
+            'orgao_id': orgao_id
         }
         return run_query(query, parameters)
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs['orgao_id'])
-        dt_calculo = str(self.kwargs['dt_calculo'])
 
-        data = self.get_outliers(
-            orgao_id=orgao_id,
-            dt_calculo=dt_calculo
-        )
-        acervo_qtd = self.get_acervo(
-            orgao_id=orgao_id,
-            data=dt_calculo
+        data = self.get_data(
+            orgao_id=orgao_id
         )
 
-        if not data or not acervo_qtd:
+        if not data:
             raise Http404
 
-        fields = ['cod_atribuicao', 'minimo', 'maximo',
-                  'media', 'primeiro_quartil', 'mediana', 'terceiro_quartil',
-                  'iqr', 'lout', 'hout']
-        data_obj = {
-            fieldname: value for fieldname, value in zip(fields, data[0])
-        }
-        data_obj['acervo_qtd'] = acervo_qtd[0][0]
+        data_obj = dict(zip(self._fields, data[0]))
+
         data = OutliersSerializer(data_obj).data
         return Response(data)
 
