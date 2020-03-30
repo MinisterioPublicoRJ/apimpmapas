@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 
 class OutliersSerializer(serializers.Serializer):
+    cod_orgao = serializers.IntegerField()
     acervo_qtd = serializers.IntegerField(min_value=0)
     cod_atribuicao = serializers.IntegerField()
     minimo = serializers.IntegerField(min_value=0)
@@ -13,6 +14,7 @@ class OutliersSerializer(serializers.Serializer):
     iqr = serializers.FloatField()
     lout = serializers.FloatField()
     hout = serializers.FloatField()
+    dt_inclusao = serializers.DateTimeField()
 
 
 class SaidasSerializer(serializers.Serializer):

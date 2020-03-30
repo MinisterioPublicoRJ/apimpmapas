@@ -81,7 +81,7 @@ Vary: Accept
 ## Outliers
 
 ```
-GET dominio/outliers/<id_orgao>/<yyyy-MM-dd>
+GET dominio/outliers/<id_orgao>
 ```
 
 ```
@@ -91,6 +91,8 @@ Content-Type: application/json
 Vary: Accept
 
 {
+    "cod_orgao": <int:id_orgao>,
+    "acervo_qtd": 10,
     "cod_atribuicao": <int:cod_atribuicao>,
     "minimo": 112,
     "maximo": 290,
@@ -100,7 +102,8 @@ Vary: Accept
     "terceiro_quartil": 182.5,
     "iqr": 42.25,
     "lout": 76.875,
-    "hout": 245.875
+    "hout": 245.875,
+    "dt_inclusao": "2020-03-20 14:28:35"
 }
 ```
 

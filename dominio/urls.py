@@ -75,8 +75,7 @@ suamesa_patterns = [
 
 stats_patterns = [
     path(
-        'outliers/'
-        '<str:orgao_id>/<str:dt_calculo>',
+        'outliers/<str:orgao_id>',
         OutliersView.as_view(),
         name='outliers'
     ),

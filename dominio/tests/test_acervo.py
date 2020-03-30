@@ -119,19 +119,16 @@ class OutliersViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
     @mock.patch('dominio.views.run_query')
     def test_outliers_result(self, _run_query):
-        _run_query.side_effect = \
-            [
-                [(
-                    '20', '100', '1000', '500', '300',
-                    '450', '700', '400', '50', '950'
-                )],
-                [('10',)],
-            ]
+        _run_query.return_value = [
+            ('0', '10', '20', '100', '1000', '500', '300',
+             '450', '700', '400', '50', '950', '2020-03-20 00:00:00')
+        ]
         response = self.client.get(reverse(
             'dominio:outliers',
-            args=('0', '1')))
+            args=('0')))
 
         expected_response = {
+            'cod_orgao': 0,
             'acervo_qtd': 10,
             'cod_atribuicao': 20,
             'minimo': 100,
@@ -142,53 +139,33 @@ class OutliersViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
             'terceiro_quartil': 700,
             'iqr': 400,
             'lout': 50,
-            'hout': 950
+            'hout': 950,
+            'dt_inclusao': '2020-03-20 00:00:00'
         }
 
-        expected_call_outliers = mock.call("""
-                SELECT B.cod_atribuicao,
-                B.minimo,
-                B.maximo,
-                B.media,
-                B.primeiro_quartil,
-                B.mediana,
-                B.terceiro_quartil,
-                B.iqr,
-                B.lout,
-                B.hout
-                FROM {namespace}.tb_acervo A
-                INNER JOIN {namespace}.tb_distribuicao B
-                ON A.cod_atribuicao = B.cod_atribuicao
-                AND A.dt_inclusao = B.dt_inclusao
-                WHERE A.cod_orgao = :orgao_id
-                AND B.dt_inclusao = to_timestamp(:dt_calculo, 'yyyy-MM-dd')
-                """.format(namespace=settings.TABLE_NAMESPACE),
-                {
-                    'orgao_id': 0,
-                    'dt_calculo': '1'
-                }
-                )
+        expected_query = """
+                SELECT
+                cod_orgao,
+                acervo,
+                cod_atribuicao,
+                minimo,
+                maximo,
+                media,
+                primeiro_quartil,
+                mediana,
+                terceiro_quartil,
+                iqr,
+                lout,
+                hout,
+                dt_inclusao
+                FROM {namespace}.tb_distribuicao
+                WHERE cod_orgao = :orgao_id
+                """.format(namespace=settings.TABLE_NAMESPACE)
+        expected_parameters = {
+            'orgao_id': 0
+        }
 
-        expected_call_acervo = mock.call(
-            "SELECT SUM(acervo) "
-            "FROM {namespace}.tb_acervo A "
-            "INNER JOIN cluster.atualizacao_pj_pacote B "
-            "ON A.cod_orgao = cast(B.id_orgao as int) "
-            "INNER JOIN {namespace}.tb_regra_negocio_investigacao C "
-            "ON C.cod_atribuicao = B.cod_pct "
-            "AND C.classe_documento = A.tipo_acervo "
-            "WHERE cod_orgao = :orgao_id "
-            "AND dt_inclusao = to_timestamp(:data, 'yyyy-MM-dd')".format(
-              namespace=settings.TABLE_NAMESPACE),
-            {
-                'orgao_id': 0,
-                'data': '1'
-            }
-        )
-
-        _run_query.assert_has_calls([
-            expected_call_outliers,
-            expected_call_acervo])
+        _run_query.assert_called_once_with(expected_query, expected_parameters)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected_response)
 
@@ -197,7 +174,7 @@ class OutliersViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         _run_query.return_value = []
         response = self.client.get(reverse(
             'dominio:outliers',
-            args=('0', '1')))
+            args=('0')))
 
         expected_response = {'detail': 'Não encontrado.'}
 
