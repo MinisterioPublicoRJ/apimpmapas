@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date
 
 from django.db import models
 from django.db.models import (
@@ -105,17 +105,3 @@ class ProcessosManager(InvestigacoesManager):
             codigo_tj=Substr("docu_nr_externo", 14, 3)
         )
         return docs_tj.filter(nr_ano=F("docu_ano"), codigo_tj="819")
-
-
-class FinalizadosManager(models.Manager):
-    def no_orgao(self, org_id, regras_saidas):
-        return self.get_queryset().filter(
-            andamento__vista__documento__docu_orgi_orga_dk_responsavel=org_id,
-            stao_tppr_dk__in=regras_saidas
-        )
-
-    def trinta_dias(self, orgao_id, regras_saidas):
-        finalizados = self.no_orgao(orgao_id, regras_saidas)
-        return finalizados.filter(
-            andamento__pcao_dt_andamento__gte=date.today()
-            - timedelta(days=30))

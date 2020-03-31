@@ -12,7 +12,7 @@ from rest_framework.views import APIView
 from dominio import suamesa
 from .db_connectors import run_query
 from .mixins import CacheMixin, PaginatorMixin, JWTAuthMixin
-from .models import Vista, Documento, SubAndamento, Alerta, Usuario
+from .models import Vista, Documento, Alerta, Usuario
 from .serializers import (
     SaidasSerializer,
     OutliersSerializer,
@@ -346,25 +346,53 @@ class SuaMesaProcessos(JWTAuthMixin, CacheMixin, APIView):
 
 class SuaMesaFinalizados(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAMESAFINALIZADOS_CACHE_TIMEOUT'
+    fields = ["suamesa_finalizados"]
+
+    def fetch_set(self, data):
+        if not data:
+            raise Http404
+
+        return dict(zip(self.fields, data))
+
+    def get_data(self, orgao_id):
+        query = """
+            select count(1)
+            from {namespace}.mcpr_documento doc
+            join {namespace}.mcpr_vista vista
+                on doc.docu_dk = vista.vist_docu_dk
+            join {namespace}.mcpr_andamento anda
+                on vista.vist_dk = anda.pcao_vist_dk
+            join ( select sub.stao_pcao_dk
+                    from {namespace}.mcpr_sub_andamento sub
+                    where sub.stao_tppr_dk in (6251,6657,6655,6644,6326,7912,
+                                               6548,6326,6681,6678,6645,6682,
+                                               6680,6679,6644,6668,6666,6665,
+                                               6669,6667,6664,6655,6662,6659,
+                                               6658,6663,6661,6660,6657,6670,
+                                               6676,6674,6673,6677,6675,6672,
+                                               6018,6341,6338,6019,6017,6591,
+                                               6339,6553,7871,6343,6340,6342,
+                                               6021,6334,6331,6022,6020,6593,
+                                               6332,7872,6336,6333,6335,7745,
+                                               6346,6345,6015,6016,6325,6327,
+                                               6328,6329,6330,6337,6344,6656,
+                                               6671,7869,7870,6324)
+                ) sub
+                on anda.pcao_dk = sub.stao_pcao_dk
+            where year = year(date_sub(current_timestamp(),  30))
+            and month >= month(date_sub(current_timestamp(),  30))
+            and anda.pcao_dt_andamento >= date_sub(current_timestamp(),  30)
+            and doc.docu_orgi_orga_dk_responsavel = :orgao_id
+            group by doc.docu_orgi_orga_dk_responsavel
+            order by doc.docu_orgi_orga_dk_responsavel;
+        """.format(namespace=settings.TABLE_EXADATA_NAMESPACE)
+        data = run_query(query, {"orgao_id": orgao_id})
+        return self.fetch_set(data)
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get("orgao_id"))
-
-        regras_saidas = (6251, 6657, 6655, 6644, 6326)
-        regras_arquiv = (7912, 6548, 6326, 6681, 6678, 6645, 6682, 6680, 6679,
-                         6644, 6668, 6666, 6665, 6669, 6667, 6664, 6655, 6662,
-                         6659, 6658, 6663, 6661, 6660, 6657, 6670, 6676, 6674,
-                         6673, 6677, 6675, 6672, 6018, 6341, 6338, 6019, 6017,
-                         6591, 6339, 6553, 7871, 6343, 6340, 6342, 6021, 6334,
-                         6331, 6022, 6020, 6593, 6332, 7872, 6336, 6333, 6335,
-                         7745, 6346, 6345, 6015, 6016, 6325, 6327, 6328, 6329,
-                         6330, 6337, 6344, 6656, 6671, 7869, 7870, 6324)
-
-        regras_finalizacoes = regras_saidas + regras_arquiv
-        doc_count = SubAndamento.finalizados.trinta_dias(
-            orgao_id, regras_finalizacoes).count()
-
-        return Response(data={"suamesa_finalizados": doc_count})
+        orgao_id = kwargs.get("orgao_id")
+        data = self.get_data(orgao_id)
+        return Response(data=data)
 
 
 class SuaMesaDetalheView(JWTAuthMixin, CacheMixin, APIView):

@@ -8,7 +8,6 @@ from .managers import (
     VistaManager,
     InvestigacoesManager,
     ProcessosManager,
-    FinalizadosManager,
 )
 
 
@@ -167,8 +166,6 @@ class Andamento(models.Model):
 
 
 class SubAndamento(models.Model):
-    finalizados = FinalizadosManager()
-
     stao_dk = models.IntegerField(primary_key=True)
     stao_tppr_dk = models.IntegerField(
         db_column="STAO_TPPR_DK",
