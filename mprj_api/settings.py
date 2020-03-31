@@ -106,8 +106,8 @@ DATABASES = {
     )
 }
 
-TABLE_NAMESPACE = config('TABLE_NAMESPACE')
-TABLE_EXADATA_NAMESPACE = config('TABLE_EXADATA_NAMESPACE')
+TABLE_NAMESPACE = config('TABLE_NAMESPACE', default="exadata_aux_dev")
+TABLE_EXADATA_NAMESPACE = config('TABLE_EXADATA_NAMESPACE', default="exadata_dev")
 IMPALA_HOST = config('IMPALA_HOST')
 IMPALA_PORT = config('IMPALA_PORT', cast=int)
 
