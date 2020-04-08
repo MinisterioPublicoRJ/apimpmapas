@@ -74,16 +74,15 @@ class PIPDetalheAproveitamentosView(CacheMixin, APIView):
         return [
             {'nr_aisp': aisp['nr_aisp'], 
             'top_n': self.get_top_n_orgaos(
-                [mapping_orgao_to_data[orgao] for orgao in aisp['orgaos']]) 
+                [mapping_orgao_to_data[orgao] for orgao in aisp['orgaos']],
+                orderby_position=2) 
             } 
         for aisp in orgaos_same_aisps]
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs['orgao_id'])
 
-        data = self.get_numero_aproveitamentos_pips(
-            orgao_id=orgao_id
-        )
+        data = self.get_numero_aproveitamentos_pips()
 
         if not data:
             raise Http404
@@ -95,7 +94,7 @@ class PIPDetalheAproveitamentosView(CacheMixin, APIView):
             data, orgao_id, value_position=2)
         variacao_1_mes = self.get_value_from_orgao(
             data, orgao_id, value_position=4)
-        top_n_pacote = self.get_top_n_orgaos(data, n=3)
+        top_n_pacote = self.get_top_n_orgaos(data, orderby_position=2, n=3)
 
         data_obj = {
             'nr_aproveitamentos_30_dias': nr_aproveitamentos_ultimos_30_dias,

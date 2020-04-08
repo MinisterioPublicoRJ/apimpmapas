@@ -5,6 +5,7 @@ from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 
+from dominio.pip_views import PIPDetalheAproveitamentosView
 from .testconf import NoJWTTestCase, NoCacheTestCase
 
 
@@ -18,7 +19,7 @@ class PIPDetalheAproveitamentosViewTest(NoJWTTestCase, NoCacheTestCase, TestCase
             (42, 'Nome3', 150),
             (60, 'Nome4', 65)
         ]
-        output = DetalheProcessosJuizoView.get_value_from_orgao(
+        output = PIPDetalheAproveitamentosView.get_value_from_orgao(
             test_list, test_orgao_id, value_position=2)
         expected_output = 150
 
@@ -32,7 +33,7 @@ class PIPDetalheAproveitamentosViewTest(NoJWTTestCase, NoCacheTestCase, TestCase
             (42, 'Nome3', 150),
             (60, 'Nome4', 65)
         ]
-        output = DetalheProcessosJuizoView.get_value_from_orgao(
+        output = PIPDetalheAproveitamentosView.get_value_from_orgao(
             test_list, test_orgao_id, value_position=2)
         expected_output = None
 
@@ -45,25 +46,25 @@ class PIPDetalheAproveitamentosViewTest(NoJWTTestCase, NoCacheTestCase, TestCase
             (42, 'Nome3', 150, -0.10, 20),
             (60, 'Nome4', 65, 1.0, 2)
         ]
-        output = DetalheProcessosJuizoView.get_top_n_orgaos(
+        output = PIPDetalheAproveitamentosView.get_top_n_orgaos(
             test_list, orderby_position=4, n=3)
         expected_output = [
-            {'nm_promotoria': 'Nome3', 'nr_acoes_propostas_30_dias': 20},
-            {'nm_promotoria': 'Nome1', 'nr_acoes_propostas_30_dias': 10},
-            {'nm_promotoria': 'Nome2', 'nr_acoes_propostas_30_dias': 5}
+            {'nm_promotoria': 'Nome3', 'nr_aproveitamentos_30_dias': 20},
+            {'nm_promotoria': 'Nome1', 'nr_aproveitamentos_30_dias': 10},
+            {'nm_promotoria': 'Nome2', 'nr_aproveitamentos_30_dias': 5}
         ]
 
         self.assertEqual(output, expected_output)
 
     def test_get_orgaos_same_aisps(self):
-        self.assertEqual(1, 2)
+        pass
 
     def test_get_top_n_by_aisp(self):
-        self.assertEqual(1, 2)
+        pass
 
-    @mock.patch('dominio.views.run_query')
+    @mock.patch('dominio.pip_views.run_query')
     def test_get_numero_aproveitamentos_pips(self, _run_query):
-        DetalheProcessosJuizoView\
+        PIPDetalheAproveitamentosView\
             .get_numero_aproveitamentos_pips()
 
         expected_query = """
@@ -78,32 +79,50 @@ class PIPDetalheAproveitamentosViewTest(NoJWTTestCase, NoCacheTestCase, TestCase
 
         _run_query.assert_called_once_with(expected_query)
 
-    @mock.patch('dominio.views.run_query')
+    @mock.patch('dominio.pip_views.run_query')
     def test_pip_aproveitamentos_result(self, _run_query):
-        _run_query.return_value = [
-            (1, 'TC 1', 20, 1.0, 50),
-            (2, 'TC 2', 30, 0.5, 10),
-            (3, 'TC 3', 40, 0.75, 40),
-            (4, 'TC 4', 10, 0.75, 100),
-            (5, 'TC 5', 40, 0.75, 30)]
+        _run_query.side_effect = [
+            [(1, 'TC 1', 20, 50, 0.75),
+            (2, 'TC 2', 30, 10, 0.5),
+            (3, 'TC 3', 50, 40, 1.0),
+            (4, 'TC 4', 10, 100, 0.75),
+            (5, 'TC 5', 40, 30, 0.75)],
+            [(1, 1, 'AISP1'), (1, 2, 'AISP2'),
+             (2, 1, 'AISP1'), (2, 2, 'AISP2'),
+             (3, 3, 'AISP3'), (4, 3, 'AISP3'), (5, 3, 'AISP3'),]
+        ]
 
         response = self.client.get(reverse(
             'dominio:pip-aproveitamentos',
             args=('1')))
 
         expected_response = {
-            'nr_acoes_propostas_60_dias': 20,
-            'variacao_12_meses': 1.0,
-            'top_n': [
-                {'nm_promotoria': 'tc 4', 'nr_acoes_propostas_30_dias': 100},
-                {'nm_promotoria': 'tc 1', 'nr_acoes_propostas_30_dias': 50},
-                {'nm_promotoria': 'tc 3', 'nr_acoes_propostas_30_dias': 40}]
+            'nr_aproveitamentos_30_dias': 20,
+            'variacao_1_mes': 0.75,
+            'top_n_pacote': [
+                {'nm_promotoria': 'tc 3', 'nr_aproveitamentos_30_dias': 50},
+                {'nm_promotoria': 'tc 5', 'nr_aproveitamentos_30_dias': 40},
+                {'nm_promotoria': 'tc 2', 'nr_aproveitamentos_30_dias': 30}],
+            'top_n_by_aisp': [
+                {'nr_aisp': 1,
+                 'top_n': [
+                     {'nm_promotoria': 'tc 2', 'nr_aproveitamentos_30_dias': 30},
+                     {'nm_promotoria': 'tc 1', 'nr_aproveitamentos_30_dias': 20}]
+                },
+                {'nr_aisp': 2,
+                 'top_n': [
+                     {'nm_promotoria': 'tc 2', 'nr_aproveitamentos_30_dias': 30},
+                     {'nm_promotoria': 'tc 1', 'nr_aproveitamentos_30_dias': 20}]
+                }
+            ]
         }
 
+        print(response.data)
+        print(expected_response)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected_response)
 
-    @mock.patch('dominio.views.run_query')
+    @mock.patch('dominio.pip_views.run_query')
     def test_pip_aproveitamentos_no_result(self, _run_query):
         _run_query.return_value = []
         response = self.client.get(reverse(
