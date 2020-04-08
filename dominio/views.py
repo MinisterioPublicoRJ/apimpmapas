@@ -22,6 +22,10 @@ from .serializers import (
     SuaMesaListaVistasSerializer,
     AlertasListaSerializer,
 )
+from .utils import (
+    get_value_given_key,
+    get_top_n_orderby_value_as_dict
+)
 from login.jwtlogin import authenticate_integra
 
 
@@ -40,26 +44,6 @@ def login(request):
 
 class DetalheAcervoView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'DETALHE_ACERVO_CACHE_TIMEOUT'
-
-    @staticmethod
-    def get_variacao_orgao(l, orgao_id):
-        for element in l:
-            # orgao_id comes in position 0 of each element
-            if element[0] == orgao_id:
-                return element[4]
-        return None
-
-    @staticmethod
-    def get_top_n_orgaos(l, n=3):
-        sorted_list = sorted(l, key=lambda el: float(el[4]), reverse=True)
-        result_list = [
-            {
-                'nm_promotoria': suamesa.format_text(el[1]),
-                'variacao_acervo': el[4]
-            }
-            for el in sorted_list
-        ]
-        return result_list[:n]
 
     @staticmethod
     def get_acervo_increase(orgao_id, dt_inicio, dt_fim):
@@ -114,10 +98,7 @@ class DetalheAcervoView(JWTAuthMixin, CacheMixin, APIView):
 
         date_today = datetime.now().date()
         dt_fim = str(date_today)
-        dt_inicio = date_today - timedelta(30)
-        dt_inicio = '2020-02-10' if datetime(2020, 2, 10).date() > dt_inicio \
-            else str(dt_inicio)
-        n = 3
+        dt_inicio = str(date_today - timedelta(30))
 
         data = self.get_acervo_increase(
             orgao_id=orgao_id,
@@ -128,8 +109,15 @@ class DetalheAcervoView(JWTAuthMixin, CacheMixin, APIView):
         if not data:
             raise Http404
 
-        variacao_acervo = self.get_variacao_orgao(data, orgao_id)
-        top_n = self.get_top_n_orgaos(data, n=n)
+        variacao_acervo = get_value_given_key(
+            data, orgao_id, key_position=0, value_position=4)
+        top_n = get_top_n_orderby_value_as_dict(
+            data,
+            name_position=1,
+            value_position=4,
+            name_fieldname='nm_promotoria',
+            value_fieldname='variacao_acervo',
+            n=3)
 
         data_obj = {
             'variacao_acervo': variacao_acervo,
@@ -405,26 +393,6 @@ class DetalheProcessosJuizoView(JWTAuthMixin, CacheMixin, APIView):
         }
         return run_query(query, parameters)
 
-    @staticmethod
-    def get_value_from_orgao(l, orgao_id, value_position=2):
-        for element in l:
-            # orgao_id comes in position 0 of each element
-            if element[0] == orgao_id:
-                return element[value_position]
-        return None
-
-    @staticmethod
-    def get_top_n_orgaos(l, n=3):
-        sorted_list = sorted(l, key=lambda el: el[4], reverse=True)
-        result_list = [
-            {
-                'nm_promotoria': suamesa.format_text(el[1]),
-                'nr_acoes_propostas_30_dias': el[4]
-            }
-            for el in sorted_list
-        ]
-        return result_list[:n]
-
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs['orgao_id'])
 
@@ -435,11 +403,17 @@ class DetalheProcessosJuizoView(JWTAuthMixin, CacheMixin, APIView):
         if not data_acoes:
             raise Http404
 
-        nr_acoes_60_dias = self.get_value_from_orgao(
-            data_acoes, orgao_id, value_position=2)
-        variacao_acoes_12_meses = self.get_value_from_orgao(
-            data_acoes, orgao_id, value_position=3)
-        top_n = self.get_top_n_orgaos(data_acoes, n=3)
+        nr_acoes_60_dias = get_value_given_key(
+            data_acoes, orgao_id, key_position=0, value_position=2)
+        variacao_acoes_12_meses = get_value_given_key(
+            data_acoes, orgao_id, key_position=0, value_position=3)
+        top_n = get_top_n_orderby_value_as_dict(
+            data_acoes,
+            name_position=1,
+            value_position=4,
+            name_fieldname='nm_promotoria',
+            value_fieldname='nr_acoes_propostas_30_dias',
+            n=3)
 
         data_obj = {
             'nr_acoes_propostas_60_dias': nr_acoes_60_dias,

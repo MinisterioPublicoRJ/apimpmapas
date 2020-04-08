@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 
 from dominio.db_connectors import run_query
 from dominio.mixins import CacheMixin, JWTAuthMixin
-from dominio.suamesa import format_text
+from dominio.utils import format_text
 
 
 class RadarView(JWTAuthMixin, CacheMixin, APIView):
