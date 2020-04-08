@@ -89,8 +89,9 @@ class AlertasListaSerializer(serializers.Serializer):
 
 # Ver como deixar isso mais bonito
 class AproveitamentosPIPSerializer(serializers.Serializer):
-        nm_promotoria = serializers.CharField()
-        nr_aproveitamentos_30_dias = serializers.IntegerField(min_value=0)
+    nm_promotoria = serializers.CharField()
+    nr_aproveitamentos_30_dias = serializers.IntegerField(min_value=0)
+
 
 class PIPDetalheAproveitamentosSerializer(serializers.Serializer):
     class TopNByAISPSerializer(serializers.Serializer):
