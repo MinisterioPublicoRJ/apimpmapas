@@ -8,6 +8,9 @@ media
 /settings.ini
 /settings.ini-bak
 
+# Docker
+docker/
+
 # Backup files # 
 *.bak 
 
