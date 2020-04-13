@@ -53,7 +53,10 @@ pip install -r dev-requirements.txt
 ```
 
 - Copie o arquivo `env.example` para `.env` com as variáveis de ambiente necessárias:
-    `cp env.example .env`
+
+```
+cp env.example .env
+```
 
 - Ative os containers Dockers necessários para rodar aplicação:
   - `source .activate`
