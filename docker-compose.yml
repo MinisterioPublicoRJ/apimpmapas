@@ -1,0 +1,16 @@
+version: "2.0"
+services:
+    apimpmapas_postgres:
+        image: postgres:12.2-alpine
+        env_file: .env
+        volumes:
+            - "./docker/postgres/:/var/lib/postgresql/data"
+        ports:
+            - "50001:5432"
+    apimpmapas_redis:
+        image: redis:alpine
+        hostname: redis
+        ports:
+            - "50002:6379"
+        volumes:
+            - "./docker/redis/:/data/"
