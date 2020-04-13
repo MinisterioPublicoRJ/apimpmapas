@@ -5,7 +5,6 @@ from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 
-from dominio.views import DetalheAcervoView
 from dominio.views import DetalheProcessosJuizoView
 
 from .testconf import NoJWTTestCase, NoCacheTestCase
@@ -13,11 +12,6 @@ from .testconf import NoJWTTestCase, NoCacheTestCase
 
 # Create your tests here.
 class DetalheAcervoViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
-    def test_get_variacao_orgao_return_none(self):
-        view = DetalheAcervoView()
-        resp = view.get_variacao_orgao([], orgao_id=10)
-
-        self.assertTrue(resp is None)
 
     @mock.patch('dominio.views.run_query')
     def test_acervo_variation_result(self, _run_query):
@@ -88,9 +82,7 @@ class DetalheAcervoViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 ON pc.id_orgao = tb_data_fim.cod_orgao
                 """.format(namespace=settings.TABLE_NAMESPACE)
 
-        dt_inicio = datetime.now().date() - timedelta(30)
-        dt_inicio = '2020-02-10' if datetime(2020, 2, 10).date() > dt_inicio \
-            else str(dt_inicio)
+        dt_inicio = str(datetime.now().date() - timedelta(30))
         expected_parameters = {
             'orgao_id': 0,
             'dt_inicio': dt_inicio,
@@ -293,50 +285,6 @@ class EntradasViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
 
 class DetalheProcessosJuizoViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
-
-    def test_get_value_from_orgao(self):
-        test_orgao_id = 42
-        test_list = [
-            (1, 'Nome1', 220),
-            (10, 'Nome2', 140),
-            (42, 'Nome3', 150),
-            (60, 'Nome4', 65)
-        ]
-        output = DetalheProcessosJuizoView.get_value_from_orgao(
-            test_list, test_orgao_id, value_position=2)
-        expected_output = 150
-
-        self.assertEqual(output, expected_output)
-
-    def test_get_value_from_invalid_orgao(self):
-        test_orgao_id = 33
-        test_list = [
-            (1, 'Nome1', 220),
-            (10, 'Nome2', 140),
-            (42, 'Nome3', 150),
-            (60, 'Nome4', 65)
-        ]
-        output = DetalheProcessosJuizoView.get_value_from_orgao(
-            test_list, test_orgao_id, value_position=2)
-        expected_output = None
-
-        self.assertEqual(output, expected_output)
-
-    def test_get_top_n_orgaos(self):
-        test_list = [
-            (1, 'Nome1', 220, 0.5, 10),
-            (10, 'Nome2', 140, 0.3, 5),
-            (42, 'Nome3', 150, -0.10, 20),
-            (60, 'Nome4', 65, 1.0, 2)
-        ]
-        output = DetalheProcessosJuizoView.get_top_n_orgaos(test_list, n=3)
-        expected_output = [
-            {'nm_promotoria': 'Nome3', 'nr_acoes_propostas_30_dias': 20},
-            {'nm_promotoria': 'Nome1', 'nr_acoes_propostas_30_dias': 10},
-            {'nm_promotoria': 'Nome2', 'nr_acoes_propostas_30_dias': 5}
-        ]
-
-        self.assertEqual(output, expected_output)
 
     @mock.patch('dominio.views.run_query')
     def test_get_numero_acoes_propostas_pacote_atribuicao(self, _run_query):

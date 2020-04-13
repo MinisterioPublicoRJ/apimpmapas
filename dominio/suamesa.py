@@ -18,15 +18,6 @@ QUERY_REGRAS = """
 VISTAS_PAGE_SIZE = config('VISTAS_PAGE_SIZE', cast=int, default=20)
 
 
-def format_text(text):
-    return ' '.join(
-        [
-            t.capitalize() if len(t) > 3 or t == "rio"
-            else t for t in text.lower().split()
-        ]
-    )
-
-
 @lru_cache()
 def get_regras(orgao_id, tipo='investigacao'):
     """Busca as regras de negócio relativas a investigação ou processo,

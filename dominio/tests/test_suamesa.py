@@ -6,31 +6,12 @@ from django.urls import reverse
 from django.test import TestCase
 
 from dominio.suamesa import (
-    format_text,
     get_regras,
     QUERY_REGRAS,
     VISTAS_PAGE_SIZE,
 )
 
 from .testconf import NoJWTTestCase, NoCacheTestCase
-
-
-class TestSuaMesaUtils(TestCase):
-    def test_format_string(self):
-        text = "PROMOTORIA DA CAPITAL"
-        expected = "Promotoria da Capital"
-
-        f_text = format_text(text)
-
-        self.assertEqual(f_text, expected)
-
-    def test_format_string_with_word_rio(self):
-        text = "PROMOTORIA DO RIO DE JANEIRO"
-        expected = "Promotoria do Rio de Janeiro"
-
-        f_text = format_text(text)
-
-        self.assertEqual(f_text, expected)
 
 
 class TestSuaMesa(TestCase):

@@ -20,6 +20,7 @@ from .views import (
     ListaProcessosView,
 )
 from .radar_views import RadarView
+from .pip_views import PIPDetalheAproveitamentosView
 
 
 app_name = 'dominio'
@@ -131,6 +132,14 @@ listaprocessos_patterns = [
     )
 ]
 
+pip_patterns = [
+    path(
+        "pip/aproveitamentos/<str:orgao_id>",
+        PIPDetalheAproveitamentosView.as_view(),
+        name="pip-aproveitamentos"
+    )
+]
+
 urlpatterns = suamesa_patterns + \
     stats_patterns \
     + alertas_patterns \
@@ -138,4 +147,5 @@ urlpatterns = suamesa_patterns + \
     + jwt_patterns \
     + tempotramitacao_patterns \
     + listaprocessos_patterns \
-    + desarquivamentos_patterns
+    + desarquivamentos_patterns \
+    + pip_patterns
