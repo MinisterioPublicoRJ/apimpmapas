@@ -67,7 +67,8 @@ class TestMoveDadoToPosition(TestCase):
             response.content
         )
         self.assertIn(
-            b'<input type="hidden" name="_selected_action" value="1" />',
+            '<input type="hidden" name="_selected_action"'
+            f' value="{dado.pk}" />'.encode(),
             response.content
         )
 

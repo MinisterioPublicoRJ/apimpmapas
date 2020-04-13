@@ -1,21 +1,8 @@
 from rest_framework import serializers
 
 
-class AcervoVariationSerializer(serializers.Serializer):
-    acervo_fim = serializers.IntegerField(min_value=0)
-    acervo_inicio = serializers.IntegerField(min_value=0)
-    variacao = serializers.FloatField()
-
-
-class AcervoVariationTopNSerializer(serializers.Serializer):
-    cod_orgao = serializers.IntegerField()
-    nm_orgao = serializers.CharField()
-    acervo_fim = serializers.IntegerField(min_value=0)
-    acervo_inicio = serializers.IntegerField(min_value=0)
-    variacao = serializers.FloatField()
-
-
 class OutliersSerializer(serializers.Serializer):
+    cod_orgao = serializers.IntegerField()
     acervo_qtd = serializers.IntegerField(min_value=0)
     cod_atribuicao = serializers.IntegerField()
     minimo = serializers.IntegerField(min_value=0)
@@ -27,6 +14,7 @@ class OutliersSerializer(serializers.Serializer):
     iqr = serializers.FloatField()
     lout = serializers.FloatField()
     hout = serializers.FloatField()
+    dt_inclusao = serializers.DateTimeField()
 
 
 class SaidasSerializer(serializers.Serializer):
@@ -48,3 +36,69 @@ class EntradasSerializer(serializers.Serializer):
     iqr = serializers.FloatField()
     lout = serializers.FloatField()
     hout = serializers.FloatField()
+
+
+class SuaMesaSerializer(serializers.Serializer):
+    vistas_abertas = serializers.IntegerField(min_value=0)
+    investigacoes_curso = serializers.IntegerField(min_value=0)
+    processos_juizo = serializers.IntegerField(min_value=0)
+    finalizados = serializers.IntegerField(min_value=0)
+
+
+class SuaMesaListaVistasSerializer(serializers.Serializer):
+    numero_mprj = serializers.CharField()
+    numero_externo = serializers.CharField()
+    dt_abertura = serializers.DateField()
+    classe = serializers.CharField()
+
+
+class DetalheAcervoSerializer(serializers.Serializer):
+
+    class VariacaoPromotoriaSerializer(serializers.Serializer):
+        nm_promotoria = serializers.CharField()
+        variacao_acervo = serializers.FloatField(min_value=0)
+
+    variacao_acervo = serializers.FloatField()
+    top_n = VariacaoPromotoriaSerializer(many=True)
+
+
+class DetalheProcessosJuizoSerializer(serializers.Serializer):
+
+    class AcoesPromotoriaSerializer(serializers.Serializer):
+        nm_promotoria = serializers.CharField()
+        nr_acoes_propostas_30_dias = serializers.IntegerField(min_value=0)
+
+    nr_acoes_propostas_60_dias = serializers.IntegerField(min_value=0)
+    variacao_12_meses = serializers.FloatField()
+    top_n = AcoesPromotoriaSerializer(many=True)
+
+
+class AlertasListaSerializer(serializers.Serializer):
+    sigla = serializers.CharField()
+    descricao = serializers.CharField()
+    doc_dk = serializers.IntegerField()
+    num_doc = serializers.CharField()
+    num_ext = serializers.CharField()
+    etiqueta = serializers.CharField()
+    classe_doc = serializers.CharField()
+    data_alerta = serializers.DateTimeField()
+    orgao = serializers.IntegerField()
+    classe_hier = serializers.CharField()
+    dias_passados = serializers.IntegerField()
+
+
+# Ver como deixar isso mais bonito
+class AproveitamentosPIPSerializer(serializers.Serializer):
+    nm_promotoria = serializers.CharField()
+    nr_aproveitamentos_30_dias = serializers.IntegerField(min_value=0)
+
+
+class PIPDetalheAproveitamentosSerializer(serializers.Serializer):
+    class TopNByAISPSerializer(serializers.Serializer):
+        nr_aisp = serializers.IntegerField()
+        top_n = AproveitamentosPIPSerializer(many=True)
+
+    nr_aproveitamentos_30_dias = serializers.IntegerField(min_value=0)
+    variacao_1_mes = serializers.FloatField()
+    top_n_pacote = AproveitamentosPIPSerializer(many=True)
+    top_n_by_aisp = TopNByAISPSerializer(many=True)
