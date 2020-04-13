@@ -52,6 +52,16 @@ Em seguida devem ser instaladas as dependências Python
 pip install -r dev-requirements.txt
 ```
 
+- Copie o arquivo `env.example` para `.env` com as variáveis de ambiente necessárias:
+    `cp env.example .env`
+
+- Ative os containers Dockers necessários para rodar aplicação:
+  - `source .activate`
+
+- Depois é o processo padrão do django de coleção de estáticos, migração e rodar testes:
+  - `python manage.py migrate`
+  - `python manage.py collectstatic`
+
 # Rodando os testes
 
 ```bash
