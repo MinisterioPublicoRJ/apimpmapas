@@ -5,6 +5,7 @@ from django.test import TestCase
 from dominio.utils_pip import (
     get_orgaos_same_aisps,
     get_top_n_by_aisp,
+    get_aisps,
 )
 
 
@@ -22,6 +23,7 @@ class UtilsPIPTest(TestCase):
             2: [1, 2]
         }
 
+        get_aisps.cache_clear()
         output = get_orgaos_same_aisps(orgao_id_test)
         self.assertEqual(output, expected_output)
 

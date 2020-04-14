@@ -13,6 +13,9 @@ class PIPDetalheAproveitamentosViewTest(
     @mock.patch('dominio.pip_views.run_query')
     def test_get_numero_aproveitamentos_pips(self, _run_query):
         PIPDetalheAproveitamentosView\
+            .get_numero_aproveitamentos_pips\
+            .cache_clear()
+        PIPDetalheAproveitamentosView\
             .get_numero_aproveitamentos_pips()
 
         expected_query = """
@@ -41,6 +44,9 @@ class PIPDetalheAproveitamentosViewTest(
              (2, 1, 'AISP1'), (2, 2, 'AISP2'),
              (3, 3, 'AISP3'), (4, 3, 'AISP3'), (5, 3, 'AISP3')]
 
+        PIPDetalheAproveitamentosView\
+            .get_numero_aproveitamentos_pips\
+            .cache_clear()
         response = self.client.get(reverse(
             'dominio:pip-aproveitamentos',
             args=('1')))
@@ -78,6 +84,9 @@ class PIPDetalheAproveitamentosViewTest(
     @mock.patch('dominio.pip_views.run_query')
     def test_pip_aproveitamentos_no_result(self, _run_query):
         _run_query.return_value = []
+        PIPDetalheAproveitamentosView\
+            .get_numero_aproveitamentos_pips\
+            .cache_clear()
         response = self.client.get(reverse(
             'dominio:pip-aproveitamentos',
             args=('1')))
