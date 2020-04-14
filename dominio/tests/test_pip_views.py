@@ -108,7 +108,7 @@ class PIPVistasAbertasMensalTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, expected_output)
-        _Vista.vistas.aberturas_30_dias.assert_called_once_with(
+        _Vista.vistas.aberturas_30_dias_PIP.assert_called_once_with(
             int(orgao_id), cpf
         )
         manager_mock.count.assert_called_once_with()
