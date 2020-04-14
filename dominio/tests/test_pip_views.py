@@ -92,8 +92,17 @@ class PIPVistasAbertasMensalTest(NoJWTTestCase, NoCacheTestCase, TestCase):
     @mock.patch('dominio.pip_views.Vista')
     def test_pip_vistas_abertas_mensal(self, _Vista):
         manager_mock = mock.MagicMock()
+        filter_mock = mock.MagicMock()
+        values_mock = mock.MagicMock()
+        distinct_mock = mock.MagicMock()
+
         manager_mock.count.return_value = 10
-        manager_mock.filter.values.distinct.count.return_value = 5
+
+        manager_mock.filter.return_value = filter_mock
+        filter_mock.values.return_value = values_mock
+        values_mock.distinct.return_value = distinct_mock
+        distinct_mock.count.return_value = 5
+
         _Vista.vistas.aberturas_30_dias_PIP.return_value = manager_mock
         orgao_id = '10'
         cpf = '123456789'
@@ -112,3 +121,4 @@ class PIPVistasAbertasMensalTest(NoJWTTestCase, NoCacheTestCase, TestCase):
             int(orgao_id), cpf
         )
         manager_mock.count.assert_called_once_with()
+        distinct_mock.count.assert_called_once_with()
