@@ -81,6 +81,16 @@ class VistaManager(models.Manager):
             soma_trinta_mais=Sum('trinta_mais')
         )
 
+    def aberturas_30_dias_PIP(self, orgao_id, cpf):
+        # cldc_dk 590 = PIC, 3 e 494 = Inquerito Policial
+        return self.get_queryset().filter(
+            Q(data_abertura__gte=date.today() - timedelta(days=30)),
+            Q(documento__docu_orgi_orga_dk_responsavel=orgao_id) |
+            Q(documento__docu_orgi_orga_dk_carga=orgao_id),
+            Q(documento__docu_cldc_dk__in=[3, 494, 590]),
+            responsavel__cpf=cpf
+        ).exclude(documento__docu_tpst_dk=11)
+
 
 class InvestigacoesManager(models.Manager):
     def em_curso(self, orgao_id, regras):

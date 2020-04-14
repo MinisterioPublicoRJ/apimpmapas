@@ -20,7 +20,10 @@ from .views import (
     ListaProcessosView,
 )
 from .radar_views import RadarView
-from .pip_views import PIPDetalheAproveitamentosView
+from .pip_views import (
+    PIPDetalheAproveitamentosView,
+    PIPVistasAbertasMensal,
+)
 
 
 app_name = 'dominio'
@@ -137,6 +140,11 @@ pip_patterns = [
         "pip/aproveitamentos/<str:orgao_id>",
         PIPDetalheAproveitamentosView.as_view(),
         name="pip-aproveitamentos"
+    ),
+    path(
+        "pip/aberturas-mensal/<str:orgao_id>/<str:cpf>",
+        PIPVistasAbertasMensal.as_view(),
+        name="pip-aberturas-mensal"
     )
 ]
 
