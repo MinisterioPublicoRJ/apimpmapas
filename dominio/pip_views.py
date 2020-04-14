@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 
 from .db_connectors import run_query
 from .mixins import CacheMixin, JWTAuthMixin
+from .models import Vista
 from .serializers import (
     PIPDetalheAproveitamentosSerializer,
 )
@@ -76,3 +77,23 @@ class PIPDetalheAproveitamentosView(JWTAuthMixin, CacheMixin, APIView):
 
         data = PIPDetalheAproveitamentosSerializer(data_obj).data
         return Response(data)
+
+
+class PIPVistasAbertasMensal(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = 'PIP_VISTASABERTASMENSAL_CACHE_TIMEOUT'
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+        cpf = kwargs.get("cpf")
+
+        aberturas = Vista.vistas.aberturas_30_dias_PIP(orgao_id, cpf)
+        nr_aberturas_30_dias = aberturas.count()
+        nr_investigacoes_30_dias = aberturas.filter()\
+            .values('documento').distinct().count()
+
+        data = {
+            'nr_aberturas_30_dias': nr_aberturas_30_dias,
+            'nr_investigacoes_30_dias': nr_investigacoes_30_dias
+        }
+
+        return Response(data=data)
