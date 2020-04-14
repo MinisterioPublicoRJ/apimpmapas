@@ -31,6 +31,7 @@ class VistaManager(models.Manager):
         Returns:
             List[Tuple] -- Lista com o resultado da query.
         """
+        # docu_tpst_dk = 11 : documentos cancelados
         return self.abertas().filter(
             Q(documento__docu_orgi_orga_dk_responsavel=orgao_id) |
             Q(documento__docu_orgi_orga_dk_carga=orgao_id),
@@ -83,6 +84,7 @@ class VistaManager(models.Manager):
 
     def aberturas_30_dias_PIP(self, orgao_id, cpf):
         # cldc_dk 590 = PIC, 3 e 494 = Inquerito Policial
+        # docu_tpst_dk = 11 : documentos cancelados
         return self.get_queryset().filter(
             Q(data_abertura__gte=date.today() - timedelta(days=30)),
             Q(documento__docu_orgi_orga_dk_responsavel=orgao_id) |
