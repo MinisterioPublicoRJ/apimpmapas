@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from django.conf import settings
 from django.http import Http404
 from rest_framework.response import Response
@@ -22,6 +24,7 @@ class PIPDetalheAproveitamentosView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'PIP_DETALHEAPROVEITAMENTOS_CACHE_TIMEOUT'
 
     @staticmethod
+    @lru_cache()
     def get_numero_aproveitamentos_pips():
         query = """
             SELECT
