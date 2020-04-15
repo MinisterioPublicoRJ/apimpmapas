@@ -139,4 +139,4 @@ urlpatterns = suamesa_patterns + \
     + tempotramitacao_patterns \
     + listaprocessos_patterns \
     + desarquivamentos_patterns \
-    + [path("pip", include("dominio.pip.urls"))]
+    + [path("pip/", include("dominio.pip.urls"))]
