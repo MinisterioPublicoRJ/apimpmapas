@@ -31,9 +31,10 @@ class PIPDetalheAproveitamentosView(JWTAuthMixin, CacheMixin, APIView):
             SELECT
                 orgao_id,
                 nm_orgao,
-                nr_aproveitamentos_ultimos_30_dias,
-                nr_aproveitamentos_ultimos_60_dias,
-                variacao_1_mes
+                nr_aproveitamentos_periodo_atual,
+                nr_aproveitamentos_periodo_anterior,
+                variacao_periodo,
+                tamanho_periodo_dias
             FROM {namespace}.tb_pip_detalhe_aproveitamentos
         """.format(namespace=settings.TABLE_NAMESPACE)
         return run_query(query)
