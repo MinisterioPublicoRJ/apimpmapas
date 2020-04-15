@@ -1,5 +1,4 @@
 from functools import lru_cache
-from collections import defaultdict
 
 from django.conf import settings
 
