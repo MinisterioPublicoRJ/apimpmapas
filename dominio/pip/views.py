@@ -102,3 +102,20 @@ class PIPVistasAbertasMensal(JWTAuthMixin, CacheMixin, APIView):
         }
 
         return Response(data=data)
+
+
+class PIPInvestigacoesCursoAISP(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = 'PIP_INVESTIGACOESCURSOAISP_CACHE_TIMEOUT'
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+
+        aisps = get_orgaos_same_aisps(orgao_id)
+        orgaos_same_aisp = list(aisps.values())[0]
+
+        doc_count = Documento.investigacoes.em_curso_pip_aisp(
+            orgaos_same_aisp).count()
+
+        data = {"aisp_nr_investigacoes": doc_count}
+
+        return Response(data=data)
