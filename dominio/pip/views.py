@@ -5,17 +5,17 @@ from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .db_connectors import run_query
-from .mixins import CacheMixin, JWTAuthMixin
-from .models import Vista
+from dominio.db_connectors import run_query
+from dominio.mixins import CacheMixin, JWTAuthMixin
+from dominio.models import Vista
 from .serializers import (
     PIPDetalheAproveitamentosSerializer,
 )
-from .utils import (
+from dominio.utils import (
     get_top_n_orderby_value_as_dict,
     get_value_given_key
 )
-from .utils_pip import (
+from .utils import (
     get_top_n_by_aisp,
     get_orgaos_same_aisps
 )

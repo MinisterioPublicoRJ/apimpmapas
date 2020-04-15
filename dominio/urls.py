@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 
 
 from .views import (
@@ -20,11 +20,6 @@ from .views import (
     ListaProcessosView,
 )
 from .radar_views import RadarView
-from .pip_views import (
-    PIPDetalheAproveitamentosView,
-    PIPVistasAbertasMensal,
-)
-
 
 app_name = 'dominio'
 
@@ -135,18 +130,6 @@ listaprocessos_patterns = [
     )
 ]
 
-pip_patterns = [
-    path(
-        "pip/aproveitamentos/<str:orgao_id>",
-        PIPDetalheAproveitamentosView.as_view(),
-        name="pip-aproveitamentos"
-    ),
-    path(
-        "pip/aberturas-mensal/<str:orgao_id>/<str:cpf>",
-        PIPVistasAbertasMensal.as_view(),
-        name="pip-aberturas-mensal"
-    )
-]
 
 urlpatterns = suamesa_patterns + \
     stats_patterns \
@@ -156,4 +139,4 @@ urlpatterns = suamesa_patterns + \
     + tempotramitacao_patterns \
     + listaprocessos_patterns \
     + desarquivamentos_patterns \
-    + pip_patterns
+    + [path("pip", include("dominio.pip.urls"))]
