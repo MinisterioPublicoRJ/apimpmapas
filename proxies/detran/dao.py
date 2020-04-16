@@ -9,6 +9,5 @@ class DataTrafficController:
     def cache_key(self):
         return f"detran_request_line_{self.rg}"
 
-    @property
-    def request_awaiting(self):
-        return cache.get(self.cache_key)
+    def get_or_set_cache(self):
+        return cache.get_or_set(self.cache_key, True)

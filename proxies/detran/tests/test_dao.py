@@ -13,28 +13,14 @@ def test_create_cache_key():
 
 
 @mock.patch("proxies.detran.dao.cache")
-def test_request_is_not_in_cache_yet(_cache):
+def test_get_or_set_from_cache(_cache):
     """
     Check in the cache if a RG was already requested
     """
-    _cache.get.return_value = None
+    _cache.get_or_set.return_value = None
     rg = "12345"
     data_controller = DataTrafficController(rg=rg)
-    request_awaiting = data_controller.request_awaiting
+    request_awaiting = data_controller.get_or_set_cache()
 
     assert not request_awaiting
-    _cache.get.assert_called_once_with(data_controller.cache_key)
-
-
-@mock.patch("proxies.detran.dao.cache")
-def test_request_is_already_in_cache(_cache):
-    """
-    Check in the cache if a RG was already requested
-    """
-    _cache.get.return_value = True
-    rg = "12345"
-    data_controller = DataTrafficController(rg=rg)
-    request_awaiting = data_controller.request_awaiting
-
-    assert request_awaiting
-    _cache.get.assert_called_once_with(data_controller.cache_key)
+    _cache.get_or_set.assert_called_once_with(data_controller.cache_key, True)
