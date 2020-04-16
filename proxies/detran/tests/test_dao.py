@@ -1,6 +1,9 @@
 from unittest import mock
 
+import pytest
+
 from proxies.detran.dao import DataTrafficController
+from proxies.exceptions import WaitDBException
 
 
 def test_create_cache_key():
@@ -105,3 +108,28 @@ def test_wait_and_get_data_from_db_sucess(_get_db_data, _sleep):
     _sleep.assert_has_calls(sleep_calls)
     _get_db_data.assert_has_calls(get_db_data_calls)
     assert data == db_data
+
+
+@mock.patch("proxies.detran.dao.sleep")
+@mock.patch.object(DataTrafficController, "get_db_data")
+def test_wait_and_get_data_from_db_exceed_max_attemps(_get_db_data, _sleep):
+    """
+    Execute cache check and request sending process
+
+    """
+    empty_result = ()
+    _get_db_data.side_effect = [empty_result, empty_result]
+    rg = "12345"
+    data_controller = DataTrafficController(rg=rg, max_attempts=2)
+
+    with pytest.raises(WaitDBException):
+        data_controller.get_data()
+
+    sleep_calls = [
+        mock.call(data_controller.wait_time),
+        mock.call(data_controller.wait_time),
+    ]
+    get_db_data_calls = [mock.call(), mock.call()]
+
+    _sleep.assert_has_calls(sleep_calls)
+    _get_db_data.assert_has_calls(get_db_data_calls)

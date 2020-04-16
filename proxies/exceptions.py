@@ -1,0 +1,2 @@
+class WaitDBException(Exception):
+    pass

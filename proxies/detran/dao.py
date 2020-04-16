@@ -3,6 +3,7 @@ from time import sleep
 from django.core.cache import cache
 
 from proxies.detran.client import request_data as request_detran_data
+from proxies.exceptions import WaitDBException
 
 
 class DataTrafficController:
@@ -37,6 +38,9 @@ class DataTrafficController:
             sleep(self.wait_time)
             data = self.get_db_data()
             attempts += 1
+
+        if not data:
+            raise WaitDBException("Tempo de espera pelos dados estourou o limite")
 
         return data
 
