@@ -1,11 +1,15 @@
+from time import sleep
+
 from django.core.cache import cache
 
 from proxies.detran.client import request_data as request_detran_data
 
 
 class DataTrafficController:
-    def __init__(self, rg):
+    def __init__(self, rg, wait_time=3, max_attempts=3):
         self.rg = rg
+        self.wait_time = wait_time
+        self.max_attempts = max_attempts
 
     @property
     def cache_key(self):
@@ -22,10 +26,19 @@ class DataTrafficController:
     def persist_data(self, data):
         pass
 
-    def wait_for_data(self):
-        # Espera for X segundos. Se os dados não vierem estoura uma excessão
-        # de espera
+    def get_db_data(self):
         pass
+
+    def wait_for_data(self):
+        sleep(self.wait_time)
+        data = self.get_db_data()
+        attempts = 1
+        while not data and attempts < self.max_attempts:
+            sleep(self.wait_time)
+            data = self.get_db_data()
+            attempts += 1
+
+        return data
 
     def get_data(self):
         """

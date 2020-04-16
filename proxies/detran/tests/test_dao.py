@@ -80,3 +80,28 @@ def test_check_cache_and_wait_for_data_in_database(
     _get_or_set_cache.assert_called_once_with()
     _wait_for_data.assert_called_once_with()
     assert data == db_data
+
+
+@mock.patch("proxies.detran.dao.sleep")
+@mock.patch.object(DataTrafficController, "get_db_data")
+def test_wait_and_get_data_from_db_sucess(_get_db_data, _sleep):
+    """
+    Execute cache check and request sending process
+
+    """
+    db_data = {"id": 6789}
+    empty_result = ()
+    _get_db_data.side_effect = [empty_result, db_data]
+    rg = "12345"
+    data_controller = DataTrafficController(rg=rg)
+    data = data_controller.get_data()
+
+    sleep_calls = [
+        mock.call(data_controller.wait_time),
+        mock.call(data_controller.wait_time),
+    ]
+    get_db_data_calls = [mock.call(), mock.call()]
+
+    _sleep.assert_has_calls(sleep_calls)
+    _get_db_data.assert_has_calls(get_db_data_calls)
+    assert data == db_data
