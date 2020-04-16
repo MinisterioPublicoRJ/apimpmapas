@@ -4,7 +4,7 @@ services:
         image: postgres:9.5.21-alpine
         env_file: .env
         volumes:
-            - "./docker/postgres/:/var/lib/postgresql/data"
+            - postgres_data:/var/lib/postgresql/data/
         ports:
             - "50001:5432"
     apimpmapas_redis:
@@ -13,4 +13,9 @@ services:
         ports:
             - "50002:6379"
         volumes:
-            - "./docker/redis/:/data/"
+            - redis_data:/data/
+
+
+volumes:
+  postgres_data:
+  redis_data:
