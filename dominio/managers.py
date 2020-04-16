@@ -33,8 +33,7 @@ class VistaManager(models.Manager):
         """
         # docu_tpst_dk = 11 : documentos cancelados
         return self.abertas().filter(
-            Q(documento__docu_orgi_orga_dk_responsavel=orgao_id) |
-            Q(documento__docu_orgi_orga_dk_carga=orgao_id),
+            orgao=orgao_id,
             responsavel__cpf=cpf
         ).exclude(documento__docu_tpst_dk=11)
 
@@ -87,9 +86,9 @@ class VistaManager(models.Manager):
         # docu_tpst_dk = 11 : documentos cancelados
         return self.get_queryset().filter(
             Q(data_abertura__gte=date.today() - timedelta(days=30)),
-            Q(documento__docu_orgi_orga_dk_responsavel=orgao_id) |
-            Q(documento__docu_orgi_orga_dk_carga=orgao_id),
+            Q(data_abertura__lte=date.today()),
             Q(documento__docu_cldc_dk__in=[3, 494, 590]),
+            orgao=orgao_id,
             responsavel__cpf=cpf
         ).exclude(documento__docu_tpst_dk=11)
 
@@ -100,7 +99,7 @@ class InvestigacoesManager(models.Manager):
             docu_orgi_orga_dk_responsavel=orgao_id,
             docu_cldc_dk__in=regras,
             docu_fsdc_dk=1
-        )
+        ).exclude(docu_tpst_dk=11)
 
 
 class ProcessosManager(InvestigacoesManager):

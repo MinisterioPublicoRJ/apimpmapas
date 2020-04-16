@@ -334,7 +334,10 @@ class SuaMesaFinalizados(JWTAuthMixin, CacheMixin, APIView):
 
         regras_finalizacoes = regras_saidas + regras_arquiv
         doc_count = SubAndamento.finalizados.trinta_dias(
-            orgao_id, regras_finalizacoes).count()
+            orgao_id, regras_finalizacoes)\
+            .values('andamento__vista__documento__docu_dk')\
+            .distinct()\
+            .count()
 
         return Response(data={"suamesa_finalizados": doc_count})
 
