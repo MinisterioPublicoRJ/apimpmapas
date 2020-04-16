@@ -60,3 +60,23 @@ def test_check_cache_and_send_request(
     _dispatch_request.assert_called_once_with()
     _persist_data.assert_called_once_with(data)
     assert data == detran_data
+
+
+@mock.patch.object(DataTrafficController, "wait_for_data")
+@mock.patch.object(DataTrafficController, "get_or_set_cache")
+def test_check_cache_and_wait_for_data_in_database(
+        _get_or_set_cache, _wait_for_data):
+    """
+    Execute cache check and request sending process
+
+    """
+    db_data = {"id": 6789}
+    _get_or_set_cache.return_value = True
+    _wait_for_data.return_value = db_data
+    rg = "12345"
+    data_controller = DataTrafficController(rg=rg)
+    data = data_controller.get_data()
+
+    _get_or_set_cache.assert_called_once_with()
+    _wait_for_data.assert_called_once_with()
+    assert data == db_data

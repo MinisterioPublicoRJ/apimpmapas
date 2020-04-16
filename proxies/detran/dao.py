@@ -22,6 +22,11 @@ class DataTrafficController:
     def persist_data(self, data):
         pass
 
+    def wait_for_data(self):
+        # Espera for X segundos. Se os dados não vierem estoura uma excessão
+        # de espera
+        pass
+
     def get_data(self):
         """
         This method checks if a request was already sent to the service.
@@ -32,5 +37,7 @@ class DataTrafficController:
         if not request_sent:
             data = self.dispatch_request()
             self.persist_data(data)
+        else:
+            data = self.wait_for_data()
 
         return data
