@@ -26,8 +26,9 @@ def test_get_or_set_from_cache(_cache):
     _cache.get_or_set.assert_called_once_with(data_controller.cache_key, True)
 
 
+@mock.patch("proxies.detran.dao.cache")
 @mock.patch("proxies.detran.dao.request_detran_data")
-def test_dispatch_request_to_detran(_detran_client):
+def test_dispatch_request_to_detran(_detran_client, _cache):
     detran_data = {"id": 6789}
     _detran_client.return_value = detran_data
     rg = "12345"
@@ -36,6 +37,7 @@ def test_dispatch_request_to_detran(_detran_client):
 
     assert data == detran_data
     _detran_client.assert_called_once_with(data_controller.rg)
+    _cache.delete.assert_called_once_with(data_controller.cache_key)
 
 
 @mock.patch.object(DataTrafficController, "get_or_set_cache")

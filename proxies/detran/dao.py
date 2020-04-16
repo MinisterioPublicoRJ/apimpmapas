@@ -15,7 +15,9 @@ class DataTrafficController:
         return cache.get_or_set(self.cache_key, True)
 
     def dispatch_request(self):
-        return request_detran_data(self.rg)
+        data = request_detran_data(self.rg)
+        cache.delete(self.cache_key)
+        return data
 
     def get_data(self):
         """
