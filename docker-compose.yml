@@ -2,6 +2,7 @@ version: "2.0"
 services:
     apimpmapas_postgres:
         image: postgres:9.5.21-alpine
+        container_name: postgres
         env_file: .env
         volumes:
             - postgres_data:/var/lib/postgresql/data/
@@ -9,6 +10,7 @@ services:
             - "50001:5432"
     apimpmapas_redis:
         image: redis:alpine
+        container_name: redis
         hostname: redis
         ports:
             - "50002:6379"
