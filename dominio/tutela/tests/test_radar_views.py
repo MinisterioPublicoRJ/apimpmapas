@@ -6,12 +6,12 @@ from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 
-from dominio.radar_views import RadarView
-from .testconf import NoJWTTestCase, NoCacheTestCase
+from dominio.tutela.radar_views import RadarView
+from dominio.tests.testconf import NoJWTTestCase, NoCacheTestCase
 
 
 class TestSuaPromotoria(NoJWTTestCase, NoCacheTestCase, TestCase):
-    @mock.patch("dominio.radar_views.run_query")
+    @mock.patch("dominio.tutela.radar_views.run_query")
     def test_correct_response(self, _run_query):
         runquery_data = [
             (
@@ -70,7 +70,7 @@ class TestSuaPromotoria(NoJWTTestCase, NoCacheTestCase, TestCase):
         )
         self.assertEqual(resp.data, expected_resp)
 
-    @mock.patch("dominio.radar_views.run_query")
+    @mock.patch("dominio.tutela.radar_views.run_query")
     def test_404_response(self, _run_query):
         _run_query.return_value = None
 

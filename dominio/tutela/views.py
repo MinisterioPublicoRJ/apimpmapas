@@ -3,43 +3,27 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.db import connections
 from django.db.models import F
-from django.http import Http404, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 
-from dominio import suamesa
-from .db_connectors import run_query
-from .mixins import CacheMixin, PaginatorMixin, JWTAuthMixin
-from .models import Vista, Documento, SubAndamento, Alerta, Usuario
-from .serializers import (
+from dominio.tutela import suamesa
+from dominio.db_connectors import run_query
+from dominio.mixins import CacheMixin, PaginatorMixin, JWTAuthMixin
+from dominio.models import Vista, Documento, SubAndamento
+from dominio.tutela.serializers import (
     SaidasSerializer,
     OutliersSerializer,
     EntradasSerializer,
     DetalheAcervoSerializer,
     DetalheProcessosJuizoSerializer,
     SuaMesaListaVistasSerializer,
-    AlertasListaSerializer,
 )
-from .utils import (
+from dominio.utils import (
     get_value_given_key,
     get_top_n_orderby_value_as_dict
 )
-from login.jwtlogin import authenticate_integra
-
-
-@csrf_exempt
-def login(request):
-    response = authenticate_integra(request)
-    usuario, created = Usuario.objects.get_or_create(
-        username=response.get("username")
-    )
-    response["first_login"] = created
-    response["first_login_today"] = created or usuario.get_first_login_today()
-    usuario.save()
-
-    return JsonResponse(response)
 
 
 class DetalheAcervoView(JWTAuthMixin, CacheMixin, APIView):
@@ -458,27 +442,6 @@ class SuaMesaVistasListaView(
         vistas_lista = SuaMesaListaVistasSerializer(page_data, many=True).data
 
         return Response(data=vistas_lista)
-
-
-class AlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
-    cache_config = 'ALERTAS_CACHE_TIMEOUT'
-    # TODO: Mover constante para um lugar decente
-    ALERTAS_SIZE = 25
-
-    def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get("orgao_id"))
-        page = int(request.GET.get("page", 1))
-
-        data = Alerta.validos_por_orgao(orgao_id)
-        page_data = self.paginate(
-            data,
-            page=page,
-            page_size=self.ALERTAS_SIZE
-        )
-
-        alertas_lista = AlertasListaSerializer(page_data, many=True)
-
-        return Response(data=alertas_lista.data)
 
 
 class TempoTramitacaoView(JWTAuthMixin, CacheMixin, APIView):
