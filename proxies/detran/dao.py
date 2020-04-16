@@ -19,6 +19,9 @@ class DataTrafficController:
         cache.delete(self.cache_key)
         return data
 
+    def persist_data(self, data):
+        pass
+
     def get_data(self):
         """
         This method checks if a request was already sent to the service.
@@ -28,5 +31,6 @@ class DataTrafficController:
         request_sent = self.get_or_set_cache()
         if not request_sent:
             data = self.dispatch_request()
+            self.persist_data(data)
 
         return data

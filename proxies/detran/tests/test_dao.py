@@ -40,9 +40,11 @@ def test_dispatch_request_to_detran(_detran_client, _cache):
     _cache.delete.assert_called_once_with(data_controller.cache_key)
 
 
+@mock.patch.object(DataTrafficController, "persist_data")
 @mock.patch.object(DataTrafficController, "get_or_set_cache")
 @mock.patch.object(DataTrafficController, "dispatch_request")
-def test_check_cache_and_send_request(_dispatch_request, _get_or_set_cache):
+def test_check_cache_and_send_request(
+        _dispatch_request, _get_or_set_cache, _persist_data):
     """
     Execute cache check and request sending process
 
@@ -56,4 +58,5 @@ def test_check_cache_and_send_request(_dispatch_request, _get_or_set_cache):
 
     _get_or_set_cache.assert_called_once_with()
     _dispatch_request.assert_called_once_with()
+    _persist_data.assert_called_once_with(data)
     assert data == detran_data
