@@ -3,7 +3,7 @@ from functools import lru_cache
 from decouple import config
 from django.conf import settings
 
-from .db_connectors import run_query
+from dominio.db_connectors import run_query
 
 
 QUERY_REGRAS = """

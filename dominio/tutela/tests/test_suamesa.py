@@ -5,17 +5,17 @@ from django.conf import settings
 from django.urls import reverse
 from django.test import TestCase
 
-from dominio.suamesa import (
+from dominio.tutela.suamesa import (
     get_regras,
     QUERY_REGRAS,
     VISTAS_PAGE_SIZE,
 )
 
-from .testconf import NoJWTTestCase, NoCacheTestCase
+from dominio.tests.testconf import NoJWTTestCase, NoCacheTestCase
 
 
 class TestSuaMesa(TestCase):
-    @mock.patch('dominio.suamesa.run_query')
+    @mock.patch('dominio.tutela.suamesa.run_query')
     def test_sua_mesa_get_regras_investigacao(self, _run_query):
         _run_query.return_value = [(20,), (30,)]
 
@@ -34,7 +34,7 @@ class TestSuaMesa(TestCase):
         _run_query.assert_called_once_with(expected_query, expected_parameters)
         self.assertEqual(output, expected_output)
 
-    @mock.patch('dominio.suamesa.run_query')
+    @mock.patch('dominio.tutela.suamesa.run_query')
     def test_sua_mesa_get_regras_processo(self, _run_query):
         _run_query.return_value = [(20,), (30,)]
 
@@ -55,8 +55,8 @@ class TestSuaMesa(TestCase):
 
 
 class SuaMesaViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
-    @mock.patch('dominio.views.suamesa.get_regras')
-    @mock.patch('dominio.views.Documento')
+    @mock.patch('dominio.tutela.views.suamesa.get_regras')
+    @mock.patch('dominio.tutela.views.Documento')
     def test_sua_mesa_investigacoes(self, _Documento, _get_regras):
         manager_mock = mock.MagicMock()
         manager_mock.count.return_value = 1
@@ -76,8 +76,8 @@ class SuaMesaViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         )
         manager_mock.count.assert_called_once_with()
 
-    @mock.patch('dominio.views.suamesa.get_regras')
-    @mock.patch('dominio.views.Documento')
+    @mock.patch('dominio.tutela.views.suamesa.get_regras')
+    @mock.patch('dominio.tutela.views.Documento')
     def test_sua_mesa_processos(self, _Documento, _get_regras):
         manager_mock = mock.MagicMock()
         manager_mock.count.return_value = 1
@@ -97,7 +97,7 @@ class SuaMesaViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         )
         manager_mock.count.assert_called_once_with()
 
-    @mock.patch('dominio.views.SubAndamento')
+    @mock.patch('dominio.tutela.views.SubAndamento')
     def test_sua_mesa_finalizados(self, _SubAndamento):
         regras_saidas = (6251, 6657, 6655, 6644, 6326)
         regras_arquiv = (7912, 6548, 6326, 6681, 6678, 6645, 6682, 6680, 6679,
@@ -125,7 +125,7 @@ class SuaMesaViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         )
         manager_mock.count.assert_called_once_with()
 
-    @mock.patch('dominio.views.Vista')
+    @mock.patch('dominio.tutela.views.Vista')
     def test_sua_mesa_vistas_abertas(self, _Vista):
         manager_mock = mock.MagicMock()
         manager_mock.count.return_value = 1
@@ -145,7 +145,7 @@ class SuaMesaViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
 
 class TestSuaMesaDetalheVistas(NoJWTTestCase, NoCacheTestCase, TestCase):
-    @mock.patch('dominio.views.Vista')
+    @mock.patch('dominio.tutela.views.Vista')
     def test_correct_response(self, _Vista):
         expected_resp = {
             'soma_ate_vinte': 25,
@@ -161,7 +161,7 @@ class TestSuaMesaDetalheVistas(NoJWTTestCase, NoCacheTestCase, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, expected_resp)
 
-    @mock.patch('dominio.views.Vista')
+    @mock.patch('dominio.tutela.views.Vista')
     def test_404_response(self, _Vista):
         query_resp = {
             'soma_ate_vinte': None,
@@ -179,7 +179,7 @@ class TestSuaMesaDetalheVistas(NoJWTTestCase, NoCacheTestCase, TestCase):
 
 class TestSuaMesaListaVistasAbertas(NoJWTTestCase, NoCacheTestCase, TestCase):
     @mock.patch('dominio.mixins.Paginator')
-    @mock.patch('dominio.views.Vista')
+    @mock.patch('dominio.tutela.views.Vista')
     def test_correct_response(self, _Vista, _Paginator):
         page_mock = mock.MagicMock()
         paginate_mock = mock.MagicMock()

@@ -4,12 +4,12 @@ from unittest import mock
 from django.test import TestCase
 from django.urls import reverse
 
-from .testconf import NoJWTTestCase, NoCacheTestCase
+from dominio.tests.testconf import NoJWTTestCase, NoCacheTestCase
 
 
 class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
-    @mock.patch('dominio.views.Alerta')
+    @mock.patch('dominio.alertas.views.Alerta')
     def test_alert_list(self, _Alerta):
         orgao_id = '0000000'
         alertas_return = [

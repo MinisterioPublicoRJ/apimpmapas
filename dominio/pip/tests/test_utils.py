@@ -2,7 +2,7 @@ from unittest import mock
 
 from django.test import TestCase
 
-from dominio.utils_pip import (
+from dominio.pip.utils import (
     get_orgaos_same_aisps,
     get_top_n_by_aisp,
     get_aisps,
@@ -10,7 +10,7 @@ from dominio.utils_pip import (
 
 
 class UtilsPIPTest(TestCase):
-    @mock.patch('dominio.utils_pip.run_query')
+    @mock.patch('dominio.pip.utils.run_query')
     def test_get_orgaos_same_aisps(self, _run_query):
         _run_query.return_value = [
             (1, 1, 'AISP1'), (1, 2, 'AISP2'),

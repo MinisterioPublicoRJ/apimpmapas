@@ -4,13 +4,13 @@ from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 
-from dominio.pip_views import PIPDetalheAproveitamentosView
-from .testconf import NoJWTTestCase, NoCacheTestCase
+from dominio.pip.views import PIPDetalheAproveitamentosView
+from dominio.tests.testconf import NoJWTTestCase, NoCacheTestCase
 
 
 class PIPDetalheAproveitamentosViewTest(
         NoJWTTestCase, NoCacheTestCase, TestCase):
-    @mock.patch('dominio.pip_views.run_query')
+    @mock.patch('dominio.pip.views.run_query')
     def test_get_numero_aproveitamentos_pips(self, _run_query):
         PIPDetalheAproveitamentosView\
             .get_numero_aproveitamentos_pips\
@@ -30,8 +30,8 @@ class PIPDetalheAproveitamentosViewTest(
 
         _run_query.assert_called_once_with(expected_query)
 
-    @mock.patch('dominio.utils_pip.run_query')
-    @mock.patch('dominio.pip_views.run_query')
+    @mock.patch('dominio.pip.utils.run_query')
+    @mock.patch('dominio.pip.views.run_query')
     def test_pip_aproveitamentos_result(self, _run_query, _run_query_aisps):
         _run_query.return_value = [
             (1, 'TC 1', 20, 50, 0.75),
@@ -81,7 +81,7 @@ class PIPDetalheAproveitamentosViewTest(
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected_response)
 
-    @mock.patch('dominio.pip_views.run_query')
+    @mock.patch('dominio.pip.views.run_query')
     def test_pip_aproveitamentos_no_result(self, _run_query):
         _run_query.return_value = []
         PIPDetalheAproveitamentosView\
@@ -98,7 +98,7 @@ class PIPDetalheAproveitamentosViewTest(
 
 
 class PIPVistasAbertasMensalTest(NoJWTTestCase, NoCacheTestCase, TestCase):
-    @mock.patch('dominio.pip_views.Vista')
+    @mock.patch('dominio.pip.views.Vista')
     def test_pip_vistas_abertas_mensal(self, _Vista):
         manager_mock = mock.MagicMock()
         filter_mock = mock.MagicMock()
