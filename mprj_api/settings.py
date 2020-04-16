@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'mprj_plus',
     'nested_admin',
     'desaparecidos',
+    'proxies',
 ]
 
 MIDDLEWARE = [
