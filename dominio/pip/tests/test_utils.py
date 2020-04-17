@@ -18,10 +18,7 @@ class UtilsPIPTest(TestCase):
             (3, 3, 'AISP3'), (4, 3, 'AISP3'), (5, 3, 'AISP3')]
 
         orgao_id_test = 1
-        expected_output = {
-            1: [1, 2],
-            2: [1, 2]
-        }
+        expected_output = ({1, 2}, {1, 2})
 
         get_aisps.cache_clear()
         output = get_orgaos_same_aisps(orgao_id_test)
@@ -32,24 +29,13 @@ class UtilsPIPTest(TestCase):
             (1, 'PIP1', 50),
             (2, 'PIP2', 30),
             (3, 'PIP3', 40)]
-        aisps_test = {
-            1: [1, 2],
-            2: [1, 2]
-        }
+        aisps_test = [1, 2]
+
         expected_output = [
-            {'nr_aisp': 1,
-             'top_n': [
-                 {'nm_pip': 'Pip1',
-                  'valor_pip': 50},
-                 {'nm_pip': 'Pip2',
-                  'valor_pip': 30}]},
-            {'nr_aisp': 2,
-             'top_n': [
-                 {'nm_pip': 'Pip1',
-                  'valor_pip': 50},
-                 {'nm_pip': 'Pip2',
-                  'valor_pip': 30}]}
-        ]
+            {'nm_pip': 'Pip1',
+             'valor_pip': 50},
+            {'nm_pip': 'Pip2',
+             'valor_pip': 30}]
 
         output = get_top_n_by_aisp(
             aisps_test,

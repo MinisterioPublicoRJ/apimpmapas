@@ -31,9 +31,10 @@ class PIPDetalheAproveitamentosView(JWTAuthMixin, CacheMixin, APIView):
             SELECT
                 orgao_id,
                 nm_orgao,
-                nr_aproveitamentos_ultimos_30_dias,
-                nr_aproveitamentos_ultimos_60_dias,
-                variacao_1_mes
+                nr_aproveitamentos_periodo_atual,
+                nr_aproveitamentos_periodo_anterior,
+                variacao_periodo,
+                tamanho_periodo_dias
             FROM {namespace}.tb_pip_detalhe_aproveitamentos
         """.format(namespace=settings.TABLE_NAMESPACE)
         return run_query(query)
@@ -46,33 +47,37 @@ class PIPDetalheAproveitamentosView(JWTAuthMixin, CacheMixin, APIView):
         if not data:
             raise Http404
 
-        orgaos_same_aisps = get_orgaos_same_aisps(orgao_id)
-        top_n_by_aisp = get_top_n_by_aisp(
+        aisps, orgaos_same_aisps = get_orgaos_same_aisps(orgao_id)
+        top_n_aisp = get_top_n_by_aisp(
             orgaos_same_aisps,
             data,
             name_position=1,
             value_position=2,
             name_fieldname='nm_promotoria',
-            value_fieldname='nr_aproveitamentos_30_dias',
+            value_fieldname='nr_aproveitamentos_periodo',
             n=3)
 
-        nr_aproveitamentos_ultimos_30_dias = get_value_given_key(
+        nr_aproveitamentos_periodo = get_value_given_key(
             data, orgao_id, key_position=0, value_position=2)
-        variacao_1_mes = get_value_given_key(
+        variacao_periodo = get_value_given_key(
             data, orgao_id, key_position=0, value_position=4)
+        tamanho_periodo_dias = get_value_given_key(
+            data, orgao_id, key_position=0, value_position=5)
         top_n_pacote = get_top_n_orderby_value_as_dict(
             data,
             name_position=1,
             value_position=2,
             name_fieldname='nm_promotoria',
-            value_fieldname='nr_aproveitamentos_30_dias',
+            value_fieldname='nr_aproveitamentos_periodo',
             n=3)
 
         data_obj = {
-            'nr_aproveitamentos_30_dias': nr_aproveitamentos_ultimos_30_dias,
-            'variacao_1_mes': variacao_1_mes,
+            'nr_aproveitamentos_periodo': nr_aproveitamentos_periodo,
+            'variacao_periodo': variacao_periodo,
             'top_n_pacote': top_n_pacote,
-            'top_n_by_aisp': top_n_by_aisp
+            'nr_aisps': aisps,
+            'top_n_aisp': top_n_aisp,
+            'tamanho_periodo_dias': tamanho_periodo_dias
         }
 
         data = PIPDetalheAproveitamentosSerializer(data_obj).data

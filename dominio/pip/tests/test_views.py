@@ -22,9 +22,10 @@ class PIPDetalheAproveitamentosViewTest(
             SELECT
                 orgao_id,
                 nm_orgao,
-                nr_aproveitamentos_ultimos_30_dias,
-                nr_aproveitamentos_ultimos_60_dias,
-                variacao_1_mes
+                nr_aproveitamentos_periodo_atual,
+                nr_aproveitamentos_periodo_anterior,
+                variacao_periodo,
+                tamanho_periodo_dias
             FROM {namespace}.tb_pip_detalhe_aproveitamentos
         """.format(namespace=settings.TABLE_NAMESPACE)
 
@@ -34,11 +35,11 @@ class PIPDetalheAproveitamentosViewTest(
     @mock.patch('dominio.pip.views.run_query')
     def test_pip_aproveitamentos_result(self, _run_query, _run_query_aisps):
         _run_query.return_value = [
-            (1, 'TC 1', 20, 50, 0.75),
-            (2, 'TC 2', 30, 10, 0.5),
-            (3, 'TC 3', 50, 40, 1.0),
-            (4, 'TC 4', 10, 100, 0.75),
-            (5, 'TC 5', 40, 30, 0.75)]
+            (1, 'TC 1', 20, 50, 0.75, 30),
+            (2, 'TC 2', 30, 10, 0.5, 30),
+            (3, 'TC 3', 50, 40, 1.0, 30),
+            (4, 'TC 4', 10, 100, 0.75, 30),
+            (5, 'TC 5', 40, 30, 0.75, 30)]
         _run_query_aisps.return_value = [
              (1, 1, 'AISP1'), (1, 2, 'AISP2'),
              (2, 1, 'AISP1'), (2, 2, 'AISP2'),
@@ -52,30 +53,19 @@ class PIPDetalheAproveitamentosViewTest(
             args=('1')))
 
         expected_response = {
-            'nr_aproveitamentos_30_dias': 20,
-            'variacao_1_mes': 0.75,
+            'nr_aproveitamentos_periodo': 20,
+            'variacao_periodo': 0.75,
             'top_n_pacote': [
-                {'nm_promotoria': 'tc 3', 'nr_aproveitamentos_30_dias': 50},
-                {'nm_promotoria': 'tc 5', 'nr_aproveitamentos_30_dias': 40},
-                {'nm_promotoria': 'tc 2', 'nr_aproveitamentos_30_dias': 30}],
-            'top_n_by_aisp': [
-                {
-                 'nr_aisp': 1,
-                 'top_n': [
+                {'nm_promotoria': 'tc 3', 'nr_aproveitamentos_periodo': 50},
+                {'nm_promotoria': 'tc 5', 'nr_aproveitamentos_periodo': 40},
+                {'nm_promotoria': 'tc 2', 'nr_aproveitamentos_periodo': 30}],
+            'nr_aisps': [1, 2],
+            'top_n_aisp': [
                      {'nm_promotoria': 'tc 2',
-                      'nr_aproveitamentos_30_dias': 30},
+                      'nr_aproveitamentos_periodo': 30},
                      {'nm_promotoria': 'tc 1',
-                      'nr_aproveitamentos_30_dias': 20}]
-                },
-                {
-                 'nr_aisp': 2,
-                 'top_n': [
-                     {'nm_promotoria': 'tc 2',
-                      'nr_aproveitamentos_30_dias': 30},
-                     {'nm_promotoria': 'tc 1',
-                      'nr_aproveitamentos_30_dias': 20}]
-                }
-            ]
+                      'nr_aproveitamentos_periodo': 20}],
+            'tamanho_periodo_dias': 30
         }
 
         self.assertEqual(response.status_code, 200)
