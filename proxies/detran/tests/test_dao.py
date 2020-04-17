@@ -219,3 +219,17 @@ class TestHBaseGate:
             db_gate.select(row_id, column_names)
 
         table_mock.row.assert_called_once_with(row_id, columns=column_names)
+
+    def test_insert_row(self):
+        table_mock = mock.Mock()
+        row_id = "12345"
+        data = {"col1": "val1", "col2": "val2"}
+        with mock.patch(
+            "proxies.detran.dao.HBaseGate.get_table",
+            new_callable=mock.PropertyMock
+        ) as _get_table:
+            _get_table.return_value = table_mock
+            db_gate = HBaseGate(table_name="table_name")
+            db_gate.insert(row_id, data)
+
+        table_mock.put.assert_called_once_with(row_id, data=data)

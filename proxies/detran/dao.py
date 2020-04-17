@@ -26,6 +26,9 @@ class HBaseGate:
     def select(self, row_id, columns):
         return self.get_table.row(row_id, columns=columns)
 
+    def insert(self, row_id, data):
+        self.get_table.put(row_id, data=data)
+
 
 class DataTrafficController:
     def __init__(self, rg, wait_time=3, max_attempts=3):
