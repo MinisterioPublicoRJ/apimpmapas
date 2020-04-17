@@ -3,7 +3,9 @@ from time import sleep
 from django.core.cache import cache
 
 from proxies.detran.client import request_data as request_detran_data
-from proxies.exceptions import WaitDBException
+from proxies.exceptions import DataDoesNotExistException, WaitDBException
+
+
 
 
 class DataTrafficController:
