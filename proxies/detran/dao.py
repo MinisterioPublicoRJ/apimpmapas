@@ -51,7 +51,7 @@ class DataTrafficController:
 
         return photo
 
-    def get_photo(self):
+    def request_photo(self):
         """
         This method checks if a request was already sent to the service.
         If not it will dispatch a new request. Otherwise, it will wait and
@@ -75,7 +75,7 @@ class DataTrafficController:
             )
         photo = self.get_db_photo()
         if not photo:
-            photo = self.get_photo()
+            photo = self.request_photo()
             db_data.update({"photo": photo})
 
         return db_data

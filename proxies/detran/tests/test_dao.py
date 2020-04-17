@@ -57,7 +57,7 @@ def test_check_cache_and_send_request(
     _dispatch_request.return_value = detran_data
     rg = "12345"
     data_controller = DataTrafficController(rg=rg)
-    data = data_controller.get_photo()
+    data = data_controller.request_photo()
 
     _get_or_set_cache.assert_called_once_with()
     _dispatch_request.assert_called_once_with()
@@ -78,7 +78,7 @@ def test_check_cache_and_wait_for_photo_in_database(
     _wait_for_photo.return_value = db_data
     rg = "12345"
     data_controller = DataTrafficController(rg=rg)
-    data = data_controller.get_photo()
+    data = data_controller.request_photo()
 
     _get_or_set_cache.assert_called_once_with()
     _wait_for_photo.assert_called_once_with()
@@ -87,7 +87,7 @@ def test_check_cache_and_wait_for_photo_in_database(
 
 @mock.patch("proxies.detran.dao.sleep")
 @mock.patch.object(DataTrafficController, "get_db_photo")
-def test_wait_and_get_photo_from_db_sucess(_get_db_photo, _sleep):
+def test_wait_and_request_photo_from_db_sucess(_get_db_photo, _sleep):
     """
     Execute cache check and request sending process
 
@@ -112,7 +112,8 @@ def test_wait_and_get_photo_from_db_sucess(_get_db_photo, _sleep):
 
 @mock.patch("proxies.detran.dao.sleep")
 @mock.patch.object(DataTrafficController, "get_db_photo")
-def test_wait_and_get_photo_from_db_exceed_max_attemps(_get_db_photo, _sleep):
+def test_wait_and_request_photo_from_db_exceed_max_attemps(
+        _get_db_photo, _sleep):
     """
     Execute cache check and request sending process
 
@@ -147,14 +148,14 @@ def test_get_entire_data_from_db_but_it_does_not_exist(_get_db_data):
     _get_db_data.assert_called_once_with()
 
 
-@mock.patch.object(DataTrafficController, "get_photo")
+@mock.patch.object(DataTrafficController, "request_photo")
 @mock.patch.object(DataTrafficController, "get_db_photo")
 @mock.patch.object(DataTrafficController, "get_db_data")
 def test_get_entire_data_from_db_and_search_photo(
-        _get_db_data, _get_db_photo, _get_photo):
+        _get_db_data, _get_db_photo, _request_photo):
     _get_db_data.return_value = {"rg": "12345"}
     _get_db_photo.return_value = ()
-    _get_photo.return_value = "b64_img"
+    _request_photo.return_value = "b64_img"
 
     rg = "12345"
     data_controller = DataTrafficController(rg=rg)
@@ -163,5 +164,5 @@ def test_get_entire_data_from_db_and_search_photo(
 
     _get_db_data.assert_called_once_with()
     _get_db_photo.assert_called_once_with()
-    _get_photo.assert_called_once_with()
+    _request_photo.assert_called_once_with()
     assert data == expected_data
