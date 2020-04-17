@@ -23,6 +23,9 @@ class HBaseGate:
 
         return connection.table(self.table_name)
 
+    def select(self, row_id, columns):
+        return self.get_table.row(row_id, columns=columns)
+
 
 class DataTrafficController:
     def __init__(self, rg, wait_time=3, max_attempts=3):

@@ -205,3 +205,17 @@ class TestHBaseGate:
         )
         connection_mock.table.assert_called_once_with(table_name)
         assert table == "table obj"
+
+    def test_select_row(self):
+        table_mock = mock.Mock()
+        row_id = "12345"
+        column_names = ["col1", "col2"]
+        with mock.patch(
+            "proxies.detran.dao.HBaseGate.get_table",
+            new_callable=mock.PropertyMock
+        ) as _get_table:
+            _get_table.return_value = table_mock
+            db_gate = HBaseGate(table_name="table_name")
+            db_gate.select(row_id, column_names)
+
+        table_mock.row.assert_called_once_with(row_id, columns=column_names)
