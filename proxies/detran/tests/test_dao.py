@@ -145,3 +145,23 @@ def test_get_entire_data_from_db_but_it_does_not_exist(_get_db_data):
         data_controller.get_data()
 
     _get_db_data.assert_called_once_with()
+
+
+@mock.patch.object(DataTrafficController, "get_photo")
+@mock.patch.object(DataTrafficController, "get_db_photo")
+@mock.patch.object(DataTrafficController, "get_db_data")
+def test_get_entire_data_from_db_and_search_photo(
+        _get_db_data, _get_db_photo, _get_photo):
+    _get_db_data.return_value = {"rg": "12345"}
+    _get_db_photo.return_value = ()
+    _get_photo.return_value = "b64_img"
+
+    rg = "12345"
+    data_controller = DataTrafficController(rg=rg)
+    data = data_controller.get_data()
+    expected_data = {"rg": rg, "photo": "b64_img"}
+
+    _get_db_data.assert_called_once_with()
+    _get_db_photo.assert_called_once_with()
+    _get_photo.assert_called_once_with()
+    assert data == expected_data

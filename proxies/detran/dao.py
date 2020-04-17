@@ -73,3 +73,9 @@ class DataTrafficController:
             raise DataDoesNotExistException(
                 f"Não existem dados para {self.rg}"
             )
+        photo = self.get_db_photo()
+        if not photo:
+            photo = self.get_photo()
+            db_data.update({"photo": photo})
+
+        return db_data
