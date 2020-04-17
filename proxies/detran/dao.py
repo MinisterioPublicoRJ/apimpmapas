@@ -35,6 +35,9 @@ class DataTrafficController:
         self.rg = rg
         self.wait_time = wait_time
         self.max_attempts = max_attempts
+        self.hbase = HBaseGate(table_name=settings.HBASE_DETRAN_BASE)
+
+        self.photo_column = "detran:foto"
 
     @property
     def cache_key(self):

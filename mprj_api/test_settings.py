@@ -195,3 +195,4 @@ JWT_SECRET = SECRET_KEY + str(datetime.now())
 #HBASE
 HBASE_SERVER = config("HBASE_SERVER")
 HBASE_TIMEOUT = config("HBASE_TIMEOUT", cast=int, default=300000)
+HBASE_DETRAN_BASE = config("HBASE_DETRAN_BASE")
