@@ -78,6 +78,6 @@ class DataTrafficController:
         photo = self.get_db_photo()
         if not photo:
             photo = self.request_photo()
-            db_data.update({"photo": photo})
 
+        db_data.update({"photo": photo})
         return db_data
