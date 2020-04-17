@@ -20,41 +20,49 @@ class DataTrafficController:
         return cache.get_or_set(self.cache_key, True)
 
     def dispatch_request(self):
+        # Se estourar excessao, preciso remover do cache
+        # try, except, cache.delete, raise
         data = request_detran_data(self.rg)
         cache.delete(self.cache_key)
         return data
 
-    def persist_data(self, data):
+    def persist_photo(self, photo):
         pass
 
     def get_db_data(self):
         pass
 
-    def wait_for_data(self):
+    def get_db_photo(self):
+        pass
+
+    def wait_for_photo(self):
         sleep(self.wait_time)
-        data = self.get_db_data()
+        photo = self.get_db_photo()
         attempts = 1
-        while not data and attempts < self.max_attempts:
+        while not photo and attempts < self.max_attempts:
             sleep(self.wait_time)
-            data = self.get_db_data()
+            photo = self.get_db_photo()
             attempts += 1
 
-        if not data:
-            raise WaitDBException("Tempo de espera pelos dados estourou o limite")
+        if not photo:
+            raise WaitDBException(
+                f"Tempo de espera pelos dados do {self.rg} estourou o limite"
+            )
 
-        return data
+        return photo
 
-    def get_data(self):
+    def get_photo(self):
         """
         This method checks if a request was already sent to the service.
         If not it will dispatch a new request. Otherwise, it will wait and
-        look for the data in the database.
+        look for the photo in the database.
         """
         request_sent = self.get_or_set_cache()
         if not request_sent:
-            data = self.dispatch_request()
-            self.persist_data(data)
+            photo = self.dispatch_request()
+            self.persist_photo(photo)
         else:
-            data = self.wait_for_data()
+            photo = self.wait_for_photo()
 
-        return data
+        return photo
+

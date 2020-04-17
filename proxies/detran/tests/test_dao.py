@@ -43,11 +43,11 @@ def test_dispatch_request_to_detran(_detran_client, _cache):
     _cache.delete.assert_called_once_with(data_controller.cache_key)
 
 
-@mock.patch.object(DataTrafficController, "persist_data")
+@mock.patch.object(DataTrafficController, "persist_photo")
 @mock.patch.object(DataTrafficController, "get_or_set_cache")
 @mock.patch.object(DataTrafficController, "dispatch_request")
 def test_check_cache_and_send_request(
-        _dispatch_request, _get_or_set_cache, _persist_data):
+        _dispatch_request, _get_or_set_cache, _persist_photo):
     """
     Execute cache check and request sending process
 
@@ -57,79 +57,79 @@ def test_check_cache_and_send_request(
     _dispatch_request.return_value = detran_data
     rg = "12345"
     data_controller = DataTrafficController(rg=rg)
-    data = data_controller.get_data()
+    data = data_controller.get_photo()
 
     _get_or_set_cache.assert_called_once_with()
     _dispatch_request.assert_called_once_with()
-    _persist_data.assert_called_once_with(data)
+    _persist_photo.assert_called_once_with(data)
     assert data == detran_data
 
 
-@mock.patch.object(DataTrafficController, "wait_for_data")
+@mock.patch.object(DataTrafficController, "wait_for_photo")
 @mock.patch.object(DataTrafficController, "get_or_set_cache")
-def test_check_cache_and_wait_for_data_in_database(
-        _get_or_set_cache, _wait_for_data):
+def test_check_cache_and_wait_for_photo_in_database(
+        _get_or_set_cache, _wait_for_photo):
     """
     Execute cache check and request sending process
 
     """
-    db_data = {"id": 6789}
+    db_data = {"foto": 6789}
     _get_or_set_cache.return_value = True
-    _wait_for_data.return_value = db_data
+    _wait_for_photo.return_value = db_data
     rg = "12345"
     data_controller = DataTrafficController(rg=rg)
-    data = data_controller.get_data()
+    data = data_controller.get_photo()
 
     _get_or_set_cache.assert_called_once_with()
-    _wait_for_data.assert_called_once_with()
+    _wait_for_photo.assert_called_once_with()
     assert data == db_data
 
 
 @mock.patch("proxies.detran.dao.sleep")
-@mock.patch.object(DataTrafficController, "get_db_data")
-def test_wait_and_get_data_from_db_sucess(_get_db_data, _sleep):
+@mock.patch.object(DataTrafficController, "get_db_photo")
+def test_wait_and_get_photo_from_db_sucess(_get_db_photo, _sleep):
     """
     Execute cache check and request sending process
 
     """
-    db_data = {"id": 6789}
+    db_data = {"foto": 6789}
     empty_result = ()
-    _get_db_data.side_effect = [empty_result, db_data]
+    _get_db_photo.side_effect = [empty_result, db_data]
     rg = "12345"
     data_controller = DataTrafficController(rg=rg)
-    data = data_controller.get_data()
+    data = data_controller.wait_for_photo()
 
     sleep_calls = [
         mock.call(data_controller.wait_time),
         mock.call(data_controller.wait_time),
     ]
-    get_db_data_calls = [mock.call(), mock.call()]
+    get_db_photo_calls = [mock.call(), mock.call()]
 
     _sleep.assert_has_calls(sleep_calls)
-    _get_db_data.assert_has_calls(get_db_data_calls)
+    _get_db_photo.assert_has_calls(get_db_photo_calls)
     assert data == db_data
 
 
 @mock.patch("proxies.detran.dao.sleep")
-@mock.patch.object(DataTrafficController, "get_db_data")
-def test_wait_and_get_data_from_db_exceed_max_attemps(_get_db_data, _sleep):
+@mock.patch.object(DataTrafficController, "get_db_photo")
+def test_wait_and_get_photo_from_db_exceed_max_attemps(_get_db_photo, _sleep):
     """
     Execute cache check and request sending process
 
     """
     empty_result = ()
-    _get_db_data.side_effect = [empty_result, empty_result]
+    _get_db_photo.side_effect = [empty_result, empty_result]
     rg = "12345"
     data_controller = DataTrafficController(rg=rg, max_attempts=2)
 
     with pytest.raises(WaitDBException):
-        data_controller.get_data()
+        data_controller.wait_for_photo()
 
     sleep_calls = [
         mock.call(data_controller.wait_time),
         mock.call(data_controller.wait_time),
     ]
-    get_db_data_calls = [mock.call(), mock.call()]
+    get_db_photo_calls = [mock.call(), mock.call()]
 
     _sleep.assert_has_calls(sleep_calls)
-    _get_db_data.assert_has_calls(get_db_data_calls)
+    _get_db_photo.assert_has_calls(get_db_photo_calls)
