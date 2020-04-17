@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 
 from proxies.detran.dao import DataTrafficController
-from proxies.exceptions import WaitDBException
+from proxies.exceptions import DataDoesNotExistException, WaitDBException
 
 
 def test_create_cache_key():
@@ -133,3 +133,15 @@ def test_wait_and_get_photo_from_db_exceed_max_attemps(_get_db_photo, _sleep):
 
     _sleep.assert_has_calls(sleep_calls)
     _get_db_photo.assert_has_calls(get_db_photo_calls)
+
+
+@mock.patch.object(DataTrafficController, "get_db_data")
+def test_get_entire_data_from_db_but_it_does_not_exist(_get_db_data):
+    _get_db_data.return_value = ()
+
+    rg = "12345"
+    data_controller = DataTrafficController(rg=rg)
+    with pytest.raises(DataDoesNotExistException):
+        data_controller.get_data()
+
+    _get_db_data.assert_called_once_with()

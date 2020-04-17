@@ -66,3 +66,10 @@ class DataTrafficController:
 
         return photo
 
+    def get_data(self):
+        db_data = self.get_db_data()
+
+        if not db_data:
+            raise DataDoesNotExistException(
+                f"Não existem dados para {self.rg}"
+            )
