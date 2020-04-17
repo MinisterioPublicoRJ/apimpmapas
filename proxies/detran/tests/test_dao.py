@@ -201,6 +201,20 @@ class TestDataTrafficControlle:
             columns=[data_controller.photo_column],
         )
 
+    @mock.patch("proxies.detran.dao.HBaseGate")
+    def test_insert_photo_in_db(self, _HBaseGate):
+        db_mock = mock.Mock()
+        _HBaseGate.return_value = db_mock
+
+        rg = "123456"
+        data_controller = DataTrafficController(rg=rg)
+        photo = "b64_img"
+        data_controller.persist_photo(photo)
+
+        db_mock.insert.assert_called_once_with(
+            row_id=rg,
+            data={data_controller.photo_column: photo}
+        )
 
 class TestHBaseGate:
     @mock.patch("proxies.detran.dao.HBaseConnection")

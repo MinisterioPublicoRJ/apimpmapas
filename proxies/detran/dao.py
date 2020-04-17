@@ -54,7 +54,7 @@ class DataTrafficController:
         return data
 
     def persist_photo(self, photo):
-        pass
+        self.hbase.insert(row_id=self.rg, data={self.photo_column: photo})
 
     def get_db_data(self):
         pass
