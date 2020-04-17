@@ -60,7 +60,7 @@ class DataTrafficController:
         pass
 
     def get_db_photo(self):
-        pass
+        return self.hbase.select(row_id=self.rg, columns=[self.photo_column])
 
     def wait_for_photo(self):
         sleep(self.wait_time)

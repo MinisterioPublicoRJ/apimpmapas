@@ -190,13 +190,16 @@ class TestDataTrafficControlle:
     @mock.patch("proxies.detran.dao.HBaseGate")
     def test_select_photo_from_db(self, _HBaseGate):
         db_mock = mock.Mock()
-        _HBaseGate.return_valur = db_mock
+        _HBaseGate.return_value = db_mock
 
         rg = "123456"
         data_controller = DataTrafficController(rg=rg)
         data_controller.get_db_photo()
 
-        db_mock.select(row_id=rg, columns=data_controller.photo_column)
+        db_mock.select.assert_called_once_with(
+            row_id=rg,
+            columns=[data_controller.photo_column],
+        )
 
 
 class TestHBaseGate:
