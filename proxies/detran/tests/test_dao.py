@@ -1,8 +1,9 @@
 from unittest import mock
 
 import pytest
+from django.conf import settings
 
-from proxies.detran.dao import DataTrafficController
+from proxies.detran.dao import DataTrafficController, HBaseGate
 from proxies.exceptions import DataDoesNotExistException, WaitDBException
 
 
@@ -185,3 +186,22 @@ def test_get_entire_data_from_already_with_photo(
     _get_db_photo.assert_called_once_with()
     _request_photo.assert_not_called()
     assert data == expected_data
+
+
+class TestHBaseGate:
+    @mock.patch("proxies.detran.dao.HBaseConnection")
+    def test_get_table(self, _Connection):
+        connection_mock = mock.Mock()
+        connection_mock.table.return_value = "table obj"
+        _Connection.return_value = connection_mock
+
+        table_name = "table_name"
+        db_gate = HBaseGate(table_name=table_name)
+        table = db_gate.get_table
+
+        _Connection.assert_called_once_with(
+            settings.HBASE_SERVER,
+            timeout=settings.HBASE_TIMEOUT,
+        )
+        connection_mock.table.assert_called_once_with(table_name)
+        assert table == "table obj"

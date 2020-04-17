@@ -1,11 +1,27 @@
 from time import sleep
 
+from django.conf import settings
 from django.core.cache import cache
+from happybase import Connection as HBaseConnection
 
 from proxies.detran.client import request_data as request_detran_data
 from proxies.exceptions import DataDoesNotExistException, WaitDBException
 
 
+class HBaseGate:
+    def __init__(self, table_name, server=None, timeout=None):
+        self.table_name = table_name
+        self.server = server or settings.HBASE_SERVER
+        self.timeout = timeout or settings.HBASE_TIMEOUT
+
+    @property
+    def get_table(self):
+        try:
+            connection = HBaseConnection(self.server, timeout=self.timeout)
+        except:
+            connection = HBaseConnection(self.server, timeout=self.timeout)
+
+        return connection.table(self.table_name)
 
 
 class DataTrafficController:

@@ -13,6 +13,7 @@ dj-database-url
 git+https://github.com/MinisterioPublicoRJ/busca_desaparecidos@develop
 git+https://github.com/MinisterioPublicoRJ/login-sca
 gunicorn==19.9.0
+happybase==1.2.0
 impyla
 Markdown
 newrelic==5.4.0.132
@@ -22,3 +23,4 @@ python-decouple
 redis
 requests
 responses
+six==1.14.0
