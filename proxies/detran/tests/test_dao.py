@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 from django.conf import settings
 
-from proxies.detran.dao import DataTrafficController, HBaseGate
+from proxies.detran.dao import DataTrafficController, HBaseGate, ImapalaGate
 from proxies.exceptions import DataDoesNotExistException, WaitDBException
 
 
@@ -260,3 +260,20 @@ class TestHBaseGate:
             db_gate.insert(row_id, data)
 
         table_mock.put.assert_called_once_with(row_id, data=data)
+
+
+class TestImpalaGate:
+    @mock.patch("proxies.detran.dao.impala_execute")
+    def test_select_from_db(self, _impala_execute):
+        table_name = "schema.table"
+        query = """SELECT * FROM {table_name} WHERE {par_1} = :par_1
+            AND {par_2} = :par_2"""
+        parameters = {"par_1": "value_1", "par_2": "value_2"}
+        impala_obj = ImapalaGate(table_name=table_name, query=query)
+        data = impala_obj.select(parameters)
+
+        _impala_execute.assert_called_once_with(
+            """SELECT * FROM schema.table WHERE par_1 = :par_1
+            AND par_2 = :par_2""",
+            {"par_1": "value_1", "par_2": "value_2"},
+        )

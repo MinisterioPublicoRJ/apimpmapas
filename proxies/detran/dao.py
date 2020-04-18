@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.cache import cache
 from happybase import Connection as HBaseConnection
 
+from dominio.db_connectors import execute as impala_execute
 from proxies.detran.client import request_data as request_detran_data
 from proxies.exceptions import DataDoesNotExistException, WaitDBException
 
@@ -28,6 +29,17 @@ class HBaseGate:
 
     def insert(self, row_id, data):
         self.get_table.put(row_id, data=data)
+
+
+class ImapalaGate:
+    def __init__(self, table_name, query):
+        self.table_name = table_name
+        self.query = query
+
+    def select(self, parameters):
+        col_names = {k: k for k in parameters}
+        f_query = self.query.format(table_name=self.table_name, **col_names)
+        return impala_execute(f_query, parameters)
 
 
 class DataTrafficController:
