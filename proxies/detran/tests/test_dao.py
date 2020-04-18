@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 from django.conf import settings
 
-from proxies.detran.dao import DataTrafficController, HBaseGate, ImapalaGate
+from proxies.detran.dao import DataTrafficController, HBaseGate, ImpalaGate
 from proxies.exceptions import DataDoesNotExistException, WaitDBException
 
 
@@ -196,6 +196,9 @@ class TestDataTrafficControlle:
         data_controller = DataTrafficController(rg=rg)
         data_controller.get_db_photo()
 
+        _HBaseGate.assert_called_once_with(
+            table_name=settings.HBASE_DETRAN_BASE
+        )
         db_mock.select.assert_called_once_with(
             row_id=rg,
             columns=[data_controller.photo_column],
@@ -211,10 +214,31 @@ class TestDataTrafficControlle:
         photo = "b64_img"
         data_controller.persist_photo(photo)
 
+        _HBaseGate.assert_called_once_with(
+            table_name=settings.HBASE_DETRAN_BASE
+        )
         db_mock.insert.assert_called_once_with(
             row_id=rg,
             data={data_controller.photo_column: photo}
         )
+
+    @mock.patch("proxies.detran.dao.ImpalaGate")
+    def test_insert_photo_in_db(self, _ImpalaGate):
+        db_mock = mock.Mock()
+        _ImpalaGate.return_value = db_mock
+
+        rg = "123456"
+        data_controller = DataTrafficController(rg=rg)
+        data_controller.get_db_data()
+
+        _ImpalaGate.assert_called_once_with(
+            table_name=settings.IMPALA_DETRAN_TABLE
+        )
+        db_mock.select.assert_called_once_with(
+            columns=["*"],
+            parameters={data_controller.db_key: data_controller.rg}
+        )
+
 
 class TestHBaseGate:
     @mock.patch("proxies.detran.dao.HBaseConnection")
@@ -266,14 +290,12 @@ class TestImpalaGate:
     @mock.patch("proxies.detran.dao.impala_execute")
     def test_select_from_db(self, _impala_execute):
         table_name = "schema.table"
-        query = """SELECT * FROM {table_name} WHERE {par_1} = :par_1
-            AND {par_2} = :par_2"""
-        parameters = {"par_1": "value_1", "par_2": "value_2"}
-        impala_obj = ImapalaGate(table_name=table_name, query=query)
-        data = impala_obj.select(parameters)
+        parameters = {"par_1": "value_1"}
+        impala_obj = ImpalaGate(table_name=table_name)
+        cols = ["*"]
+        data = impala_obj.select(cols, parameters)
 
         _impala_execute.assert_called_once_with(
-            """SELECT * FROM schema.table WHERE par_1 = :par_1
-            AND par_2 = :par_2""",
-            {"par_1": "value_1", "par_2": "value_2"},
+            "SELECT * FROM schema.table WHERE par_1 = :par_1",
+            {"par_1": "value_1"},
         )

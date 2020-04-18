@@ -31,14 +31,18 @@ class HBaseGate:
         self.get_table.put(row_id, data=data)
 
 
-class ImapalaGate:
-    def __init__(self, table_name, query):
+class ImpalaGate:
+    def __init__(self, table_name):
         self.table_name = table_name
-        self.query = query
 
-    def select(self, parameters):
-        col_names = {k: k for k in parameters}
-        f_query = self.query.format(table_name=self.table_name, **col_names)
+    def select(self, columns, parameters):
+        #TODO: criar um método genérico para formatar a query
+        query = "SELECT {projection} FROM {table_name} WHERE {0} = :{0}"
+        f_query = query.format(
+            projection=", ".join(columns),
+            table_name=self.table_name,
+            *parameters.keys()
+        )
         return impala_execute(f_query, parameters)
 
 
@@ -48,8 +52,11 @@ class DataTrafficController:
         self.wait_time = wait_time
         self.max_attempts = max_attempts
         self.hbase = HBaseGate(table_name=settings.HBASE_DETRAN_BASE)
+        self.impala = ImpalaGate(table_name=settings.IMPALA_DETRAN_TABLE)
 
+        # TODO: receber como argumento
         self.photo_column = "detran:foto"
+        self.db_key = "rg"
 
     @property
     def cache_key(self):
@@ -69,7 +76,10 @@ class DataTrafficController:
         self.hbase.insert(row_id=self.rg, data={self.photo_column: photo})
 
     def get_db_data(self):
-        pass
+        return self.impala.select(
+            columns=["*"],
+            parameters={self.db_key: self.rg}
+        )
 
     def get_db_photo(self):
         return self.hbase.select(row_id=self.rg, columns=[self.photo_column])
