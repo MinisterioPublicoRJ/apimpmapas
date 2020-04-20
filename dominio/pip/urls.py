@@ -3,6 +3,7 @@ from django.urls import path
 from .views import (
     PIPDetalheAproveitamentosView,
     PIPVistasAbertasMensal,
+    PIPInvestigacoesCursoAISP,
 )
 
 
@@ -16,5 +17,10 @@ urlpatterns = [
         "aberturas-mensal/<str:orgao_id>/<str:cpf>",
         PIPVistasAbertasMensal.as_view(),
         name="pip-aberturas-mensal"
-    )
+    ),
+    path(
+        "aisp/investigacoes/<str:orgao_id>",
+        PIPInvestigacoesCursoAISP.as_view(),
+        name="pip-aisp-investigacoes"
+    ),
 ]

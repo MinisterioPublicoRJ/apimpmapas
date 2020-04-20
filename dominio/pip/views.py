@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 
 from dominio.db_connectors import run_query
 from dominio.mixins import CacheMixin, JWTAuthMixin
-from dominio.models import Vista
+from dominio.models import Vista, Documento
 from .serializers import (
     PIPDetalheAproveitamentosSerializer,
 )
@@ -110,8 +110,7 @@ class PIPInvestigacoesCursoAISP(JWTAuthMixin, CacheMixin, APIView):
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
 
-        aisps = get_orgaos_same_aisps(orgao_id)
-        orgaos_same_aisp = list(aisps.values())[0]
+        _, orgaos_same_aisp = get_orgaos_same_aisps(orgao_id)
 
         doc_count = Documento.investigacoes.em_curso_pip_aisp(
             orgaos_same_aisp).count()

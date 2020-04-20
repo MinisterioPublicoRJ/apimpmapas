@@ -129,8 +129,8 @@ class PIPVistasAbertasMensalTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
 
 class PIPInvestigacoesCursoAISPTest(NoJWTTestCase, NoCacheTestCase, TestCase):
-    @mock.patch('dominio.utils_pip.run_query')
-    @mock.patch('dominio.pip_views.Documento')
+    @mock.patch('dominio.pip.utils.run_query')
+    @mock.patch('dominio.pip.views.Documento')
     def test_pip_investigacoes_curso_aisp(self, _Documento, _run_query_aisps):
         _run_query_aisps.return_value = [
              (1, 1, 'AISP1'), (1, 2, 'AISP2'),
@@ -153,5 +153,5 @@ class PIPInvestigacoesCursoAISPTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, expected_output)
         _Documento.investigacoes.em_curso_pip_aisp.assert_called_once_with(
-            [1, 2])
+            {1, 2})
         manager_mock.count.assert_called_once_with()
