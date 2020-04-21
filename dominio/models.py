@@ -153,6 +153,10 @@ class Andamento(models.Model):
     pcao_dt_andamento = models.DateField(
         db_column="PCAO_DT_ANDAMENTO"
     )
+    pcao_dt_cancelamento = models.DateField(
+        null=True,
+        db_column='PCAO_DT_CANCELAMENTO'
+    )
 
     vista = models.ForeignKey(
         "Vista",
