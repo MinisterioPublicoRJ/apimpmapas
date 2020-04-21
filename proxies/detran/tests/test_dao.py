@@ -304,6 +304,8 @@ class TestHBaseGate:
 class TestImpalaGate:
     @mock.patch("proxies.detran.dao.impala_execute")
     def test_select_from_db(self, _impala_execute):
+        result_set = (1, 2)
+        _impala_execute.return_value = result_set
         table_name = "schema.table"
         parameters = {"par_1": "value_1"}
         impala_obj = ImpalaGate(table_name=table_name)
@@ -314,3 +316,4 @@ class TestImpalaGate:
             "SELECT * FROM schema.table WHERE par_1 = :par_1",
             {"par_1": "value_1"},
         )
+        assert data == result_set
