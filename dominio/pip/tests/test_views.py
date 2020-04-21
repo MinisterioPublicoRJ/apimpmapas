@@ -6,6 +6,9 @@ from django.urls import reverse
 
 from dominio.pip.views import PIPDetalheAproveitamentosView
 from dominio.tests.testconf import NoJWTTestCase, NoCacheTestCase
+from dominio.pip.utils import (
+    get_aisps,
+)
 
 
 class PIPDetalheAproveitamentosViewTest(
@@ -45,6 +48,7 @@ class PIPDetalheAproveitamentosViewTest(
              (2, 1, 'AISP1'), (2, 2, 'AISP2'),
              (3, 3, 'AISP3'), (4, 3, 'AISP3'), (5, 3, 'AISP3')]
 
+        get_aisps.cache_clear()
         PIPDetalheAproveitamentosView\
             .get_numero_aproveitamentos_pips\
             .cache_clear()
@@ -74,6 +78,7 @@ class PIPDetalheAproveitamentosViewTest(
     @mock.patch('dominio.pip.views.run_query')
     def test_pip_aproveitamentos_no_result(self, _run_query):
         _run_query.return_value = []
+        get_aisps.cache_clear()
         PIPDetalheAproveitamentosView\
             .get_numero_aproveitamentos_pips\
             .cache_clear()
@@ -121,3 +126,32 @@ class PIPVistasAbertasMensalTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         )
         manager_mock.count.assert_called_once_with()
         distinct_mock.count.assert_called_once_with()
+
+
+class PIPInvestigacoesCursoAISPTest(NoJWTTestCase, NoCacheTestCase, TestCase):
+    @mock.patch('dominio.pip.utils.run_query')
+    @mock.patch('dominio.pip.views.Documento')
+    def test_pip_investigacoes_curso_aisp(self, _Documento, _run_query_aisps):
+        _run_query_aisps.return_value = [
+             (1, 1, 'AISP1'), (1, 2, 'AISP2'),
+             (2, 1, 'AISP1'), (2, 2, 'AISP2'),
+             (3, 3, 'AISP3'), (4, 3, 'AISP3'), (5, 3, 'AISP3')]
+
+        manager_mock = mock.MagicMock()
+        manager_mock.count.return_value = 100
+        _Documento.investigacoes.em_curso_pip_aisp.return_value = manager_mock
+
+        get_aisps.cache_clear()
+        orgao_id = '1'
+        url = reverse('dominio:pip-aisp-investigacoes', args=(orgao_id,))
+        resp = self.client.get(url)
+
+        expected_output = {
+            'aisp_nr_investigacoes': 100
+        }
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, expected_output)
+        _Documento.investigacoes.em_curso_pip_aisp.assert_called_once_with(
+            {1, 2})
+        manager_mock.count.assert_called_once_with()

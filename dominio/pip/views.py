@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 
 from dominio.db_connectors import run_query
 from dominio.mixins import CacheMixin, JWTAuthMixin
-from dominio.models import Vista
+from dominio.models import Vista, Documento
 from .serializers import (
     PIPDetalheAproveitamentosSerializer,
 )
@@ -100,5 +100,21 @@ class PIPVistasAbertasMensal(JWTAuthMixin, CacheMixin, APIView):
             'nr_aberturas_30_dias': nr_aberturas_30_dias,
             'nr_investigacoes_30_dias': nr_investigacoes_30_dias
         }
+
+        return Response(data=data)
+
+
+class PIPInvestigacoesCursoAISP(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = 'PIP_INVESTIGACOESCURSOAISP_CACHE_TIMEOUT'
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+
+        _, orgaos_same_aisp = get_orgaos_same_aisps(orgao_id)
+
+        doc_count = Documento.investigacoes.em_curso_pip_aisp(
+            orgaos_same_aisp).count()
+
+        data = {"aisp_nr_investigacoes": doc_count}
 
         return Response(data=data)
