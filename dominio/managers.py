@@ -118,6 +118,8 @@ class ProcessosManager(InvestigacoesManager):
 
 class FinalizadosManager(models.Manager):
     def no_orgao(self, org_id, regras_saidas):
+        # docu_tpst_dk = 11 : documentos cancelados (desconsiderados)
+        # pcao_dt_cancelamento = null : andamentos valido
         return self.get_queryset().filter(
             andamento__vista__documento__docu_orgi_orga_dk_responsavel=org_id,
             stao_tppr_dk__in=regras_saidas,
