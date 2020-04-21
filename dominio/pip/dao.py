@@ -1,6 +1,7 @@
 from django.conf import settings
 
 from dominio.db_connectors import execute as impala_execute
+from dominio.exceptions import APIEmptyResultError
 
 
 QUERIES_DIR = settings.BASE_DIR.child("dominio", "pip", "queries")
@@ -24,4 +25,7 @@ class PIPIndicadoresSucessoDAO:
     @classmethod
     def get(cls, **kwargs):
         result_set = cls.execute(**kwargs)
+        if not result_set:
+            raise APIEmptyResultError
+
         return cls.serialize(result_set)
