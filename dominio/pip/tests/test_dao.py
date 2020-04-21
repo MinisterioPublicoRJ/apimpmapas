@@ -22,3 +22,17 @@ class TestPIPIndicadoresSucesso:
         expected = {"taxa_resolutivdade": 0.133}
 
         assert ser_data == expected
+
+    @mock.patch.object(PIPIndicadoresSucessoDAO, "execute")
+    @mock.patch.object(PIPIndicadoresSucessoDAO, "serialize")
+    def test_get_data(self, _serialize, _execute):
+        result_set = [(0.133)]
+        _execute.return_value = result_set
+        _serialize.return_value = {"data": 1}
+
+        orgao_id = "12345"
+        data = PIPIndicadoresSucessoDAO.get(orgao_id=orgao_id)
+
+        _execute.assert_called_once_with(orgao_id=orgao_id)
+        _serialize.assert_called_once_with(result_set)
+        assert data == {"data": 1}

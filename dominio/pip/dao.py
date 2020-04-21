@@ -20,3 +20,8 @@ class PIPIndicadoresSucessoDAO:
             query = fobj.read()
 
         return impala_execute(query, kwargs)
+
+    @classmethod
+    def get(cls, **kwargs):
+        result_set = cls.execute(**kwargs)
+        return cls.serialize(result_set)
