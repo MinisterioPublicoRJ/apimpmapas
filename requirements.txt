@@ -22,3 +22,4 @@ python-decouple
 redis
 requests
 responses
+Unipath==1.1
