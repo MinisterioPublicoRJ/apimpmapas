@@ -17,7 +17,7 @@ class TestPIPIndicadoresSucesso:
         )
 
     def test_serialize_result_set(self):
-        result_set = [(0.133)]
+        result_set = [(0.133,)]
         ser_data = PIPIndicadoresSucessoDAO.serialize(result_set)
         expected = {"taxa_resolutivdade": 0.133}
 

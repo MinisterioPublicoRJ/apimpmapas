@@ -12,7 +12,7 @@ class PIPIndicadoresSucessoDAO:
 
     @classmethod
     def serialize(cls, result_set):
-        return {cls.column: result_set[0]}
+        return {cls.column: result_set[0][0]}
 
     @classmethod
     def execute(cls, **kwargs):
