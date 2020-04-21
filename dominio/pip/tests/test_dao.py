@@ -15,3 +15,10 @@ class TestPIPIndicadoresSucesso:
         _impala_execute.assert_called_once_with(
             query, {"orgao_id": orgao_id}
         )
+
+    def test_serialize_result_set(self):
+        result_set = [(0.133)]
+        ser_data = PIPIndicadoresSucessoDAO.serialize(result_set)
+        expected = {"taxa_resolutivdade": 0.133}
+
+        assert ser_data == expected
