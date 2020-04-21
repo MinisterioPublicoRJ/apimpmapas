@@ -204,10 +204,22 @@ class TestDataTrafficControlle:
             columns=[data_controller.photo_column],
         )
 
+    def test_calculate_image_md5_hash(self):
+        rg = "12345"
+        data_controller = DataTrafficController(rg=rg)
+        photo = "b64_img"
+
+        hash_md5 = data_controller.md5_hash(photo)
+        expected = "dd8bbfe65432d2cfd49b8bc239bc590e"
+
+        assert hash_md5 == expected
+
+    @mock.patch.object(DataTrafficController, "md5_hash")
     @mock.patch("proxies.detran.dao.HBaseGate")
-    def test_insert_photo_in_db(self, _HBaseGate):
+    def test_insert_photo_in_db(self, _HBaseGate, _md5_hash):
         db_mock = mock.Mock()
         _HBaseGate.return_value = db_mock
+        _md5_hash.return_value = "photo_hash"
 
         rg = "123456"
         data_controller = DataTrafficController(rg=rg)
@@ -219,11 +231,14 @@ class TestDataTrafficControlle:
         )
         db_mock.insert.assert_called_once_with(
             row_id=rg,
-            data={data_controller.photo_column: photo}
+            data={
+                data_controller.photo_column: photo,
+                data_controller.hash_column: "photo_hash",
+            }
         )
 
     @mock.patch("proxies.detran.dao.ImpalaGate")
-    def test_insert_photo_in_db(self, _ImpalaGate):
+    def test_select_data_from_impala(self, _ImpalaGate):
         db_mock = mock.Mock()
         _ImpalaGate.return_value = db_mock
 

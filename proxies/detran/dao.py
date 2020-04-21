@@ -1,3 +1,4 @@
+from hashlib import md5
 from time import sleep
 
 from django.conf import settings
@@ -36,7 +37,7 @@ class ImpalaGate:
         self.table_name = table_name
 
     def select(self, columns, parameters):
-        #TODO: criar um método genérico para formatar a query
+        # TODO: criar um método genérico para formatar a query
         query = "SELECT {projection} FROM {table_name} WHERE {0} = :{0}"
         f_query = query.format(
             projection=", ".join(columns),
@@ -56,11 +57,15 @@ class DataTrafficController:
 
         # TODO: receber como argumento
         self.photo_column = "detran:foto"
+        self.hash_column = "detran:foto_hash"
         self.db_key = "rg"
 
     @property
     def cache_key(self):
         return f"detran_request_line_{self.rg}"
+
+    def md5_hash(self, photo):
+        return md5(photo.encode()).hexdigest()
 
     def get_or_set_cache(self):
         return cache.get_or_set(self.cache_key, True)
@@ -73,7 +78,13 @@ class DataTrafficController:
         return data
 
     def persist_photo(self, photo):
-        self.hbase.insert(row_id=self.rg, data={self.photo_column: photo})
+        self.hbase.insert(
+            row_id=self.rg,
+            data={
+                self.photo_column: photo,
+                self.hash_column: self.md5_hash(photo),
+            }
+        )
 
     def get_db_data(self):
         return self.impala.select(
