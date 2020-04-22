@@ -15,6 +15,7 @@ from dominio.utils import (
     get_top_n_orderby_value_as_dict,
     get_value_given_key
 )
+from dominio.pip.dao import PIPRadarPerformanceDAO
 from .utils import (
     get_top_n_by_aisp,
     get_orgaos_same_aisps
@@ -118,3 +119,11 @@ class PIPInvestigacoesCursoAISP(JWTAuthMixin, CacheMixin, APIView):
         data = {"aisp_nr_investigacoes": doc_count}
 
         return Response(data=data)
+
+
+class PIPRadarPerformanceView(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = "PIP_RADAR_PERFORMANCE_CACHE_TIMEOUT"
+
+    def get(self, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+        return Response(data=PIPRadarPerformanceDAO.get(orgao_id=orgao_id))

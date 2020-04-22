@@ -155,3 +155,15 @@ class PIPInvestigacoesCursoAISPTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         _Documento.investigacoes.em_curso_pip_aisp.assert_called_once_with(
             {1, 2})
         manager_mock.count.assert_called_once_with()
+
+
+class TestPIPRadarPerformance(NoJWTTestCase, NoCacheTestCase, TestCase):
+    @mock.patch("dominio.pip.views.PIPRadarPerformanceDAO.get")
+    def test_correct_response(self, _get_data):
+        _get_data.return_value = {"data": 1}
+
+        url = reverse("dominio:pip-radar-performance", args=("12345", ))
+        resp = self.client.get(url)
+
+        assert resp.status_code == 200
+        assert resp.data == {"data": 1}
