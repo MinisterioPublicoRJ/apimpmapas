@@ -4,6 +4,7 @@ from .views import (
     PIPDetalheAproveitamentosView,
     PIPVistasAbertasMensal,
     PIPInvestigacoesCursoAISP,
+    PIPTaxaResolutividadeView,
 )
 
 
@@ -23,4 +24,9 @@ urlpatterns = [
         PIPInvestigacoesCursoAISP.as_view(),
         name="pip-aisp-investigacoes"
     ),
+    path(
+        "taxa-resolutividade/<str:orgao_id>",
+        PIPTaxaResolutividadeView.as_view(),
+        name="pip-taxa-resolutividade",
+    )
 ]

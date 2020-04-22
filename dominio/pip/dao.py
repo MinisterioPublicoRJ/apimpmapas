@@ -7,7 +7,7 @@ from dominio.exceptions import APIEmptyResultError
 QUERIES_DIR = settings.BASE_DIR.child("dominio", "pip", "queries")
 
 
-class PIPIndicadoresSucessoDAO:
+class PIPTaxaResolutividadeDAO:
     query_file = "pip_taxa_resolutividade.sql"
     column = "taxa_resolutivdade"
 

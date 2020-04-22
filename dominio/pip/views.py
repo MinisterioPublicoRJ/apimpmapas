@@ -15,6 +15,7 @@ from dominio.utils import (
     get_top_n_orderby_value_as_dict,
     get_value_given_key
 )
+from .dao import PIPTaxaResolutividadeDAO
 from .utils import (
     get_top_n_by_aisp,
     get_orgaos_same_aisps
@@ -116,5 +117,15 @@ class PIPInvestigacoesCursoAISP(JWTAuthMixin, CacheMixin, APIView):
             orgaos_same_aisp).count()
 
         data = {"aisp_nr_investigacoes": doc_count}
+
+        return Response(data=data)
+
+
+class PIPTaxaResolutividadeView(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = "PIP_RESOLUTIVIDADE_CACHE_TIMEOUT"
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+        data = PIPTaxaResolutividadeDAO.get(orgao_id=orgao_id)
 
         return Response(data=data)

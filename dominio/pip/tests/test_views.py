@@ -155,3 +155,16 @@ class PIPInvestigacoesCursoAISPTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         _Documento.investigacoes.em_curso_pip_aisp.assert_called_once_with(
             {1, 2})
         manager_mock.count.assert_called_once_with()
+
+
+class TestPIPIndicadoresSucesso(NoJWTTestCase, NoCacheTestCase, TestCase):
+    @mock.patch("dominio.pip.views.PIPTaxaResolutividadeDAO")
+    def test_correct_response(self, _PIPTaxaResolutividade):
+        _PIPTaxaResolutividade.get.return_value = {"data": 1}
+
+        orgao_id = "12345"
+        url = reverse("dominio:pip-taxa-resolutividade", args=(orgao_id,))
+        resp = self.client.get(url)
+
+        assert resp.status_code == 200
+        assert resp.data == {"data": 1}
