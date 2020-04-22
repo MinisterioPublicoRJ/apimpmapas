@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from django.conf import settings
 
 from dominio.db_connectors import execute as impala_execute
@@ -46,13 +48,19 @@ class PIPRadarPerformanceDAO:
         "nm_max_arquivamentos",
         "nm_max_abeturas_vista",
     ]
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
 
     @classmethod
-    def execute(cls, **kwargs):
+    @lru_cache(maxsize=None)
+    def query(cls):
         with open(QUERIES_DIR.child(cls.query_file)) as fobj:
             query = fobj.read()
 
-        return impala_execute(query, kwargs)
+        return query.format(**cls.table_namespaces)
+
+    @classmethod
+    def execute(cls, **kwargs):
+        return impala_execute(cls.query(), kwargs)
 
     @classmethod
     def serialize(cls, result_set):
