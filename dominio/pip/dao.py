@@ -61,3 +61,8 @@ class PIPRadarPerformanceDAO:
                 ser_data[column] = format_text(value)
 
         return ser_data
+
+    @classmethod
+    def get(cls, **kwargs):
+        result_set = cls.execute(**kwargs)
+        return cls.serialize(result_set)
