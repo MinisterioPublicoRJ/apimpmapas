@@ -1,6 +1,9 @@
 from datetime import datetime
 from unittest import mock
 
+import pytest
+
+from dominio.exceptions import APIEmptyResultError
 from dominio.pip.dao import PIPRadarPerformanceDAO, QUERIES_DIR
 
 
@@ -106,3 +109,16 @@ class TestPIPRadarPerformance:
         _execute.assert_called_once_with(orgao_id=orgao_id)
         _serialize.assert_called_once_with(result_set)
         assert data == {"data": 1}
+
+    @mock.patch.object(PIPRadarPerformanceDAO, "execute")
+    @mock.patch.object(PIPRadarPerformanceDAO, "serialize")
+    def test_get_data_404_exception(self, _serialize, _execute):
+        result_set = []
+        _execute.return_value = result_set
+
+        orgao_id = "12345"
+        with pytest.raises(APIEmptyResultError):
+            PIPRadarPerformanceDAO.get(orgao_id=orgao_id)
+
+        _execute.assert_called_once_with(orgao_id=orgao_id)
+        _serialize.assert_not_called()

@@ -1,6 +1,7 @@
 from django.conf import settings
 
 from dominio.db_connectors import execute as impala_execute
+from dominio.exceptions import APIEmptyResultError
 from dominio.utils import format_text
 
 
@@ -65,4 +66,7 @@ class PIPRadarPerformanceDAO:
     @classmethod
     def get(cls, **kwargs):
         result_set = cls.execute(**kwargs)
+        if not result_set:
+            raise APIEmptyResultError
+
         return cls.serialize(result_set)
