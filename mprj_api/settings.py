@@ -14,10 +14,9 @@ import os
 from decouple import config, Csv
 from dj_database_url import parse as db_url
 from datetime import datetime
+from unipath import Path
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+BASE_DIR = Path(__file__).parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -96,12 +95,12 @@ WSGI_APPLICATION = 'mprj_api.wsgi.application'
 DATABASES = {
     'default': config(
         'DATABASE_URL',
-        default='sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3'),
+        default='sqlite:///' + BASE_DIR.child('db.sqlite3'),
         cast=db_url
     ),
     'dominio_db': config(
         'DOMINIO_DB',
-        default='sqlite:///' + os.path.join(BASE_DIR, 'dominio.sqlite3'),
+        default='sqlite:///' + BASE_DIR.child('dominio.sqlite3'),
         cast=db_url
     )
 }
@@ -164,7 +163,7 @@ STATIC_URL = config(
 )
 STATIC_ROOT = config(
     'STATIC_ROOT',
-    default=os.path.join(BASE_DIR, 'static')
+    default=BASE_DIR.child('static')
 )
 
 MEDIA_URL = config(
@@ -173,7 +172,7 @@ MEDIA_URL = config(
 )
 MEDIA_ROOT = config(
     'MEDIA_ROOT',
-    default=os.path.join(BASE_DIR, 'media')
+    default=BASE_DIR.child('media')
 )
 
 # CORS configuration
