@@ -1,7 +1,9 @@
 from unittest import mock
 
+import pytest
 from decouple import config
 
+from proxies.exceptions import DetranAPIClientError
 from proxies.detran.client import request_data
 
 class TestDetranAPIClient:
@@ -57,7 +59,9 @@ class TestDetranAPIClient:
 
         rg = "12345"
         photo = request_data(rg)
-        expected = "ThisIsAPhoto,TrustMe"
+        expected  = "photo"
+
+        assert photo == expected
 
     @mock.patch("proxies.detran.client.Client")
     def test_get_photo_rg_sucess_with_retry_api_exception(self, _Client):
@@ -75,4 +79,24 @@ class TestDetranAPIClient:
 
         rg = "12345"
         photo = request_data(rg)
-        expected = "ThisIsAPhoto,TrustMe"
+        expected  = "photo"
+
+        assert photo == expected
+
+    @mock.patch("proxies.detran.client.Client")
+    def test_get_photo_rg_fail(self, _Client):
+        mock_send = mock.Mock()
+        mock_retrieve = mock.Mock()
+        api_response = [
+            None,
+            Exception,
+            Exception,
+        ]
+        mock_retrieve.service.BuscarProcessados.side_effect = api_response
+
+        _Client.side_effect = [mock_send, mock_retrieve]
+
+
+        rg = "12345"
+        with pytest.raises(DetranAPIClientError):
+            request_data(rg)

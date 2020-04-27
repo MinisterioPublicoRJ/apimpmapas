@@ -36,5 +36,9 @@ def request_data(rg, max_attempts=3, waiting_time=3):
 
         attempts += 1
 
+    if not result:
+        raise DetranAPIClientError(
+            "Não foi possível buscar a foto na API do Detran"
+        )
 
     return result[0].fotoCivil.string[0]
