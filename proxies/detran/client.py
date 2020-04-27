@@ -13,7 +13,7 @@ URL_DETRAN_ENVIO = config("URL_DETRAN_ENVIO")
 URL_DETRAN_BUSCA = config("URL_DETRAN_BUSCA")
 
 
-def request_data(rg, max_attempts=3, waiting_time=3):
+def request_data(rg):
     search_connector = Client(URL_DETRAN_ENVIO)
     result_connector = Client(URL_DETRAN_BUSCA)
 
@@ -24,19 +24,8 @@ def request_data(rg, max_attempts=3, waiting_time=3):
     result = result_connector.service.BuscarProcessados(
         CNPJ, CHAVE, PERFIL, rg
     )
-    attempts = 1
-    while result is None and attempts < max_attempts:
-        try:
-            result = result_connector.service.BuscarProcessados(
-                CNPJ, CHAVE, PERFIL, rg
-            )
-        except:
-            # TODO: encontrar as excessões possíveis
-            pass
 
-        attempts += 1
-
-    if not result:
+    if result[0].RG is None:
         raise DetranAPIClientError(
             "Não foi possível buscar a foto na API do Detran"
         )
