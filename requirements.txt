@@ -1,6 +1,8 @@
+Django>=2.2
+Markdown
 celery
 cx_Oracle==7.3
-Django>=2.2
+dj-database-url
 django-colorfield
 django-cors-headers
 django-filter
@@ -9,13 +11,11 @@ django-nested-admin
 django-ordered-model==3.2.0
 django-redis-cache==2.1.0
 djangorestframework>=3.9
-dj-database-url
 git+https://github.com/MinisterioPublicoRJ/busca_desaparecidos@develop
 git+https://github.com/MinisterioPublicoRJ/login-sca
 gunicorn==19.9.0
 happybase==1.2.0
 impyla
-Markdown
 newrelic==5.4.0.132
 psycopg2-binary
 pyjwt
@@ -24,3 +24,4 @@ redis
 requests
 responses
 six==1.14.0
+zeep==3.4.0
