@@ -58,3 +58,21 @@ class TestDetranAPIClient:
         rg = "12345"
         photo = request_data(rg)
         expected = "ThisIsAPhoto,TrustMe"
+
+    @mock.patch("proxies.detran.client.Client")
+    def test_get_photo_rg_sucess_with_retry_api_exception(self, _Client):
+        mock_send = mock.Mock()
+        mock_retrieve = mock.Mock()
+        api_response = [
+            None,
+            Exception,
+            [mock.Mock(fotoCivil=mock.Mock(string=["photo"]))],
+        ]
+        mock_retrieve.service.BuscarProcessados.side_effect = api_response
+
+        _Client.side_effect = [mock_send, mock_retrieve]
+
+
+        rg = "12345"
+        photo = request_data(rg)
+        expected = "ThisIsAPhoto,TrustMe"

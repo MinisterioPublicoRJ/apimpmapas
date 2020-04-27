@@ -26,9 +26,15 @@ def request_data(rg, max_attempts=3, waiting_time=3):
     )
     attempts = 1
     while result is None and attempts < max_attempts:
-        result = result_connector.service.BuscarProcessados(
-            CNPJ, CHAVE, PERFIL, rg
-        )
+        try:
+            result = result_connector.service.BuscarProcessados(
+                CNPJ, CHAVE, PERFIL, rg
+            )
+        except:
+            # TODO: encontrar as excessões possíveis
+            pass
+
+        attempts += 1
 
 
     return result[0].fotoCivil.string[0]
