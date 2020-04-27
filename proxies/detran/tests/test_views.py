@@ -4,6 +4,8 @@ from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 
+from proxies.exceptions import DetranAPIClientError
+
 
 class TestDetranProxyView(TestCase):
     @mock.patch("proxies.detran.views.ImpalaGate")
@@ -35,3 +37,15 @@ class TestDetranProxyView(TestCase):
         )
         assert resp.status_code == 200
         assert resp.json() == {"data": 1}
+
+    @mock.patch("proxies.detran.views.DataTrafficController")
+    def test_exception_detran_api(self, _DataController):
+        controller_mock = mock.Mock()
+        controller_mock.get_data.side_effect = DetranAPIClientError
+        _DataController.return_value = controller_mock
+
+        rg = "12345"
+        url = reverse("proxies:foto-detran", kwargs={"rg": rg})
+        resp = self.client.get(url)
+
+        assert resp.status_code == 503

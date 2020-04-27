@@ -1,8 +1,8 @@
 from django.urls import path
 
-from proxies.detran.views import foto_detran_view
+from proxies.detran.views import FotoDetranView
 
 
 urlpatterns = [
-    path("foto-detran/<str:rg>", foto_detran_view, name="foto-detran"),
+    path("foto-detran/<str:rg>", FotoDetranView.as_view(), name="foto-detran"),
 ]
