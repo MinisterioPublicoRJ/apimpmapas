@@ -5,12 +5,12 @@ from zeep import Client
 
 from proxies.exceptions import DetranAPIClientError
 
-CNPJ = config('CNPJ')
-CHAVE = config('CHAVE')
-PERFIL = config('PERFIL')
-CPF = config('CPF')
-URL_DETRAN_ENVIO = config('URL_DETRAN_ENVIO')
-URL_DETRAN_BUSCA = config('URL_DETRAN_BUSCA')
+CNPJ = config("CNPJ")
+CHAVE = config("CHAVE")
+PERFIL = config("PERFIL")
+CPF = config("CPF")
+URL_DETRAN_ENVIO = config("URL_DETRAN_ENVIO")
+URL_DETRAN_BUSCA = config("URL_DETRAN_BUSCA")
 
 
 def request_data(rg, max_attempts=3, waiting_time=3):
@@ -19,12 +19,8 @@ def request_data(rg, max_attempts=3, waiting_time=3):
     result_connector = Client(URL_DETRAN_BUSCA)
 
     search_connector.service.consultarRG(
-        CNPJ,
-        CHAVE,
-        PERFIL,
-        rg,
-        rg.zfill(10),
-        CPF)
+        CNPJ, CHAVE, PERFIL, rg, rg.zfill(10), CPF
+    )
 
     attempt = 0
     return_message = None
@@ -36,7 +32,8 @@ def request_data(rg, max_attempts=3, waiting_time=3):
         sleep(waiting_time)
 
         result = result_connector.service.BuscarProcessados(
-            CNPJ, CHAVE, PERFIL, rg)
+            CNPJ, CHAVE, PERFIL, rg
+        )
 
         if result is not None:
 
@@ -49,6 +46,8 @@ def request_data(rg, max_attempts=3, waiting_time=3):
                 raise DetranAPIClientError(return_message)
 
         else:
-            raise DetranAPIClientError("Não foi possível acessar a API do Detran")
+            raise DetranAPIClientError(
+                "Não foi possível acessar a API do Detran"
+            )
 
     return photo
