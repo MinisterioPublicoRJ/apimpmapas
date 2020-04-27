@@ -3,7 +3,7 @@ from time import sleep
 from decouple import config
 from zeep import Client
 
-from proxies.exceptions import DetranCustonError
+from proxies.exceptions import DetranAPIClientError
 
 CNPJ = config('CNPJ')
 CHAVE = config('CHAVE')
@@ -46,9 +46,9 @@ def request_data(rg, max_attempts=3, waiting_time=3):
                 photo = result[0].fotoCivil.string[0]
 
             except AttributeError as Error:
-                raise DetranCustonError(return_message)
+                raise DetranAPIClientError(return_message)
 
         else:
-            raise DetranCustonError("Não foi possível acessar a API do Detran")
+            raise DetranAPIClientError("Não foi possível acessar a API do Detran")
 
     return photo

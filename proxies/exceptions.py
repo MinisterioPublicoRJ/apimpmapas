@@ -6,6 +6,6 @@ class WaitDBException(Exception):
     pass
 
 
-class DetranCustonError(Exception):
+class DetranAPIClientError(Exception):
     def __init__(self, error):
         self.error = error
