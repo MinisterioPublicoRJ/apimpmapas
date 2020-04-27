@@ -43,6 +43,21 @@ class TestDataTrafficControlle:
         assert data == detran_data
         _detran_client.assert_called_once_with(data_controller.rg)
 
+    @mock.patch("proxies.detran.dao.cache")
+    @mock.patch("proxies.detran.dao.request_detran_data")
+    def test_remove_cache_if_dispatch_raises_exception(
+            self, _detran_client, _cache):
+
+        detran_data = {"id": 6789}
+        _detran_client.side_effect = Exception
+        rg = "12345"
+        data_controller = DataTrafficController(rg=rg)
+        with pytest.raises(Exception):
+            data_controller.dispatch_request()
+
+        _detran_client.assert_called_once_with(data_controller.rg)
+        _cache.delete.assert_called_once_with(data_controller.cache_key)
+
     @mock.patch.object(DataTrafficController, "persist_photo")
     @mock.patch.object(DataTrafficController, "get_or_set_cache")
     @mock.patch.object(DataTrafficController, "dispatch_request")

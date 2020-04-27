@@ -73,9 +73,13 @@ class DataTrafficController:
         return cache.get_or_set(self.cache_key, True)
 
     def dispatch_request(self):
-        # Se estourar excessao, preciso remover do cache
-        # try, except, cache.delete, raise
-        data = request_detran_data(self.rg)
+        try:
+            data = request_detran_data(self.rg)
+        except Exception as e:
+            # TODO except only DetranException
+            cache.delete(self.cache_key)
+            raise e
+
         return data
 
     def persist_photo(self, photo):
