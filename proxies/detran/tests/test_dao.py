@@ -4,7 +4,11 @@ import pytest
 from django.conf import settings
 
 from proxies.detran.dao import DataTrafficController, HBaseGate, ImpalaGate
-from proxies.exceptions import DataDoesNotExistException, WaitDBException
+from proxies.exceptions import (
+    DataDoesNotExistException,
+    DetranAPIClientError,
+    WaitDBException,
+)
 
 
 class TestDataTrafficControlle:
@@ -49,10 +53,10 @@ class TestDataTrafficControlle:
             self, _detran_client, _cache):
 
         detran_data = {"id": 6789}
-        _detran_client.side_effect = Exception
+        _detran_client.side_effect = DetranAPIClientError 
         rg = "12345"
         data_controller = DataTrafficController(rg=rg)
-        with pytest.raises(Exception):
+        with pytest.raises(DetranAPIClientError):
             data_controller.dispatch_request()
 
         _detran_client.assert_called_once_with(data_controller.rg)

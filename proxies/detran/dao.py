@@ -7,7 +7,11 @@ from happybase import Connection as HBaseConnection
 
 from dominio.db_connectors import execute as impala_execute
 from proxies.detran.client import request_data as request_detran_data
-from proxies.exceptions import DataDoesNotExistException, WaitDBException
+from proxies.exceptions import (
+    DataDoesNotExistException,
+    DetranAPIClientError,
+    WaitDBException,
+)
 
 
 class HBaseGate:
@@ -75,7 +79,7 @@ class DataTrafficController:
     def dispatch_request(self):
         try:
             data = request_detran_data(self.rg)
-        except Exception as e:
+        except DetranAPIClientError as e:
             # TODO except only DetranException
             cache.delete(self.cache_key)
             raise e

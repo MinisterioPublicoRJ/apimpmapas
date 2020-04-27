@@ -7,5 +7,4 @@ class WaitDBException(Exception):
 
 
 class DetranAPIClientError(Exception):
-    def __init__(self, error):
-        self.error = error
+    pass
