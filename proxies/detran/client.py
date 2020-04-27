@@ -25,29 +25,8 @@ def request_data(rg, max_attempts=3, waiting_time=3):
     attempt = 0
     return_message = None
 
-    while (attempt <= max_attempts and return_message) is None:
+    result = result_connector.service.BuscarProcessados(
+        CNPJ, CHAVE, PERFIL, rg
+    )
 
-        attempt += 1
-
-        sleep(waiting_time)
-
-        result = result_connector.service.BuscarProcessados(
-            CNPJ, CHAVE, PERFIL, rg
-        )
-
-        if result is not None:
-
-            return_message = result[0].MsgRetorno
-
-            try:
-                photo = result[0].fotoCivil.string[0]
-
-            except AttributeError as Error:
-                raise DetranAPIClientError(return_message)
-
-        else:
-            raise DetranAPIClientError(
-                "Não foi possível acessar a API do Detran"
-            )
-
-    return photo
+    return result[0].fotoCivil.string[0]
