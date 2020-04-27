@@ -42,18 +42,20 @@ class ImpalaGate:
         f_query = query.format(
             projection=", ".join(columns),
             table_name=self.table_name,
-            *parameters.keys()
+            *parameters.keys(),
         )
         return impala_execute(f_query, parameters)
 
 
 class DataTrafficController:
-    def __init__(self, rg, wait_time=3, max_attempts=3):
+    def __init__(self, rg, data_dao=None, photo_dao=None, wait_time=3,
+                 max_attempts=3):
         self.rg = rg
+        self.data_dao = data_dao
+        self.photo_dao = photo_dao
+
         self.wait_time = wait_time
         self.max_attempts = max_attempts
-        self.hbase = HBaseGate(table_name=settings.HBASE_DETRAN_BASE)
-        self.impala = ImpalaGate(table_name=settings.IMPALA_DETRAN_TABLE)
 
         # TODO: receber como argumento
         self.photo_column = "detran:foto"
@@ -77,24 +79,18 @@ class DataTrafficController:
         return data
 
     def persist_photo(self, photo):
-        self.hbase.insert(
+        self.photo_dao.insert(
             row_id=self.rg,
-            data={
-                self.photo_column: photo,
-                self.hash_column: self.md5_hash(photo),
-            }
+            data={self.photo_column: photo, self.hash_column: self.md5_hash(photo),},
         )
         # Depois que a foto foi salva no banco, exclui registro da busca
         cache.delete(self.cache_key)
 
     def get_db_data(self):
-        return self.impala.select(
-            columns=["*"],
-            parameters={self.db_key: self.rg}
-        )
+        return self.data_dao.select(columns=["*"], parameters={self.db_key: self.rg})
 
     def get_db_photo(self):
-        return self.hbase.select(row_id=self.rg, columns=[self.photo_column])
+        return self.photo_dao.select(row_id=self.rg, columns=[self.photo_column])
 
     def wait_for_photo(self):
         sleep(self.wait_time)
@@ -131,9 +127,7 @@ class DataTrafficController:
         db_data = self.get_db_data()
 
         if not db_data:
-            raise DataDoesNotExistException(
-                f"Não existem dados para {self.rg}"
-            )
+            raise DataDoesNotExistException(f"Não existem dados para {self.rg}")
         photo = self.get_db_photo()
         if not photo:
             photo = self.request_photo()

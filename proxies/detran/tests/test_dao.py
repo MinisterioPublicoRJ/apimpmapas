@@ -191,12 +191,9 @@ class TestDataTrafficControlle:
         _HBaseGate.return_value = db_mock
 
         rg = "123456"
-        data_controller = DataTrafficController(rg=rg)
+        data_controller = DataTrafficController(rg=rg, photo_dao=db_mock)
         data_controller.get_db_photo()
 
-        _HBaseGate.assert_called_once_with(
-            table_name=settings.HBASE_DETRAN_BASE
-        )
         db_mock.select.assert_called_once_with(
             row_id=rg,
             columns=[data_controller.photo_column],
@@ -221,13 +218,10 @@ class TestDataTrafficControlle:
         _md5_hash.return_value = "photo_hash"
 
         rg = "123456"
-        data_controller = DataTrafficController(rg=rg)
+        data_controller = DataTrafficController(rg=rg, photo_dao=db_mock)
         photo = "b64_img"
         data_controller.persist_photo(photo)
 
-        _HBaseGate.assert_called_once_with(
-            table_name=settings.HBASE_DETRAN_BASE
-        )
         db_mock.insert.assert_called_once_with(
             row_id=rg,
             data={
@@ -243,12 +237,9 @@ class TestDataTrafficControlle:
         _ImpalaGate.return_value = db_mock
 
         rg = "123456"
-        data_controller = DataTrafficController(rg=rg)
+        data_controller = DataTrafficController(rg=rg, data_dao=db_mock)
         data_controller.get_db_data()
 
-        _ImpalaGate.assert_called_once_with(
-            table_name=settings.IMPALA_DETRAN_TABLE
-        )
         db_mock.select.assert_called_once_with(
             columns=["*"],
             parameters={data_controller.db_key: data_controller.rg}
