@@ -4,7 +4,11 @@ from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 
-from proxies.exceptions import DataDoesNotExistException, DetranAPIClientError
+from proxies.exceptions import (
+    DataDoesNotExistException,
+    DetranAPIClientError,
+    WaitDBException,
+)
 
 
 class TestDetranProxyView(TestCase):
@@ -62,3 +66,18 @@ class TestDetranProxyView(TestCase):
 
         assert resp.status_code == 404
         assert resp.json() == {"detail": f"Dado não encontrado para RG: {rg}"}
+
+    @mock.patch("proxies.detran.views.DataTrafficController")
+    def test_wait_database_exception(self, _DataController):
+        controller_mock = mock.Mock()
+        controller_mock.get_data.side_effect = WaitDBException
+        _DataController.return_value = controller_mock
+
+        rg = "12345"
+        url = reverse("proxies:foto-detran", kwargs={"rg": rg})
+        resp = self.client.get(url)
+
+        assert resp.status_code == 503
+        assert resp.json() == {
+            "detail": "Tempo de busca dos dados excedeu o tempo máximo"
+        }

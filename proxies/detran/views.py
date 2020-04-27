@@ -1,6 +1,6 @@
 from django.conf import settings
-from django.http import JsonResponse
 from rest_framework.exceptions import NotFound
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from proxies.detran.dao import DataTrafficController, HBaseGate, ImpalaGate
@@ -8,6 +8,7 @@ from proxies.exceptions import (
     DataDoesNotExistException,
     DetranAPIClientError,
     ServiceUnavailableAPIException,
+    WaitDBException,
 )
 
 
@@ -39,5 +40,10 @@ class FotoDetranView(APIView):
             )
         except DataDoesNotExistException:
             raise NotFound(detail=f"Dado não encontrado para RG: {rg}")
+        except WaitDBException:
+            raise ServiceUnavailableAPIException(
+                detail="Tempo de busca dos dados excedeu o tempo máximo",
+                code="db_persist_timeout",
+            )
 
-        return JsonResponse(data=data)
+        return Response(data=data)
