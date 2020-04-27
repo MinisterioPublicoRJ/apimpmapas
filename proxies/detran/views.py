@@ -1,9 +1,11 @@
 from django.conf import settings
 from django.http import JsonResponse
+from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
 
 from proxies.detran.dao import DataTrafficController, HBaseGate, ImpalaGate
 from proxies.exceptions import (
+    DataDoesNotExistException,
     DetranAPIClientError,
     ServiceUnavailableAPIException,
 )
@@ -35,5 +37,7 @@ class FotoDetranView(APIView):
                 detail="Serviço do Detran temporariamente indisponível",
                 code="detran_service_unavailable",
             )
+        except DataDoesNotExistException:
+            raise NotFound(detail=f"Dado não encontrado para RG: {rg}")
 
         return JsonResponse(data=data)

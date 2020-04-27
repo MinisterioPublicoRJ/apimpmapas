@@ -4,7 +4,7 @@ from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 
-from proxies.exceptions import DetranAPIClientError
+from proxies.exceptions import DataDoesNotExistException, DetranAPIClientError
 
 
 class TestDetranProxyView(TestCase):
@@ -49,3 +49,16 @@ class TestDetranProxyView(TestCase):
         resp = self.client.get(url)
 
         assert resp.status_code == 503
+
+    @mock.patch("proxies.detran.views.DataTrafficController")
+    def test_data_do_not_exist(self, _DataController):
+        controller_mock = mock.Mock()
+        controller_mock.get_data.side_effect = DataDoesNotExistException
+        _DataController.return_value = controller_mock
+
+        rg = "12345"
+        url = reverse("proxies:foto-detran", kwargs={"rg": rg})
+        resp = self.client.get(url)
+
+        assert resp.status_code == 404
+        assert resp.json() == {"detail": f"Dado não encontrado para RG: {rg}"}
