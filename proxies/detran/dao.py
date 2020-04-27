@@ -74,7 +74,6 @@ class DataTrafficController:
         # Se estourar excessao, preciso remover do cache
         # try, except, cache.delete, raise
         data = request_detran_data(self.rg)
-        cache.delete(self.cache_key)
         return data
 
     def persist_photo(self, photo):
@@ -85,6 +84,8 @@ class DataTrafficController:
                 self.hash_column: self.md5_hash(photo),
             }
         )
+        # Depois que a foto foi salva no banco, exclui registro da busca
+        cache.delete(self.cache_key)
 
     def get_db_data(self):
         return self.impala.select(

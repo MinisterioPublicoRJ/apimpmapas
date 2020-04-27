@@ -32,9 +32,8 @@ class TestDataTrafficControlle:
             True
         )
 
-    @mock.patch("proxies.detran.dao.cache")
     @mock.patch("proxies.detran.dao.request_detran_data")
-    def test_dispatch_request_to_detran(self, _detran_client, _cache):
+    def test_dispatch_request_to_detran(self, _detran_client):
         detran_data = {"id": 6789}
         _detran_client.return_value = detran_data
         rg = "12345"
@@ -43,7 +42,6 @@ class TestDataTrafficControlle:
 
         assert data == detran_data
         _detran_client.assert_called_once_with(data_controller.rg)
-        _cache.delete.assert_called_once_with(data_controller.cache_key)
 
     @mock.patch.object(DataTrafficController, "persist_photo")
     @mock.patch.object(DataTrafficController, "get_or_set_cache")
@@ -214,9 +212,10 @@ class TestDataTrafficControlle:
 
         assert hash_md5 == expected
 
+    @mock.patch("proxies.detran.dao.cache")
     @mock.patch.object(DataTrafficController, "md5_hash")
     @mock.patch("proxies.detran.dao.HBaseGate")
-    def test_insert_photo_in_db(self, _HBaseGate, _md5_hash):
+    def test_insert_photo_in_db(self, _HBaseGate, _md5_hash, _cache):
         db_mock = mock.Mock()
         _HBaseGate.return_value = db_mock
         _md5_hash.return_value = "photo_hash"
@@ -236,6 +235,7 @@ class TestDataTrafficControlle:
                 data_controller.hash_column: "photo_hash",
             }
         )
+        _cache.delete.assert_called_once_with(data_controller.cache_key)
 
     @mock.patch("proxies.detran.dao.ImpalaGate")
     def test_select_data_from_impala(self, _ImpalaGate):
