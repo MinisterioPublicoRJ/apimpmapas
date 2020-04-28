@@ -21,20 +21,34 @@ class TestDataTrafficControlle:
         assert cache_key == expected
 
     @mock.patch("proxies.detran.dao.cache")
-    def test_get_or_set_from_cache(self, _cache):
+    def test_check_request_inserted_in_queue(self, _cache):
         """
         Check in the cache if a RG was already requested
         """
-        _cache.get_or_set.return_value = None
+        _cache.get.return_value = None
         rg = "12345"
         data_controller = DataTrafficController(rg=rg)
-        request_awaiting = data_controller.get_or_set_cache()
+        request_inserted_in_queue = data_controller.check_request_queue()
 
-        assert not request_awaiting
-        _cache.get_or_set.assert_called_once_with(
+        assert request_inserted_in_queue
+        _cache.set.assert_called_once_with(
             data_controller.cache_key,
             True
         )
+
+    @mock.patch("proxies.detran.dao.cache")
+    def test_check_request_already_in_queue(self, _cache):
+        """
+        Check in the cache if a RG was already requested
+        """
+        _cache.get.return_value = True
+        rg = "12345"
+        data_controller = DataTrafficController(rg=rg)
+        request_inserted_in_queue = data_controller.check_request_queue()
+
+        assert not request_inserted_in_queue
+        _cache.set.assert_not_called()
+
 
     @mock.patch("proxies.detran.dao.request_detran_data")
     def test_dispatch_request_to_detran(self, _detran_client):
@@ -62,44 +76,44 @@ class TestDataTrafficControlle:
         _cache.delete.assert_called_once_with(data_controller.cache_key)
 
     @mock.patch.object(DataTrafficController, "persist_photo")
-    @mock.patch.object(DataTrafficController, "get_or_set_cache")
+    @mock.patch.object(DataTrafficController, "check_request_queue")
     @mock.patch.object(DataTrafficController, "dispatch_request")
     def test_check_cache_and_send_request(
-        self, _dispatch_request, _get_or_set_cache, _persist_photo
+        self, _dispatch_request, _check_request_queue, _persist_photo
     ):
         """
         Execute cache check and request sending process
 
         """
         detran_data = {"id": 6789}
-        _get_or_set_cache.return_value = None
+        _check_request_queue.return_value = True
         _dispatch_request.return_value = detran_data
         rg = "12345"
         data_controller = DataTrafficController(rg=rg)
         data = data_controller.request_photo()
 
-        _get_or_set_cache.assert_called_once_with()
+        _check_request_queue.assert_called_once_with()
         _dispatch_request.assert_called_once_with()
         _persist_photo.assert_called_once_with(data)
         assert data == detran_data
 
     @mock.patch.object(DataTrafficController, "wait_for_photo")
-    @mock.patch.object(DataTrafficController, "get_or_set_cache")
+    @mock.patch.object(DataTrafficController, "check_request_queue")
     def test_check_cache_and_wait_for_photo_in_database(
-        self, _get_or_set_cache, _wait_for_photo
+        self, _check_request_queue, _wait_for_photo
     ):
         """
         Execute cache check and request sending process
 
         """
         db_data = {"foto": 6789}
-        _get_or_set_cache.return_value = True
+        _check_request_queue.return_value = False
         _wait_for_photo.return_value = db_data
         rg = "12345"
         data_controller = DataTrafficController(rg=rg)
         data = data_controller.request_photo()
 
-        _get_or_set_cache.assert_called_once_with()
+        _check_request_queue.assert_called_once_with()
         _wait_for_photo.assert_called_once_with()
         assert data == db_data
 

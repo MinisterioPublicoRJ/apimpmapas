@@ -77,8 +77,15 @@ class DataTrafficController:
     def md5_hash(self, photo):
         return md5(photo.encode()).hexdigest()
 
-    def get_or_set_cache(self):
-        return cache.get_or_set(self.cache_key, True)
+    def check_request_queue(self):
+        already_cached = cache.get(self.cache_key)
+        if already_cached is None:
+            cache.set(self.cache_key, True)
+            created = True
+        else:
+            created = False
+
+        return created
 
     def dispatch_request(self):
         try:
@@ -126,8 +133,10 @@ class DataTrafficController:
         If not it will dispatch a new request. Otherwise, it will wait and
         look for the photo in the database.
         """
-        request_sent = self.get_or_set_cache()
-        if not request_sent:
+        joined_queue = self.check_request_queue()
+        # If request just joined the queue, go search for the photo.
+        # Otherwise, it was already in the queue, so wait to be persisted
+        if joined_queue:
             photo = self.dispatch_request()
             self.persist_photo(photo)
         else:
