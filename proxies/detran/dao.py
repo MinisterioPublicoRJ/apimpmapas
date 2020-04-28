@@ -143,9 +143,12 @@ class DataTrafficController:
 
         if not db_data:
             raise DataDoesNotExistException(f"Não existem dados para {self.rg}")
+
+        ser_db_data = self.serialize(db_data)
+
         photo = self.get_db_photo()
         if not photo:
             photo = self.request_photo()
 
-        db_data.update({"photo": photo})
-        return db_data
+        ser_db_data.update({"photo": photo})
+        return ser_db_data

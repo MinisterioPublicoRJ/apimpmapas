@@ -52,8 +52,7 @@ class TestDataTrafficControlle:
     def test_remove_cache_if_dispatch_raises_exception(
             self, _detran_client, _cache):
 
-        detran_data = {"id": 6789}
-        _detran_client.side_effect = DetranAPIClientError 
+        _detran_client.side_effect = DetranAPIClientError
         rg = "12345"
         data_controller = DataTrafficController(rg=rg)
         with pytest.raises(DetranAPIClientError):
@@ -165,41 +164,47 @@ class TestDataTrafficControlle:
 
         _get_db_data.assert_called_once_with()
 
+    @mock.patch.object(DataTrafficController, "serialize")
     @mock.patch.object(DataTrafficController, "request_photo")
     @mock.patch.object(DataTrafficController, "get_db_photo")
     @mock.patch.object(DataTrafficController, "get_db_data")
     def test_get_entire_data_from_db_and_search_photo(
-        self, _get_db_data, _get_db_photo, _request_photo
+        self, _get_db_data, _get_db_photo, _request_photo, _serialize
     ):
         _get_db_data.return_value = {"rg": "12345"}
+        _serialize.return_value = {"ser_data": 1}
         _get_db_photo.return_value = ()
         _request_photo.return_value = "b64_img"
 
         rg = "12345"
         data_controller = DataTrafficController(rg=rg)
         data = data_controller.get_data()
-        expected_data = {"rg": rg, "photo": "b64_img"}
+        expected_data = {"ser_data": 1, "photo": "b64_img"}
 
         _get_db_data.assert_called_once_with()
+        _serialize.assert_called_once_with({"rg": "12345"})
         _get_db_photo.assert_called_once_with()
         _request_photo.assert_called_once_with()
         assert data == expected_data
 
+    @mock.patch.object(DataTrafficController, "serialize")
     @mock.patch.object(DataTrafficController, "request_photo")
     @mock.patch.object(DataTrafficController, "get_db_photo")
     @mock.patch.object(DataTrafficController, "get_db_data")
     def test_get_entire_data_from_already_with_photo(
-        self, _get_db_data, _get_db_photo, _request_photo
+        self, _get_db_data, _get_db_photo, _request_photo, _serialize
     ):
         _get_db_data.return_value = {"rg": "12345"}
+        _serialize.return_value = {"ser_data": 1}
         _get_db_photo.return_value = "b64_img"
 
         rg = "12345"
         data_controller = DataTrafficController(rg=rg)
         data = data_controller.get_data()
-        expected_data = {"rg": rg, "photo": "b64_img"}
+        expected_data = {"ser_data": 1, "photo": "b64_img"}
 
         _get_db_data.assert_called_once_with()
+        _serialize.assert_called_once_with({"rg": "12345"})
         _get_db_photo.assert_called_once_with()
         _request_photo.assert_not_called()
         assert data == expected_data
