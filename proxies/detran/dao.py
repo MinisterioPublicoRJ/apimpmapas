@@ -68,7 +68,7 @@ class DataTrafficController:
         # TODO: receber como argumento
         self.photo_column = "detran:foto"
         self.hash_column = "detran:foto_hash"
-        self.db_key = "rg"
+        self.db_key = "nu_rg"
 
     @property
     def cache_key(self):
