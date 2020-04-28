@@ -117,7 +117,7 @@ class DataTrafficController:
     def get_db_photo(self):
         return self.photo_dao.select(
             row_id=self.rg, columns=[self.photo_column]
-        )
+        ).get(self.photo_column.encode(), dict())
 
     def wait_for_photo(self):
         sleep(self.wait_time)

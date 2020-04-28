@@ -225,15 +225,17 @@ class TestDataTrafficControlle:
     @mock.patch("proxies.detran.dao.HBaseGate")
     def test_select_photo_from_db(self, _HBaseGate):
         db_mock = mock.Mock()
+        db_mock.select.return_value = {b"detran:foto": "b64 photo"}
         _HBaseGate.return_value = db_mock
 
         rg = "123456"
         data_controller = DataTrafficController(rg=rg, photo_dao=db_mock)
-        data_controller.get_db_photo()
+        photo = data_controller.get_db_photo()
 
         db_mock.select.assert_called_once_with(
             row_id=rg, columns=[data_controller.photo_column],
         )
+        assert photo == "b64 photo"
 
     def test_calculate_image_md5_hash(self):
         rg = "12345"
