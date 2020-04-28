@@ -5,7 +5,12 @@ import pytest
 from django.conf import settings
 
 from dominio.exceptions import APIEmptyResultError
-from dominio.pip.dao import PIPRadarPerformanceDAO, QUERIES_DIR
+from dominio.pip.dao import (
+    GenericDAO,
+    PIPRadarPerformanceDAO,
+    PIPPrincipaisInvestigadosDAO,
+    QUERIES_DIR,
+)
 
 
 class TestPIPRadarPerformance:
@@ -134,3 +139,75 @@ class TestPIPRadarPerformance:
 
         _execute.assert_called_once_with(orgao_id=orgao_id)
         _serialize.assert_not_called()
+
+
+class TestPIPPrincipaisInvestigadosDAO:
+    @mock.patch("dominio.pip.dao.get_hbase_table")
+    def test_get_hbase_flags(self, _get_table):
+        table_mock = mock.MagicMock()
+        table_mock.scan.return_value = [
+            (
+                b"1",
+                {
+                    b"identificacao:nm_personagem": b"Nome1",
+                    b"flags:is_pinned": b"True",
+                    b"flags:is_removed": b"False"
+                }
+            ), 
+            (
+                b"2",
+                {
+                    b"identificacao:nm_personagem": b"Nome2",
+                    b"flags:is_pinned": b"True"
+                }
+            )
+        ]
+        _get_table.return_value = table_mock
+
+        expected_output = {
+            "Nome1": {"is_pinned": True, "is_removed": False},
+            "Nome2": {"is_pinned": True, "is_removed": False},
+        }
+
+        data = PIPPrincipaisInvestigadosDAO.get_hbase_flags("1", "2")
+
+        _get_table.assert_called_once_with("pip_investigados_flags")
+        table_mock.scan.assert_called_once_with(row_prefix=b"12")
+        assert data == expected_output
+
+    @mock.patch("dominio.pip.dao.get_hbase_table")
+    def test_save_hbase_flags(self, _get_table):
+        table_mock = mock.MagicMock()
+        table_mock.put.return_value = None
+        _get_table.return_value = table_mock
+
+        expected_output = {
+            "identificacao:orgao_id": "1",
+            "identificacao:cpf": "2",
+            "identificacao:nm_personagem": "Nome1",
+            "flags:is_pinned": "True",
+            "flags:is_removed": "False"
+        }
+
+        expected_call_arguments = {
+            b"identificacao:orgao_id": b"1",
+            b"identificacao:cpf": b"2",
+            b"identificacao:nm_personagem": b"Nome1",
+            b"flags:is_pinned": b"True",
+            b"flags:is_removed": b"False"
+        }
+
+        data = PIPPrincipaisInvestigadosDAO.save_hbase_flags("1", "2", "Nome1", "True", "False")
+
+        _get_table.assert_called_once_with("pip_investigados_flags")
+        table_mock.put.assert_called_once_with(b"12Nome1", data=expected_call_arguments)
+        assert expected_output == data
+
+    @mock.patch.object(PIPPrincipaisInvestigadosDAO, "get_hbase_flags")
+    @mock.patch.object(GenericDAO, "get")
+    def test_get(self, _get, _get_hbase):
+        _get_hbase.return_value = []
+        _get.return_value = []
+
+        data = PIPPrincipaisInvestigadosDAO.get("1", "2")
+        print(data)

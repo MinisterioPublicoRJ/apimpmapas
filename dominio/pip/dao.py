@@ -1,16 +1,47 @@
 from functools import lru_cache
+from ast import literal_eval
 
 from django.conf import settings
 
-from dominio.db_connectors import execute as impala_execute
+from dominio.db_connectors import execute as impala_execute, get_hbase_table
 from dominio.exceptions import APIEmptyResultError
 from dominio.utils import format_text
+from dominio.pip.serializers import PIPPrincipaisInvestigadosSerializer
 
 
 QUERIES_DIR = settings.BASE_DIR.child("dominio", "pip", "queries")
 
+class GenericDAO:
+    serializer = None
 
-class PIPRadarPerformanceDAO:
+    @classmethod
+    def query(cls):
+        with open(QUERIES_DIR.child(cls.query_file)) as fobj:
+            query = fobj.read()
+
+        return query.format(**cls.table_namespaces)
+
+    @classmethod
+    def execute(cls, **kwargs):
+        return impala_execute(cls.query(), kwargs)
+
+    @classmethod
+    def serialize(cls, result_set):
+        ser_data = [dict(zip(cls.columns, row)) for row in result_set]
+        if cls.serializer:
+            ser_data = cls.serializer(ser_data, many=True).data
+        return ser_data
+
+    @classmethod
+    def get(cls, **kwargs):
+        result_set = cls.execute(**kwargs)
+        if not result_set:
+            raise APIEmptyResultError
+
+        return cls.serialize(result_set)
+
+
+class PIPRadarPerformanceDAO(GenericDAO):
     query_file = "pip_radar_performance.sql"
     columns = [
         "aisp_codigo",
@@ -53,28 +84,80 @@ class PIPRadarPerformanceDAO:
     @classmethod
     @lru_cache(maxsize=None)
     def query(cls):
-        with open(QUERIES_DIR.child(cls.query_file)) as fobj:
-            query = fobj.read()
-
-        return query.format(**cls.table_namespaces)
-
-    @classmethod
-    def execute(cls, **kwargs):
-        return impala_execute(cls.query(), kwargs)
+        return super().query()
 
     @classmethod
     def serialize(cls, result_set):
-        ser_data = dict(zip(cls.columns, result_set[0]))
+        ser_data = super().serialize(result_set)[0]
         for column, value in ser_data.items():
             if column.startswith("nm_max"):
                 ser_data[column] = format_text(value)
 
         return ser_data
 
-    @classmethod
-    def get(cls, **kwargs):
-        result_set = cls.execute(**kwargs)
-        if not result_set:
-            raise APIEmptyResultError
 
-        return cls.serialize(result_set)
+class PIPPrincipaisInvestigadosDAO(GenericDAO):
+    hbase_table_name = "pip_investigados_flags"
+    query_file = "pip_principais_investigados.sql"
+    columns = [
+        "nm_investigado",
+        "pip_codigo",
+        "nr_investigacoes",
+    ]
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
+    serializer = PIPPrincipaisInvestigadosSerializer
+
+    @classmethod
+    @lru_cache(maxsize=None)
+    def query(cls):
+        return super().query()
+
+    @classmethod
+    def get_hbase_flags(cls, orgao_id, cpf):
+        # orgao_id e cpf precisam ser str
+        row_prefix = bytes(orgao_id + cpf, encoding='utf-8')
+        hbase = get_hbase_table(cls.hbase_table_name)
+
+        data = {row[1][b'identificacao:nm_personagem'].decode(): 
+                    {
+                        'is_pinned': literal_eval(row[1][b'flags:is_pinned'].decode()) if b'flags:is_pinned' in row[1] else False,
+                        'is_removed': literal_eval(row[1][b'flags:is_removed'].decode()) if b'flags:is_removed' in row[1] else False
+                    }
+            for row in hbase.scan(row_prefix=row_prefix)
+        }
+        return data
+
+    @classmethod
+    def save_hbase_flags(cls, orgao_id, cpf, nm_personagem, is_pinned, is_removed):
+        row_key = bytes(orgao_id + cpf + nm_personagem, encoding='utf-8')
+
+        data = {
+            b'identificacao:orgao_id': bytes(orgao_id, encoding='utf-8'),
+            b'identificacao:cpf': bytes(cpf, encoding='utf-8'),
+            b'identificacao:nm_personagem': bytes(nm_personagem, encoding='utf-8'),
+        }
+        if is_pinned:
+            data[b'flags:is_pinned'] = bytes(is_pinned, encoding='utf-8')
+        if is_removed:
+            data[b'flags:is_removed'] = bytes(is_removed, encoding='utf-8')
+
+        hbase = get_hbase_table(cls.hbase_table_name)
+        hbase.put(row_key, data=data)
+
+        # TODO: Retornar dados que foram salvos no banco, em formato diferente de bytes
+
+        return data
+
+    @classmethod
+    def get(cls, orgao_id, cpf):
+        hbase_flags = cls.get_hbase_flags(orgao_id, cpf)
+        data = super().get(orgao_id=int(orgao_id))
+
+        for row in data:
+            investigado = row['nm_investigado']
+            row['is_pinned'] = hbase_flags[investigado]['is_pinned'] if investigado in hbase_flags and 'is_pinned' in hbase_flags[investigado] else False
+            row['is_removed'] = hbase_flags[investigado]['is_removed'] if investigado in hbase_flags and 'is_removed' in hbase_flags[investigado] else False
+
+        data = sorted(data, key=lambda k: (-k['is_pinned'], -k['nr_investigacoes'], k['nm_investigado']))
+        
+        return data
