@@ -188,9 +188,12 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 # CACHE Configuration
+CACHE_BACKEND = config(
+    "CACHE_BACKEND", default='django.core.cache.backends.locmem.LocMemCache'
+)
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        'BACKEND': CACHE_BACKEND,
         'LOCATION': config(
             'CACHE_LOCATION',
             default='localhost:6379'
