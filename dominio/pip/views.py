@@ -1,17 +1,17 @@
 from functools import lru_cache
-from ast import literal_eval
+from operator import itemgetter
 
 from django.conf import settings
 from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from dominio.db_connectors import run_query, HBaseGate
+from dominio.db_connectors import run_query
 from dominio.mixins import CacheMixin, JWTAuthMixin
 from dominio.models import Vista, Documento
 from .serializers import PIPDetalheAproveitamentosSerializer
 from dominio.utils import get_top_n_orderby_value_as_dict, get_value_given_key
-from dominio.pip.dao import PIPRadarPerformanceDAO
+from dominio.pip.dao import PIPRadarPerformanceDAO, PIPPrincipaisInvestigadosDAO
 from .utils import get_top_n_by_aisp, get_orgaos_same_aisps
 
 
@@ -133,26 +133,15 @@ class PIPRadarPerformanceView(JWTAuthMixin, CacheMixin, APIView):
 
 #JWTAuthMixin, 
 class PIPPrincipaisInvestigadosView(CacheMixin, APIView):
-    # TODO: Possivelmente passar o HBase para um DAO
     cache_config = "PIP_PRINCIPAIS_INVESTIGADOS_CACHE_TIMEOUT"
 
     def get(self, *args, **kwargs):
+        # TODO: Paginacao
+        # TODO: Enviar os removidos?
         orgao_id = kwargs.get("orgao_id")
         cpf = kwargs.get("cpf")
 
-        row_prefix = bytes(orgao_id + cpf, encoding='utf-8')
-
-        hbase = HBaseGate("pip_investigados_flags")
-        # TODO: Util para tratar o retorno do hbase (tirar bytes e etc)
-        # data = {row[0].decode(): {x[0].decode(): x[1].decode() for x in row[1].items()} for row in hbase.scan(row_prefix=row_prefix)}
-        data = {row[1][b'identificacao:nm_personagem'].decode(): 
-                    {
-                        'is_pinned': literal_eval(row[1][b'flags:is_pinned'].decode()),
-                        'is_removed': literal_eval(row[1][b'flags:is_removed'].decode())
-                    }
-            for row in hbase.scan(row_prefix=row_prefix)
-        }
-        print(data)
+        data = PIPPrincipaisInvestigadosDAO.get(orgao_id=orgao_id, cpf=cpf)
 
         return Response(data)
 
@@ -161,30 +150,14 @@ class PIPPrincipaisInvestigadosView(CacheMixin, APIView):
         cpf = kwargs.get("cpf")
 
         # TODO: Verificar que o post foi feito pelo mesmo orgao
-        # TODO: Bug, se definir "False" pro que nao for dado, 
-        # vai modificar dado que n e pra modificar. Encontrar solucao.
-        is_pinned = request.POST.get("is_pinned") or "False"
-        is_removed = request.POST.get("is_removed") or "True"
+        is_pinned = request.POST.get("is_pinned")
+        is_removed = request.POST.get("is_removed")
         nm_personagem = request.POST.get("nm_personagem")
         
-        if not orgao_id or not cpf or not nm_personagem:
-            # TODO: Fazer um raise apropriado depois
-            return Response({'error': 'orgao_id ou cpf ou nm_personagem nao dado'})
-        
-        row_key = bytes(orgao_id + cpf + nm_personagem, encoding='utf-8')
-        print(row_key)
+        if not nm_personagem:
+            raise ValueError("Nome de personagem não foi dado!")
 
-        data = {
-            b'flags:is_pinned': bytes(is_pinned, encoding='utf-8'),
-            b'flags:is_removed': bytes(is_removed, encoding='utf-8'),
-            b'identificacao:orgao_id': bytes(orgao_id, encoding='utf-8'),
-            b'identificacao:cpf': bytes(cpf, encoding='utf-8'),
-            b'identificacao:nm_personagem': bytes(nm_personagem, encoding='utf-8'),
-        }
-        print(data)
-
-        hbase = HBaseGate("pip_investigados_flags")
-        hbase.insert(row_key, data=data)
+        data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(orgao_id, cpf, nm_personagem, is_pinned, is_removed)
 
         return Response({})
 

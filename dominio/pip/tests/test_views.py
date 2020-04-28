@@ -174,3 +174,40 @@ class TestPIPRadarPerformance(NoJWTTestCase, NoCacheTestCase, TestCase):
 
         assert resp.status_code == 200
         assert resp.data == {"data": 1}
+
+
+class TestPIPPrincipaisInvestigadosView(NoJWTTestCase, NoCacheTestCase, TestCase):
+    @mock.patch("dominio.pip.views.PIPPrincipaisInvestigadosDAO.get")
+    def test_correct_response_get(self, _get_data):
+        _get_data.return_value = {"data": 1}
+
+        url = reverse("dominio:pip-principais-investigados", args=("1234", "123"))
+        resp = self.client.get(url)
+
+        _get_data.assert_called_once_with(orgao_id="1234", cpf="123")
+        assert resp.status_code == 200
+        assert resp.data == {"data": 1}
+
+    @mock.patch("dominio.pip.views.PIPPrincipaisInvestigadosDAO.save_hbase_flags")
+    def test_correct_response_save_flags(self, _save_flags):
+        _save_flags.return_value = {"data": 1}
+
+        url = reverse("dominio:pip-principais-investigados", args=("1234", "123"))
+        data = {"nm_personagem": "Nome Teste", "is_pinned": "True"}
+        resp = self.client.post(url, data)
+
+        _save_flags.assert_called_once_with("1234", "123", "Nome Teste", "True", None)
+        assert resp.status_code == 200
+        assert resp.data == {"data": 1}
+
+    @mock.patch("dominio.pip.views.PIPPrincipaisInvestigadosDAO.save_hbase_flags")
+    def test_no_personagem_save_flags(self, _save_flags):
+        _save_flags.return_value = {"data": 1}
+
+        url = reverse("dominio:pip-principais-investigados", args=("1234", "123"))
+        data = {"is_pinned": True}
+        with self.assertRaises(ValueError):
+            resp = self.client.post(url, data)
+
+            _save_flags.assert_not_called()
+            assert resp.status_code == 200
