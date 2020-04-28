@@ -38,31 +38,13 @@ def run_query(query, parameters=None):
     return None
 
 
-class HBaseGate:
-    def __init__(self, table_name, server=None, timeout=None):
-        self.table_name = table_name
-        self.server = server or settings.HBASE_SERVER
-        self.timeout = timeout or settings.HBASE_TIMEOUT
+def get_hbase_table(table_name, server=None, timeout=None):
+    hbase_server = server or settings.HBASE_SERVER
+    hbase_timeout = timeout or settings.HBASE_TIMEOUT
 
-    @property
-    def get_table(self):
-        try:
-            connection = HBaseConnection(self.server, timeout=self.timeout)
-        except:
-            connection = HBaseConnection(self.server, timeout=self.timeout)
-
-        return connection.table(self.table_name)
-
-    def select(self, row_id, **kwargs):
-        if isinstance(row_id, list):
-            return self.get_table.rows(row_id, **kwargs)
-        return self.get_table.row(row_id, **kwargs)
-
-    def insert(self, row_id, data):
-        self.get_table.put(row_id, data=data)
-
-    def scan(self, **kwargs):
-        return self.get_table.scan(**kwargs)
-
-    def delete(self, row_id, **kwargs):
-        return self.get_table.delete(row_id, **kwargs)
+    try:
+        connection = HBaseConnection(hbase_server, timeout=hbase_timeout)
+        return connection.table(table_name)
+    except Exception as e:
+        logger.error("Error getting table from hbase: " + str(e))
+        raise Exception(str(e)) from e

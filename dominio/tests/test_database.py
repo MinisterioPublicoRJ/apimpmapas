@@ -4,7 +4,7 @@ from django.test import TestCase
 
 
 from mprj_api.db_routers import DominioRouter
-from dominio.db_connectors import BDA_Error, execute, run_query
+from dominio.db_connectors import BDA_Error, execute, run_query, get_hbase_table
 from lupa.exceptions import QueryError
 
 
@@ -76,3 +76,22 @@ class RunQuery(TestCase):
 
         _execute.assert_called_once_with(query, None)
         self.assertEqual(resp, None)
+
+class HBaseTests(TestCase):
+    @mock.patch("dominio.db_connectors.HBaseConnection")
+    def test_hbase_get_table(self, _HBaseConnection):
+        connection_mock = mock.MagicMock()
+        connection_mock.table.return_value = "Table"
+        _HBaseConnection.return_value = connection_mock
+
+        output = get_hbase_table("tabela")
+
+        self.assertEqual(output, "Table")
+        connection_mock.table.assert_called_once_with("tabela")
+
+    @mock.patch("dominio.db_connectors.HBaseConnection")
+    def test_hbase_get_table_failed_connection(self, _HBaseConnection):
+        _HBaseConnection.side_effect = Exception
+
+        with self.assertRaises(Exception):
+            get_hbase_table("tabela")
