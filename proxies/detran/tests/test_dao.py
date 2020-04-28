@@ -31,10 +31,7 @@ class TestDataTrafficControlle:
         request_inserted_in_queue = data_controller.check_request_queue()
 
         assert request_inserted_in_queue
-        _cache.set.assert_called_once_with(
-            data_controller.cache_key,
-            True
-        )
+        _cache.set.assert_called_once_with(data_controller.cache_key, True)
 
     @mock.patch("proxies.detran.dao.cache")
     def test_check_request_already_in_queue(self, _cache):
@@ -48,7 +45,6 @@ class TestDataTrafficControlle:
 
         assert not request_inserted_in_queue
         _cache.set.assert_not_called()
-
 
     @mock.patch("proxies.detran.dao.request_detran_data")
     def test_dispatch_request_to_detran(self, _detran_client):
@@ -64,7 +60,8 @@ class TestDataTrafficControlle:
     @mock.patch("proxies.detran.dao.cache")
     @mock.patch("proxies.detran.dao.request_detran_data")
     def test_remove_cache_if_dispatch_raises_exception(
-            self, _detran_client, _cache):
+        self, _detran_client, _cache
+    ):
 
         _detran_client.side_effect = DetranAPIClientError
         rg = "12345"
@@ -120,7 +117,8 @@ class TestDataTrafficControlle:
     @mock.patch("proxies.detran.dao.sleep")
     @mock.patch.object(DataTrafficController, "get_db_photo")
     def test_wait_and_request_photo_from_db_sucess(
-            self, _get_db_photo, _sleep):
+        self, _get_db_photo, _sleep
+    ):
         """
         Execute cache check and request sending process
 
@@ -145,7 +143,8 @@ class TestDataTrafficControlle:
     @mock.patch("proxies.detran.dao.sleep")
     @mock.patch.object(DataTrafficController, "get_db_photo")
     def test_wait_and_request_photo_from_db_exceed_max_attemps(
-            self, _get_db_photo, _sleep):
+        self, _get_db_photo, _sleep
+    ):
         """
         Execute cache check and request sending process
 
@@ -233,8 +232,7 @@ class TestDataTrafficControlle:
         data_controller.get_db_photo()
 
         db_mock.select.assert_called_once_with(
-            row_id=rg,
-            columns=[data_controller.photo_column],
+            row_id=rg, columns=[data_controller.photo_column],
         )
 
     def test_calculate_image_md5_hash(self):
@@ -265,7 +263,7 @@ class TestDataTrafficControlle:
             data={
                 data_controller.photo_column: photo,
                 data_controller.hash_column: "photo_hash",
-            }
+            },
         )
         _cache.delete.assert_called_once_with(data_controller.cache_key)
 
@@ -280,7 +278,7 @@ class TestDataTrafficControlle:
 
         db_mock.select.assert_called_once_with(
             columns=["*"],
-            parameters={data_controller.db_key: data_controller.rg}
+            parameters={data_controller.db_key: data_controller.rg},
         )
 
     @mock.patch("proxies.detran.dao.DetranSerializer")
@@ -320,7 +318,7 @@ class TestHBaseGate:
         column_names = ["col1", "col2"]
         with mock.patch(
             "proxies.detran.dao.HBaseGate.get_table",
-            new_callable=mock.PropertyMock
+            new_callable=mock.PropertyMock,
         ) as _get_table:
             _get_table.return_value = table_mock
             db_gate = HBaseGate(table_name="table_name")
@@ -334,7 +332,7 @@ class TestHBaseGate:
         data = {"col1": "val1", "col2": "val2"}
         with mock.patch(
             "proxies.detran.dao.HBaseGate.get_table",
-            new_callable=mock.PropertyMock
+            new_callable=mock.PropertyMock,
         ) as _get_table:
             _get_table.return_value = table_mock
             db_gate = HBaseGate(table_name="table_name")

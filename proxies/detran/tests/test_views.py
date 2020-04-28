@@ -37,7 +37,7 @@ class TestDetranProxyView(TestCase):
         _HBase.assert_called_once_with(
             table_name=settings.HBASE_DETRAN_BASE,
             server=settings.HBASE_SERVER,
-            timeout=settings.HBASE_TIMEOUT
+            timeout=settings.HBASE_TIMEOUT,
         )
         assert resp.status_code == 200
         assert resp.json() == {"data": 1}

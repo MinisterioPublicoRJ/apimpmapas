@@ -6,6 +6,7 @@ from decouple import config
 from proxies.exceptions import DetranAPIClientError
 from proxies.detran.client import request_data
 
+
 class TestDetranAPIClient:
     @mock.patch("proxies.detran.client.Client")
     def test_get_photo_rg_success(self, _Client):
@@ -37,10 +38,7 @@ class TestDetranAPIClient:
             config("CPF"),
         )
         mock_retrieve.service.BuscarProcessados.assert_called_once_with(
-            config("CNPJ"),
-            config("CHAVE"),
-            config("PERFIL"),
-            rg,
+            config("CNPJ"), config("CHAVE"), config("PERFIL"), rg,
         )
         assert photo == "photo"
 
@@ -52,7 +50,6 @@ class TestDetranAPIClient:
         mock_retrieve.service.BuscarProcessados.return_value = api_response
 
         _Client.side_effect = [mock_send, mock_retrieve]
-
 
         rg = "12345"
         with pytest.raises(DetranAPIClientError):

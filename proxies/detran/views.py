@@ -21,9 +21,7 @@ class FotoDetranView(APIView):
         )
         impala_gate = ImpalaGate(table_name=settings.IMPALA_DETRAN_TABLE)
         data_controller = DataTrafficController(
-            rg=rg,
-            data_dao=impala_gate,
-            photo_dao=hbase_gate,
+            rg=rg, data_dao=impala_gate, photo_dao=hbase_gate,
         )
         return data_controller
 
