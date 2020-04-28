@@ -12,6 +12,7 @@ from proxies.exceptions import (
     DetranAPIClientError,
     WaitDBException,
 )
+from proxies.detran.serializers import DetranSerializer
 
 
 class HBaseGate:
@@ -57,6 +58,9 @@ class DataTrafficController:
         self.rg = rg
         self.data_dao = data_dao
         self.photo_dao = photo_dao
+
+        # TODO: receber como argumento
+        self.serializer_obj = DetranSerializer
 
         self.wait_time = wait_time
         self.max_attempts = max_attempts
@@ -130,6 +134,9 @@ class DataTrafficController:
             photo = self.wait_for_photo()
 
         return photo
+
+    def serialize(self, result_set):
+        return self.serializer_obj(result_set).data
 
     def get_data(self):
         db_data = self.get_db_data()

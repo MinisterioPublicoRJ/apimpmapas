@@ -264,6 +264,19 @@ class TestDataTrafficControlle:
             parameters={data_controller.db_key: data_controller.rg}
         )
 
+    @mock.patch("proxies.detran.dao.DetranSerializer")
+    def test_serialize_result_set(self, _DetranSerializer):
+        data_mock = mock.Mock()
+        data_mock.data = {"data": 1}
+        _DetranSerializer.return_value = data_mock
+
+        result_set = (1, 2)
+        data_controller = DataTrafficController(rg="12345")
+        ser_data = data_controller.serialize(result_set)
+
+        _DetranSerializer.assert_called_once_with(result_set)
+        assert ser_data == {"data": 1}
+
 
 class TestHBaseGate:
     @mock.patch("proxies.detran.dao.HBaseConnection")
