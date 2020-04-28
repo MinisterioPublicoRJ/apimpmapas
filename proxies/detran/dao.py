@@ -1,3 +1,4 @@
+import logging
 from hashlib import md5
 from time import sleep
 
@@ -13,6 +14,9 @@ from proxies.exceptions import (
     WaitDBException,
 )
 from proxies.detran.serializers import DetranSerializer
+
+
+logger = logging.getLogger(__name__)
 
 
 class HBaseGate:
@@ -156,6 +160,7 @@ class DataTrafficController:
         return self.serializer_obj(result_set).data
 
     def get_data(self):
+        logger.info(f"RG: {self.rg} - Buscando informações no BD")
         db_data = self.get_db_data()
 
         if not db_data:
@@ -167,7 +172,16 @@ class DataTrafficController:
 
         photo = self.get_db_photo()
         if not photo:
+            logger.info(
+                f"RG: {self.rg} - Foto não encontrada no BD."
+                "Enviando requisição para busca da foto."
+            )
             photo = self.request_photo()
+        else:
+            logger.info(
+                f"RG: {self.rg} - Foto encontrada no BD."
+            )
+
 
         ser_db_data.update({"photo": photo})
         return ser_db_data
