@@ -4,7 +4,12 @@ from django.test import TestCase
 
 
 from mprj_api.db_routers import DominioRouter
-from dominio.db_connectors import BDA_Error, execute, run_query, get_hbase_table
+from dominio.db_connectors import (
+    BDA_Error,
+    execute,
+    run_query,
+    get_hbase_table,
+)
 from lupa.exceptions import QueryError
 
 
@@ -76,6 +81,7 @@ class RunQuery(TestCase):
 
         _execute.assert_called_once_with(query, None)
         self.assertEqual(resp, None)
+
 
 class HBaseTests(TestCase):
     @mock.patch("dominio.db_connectors.HBaseConnection")

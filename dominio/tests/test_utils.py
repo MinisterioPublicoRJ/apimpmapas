@@ -3,7 +3,10 @@ from django.test import TestCase
 from dominio.utils import (
     format_text,
     get_value_given_key,
-    get_top_n_orderby_value_as_dict
+    get_top_n_orderby_value_as_dict,
+    check_literal_eval,
+    hbase_encode_row,
+    hbase_decode_row,
 )
 
 
@@ -73,3 +76,46 @@ class UtilsTest(TestCase):
         ]
 
         self.assertEqual(output, expected_output)
+
+    def test_check_literal_eval(self):
+        x1 = "1"
+        x2 = "[1, 2, 3]"
+        x3 = "True"
+        lit_x1 = check_literal_eval(x1)
+        lit_x2 = check_literal_eval(x2)
+        lit_x3 = check_literal_eval(x3)
+
+        self.assertEqual(lit_x1, 1)
+        self.assertEqual(lit_x2, [1, 2, 3])
+        self.assertEqual(lit_x3, True)
+
+    def test_check_literal_eval_exception(self):
+        x1 = "Ola"
+        lit_x1 = check_literal_eval(x1)
+
+        self.assertEqual(lit_x1, x1)
+
+    def test_hbase_decode(self):
+        data = (b'k1', {b'c1': b'Nome', b'c2': b'True', b'c3': b'[1, 2, 3]'})
+        expected_output = ('k1', {'c1': 'Nome', 'c2': True, 'c3': [1, 2, 3]})
+        decoded_data = hbase_decode_row(data)
+
+        self.assertEqual(decoded_data, expected_output)
+
+    def test_hbase_encode(self):
+        expected_output = (
+            b'k1',
+            {b'c1': b'Nome', b'c2': b'True', b'c3': b'[1, 2, 3]'}
+        )
+        data = ('k1', {'c1': 'Nome', 'c2': True, 'c3': [1, 2, 3]})
+        decoded_data = hbase_encode_row(data)
+
+        self.assertEqual(decoded_data, expected_output)
+
+    def test_hbase_encode_decode(self):
+        data = ('k1', {'c1': 'Nome', 'c2': True, 'c3': [1, 2, 3]})
+
+        encoded_data = hbase_encode_row(data)
+        decoded_data = hbase_decode_row(encoded_data)
+
+        self.assertEqual(data, decoded_data)
