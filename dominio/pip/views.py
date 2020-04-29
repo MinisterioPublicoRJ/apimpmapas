@@ -1,5 +1,4 @@
 from functools import lru_cache
-from operator import itemgetter
 
 from django.conf import settings
 from django.http import Http404
@@ -7,11 +6,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from dominio.db_connectors import run_query
-from dominio.mixins import CacheMixin, JWTAuthMixin
+from dominio.mixins import CacheMixin, JWTAuthMixin, PaginatorMixin
 from dominio.models import Vista, Documento
 from .serializers import PIPDetalheAproveitamentosSerializer
 from dominio.utils import get_top_n_orderby_value_as_dict, get_value_given_key
-from dominio.pip.dao import PIPRadarPerformanceDAO, PIPPrincipaisInvestigadosDAO
+from dominio.pip.dao import (
+    PIPRadarPerformanceDAO,
+    PIPPrincipaisInvestigadosDAO,
+)
 from .utils import get_top_n_by_aisp, get_orgaos_same_aisps
 
 
@@ -131,34 +133,39 @@ class PIPRadarPerformanceView(JWTAuthMixin, CacheMixin, APIView):
         return Response(data=PIPRadarPerformanceDAO.get(orgao_id=orgao_id))
 
 
-#JWTAuthMixin, 
-class PIPPrincipaisInvestigadosView(CacheMixin, APIView):
+class PIPPrincipaisInvestigadosView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
     cache_config = "PIP_PRINCIPAIS_INVESTIGADOS_CACHE_TIMEOUT"
+    PRINCIPAIS_INVESTIGADOS_SIZE = 20
 
-    def get(self, *args, **kwargs):
-        # TODO: Paginacao
-        # TODO: Enviar os removidos?
+    def get(self, request, *args, **kwargs):
+        # TODO: Enviar os removidos? Ou tirar totalmente?
         orgao_id = kwargs.get("orgao_id")
         cpf = kwargs.get("cpf")
+        page = int(request.GET.get("page", 1))
 
         data = PIPPrincipaisInvestigadosDAO.get(orgao_id=orgao_id, cpf=cpf)
 
-        return Response(data)
+        page_data = self.paginate(
+            data,
+            page=page,
+            page_size=self.PRINCIPAIS_INVESTIGADOS_SIZE
+        )
+
+        return Response(page_data)
 
     def post(self, request, *args, **kwargs):
         orgao_id = kwargs.get("orgao_id")
         cpf = kwargs.get("cpf")
 
-        # TODO: Verificar que o post foi feito pelo mesmo orgao
+        # TODO: Verificar que o post foi feito pelo mesmo orgao?
         is_pinned = request.POST.get("is_pinned")
         is_removed = request.POST.get("is_removed")
         nm_personagem = request.POST.get("nm_personagem")
-        
+
         if not nm_personagem:
             raise ValueError("Nome de personagem não foi dado!")
 
-        data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(orgao_id, cpf, nm_personagem, is_pinned, is_removed)
+        data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(
+            orgao_id, cpf, nm_personagem, is_pinned, is_removed)
 
-        return Response({})
-
-
+        return Response(data)
