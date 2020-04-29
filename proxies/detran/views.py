@@ -3,6 +3,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from login.simple import token_required
 from proxies.detran.dao import DataTrafficController, HBaseGate, ImpalaGate
 from proxies.exceptions import (
     DataDoesNotExistException,
@@ -25,6 +26,7 @@ class FotoDetranView(APIView):
         )
         return data_controller
 
+    @token_required
     def get(self, request, *args, **kwargs):
         rg = kwargs.get("rg")
 

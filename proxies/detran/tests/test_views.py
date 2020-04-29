@@ -1,7 +1,7 @@
 from unittest import mock
 
 from django.conf import settings
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from proxies.exceptions import (
@@ -11,6 +11,7 @@ from proxies.exceptions import (
 )
 
 
+@override_settings(SIMPLE_AUTH_TOKEN=None)
 class TestDetranProxyView(TestCase):
     @mock.patch("proxies.detran.views.ImpalaGate")
     @mock.patch("proxies.detran.views.HBaseGate")
@@ -81,3 +82,22 @@ class TestDetranProxyView(TestCase):
         assert resp.json() == {
             "detail": "Tempo de busca dos dados excedeu o tempo máximo"
         }
+
+    @override_settings(SIMPLE_AUTH_TOKEN="very-secure-token")
+    def test_no_token_permission_denied(self):
+        rg = "12345"
+        url = reverse("proxies:foto-detran", kwargs={"rg": rg})
+        resp = self.client.get(url)
+
+        assert resp.status_code == 403
+
+    @override_settings(SIMPLE_AUTH_TOKEN="even-more-secure-token")
+    @mock.patch("proxies.detran.views.DataTrafficController")
+    def test_with_token_permission_granted(self,  _DataController):
+        _DataController.return_value.get_data.return_value = {"data": 1}
+        rg = "12345"
+        url = reverse("proxies:foto-detran", kwargs={"rg": rg})
+        resp = self.client.get(url, {"proxy-token": "even-more-secure-token"})
+
+        assert resp.status_code == 200
+        assert resp.data == {"data": 1}
