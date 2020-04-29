@@ -85,9 +85,11 @@ class DataTrafficController:
     def check_request_queue(self):
         already_cached = cache.get(self.cache_key)
         if already_cached is None:
+            logger.info(f"RG: {self.rg} - Busca da foto inserida na fila.")
             cache.set(self.cache_key, True)
             created = True
         else:
+            logger.info(f"RG: {self.rg} - Busca da foto já foi disparada.")
             created = False
 
         return created
@@ -127,6 +129,7 @@ class DataTrafficController:
         sleep(self.wait_time)
         photo = self.get_db_photo()
         attempts = 1
+        logger.info(f"RG: {self.rg} - Aguardando foto ser persistida no BD")
         while not photo and attempts < self.max_attempts:
             sleep(self.wait_time)
             photo = self.get_db_photo()

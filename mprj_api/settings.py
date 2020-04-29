@@ -208,6 +208,38 @@ CACHES = {
 }
 CACHE_TIMEOUT = config("CACHE_TIMEOUT", default=300, cast=int)
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} - {pathname}:{funcName} --> {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': config("DJANGO_LOG_LEVEL", default="INFO"),
+        },
+        'proxies': {
+            'level': config("PROXIES_LOG_LEVEL", default="INFO"),
+            'formatter': 'verbose',
+            'handlers': ['console'],
+            'propagate': True,
+        },
+    },
+}
+
+
+
+
 JWT_SECRET = SECRET_KEY
 
 #HBASE
