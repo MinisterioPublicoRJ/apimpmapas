@@ -1,5 +1,3 @@
-from time import sleep
-
 from decouple import config
 from zeep import Client
 

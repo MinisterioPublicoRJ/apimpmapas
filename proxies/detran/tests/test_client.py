@@ -3,8 +3,8 @@ from unittest import mock
 import pytest
 from decouple import config
 
-from proxies.exceptions import DetranAPIClientError
 from proxies.detran.client import request_data
+from proxies.exceptions import DetranAPIClientError
 
 
 class TestDetranAPIClient:
@@ -21,7 +21,6 @@ class TestDetranAPIClient:
 
         rg = "12345"
         photo = request_data(rg)
-        expected = "ThisIsAPhoto,TrustMe"
 
         _Client.assert_has_calls(
             [

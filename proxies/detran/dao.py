@@ -8,13 +8,12 @@ from happybase import Connection as HBaseConnection
 
 from dominio.db_connectors import execute as impala_execute
 from proxies.detran.client import request_data as request_detran_data
+from proxies.detran.serializers import DetranSerializer
 from proxies.exceptions import (
     DataDoesNotExistException,
     DetranAPIClientError,
     WaitDBException,
 )
-from proxies.detran.serializers import DetranSerializer
-
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +28,7 @@ class HBaseGate:
     def get_table(self):
         try:
             connection = HBaseConnection(self.server, timeout=self.timeout)
-        except:
+        except Exception:
             connection = HBaseConnection(self.server, timeout=self.timeout)
 
         return connection.table(self.table_name)
@@ -181,10 +180,7 @@ class DataTrafficController:
             )
             photo = self.request_photo()
         else:
-            logger.info(
-                f"RG: {self.rg} - Foto encontrada no BD."
-            )
-
+            logger.info(f"RG: {self.rg} - Foto encontrada no BD.")
 
         ser_db_data.update({"photo": photo})
         return ser_db_data

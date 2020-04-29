@@ -93,7 +93,7 @@ class TestDetranProxyView(TestCase):
 
     @override_settings(SIMPLE_AUTH_TOKEN="even-more-secure-token")
     @mock.patch("proxies.detran.views.DataTrafficController")
-    def test_with_token_permission_granted(self,  _DataController):
+    def test_with_token_permission_granted(self, _DataController):
         _DataController.return_value.get_data.return_value = {"data": 1}
         rg = "12345"
         url = reverse("proxies:foto-detran", kwargs={"rg": rg})
