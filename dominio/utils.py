@@ -1,3 +1,6 @@
+from ast import literal_eval
+
+
 def format_text(text):
     """Formata o texto relativo ao nome das promotorias.
 
@@ -71,3 +74,31 @@ def get_value_given_key(l, key_value, key_position, value_position):
         if element[key_position] == key_value:
             return element[value_position]
     return None
+
+
+def check_literal_eval(x):
+    """Tenta identificar um tipo Python na string x - senão retorna x"""
+    try:
+        return literal_eval(x)
+    except Exception:
+        return x
+
+
+def hbase_encode_row(data, encoding='utf-8'):
+    """Recebe tupla (1, {1: 2}) e retorna (b'1', {b'1': b'2'})"""
+    encoded_key = bytes(data[0], encoding)
+    encoded_data = {
+        bytes(key, encoding): bytes(str(value), encoding)
+        for key, value in data[1].items()
+    }
+    return encoded_key, encoded_data
+
+
+def hbase_decode_row(data, encoding='utf-8'):
+    """Recebe tupla (b'1', {b'1': b'2'}) e retorna (1, {1: 2})"""
+    decoded_key = data[0].decode(encoding)
+    decoded_data = {
+        key.decode(encoding): check_literal_eval(value.decode(encoding))
+        for key, value in data[1].items()
+    }
+    return decoded_key, decoded_data

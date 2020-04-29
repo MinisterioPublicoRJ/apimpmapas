@@ -9,7 +9,6 @@ from happybase import Connection as HBaseConnection
 from lupa.exceptions import QueryError
 
 
-
 logger = logging.getLogger(__name__)
 os.environ['NLS_LANG'] = 'American_America.UTF8'
 
