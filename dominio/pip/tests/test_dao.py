@@ -3,6 +3,7 @@ from unittest import mock
 
 import pytest
 from django.conf import settings
+from rest_framework import serializers
 
 from dominio.exceptions import APIEmptyResultError
 from dominio.pip.dao import (
@@ -13,19 +14,107 @@ from dominio.pip.dao import (
 )
 
 
-class TestPIPRadarPerformance:
-    @mock.patch.object(PIPRadarPerformanceDAO, "query")
+class TestGenericDAO:
+    @mock.patch('dominio.pip.dao.GenericDAO.table_namespaces',
+                new_callable=mock.PropertyMock)
+    @mock.patch('dominio.pip.dao.GenericDAO.query_file',
+                new_callable=mock.PropertyMock)
+    def test_query_method(self, _query_file, _namespaces):
+        _query_file.return_value = "test_query.sql"
+        _namespaces.return_value = {"schema": "test_schema"}
+
+        with open(QUERIES_DIR.child("test_query.sql")) as fobj:
+            query = fobj.read()
+        expected_query = query.format(schema="test_schema")
+
+        output = GenericDAO.query()
+
+        assert output == expected_query
+
+    @mock.patch.object(GenericDAO, "query")
     @mock.patch("dominio.pip.dao.impala_execute")
-    def test_execute_query(self, _impalaa_execute, _query):
+    def test_execute_method(self, _impala_execute, _query):
         _query.return_value = "SELECT * FROM dual"
 
         orgao_id = "12345"
-        PIPRadarPerformanceDAO.execute(orgao_id=orgao_id)
+        GenericDAO.execute(orgao_id=orgao_id)
 
-        _impalaa_execute.assert_called_once_with(
+        _impala_execute.assert_called_once_with(
             "SELECT * FROM dual", {"orgao_id": orgao_id}
         )
 
+    @mock.patch('dominio.pip.dao.GenericDAO.columns',
+                new_callable=mock.PropertyMock)
+    def test_serialize_result_no_serializer(self, _columns):
+        _columns.return_value = ["col1", "col2", "col3"]
+        result_set = [
+            ("1", "2", "3"),
+            ("4", "5", "6"),
+            ("7", "8", "9"),
+        ]
+        ser_data = GenericDAO.serialize(result_set)
+        expected_data = [
+            {"col1": "1", "col2": "2", "col3": "3"},
+            {"col1": "4", "col2": "5", "col3": "6"},
+            {"col1": "7", "col2": "8", "col3": "9"},
+        ]
+        assert ser_data == expected_data
+
+    @mock.patch('dominio.pip.dao.GenericDAO.serializer',
+                new_callable=mock.PropertyMock)
+    @mock.patch('dominio.pip.dao.GenericDAO.columns',
+                new_callable=mock.PropertyMock)
+    def test_serialize_result_with_serializer(self, _columns, _serializer):
+        class TestSerializer(serializers.Serializer):
+            col1 = serializers.IntegerField()
+            col2 = serializers.IntegerField()
+            col3 = serializers.IntegerField()
+
+        _serializer.return_value = TestSerializer
+        _columns.return_value = ["col1", "col2", "col3"]
+        result_set = [
+            ("1", "2", "3"),
+            ("4", "5", "6"),
+            ("7", "8", "9"),
+        ]
+        ser_data = GenericDAO.serialize(result_set)
+        expected_data = [
+            {"col1": 1, "col2": 2, "col3": 3},
+            {"col1": 4, "col2": 5, "col3": 6},
+            {"col1": 7, "col2": 8, "col3": 9},
+        ]
+
+        assert ser_data == expected_data
+
+    @mock.patch.object(GenericDAO, "execute")
+    @mock.patch.object(GenericDAO, "serialize")
+    def test_get_data(self, _serialize, _execute):
+        result_set = [("0.133")]
+        _execute.return_value = result_set
+        _serialize.return_value = {"data": 1}
+
+        orgao_id = "12345"
+        data = GenericDAO.get(orgao_id=orgao_id)
+
+        _execute.assert_called_once_with(orgao_id=orgao_id)
+        _serialize.assert_called_once_with(result_set)
+        assert data == {"data": 1}
+
+    @mock.patch.object(GenericDAO, "execute")
+    @mock.patch.object(GenericDAO, "serialize")
+    def test_get_data_404_exception(self, _serialize, _execute):
+        result_set = []
+        _execute.return_value = result_set
+
+        orgao_id = "12345"
+        with pytest.raises(APIEmptyResultError):
+            GenericDAO.get(orgao_id=orgao_id)
+
+        _execute.assert_called_once_with(orgao_id=orgao_id)
+        _serialize.assert_not_called()
+
+
+class TestPIPRadarPerformance:
     def test_query_method(self):
         with open(QUERIES_DIR.child("pip_radar_performance.sql")) as fobj:
             query = fobj.read()
@@ -113,33 +202,6 @@ class TestPIPRadarPerformance:
         }
         assert ser_data == expected_data
 
-    @mock.patch.object(PIPRadarPerformanceDAO, "execute")
-    @mock.patch.object(PIPRadarPerformanceDAO, "serialize")
-    def test_get_data(self, _serialize, _execute):
-        result_set = [(0.133)]
-        _execute.return_value = result_set
-        _serialize.return_value = {"data": 1}
-
-        orgao_id = "12345"
-        data = PIPRadarPerformanceDAO.get(orgao_id=orgao_id)
-
-        _execute.assert_called_once_with(orgao_id=orgao_id)
-        _serialize.assert_called_once_with(result_set)
-        assert data == {"data": 1}
-
-    @mock.patch.object(PIPRadarPerformanceDAO, "execute")
-    @mock.patch.object(PIPRadarPerformanceDAO, "serialize")
-    def test_get_data_404_exception(self, _serialize, _execute):
-        result_set = []
-        _execute.return_value = result_set
-
-        orgao_id = "12345"
-        with pytest.raises(APIEmptyResultError):
-            PIPRadarPerformanceDAO.get(orgao_id=orgao_id)
-
-        _execute.assert_called_once_with(orgao_id=orgao_id)
-        _serialize.assert_not_called()
-
 
 class TestPIPPrincipaisInvestigadosDAO:
     @mock.patch("dominio.pip.dao.get_hbase_table")
@@ -153,7 +215,7 @@ class TestPIPPrincipaisInvestigadosDAO:
                     b"flags:is_pinned": b"True",
                     b"flags:is_removed": b"False"
                 }
-            ), 
+            ),
             (
                 b"2",
                 {
@@ -197,17 +259,49 @@ class TestPIPPrincipaisInvestigadosDAO:
             b"flags:is_removed": b"False"
         }
 
-        data = PIPPrincipaisInvestigadosDAO.save_hbase_flags("1", "2", "Nome1", "True", "False")
+        data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(
+            "1", "2", "Nome1", "True", "False")
 
         _get_table.assert_called_once_with("pip_investigados_flags")
-        table_mock.put.assert_called_once_with(b"12Nome1", data=expected_call_arguments)
+        table_mock.put.assert_called_once_with(
+            b"12Nome1", expected_call_arguments)
         assert expected_output == data
 
     @mock.patch.object(PIPPrincipaisInvestigadosDAO, "get_hbase_flags")
     @mock.patch.object(GenericDAO, "get")
     def test_get(self, _get, _get_hbase):
-        _get_hbase.return_value = []
-        _get.return_value = []
+        _get_hbase.return_value = {
+            'Nome2': {'is_pinned': True, 'is_removed': False}
+        }
+        _get.return_value = [
+            {
+                'nm_investigado': 'Nome1',
+                'pip_codigo': 1,
+                'nr_investigacoes': 10
+            },
+            {
+                'nm_investigado': 'Nome2',
+                'pip_codigo': 1,
+                'nr_investigacoes': 5
+            },
+        ]
+
+        expected_output = [
+            {
+                'nm_investigado': 'Nome2',
+                'pip_codigo': 1,
+                'nr_investigacoes': 5,
+                'is_pinned': True,
+                'is_removed': False
+            },
+            {
+                'nm_investigado': 'Nome1',
+                'pip_codigo': 1,
+                'nr_investigacoes': 10,
+                'is_pinned': False,
+                'is_removed': False
+            },
+        ]
 
         data = PIPPrincipaisInvestigadosDAO.get("1", "2")
-        print(data)
+        assert data == expected_output

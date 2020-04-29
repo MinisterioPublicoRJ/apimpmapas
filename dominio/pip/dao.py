@@ -1,18 +1,21 @@
 from functools import lru_cache
-from ast import literal_eval
 
 from django.conf import settings
 
 from dominio.db_connectors import execute as impala_execute, get_hbase_table
 from dominio.exceptions import APIEmptyResultError
-from dominio.utils import format_text
+from dominio.utils import format_text, hbase_encode_row, hbase_decode_row
 from dominio.pip.serializers import PIPPrincipaisInvestigadosSerializer
 
 
 QUERIES_DIR = settings.BASE_DIR.child("dominio", "pip", "queries")
 
+
 class GenericDAO:
+    query_file = ""
+    columns = []
     serializer = None
+    table_namespaces = {}
 
     @classmethod
     def query(cls):
@@ -118,33 +121,45 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
         row_prefix = bytes(orgao_id + cpf, encoding='utf-8')
         hbase = get_hbase_table(cls.hbase_table_name)
 
-        data = {row[1][b'identificacao:nm_personagem'].decode(): 
-                    {
-                        'is_pinned': literal_eval(row[1][b'flags:is_pinned'].decode()) if b'flags:is_pinned' in row[1] else False,
-                        'is_removed': literal_eval(row[1][b'flags:is_removed'].decode()) if b'flags:is_removed' in row[1] else False
-                    }
-            for row in hbase.scan(row_prefix=row_prefix)
+        data = {
+            drow[1]['identificacao:nm_personagem']:
+                {
+                    'is_pinned': (
+                        drow[1]['flags:is_pinned']
+                        if 'flags:is_pinned' in drow[1]
+                        else False
+                    ),
+                    'is_removed': (
+                        drow[1]['flags:is_removed']
+                        if 'flags:is_removed' in drow[1]
+                        else False
+                    )
+                }
+            for drow in [
+                hbase_decode_row(row)
+                for row in hbase.scan(row_prefix=row_prefix)
+            ]
         }
+
         return data
 
     @classmethod
-    def save_hbase_flags(cls, orgao_id, cpf, nm_personagem, is_pinned, is_removed):
-        row_key = bytes(orgao_id + cpf + nm_personagem, encoding='utf-8')
-
+    def save_hbase_flags(cls, orgao_id, cpf, nm_personagem,
+                         is_pinned, is_removed):
+        row_key = orgao_id + cpf + nm_personagem
         data = {
-            b'identificacao:orgao_id': bytes(orgao_id, encoding='utf-8'),
-            b'identificacao:cpf': bytes(cpf, encoding='utf-8'),
-            b'identificacao:nm_personagem': bytes(nm_personagem, encoding='utf-8'),
+            'identificacao:orgao_id': orgao_id,
+            'identificacao:cpf': cpf,
+            'identificacao:nm_personagem': nm_personagem
         }
         if is_pinned:
-            data[b'flags:is_pinned'] = bytes(is_pinned, encoding='utf-8')
+            data['flags:is_pinned'] = is_pinned
         if is_removed:
-            data[b'flags:is_removed'] = bytes(is_removed, encoding='utf-8')
+            data['flags:is_removed'] = is_removed
+        row = (row_key, data)
 
         hbase = get_hbase_table(cls.hbase_table_name)
-        hbase.put(row_key, data=data)
-
-        # TODO: Retornar dados que foram salvos no banco, em formato diferente de bytes
+        hbase.put(*hbase_encode_row(row))
 
         return data
 
@@ -155,9 +170,23 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
 
         for row in data:
             investigado = row['nm_investigado']
-            row['is_pinned'] = hbase_flags[investigado]['is_pinned'] if investigado in hbase_flags and 'is_pinned' in hbase_flags[investigado] else False
-            row['is_removed'] = hbase_flags[investigado]['is_removed'] if investigado in hbase_flags and 'is_removed' in hbase_flags[investigado] else False
+            row['is_pinned'] = (
+                hbase_flags[investigado]['is_pinned']
+                if investigado in hbase_flags
+                and 'is_pinned' in hbase_flags[investigado]
+                else False
+            )
+            row['is_removed'] = (
+                hbase_flags[investigado]['is_removed']
+                if investigado in hbase_flags
+                and 'is_removed' in hbase_flags[investigado]
+                else False
+            )
 
-        data = sorted(data, key=lambda k: (-k['is_pinned'], -k['nr_investigacoes'], k['nm_investigado']))
-        
+        data = sorted(
+            data,
+            key=lambda k:
+                (-k['is_pinned'], -k['nr_investigacoes'], k['nm_investigado'])
+        )
+
         return data
