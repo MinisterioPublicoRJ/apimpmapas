@@ -23,12 +23,14 @@ class TestDetranProxyView(TestCase):
         controller_mock.get_data.return_value = {"data": 1}
         _DataController.return_value = controller_mock
 
-        rg = "12345"
+        # View must remove padding zero
+        rg = "012345"
         url = reverse("proxies:foto-detran", kwargs={"rg": rg})
         resp = self.client.get(url)
+        expected_used_rg = str(int(rg))
 
         _DataController.assert_called_once_with(
-            rg=rg,
+            rg=expected_used_rg,
             data_dao=_Impala.return_value,
             photo_dao=_HBase.return_value,
         )
