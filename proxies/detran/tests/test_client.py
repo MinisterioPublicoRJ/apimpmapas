@@ -1,7 +1,8 @@
 from unittest import mock
 
 import pytest
-from decouple import config
+from django.conf import settings
+
 
 from proxies.detran.client import request_data
 from proxies.exceptions import DetranAPIClientError
@@ -24,20 +25,23 @@ class TestDetranAPIClient:
 
         _Client.assert_has_calls(
             [
-                mock.call(config("URL_DETRAN_ENVIO")),
-                mock.call(config("URL_DETRAN_BUSCA")),
+                mock.call(settings.DETRAN_URL_ENVIO),
+                mock.call(settings.DETRAN_URL_BUSCA),
             ]
         )
 
         mock_send.service.consultarRG(
-            config("CNPJ"),
-            config("CHAVE"),
-            config("PERFIL"),
+            settings.DETRAN_CNPJ,
+            settings.DETRAN_CHAVE,
+            settings.DETRAN_PERFIL,
             rg.zfill(10),
-            config("CPF"),
+            settings.DETRAN_CPF,
         )
         mock_retrieve.service.BuscarProcessados.assert_called_once_with(
-            config("CNPJ"), config("CHAVE"), config("PERFIL"), rg,
+            settings.DETRAN_CNPJ,
+            settings.DETRAN_CHAVE,
+            settings.DETRAN_PERFIL,
+            rg
         )
         assert photo == "photo"
 

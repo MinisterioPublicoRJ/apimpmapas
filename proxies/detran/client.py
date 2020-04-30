@@ -1,26 +1,24 @@
-from decouple import config
+from django.conf import settings
 from zeep import Client
 
 from proxies.exceptions import DetranAPIClientError
 
-CNPJ = config("CNPJ")
-CHAVE = config("CHAVE")
-PERFIL = config("PERFIL")
-CPF = config("CPF")
-URL_DETRAN_ENVIO = config("URL_DETRAN_ENVIO")
-URL_DETRAN_BUSCA = config("URL_DETRAN_BUSCA")
-
 
 def request_data(rg):
-    search_connector = Client(URL_DETRAN_ENVIO)
-    result_connector = Client(URL_DETRAN_BUSCA)
+    search_connector = Client(settings.DETRAN_URL_ENVIO)
+    result_connector = Client(settings.DETRAN_URL_BUSCA)
 
     search_connector.service.consultarRG(
-        CNPJ, CHAVE, PERFIL, rg, rg.zfill(10), CPF
+        settings.DETRAN_CNPJ,
+        settings.DETRAN_CHAVE,
+        settings.DETRAN_PERFIL,
+        rg,
+        rg.zfill(10),
+        settings.DETRAN_CPF
     )
 
     result = result_connector.service.BuscarProcessados(
-        CNPJ, CHAVE, PERFIL, rg
+        settings.DETRAN_CNPJ, settings.DETRAN_CHAVE, settings.DETRAN_PERFIL, rg
     )
 
     if result[0].RG is None:
