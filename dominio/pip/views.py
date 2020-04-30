@@ -138,7 +138,6 @@ class PIPPrincipaisInvestigadosView(JWTAuthMixin, CacheMixin, PaginatorMixin, AP
     PRINCIPAIS_INVESTIGADOS_SIZE = 20
 
     def get(self, request, *args, **kwargs):
-        # TODO: Enviar os removidos? Ou tirar totalmente?
         orgao_id = kwargs.get("orgao_id")
         cpf = kwargs.get("cpf")
         page = int(request.GET.get("page", 1))
@@ -157,7 +156,7 @@ class PIPPrincipaisInvestigadosView(JWTAuthMixin, CacheMixin, PaginatorMixin, AP
         orgao_id = kwargs.get("orgao_id")
         cpf = kwargs.get("cpf")
 
-        # TODO: Verificar que o post foi feito pelo mesmo orgao?
+        # TODO: Verificar que o post foi feito pelo mesmo orgao
         is_pinned = request.POST.get("is_pinned")
         is_removed = request.POST.get("is_removed")
         nm_personagem = request.POST.get("nm_personagem")

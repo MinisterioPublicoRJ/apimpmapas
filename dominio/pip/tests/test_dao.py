@@ -271,7 +271,8 @@ class TestPIPPrincipaisInvestigadosDAO:
     @mock.patch.object(GenericDAO, "get")
     def test_get(self, _get, _get_hbase):
         _get_hbase.return_value = {
-            'Nome2': {'is_pinned': True, 'is_removed': False}
+            'Nome2': {'is_pinned': True, 'is_removed': False},
+            'Nome3': {'is_pinned': False, 'is_removed': True},
         }
         _get.return_value = [
             {
@@ -283,6 +284,11 @@ class TestPIPPrincipaisInvestigadosDAO:
                 'nm_investigado': 'Nome2',
                 'pip_codigo': 1,
                 'nr_investigacoes': 5
+            },
+            {
+                'nm_investigado': 'Nome3',
+                'pip_codigo': 1,
+                'nr_investigacoes': 15
             },
         ]
 

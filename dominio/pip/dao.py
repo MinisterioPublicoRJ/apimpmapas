@@ -183,6 +183,8 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
                 else False
             )
 
+        data = [row for row in data if not row['is_removed']]
+
         data = sorted(
             data,
             key=lambda k:
