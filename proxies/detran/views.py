@@ -16,11 +16,13 @@ from proxies.exceptions import (
 class FotoDetranView(APIView):
     def start_controller(self, rg):
         hbase_gate = HBaseGate(
-            table_name=settings.HBASE_DETRAN_BASE,
+            table_name=settings.EXADATA_DETRAN_PHOTO_ORIGIN,
             server=settings.HBASE_SERVER,
             timeout=settings.HBASE_TIMEOUT,
         )
-        impala_gate = ImpalaGate(table_name=settings.IMPALA_DETRAN_TABLE)
+        impala_gate = ImpalaGate(
+            table_name=settings.EXADATA_DETRAN_DATA_ORIGIN
+        )
         data_controller = DataTrafficController(
             rg=rg, data_dao=impala_gate, photo_dao=hbase_gate,
         )

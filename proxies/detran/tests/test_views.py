@@ -33,10 +33,10 @@ class TestDetranProxyView(TestCase):
             photo_dao=_HBase.return_value,
         )
         _Impala.assert_called_once_with(
-            table_name=settings.IMPALA_DETRAN_TABLE,
+            table_name=settings.EXADATA_DETRAN_DATA_ORIGIN,
         )
         _HBase.assert_called_once_with(
-            table_name=settings.HBASE_DETRAN_BASE,
+            table_name=settings.EXADATA_DETRAN_PHOTO_ORIGIN,
             server=settings.HBASE_SERVER,
             timeout=settings.HBASE_TIMEOUT,
         )
