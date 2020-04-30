@@ -26,7 +26,7 @@ class FotoDetranView(APIView):
         )
         return data_controller
 
-    @token_required
+    @token_required(name="proxy-token")
     def get(self, request, *args, **kwargs):
         rg = kwargs.get("rg")
 
