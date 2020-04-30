@@ -25,3 +25,4 @@ requests
 responses
 six==1.14.0
 zeep==3.4.0
+Unipath==1.1

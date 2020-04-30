@@ -1,5 +1,4 @@
 from functools import lru_cache
-from collections import defaultdict
 
 from django.conf import settings
 
@@ -13,7 +12,8 @@ def get_aisps():
     (codigo_pip, codigo_aisp, nome_aisp)
     """
     query = "SELECT * FROM {namespace}.tb_pip_aisp".format(
-        namespace=settings.TABLE_NAMESPACE)
+        namespace=settings.TABLE_NAMESPACE
+    )
     return run_query(query)
 
 
@@ -27,15 +27,10 @@ def get_orgaos_same_aisps(orgao_id):
         list(dict) -- Lista de dicionários contendo o número da AISP e .
     """
     data = get_aisps()
-    aisps_current_orgao = [x[1] for x in data if x[0] == orgao_id]
+    aisps_current_orgao = set(x[1] for x in data if x[0] == orgao_id)
+    orgaos_same_aisps = set(x[0] for x in data if x[1] in aisps_current_orgao)
 
-    aisp_list = defaultdict(list)
-
-    for x in data:
-        if x[1] in aisps_current_orgao:
-            aisp_list[x[1]].append(x[0])
-
-    return aisp_list
+    return aisps_current_orgao, orgaos_same_aisps
 
 
 def get_top_n_by_aisp(orgaos_same_aisps, data, **kwargs):
@@ -62,10 +57,6 @@ def get_top_n_by_aisp(orgaos_same_aisps, data, **kwargs):
     """
     mapping_orgao_to_data = {x[0]: x for x in data}
 
-    return [
-        {'nr_aisp': aisp,
-         'top_n': get_top_n_orderby_value_as_dict(
-            [mapping_orgao_to_data[orgao] for orgao in orgaos],
-            **kwargs)}
-        for aisp, orgaos in sorted(orgaos_same_aisps.items())
-    ]
+    return get_top_n_orderby_value_as_dict(
+        [mapping_orgao_to_data[orgao] for orgao in orgaos_same_aisps], **kwargs
+    )

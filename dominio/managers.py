@@ -102,6 +102,13 @@ class InvestigacoesManager(models.Manager):
             docu_fsdc_dk=1
         )
 
+    def em_curso_pip_aisp(self, orgao_ids):
+        return self.get_queryset().filter(
+            docu_orgi_orga_dk_responsavel__in=orgao_ids,
+            docu_cldc_dk__in=[3, 494, 590],
+            docu_fsdc_dk=1
+        )
+
 
 class ProcessosManager(InvestigacoesManager):
     def em_juizo(self, orgao_id, regras):
