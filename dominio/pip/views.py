@@ -133,7 +133,8 @@ class PIPRadarPerformanceView(JWTAuthMixin, CacheMixin, APIView):
         return Response(data=PIPRadarPerformanceDAO.get(orgao_id=orgao_id))
 
 
-class PIPPrincipaisInvestigadosView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
+class PIPPrincipaisInvestigadosView(
+        JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
     cache_config = "PIP_PRINCIPAIS_INVESTIGADOS_CACHE_TIMEOUT"
     PRINCIPAIS_INVESTIGADOS_SIZE = 20
 
@@ -161,6 +162,7 @@ class PIPPrincipaisInvestigadosView(JWTAuthMixin, CacheMixin, PaginatorMixin, AP
         is_removed = request.POST.get("is_removed")
         nm_personagem = request.POST.get("nm_personagem")
 
+        # Nome de personagem é necessário para a chave do HBase
         if not nm_personagem:
             raise ValueError("Nome de personagem não foi dado!")
 

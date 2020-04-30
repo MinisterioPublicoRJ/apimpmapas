@@ -84,6 +84,7 @@ def check_literal_eval(x):
         return x
 
 
+# HBase só trabalha com bytes, ter funções de encode/decode ajuda a comunicar
 def hbase_encode_row(data, encoding='utf-8'):
     """Recebe tupla (1, {1: 2}) e retorna (b'1', {b'1': b'2'})"""
     encoded_key = bytes(data[0], encoding)

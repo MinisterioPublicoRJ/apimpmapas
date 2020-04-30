@@ -12,6 +12,16 @@ QUERIES_DIR = settings.BASE_DIR.child("dominio", "pip", "queries")
 
 
 class GenericDAO:
+    """Classe que implementa métodos genéricos de execução de query no
+    impala a partir de um arquivo, e posterior serialização.
+
+    Atributos:
+    - query_file (str): Nome do arquivo .sql contendo a query a executar.
+    - columns (list): Lista de nome das colunas a usar na serialização.
+    - serializer (Serializer): Serializador a ser utilizado (opcional).
+    - table_namespaces (dict): Define os schemas a serem formatados na query.
+    """
+
     query_file = ""
     columns = []
     serializer = None
@@ -168,6 +178,7 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
         hbase_flags = cls.get_hbase_flags(orgao_id, cpf)
         data = super().get(orgao_id=int(orgao_id))
 
+        # Flags e dados precisam estar juntos para o front
         for row in data:
             investigado = row['nm_investigado']
             row['is_pinned'] = (
@@ -183,6 +194,7 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
                 else False
             )
 
+        # Nomes que foram removidos não precisam ser entregues
         data = [row for row in data if not row['is_removed']]
 
         data = sorted(
