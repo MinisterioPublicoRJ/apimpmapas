@@ -111,6 +111,7 @@ class PIPRadarPerformanceDAO(GenericDAO):
 
 class PIPPrincipaisInvestigadosDAO(GenericDAO):
     hbase_table_name = "pip_investigados_flags"
+    hbase_namespace = settings.HBASE_NAMESPACE
     query_file = "pip_principais_investigados.sql"
     columns = [
         "nm_investigado",
@@ -129,7 +130,7 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
     def get_hbase_flags(cls, orgao_id, cpf):
         # orgao_id e cpf precisam ser str
         row_prefix = bytes(orgao_id + cpf, encoding='utf-8')
-        hbase = get_hbase_table(cls.hbase_table_name)
+        hbase = get_hbase_table(cls.hbase_namespace + cls.hbase_table_name)
 
         data = {
             drow[1]['identificacao:nm_personagem']:
@@ -168,7 +169,7 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
             data['flags:is_removed'] = is_removed
         row = (row_key, data)
 
-        hbase = get_hbase_table(cls.hbase_table_name)
+        hbase = get_hbase_table(cls.hbase_namespace + cls.hbase_table_name)
         hbase.put(*hbase_encode_row(row))
 
         return data

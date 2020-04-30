@@ -233,7 +233,8 @@ class TestPIPPrincipaisInvestigadosDAO:
 
         data = PIPPrincipaisInvestigadosDAO.get_hbase_flags("1", "2")
 
-        _get_table.assert_called_once_with("pip_investigados_flags")
+        hbspace = settings.HBASE_NAMESPACE
+        _get_table.assert_called_once_with(hbspace + "pip_investigados_flags")
         table_mock.scan.assert_called_once_with(row_prefix=b"12")
         assert data == expected_output
 
@@ -262,7 +263,8 @@ class TestPIPPrincipaisInvestigadosDAO:
         data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(
             "1", "2", "Nome1", "True", "False")
 
-        _get_table.assert_called_once_with("pip_investigados_flags")
+        hbspace = settings.HBASE_NAMESPACE
+        _get_table.assert_called_once_with(hbspace + "pip_investigados_flags")
         table_mock.put.assert_called_once_with(
             b"12Nome1", expected_call_arguments)
         assert expected_output == data
