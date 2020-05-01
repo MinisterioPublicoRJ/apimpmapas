@@ -201,11 +201,11 @@ class TestPIPPrincipaisInvestigadosView(
             "dominio:pip-principais-investigados",
             args=("1234", "123")
         )
-        data = {"nm_personagem": "Nome Teste", "is_pinned": "True"}
+        data = {"nm_personagem": "Nome Teste", "action": "qualquer"}
         resp = self.client.post(url, data)
 
         _save_flags.assert_called_once_with(
-            "1234", "123", "Nome Teste", "True", None
+            "1234", "123", "Nome Teste", "qualquer"
         )
         assert resp.status_code == 200
         assert resp.data == {"data": 1}
@@ -220,6 +220,22 @@ class TestPIPPrincipaisInvestigadosView(
             args=("1234", "123")
         )
         data = {"is_pinned": True}
+        with self.assertRaises(ValueError):
+            resp = self.client.post(url, data)
+
+            _save_flags.assert_not_called()
+            assert resp.status_code == 200
+
+    @mock.patch("dominio.pip.views.PIPPrincipaisInvestigadosDAO."
+                "save_hbase_flags")
+    def test_no_action_save_flags(self, _save_flags):
+        _save_flags.return_value = {"data": 1}
+
+        url = reverse(
+            "dominio:pip-principais-investigados",
+            args=("1234", "123")
+        )
+        data = {"nm_personagem": "Nome1"}
         with self.assertRaises(ValueError):
             resp = self.client.post(url, data)
 

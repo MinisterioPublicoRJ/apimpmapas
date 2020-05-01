@@ -158,15 +158,16 @@ class PIPPrincipaisInvestigadosView(
         cpf = kwargs.get("cpf")
 
         # TODO: Verificar que o post foi feito pelo mesmo orgao
-        is_pinned = request.POST.get("is_pinned")
-        is_removed = request.POST.get("is_removed")
+        action = request.POST.get("action")
         nm_personagem = request.POST.get("nm_personagem")
 
         # Nome de personagem é necessário para a chave do HBase
         if not nm_personagem:
-            raise ValueError("Nome de personagem não foi dado!")
+            raise ValueError("Campo 'nm_personagem' não foi dado!")
+        if not action:
+            raise ValueError("Campo 'action' não foi dado!")
 
         data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(
-            orgao_id, cpf, nm_personagem, is_pinned, is_removed)
+            orgao_id, cpf, nm_personagem, action)
 
         return Response(data)

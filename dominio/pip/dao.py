@@ -155,24 +155,29 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
         return data
 
     @classmethod
-    def save_hbase_flags(cls, orgao_id, cpf, nm_personagem,
-                         is_pinned, is_removed):
+    def save_hbase_flags(cls, orgao_id, cpf, nm_personagem, action):
         row_key = orgao_id + cpf + nm_personagem
+        hbase = get_hbase_table(cls.hbase_namespace + cls.hbase_table_name)
+
         data = {
             'identificacao:orgao_id': orgao_id,
             'identificacao:cpf': cpf,
             'identificacao:nm_personagem': nm_personagem
         }
-        if is_pinned:
-            data['flags:is_pinned'] = is_pinned
-        if is_removed:
-            data['flags:is_removed'] = is_removed
         row = (row_key, data)
 
-        hbase = get_hbase_table(cls.hbase_namespace + cls.hbase_table_name)
-        hbase.put(*hbase_encode_row(row))
+        if action == 'unpin':
+            hbase.delete(bytes(row_key, 'utf-8'), columns=['flags:is_pinned'])
+        elif action == 'unremove':
+            hbase.delete(bytes(row_key, 'utf-8'), columns=['flags:is_removed'])
+        elif action == 'pin':
+            data['flags:is_pinned'] = True
+            hbase.put(*hbase_encode_row(row))
+        elif action == 'remove':
+            data['flags:is_removed'] = True
+            hbase.put(*hbase_encode_row(row))
 
-        return data
+        return {'status': 'Success!'}
 
     @classmethod
     def get(cls, orgao_id, cpf):

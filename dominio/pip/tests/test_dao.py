@@ -239,34 +239,85 @@ class TestPIPPrincipaisInvestigadosDAO:
         assert data == expected_output
 
     @mock.patch("dominio.pip.dao.get_hbase_table")
-    def test_save_hbase_flags(self, _get_table):
+    def test_save_hbase_flags_pin(self, _get_table):
         table_mock = mock.MagicMock()
         table_mock.put.return_value = None
         _get_table.return_value = table_mock
 
-        expected_output = {
-            "identificacao:orgao_id": "1",
-            "identificacao:cpf": "2",
-            "identificacao:nm_personagem": "Nome1",
-            "flags:is_pinned": "True",
-            "flags:is_removed": "False"
-        }
+        expected_output = {'status': 'Success!'}
 
         expected_call_arguments = {
             b"identificacao:orgao_id": b"1",
             b"identificacao:cpf": b"2",
             b"identificacao:nm_personagem": b"Nome1",
-            b"flags:is_pinned": b"True",
-            b"flags:is_removed": b"False"
+            b"flags:is_pinned": b"True"
         }
 
         data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(
-            "1", "2", "Nome1", "True", "False")
+            "1", "2", "Nome1", "pin")
 
         hbspace = settings.HBASE_NAMESPACE
         _get_table.assert_called_once_with(hbspace + "pip_investigados_flags")
         table_mock.put.assert_called_once_with(
             b"12Nome1", expected_call_arguments)
+        assert expected_output == data
+
+    @mock.patch("dominio.pip.dao.get_hbase_table")
+    def test_save_hbase_flags_remove(self, _get_table):
+        table_mock = mock.MagicMock()
+        table_mock.put.return_value = None
+        _get_table.return_value = table_mock
+
+        expected_output = {'status': 'Success!'}
+
+        expected_call_arguments = {
+            b"identificacao:orgao_id": b"1",
+            b"identificacao:cpf": b"2",
+            b"identificacao:nm_personagem": b"Nome1",
+            b"flags:is_removed": b"True"
+        }
+
+        data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(
+            "1", "2", "Nome1", "remove")
+
+        hbspace = settings.HBASE_NAMESPACE
+        _get_table.assert_called_once_with(hbspace + "pip_investigados_flags")
+        table_mock.put.assert_called_once_with(
+            b"12Nome1", expected_call_arguments)
+        assert expected_output == data
+
+    @mock.patch("dominio.pip.dao.get_hbase_table")
+    def test_save_hbase_flags_unpin(self, _get_table):
+        table_mock = mock.MagicMock()
+        table_mock.delete.return_value = None
+        _get_table.return_value = table_mock
+
+        expected_output = {'status': 'Success!'}
+
+        data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(
+            "1", "2", "Nome1", "unpin")
+
+        hbspace = settings.HBASE_NAMESPACE
+        _get_table.assert_called_once_with(hbspace + "pip_investigados_flags")
+        table_mock.delete.assert_called_once_with(
+            b"12Nome1", columns=['flags:is_pinned'])
+        assert expected_output == data
+
+    @mock.patch("dominio.pip.dao.get_hbase_table")
+    def test_save_hbase_flags_unremove(self, _get_table):
+        table_mock = mock.MagicMock()
+        table_mock.delete.return_value = None
+        _get_table.return_value = table_mock
+
+        expected_output = {'status': 'Success!'}
+
+        data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(
+            "1", "2", "Nome1", "unremove")
+
+        hbspace = settings.HBASE_NAMESPACE
+        _get_table.assert_called_once_with(hbspace + "pip_investigados_flags")
+        table_mock.delete.assert_called_once_with(
+            b"12Nome1", columns=['flags:is_removed'])
         assert expected_output == data
 
     @mock.patch.object(PIPPrincipaisInvestigadosDAO, "get_hbase_flags")
