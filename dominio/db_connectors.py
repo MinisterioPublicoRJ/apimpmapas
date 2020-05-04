@@ -38,8 +38,8 @@ def run_query(query, parameters=None):
 
 
 def get_hbase_table(table_name, server=None, timeout=None):
-    hbase_server = server or settings.HBASE_SERVER
-    hbase_timeout = timeout or settings.HBASE_TIMEOUT
+    hbase_server = server or settings.PROMOTRON_HBASE_SERVER
+    hbase_timeout = timeout or settings.PROMOTRON_HBASE_TIMEOUT
 
     try:
         connection = HBaseConnection(hbase_server, timeout=hbase_timeout)

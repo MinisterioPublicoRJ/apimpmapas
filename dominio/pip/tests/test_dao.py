@@ -233,7 +233,7 @@ class TestPIPPrincipaisInvestigadosDAO:
 
         data = PIPPrincipaisInvestigadosDAO.get_hbase_flags("1", "2")
 
-        hbspace = settings.HBASE_NAMESPACE
+        hbspace = settings.PROMOTRON_HBASE_NAMESPACE
         _get_table.assert_called_once_with(hbspace + "pip_investigados_flags")
         table_mock.scan.assert_called_once_with(row_prefix=b"12")
         assert data == expected_output
@@ -256,7 +256,7 @@ class TestPIPPrincipaisInvestigadosDAO:
         data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(
             "1", "2", "Nome1", "pin")
 
-        hbspace = settings.HBASE_NAMESPACE
+        hbspace = settings.PROMOTRON_HBASE_NAMESPACE
         _get_table.assert_called_once_with(hbspace + "pip_investigados_flags")
         table_mock.put.assert_called_once_with(
             b"12Nome1", expected_call_arguments)
@@ -280,7 +280,7 @@ class TestPIPPrincipaisInvestigadosDAO:
         data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(
             "1", "2", "Nome1", "remove")
 
-        hbspace = settings.HBASE_NAMESPACE
+        hbspace = settings.PROMOTRON_HBASE_NAMESPACE
         _get_table.assert_called_once_with(hbspace + "pip_investigados_flags")
         table_mock.put.assert_called_once_with(
             b"12Nome1", expected_call_arguments)
@@ -297,7 +297,7 @@ class TestPIPPrincipaisInvestigadosDAO:
         data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(
             "1", "2", "Nome1", "unpin")
 
-        hbspace = settings.HBASE_NAMESPACE
+        hbspace = settings.PROMOTRON_HBASE_NAMESPACE
         _get_table.assert_called_once_with(hbspace + "pip_investigados_flags")
         table_mock.delete.assert_called_once_with(
             b"12Nome1", columns=['flags:is_pinned'])
@@ -314,7 +314,7 @@ class TestPIPPrincipaisInvestigadosDAO:
         data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(
             "1", "2", "Nome1", "unremove")
 
-        hbspace = settings.HBASE_NAMESPACE
+        hbspace = settings.PROMOTRON_HBASE_NAMESPACE
         _get_table.assert_called_once_with(hbspace + "pip_investigados_flags")
         table_mock.delete.assert_called_once_with(
             b"12Nome1", columns=['flags:is_removed'])

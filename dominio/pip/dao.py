@@ -111,7 +111,7 @@ class PIPRadarPerformanceDAO(GenericDAO):
 
 class PIPPrincipaisInvestigadosDAO(GenericDAO):
     hbase_table_name = "pip_investigados_flags"
-    hbase_namespace = settings.HBASE_NAMESPACE
+    hbase_namespace = settings.PROMOTRON_HBASE_NAMESPACE
     query_file = "pip_principais_investigados.sql"
     columns = [
         "nm_investigado",
