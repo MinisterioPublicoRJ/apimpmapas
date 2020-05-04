@@ -15,9 +15,9 @@ from dominio.pip.dao import (
 
 
 class TestGenericDAO:
-    @mock.patch('dominio.pip.dao.GenericDAO.table_namespaces',
+    @mock.patch("dominio.pip.dao.GenericDAO.table_namespaces",
                 new_callable=mock.PropertyMock)
-    @mock.patch('dominio.pip.dao.GenericDAO.query_file',
+    @mock.patch("dominio.pip.dao.GenericDAO.query_file",
                 new_callable=mock.PropertyMock)
     def test_query_method(self, _query_file, _namespaces):
         _query_file.return_value = "test_query.sql"
@@ -43,7 +43,7 @@ class TestGenericDAO:
             "SELECT * FROM dual", {"orgao_id": orgao_id}
         )
 
-    @mock.patch('dominio.pip.dao.GenericDAO.columns',
+    @mock.patch("dominio.pip.dao.GenericDAO.columns",
                 new_callable=mock.PropertyMock)
     def test_serialize_result_no_serializer(self, _columns):
         _columns.return_value = ["col1", "col2", "col3"]
@@ -60,9 +60,9 @@ class TestGenericDAO:
         ]
         assert ser_data == expected_data
 
-    @mock.patch('dominio.pip.dao.GenericDAO.serializer',
+    @mock.patch("dominio.pip.dao.GenericDAO.serializer",
                 new_callable=mock.PropertyMock)
-    @mock.patch('dominio.pip.dao.GenericDAO.columns',
+    @mock.patch("dominio.pip.dao.GenericDAO.columns",
                 new_callable=mock.PropertyMock)
     def test_serialize_result_with_serializer(self, _columns, _serializer):
         class TestSerializer(serializers.Serializer):
@@ -244,7 +244,7 @@ class TestPIPPrincipaisInvestigadosDAO:
         table_mock.put.return_value = None
         _get_table.return_value = table_mock
 
-        expected_output = {'status': 'Success!'}
+        expected_output = {"status": "Success!"}
 
         expected_call_arguments = {
             b"identificacao:orgao_id": b"1",
@@ -268,7 +268,7 @@ class TestPIPPrincipaisInvestigadosDAO:
         table_mock.put.return_value = None
         _get_table.return_value = table_mock
 
-        expected_output = {'status': 'Success!'}
+        expected_output = {"status": "Success!"}
 
         expected_call_arguments = {
             b"identificacao:orgao_id": b"1",
@@ -292,7 +292,7 @@ class TestPIPPrincipaisInvestigadosDAO:
         table_mock.delete.return_value = None
         _get_table.return_value = table_mock
 
-        expected_output = {'status': 'Success!'}
+        expected_output = {"status": "Success!"}
 
         data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(
             "1", "2", "Nome1", "unpin")
@@ -300,7 +300,7 @@ class TestPIPPrincipaisInvestigadosDAO:
         hbspace = settings.PROMOTRON_HBASE_NAMESPACE
         _get_table.assert_called_once_with(hbspace + "pip_investigados_flags")
         table_mock.delete.assert_called_once_with(
-            b"12Nome1", columns=['flags:is_pinned'])
+            b"12Nome1", columns=["flags:is_pinned"])
         assert expected_output == data
 
     @mock.patch("dominio.pip.dao.get_hbase_table")
@@ -309,7 +309,7 @@ class TestPIPPrincipaisInvestigadosDAO:
         table_mock.delete.return_value = None
         _get_table.return_value = table_mock
 
-        expected_output = {'status': 'Success!'}
+        expected_output = {"status": "Success!"}
 
         data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(
             "1", "2", "Nome1", "unremove")
@@ -317,48 +317,48 @@ class TestPIPPrincipaisInvestigadosDAO:
         hbspace = settings.PROMOTRON_HBASE_NAMESPACE
         _get_table.assert_called_once_with(hbspace + "pip_investigados_flags")
         table_mock.delete.assert_called_once_with(
-            b"12Nome1", columns=['flags:is_removed'])
+            b"12Nome1", columns=["flags:is_removed"])
         assert expected_output == data
 
     @mock.patch.object(PIPPrincipaisInvestigadosDAO, "get_hbase_flags")
     @mock.patch.object(GenericDAO, "get")
     def test_get(self, _get, _get_hbase):
         _get_hbase.return_value = {
-            'Nome2': {'is_pinned': True, 'is_removed': False},
-            'Nome3': {'is_pinned': False, 'is_removed': True},
+            "Nome2": {"is_pinned": True, "is_removed": False},
+            "Nome3": {"is_pinned": False, "is_removed": True},
         }
         _get.return_value = [
             {
-                'nm_investigado': 'Nome1',
-                'pip_codigo': 1,
-                'nr_investigacoes': 10
+                "nm_investigado": "Nome1",
+                "pip_codigo": 1,
+                "nr_investigacoes": 10
             },
             {
-                'nm_investigado': 'Nome2',
-                'pip_codigo': 1,
-                'nr_investigacoes': 5
+                "nm_investigado": "Nome2",
+                "pip_codigo": 1,
+                "nr_investigacoes": 5
             },
             {
-                'nm_investigado': 'Nome3',
-                'pip_codigo': 1,
-                'nr_investigacoes': 15
+                "nm_investigado": "Nome3",
+                "pip_codigo": 1,
+                "nr_investigacoes": 15
             },
         ]
 
         expected_output = [
             {
-                'nm_investigado': 'Nome2',
-                'pip_codigo': 1,
-                'nr_investigacoes': 5,
-                'is_pinned': True,
-                'is_removed': False
+                "nm_investigado": "Nome2",
+                "pip_codigo": 1,
+                "nr_investigacoes": 5,
+                "is_pinned": True,
+                "is_removed": False
             },
             {
-                'nm_investigado': 'Nome1',
-                'pip_codigo': 1,
-                'nr_investigacoes': 10,
-                'is_pinned': False,
-                'is_removed': False
+                "nm_investigado": "Nome1",
+                "pip_codigo": 1,
+                "nr_investigacoes": 10,
+                "is_pinned": False,
+                "is_removed": False
             },
         ]
 

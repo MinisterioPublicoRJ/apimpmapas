@@ -30,10 +30,10 @@ class UtilsTest(TestCase):
     def test_get_value_given_key(self):
         test_orgao_id = 42
         test_list = [
-            (1, 'Nome1', 220),
-            (10, 'Nome2', 140),
-            (42, 'Nome3', 150),
-            (60, 'Nome4', 65)
+            (1, "Nome1", 220),
+            (10, "Nome2", 140),
+            (42, "Nome3", 150),
+            (60, "Nome4", 65)
         ]
         output = get_value_given_key(
             test_list, test_orgao_id, key_position=0, value_position=2)
@@ -44,10 +44,10 @@ class UtilsTest(TestCase):
     def test_test_get_value_given_key_invalid_key(self):
         test_orgao_id = 33
         test_list = [
-            (1, 'Nome1', 220),
-            (10, 'Nome2', 140),
-            (42, 'Nome3', 150),
-            (60, 'Nome4', 65)
+            (1, "Nome1", 220),
+            (10, "Nome2", 140),
+            (42, "Nome3", 150),
+            (60, "Nome4", 65)
         ]
         output = get_value_given_key(
             test_list, test_orgao_id, key_position=0, value_position=2)
@@ -57,22 +57,22 @@ class UtilsTest(TestCase):
 
     def test_get_top_n_orderby_value_as_dict(self):
         test_list = [
-            (1, 'Nome1', 220, 0.5, 10),
-            (10, 'Nome2', 140, 0.3, 5),
-            (42, 'Nome3', 150, -0.10, 20),
-            (60, 'Nome4', 65, 1.0, 2)
+            (1, "Nome1", 220, 0.5, 10),
+            (10, "Nome2", 140, 0.3, 5),
+            (42, "Nome3", 150, -0.10, 20),
+            (60, "Nome4", 65, 1.0, 2)
         ]
         output = get_top_n_orderby_value_as_dict(
             test_list,
             name_position=1,
             value_position=4,
-            name_fieldname='nm_field',
-            value_fieldname='value_field',
+            name_fieldname="nm_field",
+            value_fieldname="value_field",
             n=3)
         expected_output = [
-            {'nm_field': 'Nome3', 'value_field': 20},
-            {'nm_field': 'Nome1', 'value_field': 10},
-            {'nm_field': 'Nome2', 'value_field': 5}
+            {"nm_field": "Nome3", "value_field": 20},
+            {"nm_field": "Nome1", "value_field": 10},
+            {"nm_field": "Nome2", "value_field": 5}
         ]
 
         self.assertEqual(output, expected_output)
@@ -96,24 +96,24 @@ class UtilsTest(TestCase):
         self.assertEqual(lit_x1, x1)
 
     def test_hbase_decode(self):
-        data = (b'k1', {b'c1': b'Nome', b'c2': b'True', b'c3': b'[1, 2, 3]'})
-        expected_output = ('k1', {'c1': 'Nome', 'c2': True, 'c3': [1, 2, 3]})
+        data = (b"k1", {b"c1": b"Nome", b"c2": b"True", b"c3": b"[1, 2, 3]"})
+        expected_output = ("k1", {"c1": "Nome", "c2": True, "c3": [1, 2, 3]})
         decoded_data = hbase_decode_row(data)
 
         self.assertEqual(decoded_data, expected_output)
 
     def test_hbase_encode(self):
         expected_output = (
-            b'k1',
-            {b'c1': b'Nome', b'c2': b'True', b'c3': b'[1, 2, 3]'}
+            b"k1",
+            {b"c1": b"Nome", b"c2": b"True", b"c3": b"[1, 2, 3]"}
         )
-        data = ('k1', {'c1': 'Nome', 'c2': True, 'c3': [1, 2, 3]})
+        data = ("k1", {"c1": "Nome", "c2": True, "c3": [1, 2, 3]})
         decoded_data = hbase_encode_row(data)
 
         self.assertEqual(decoded_data, expected_output)
 
     def test_hbase_encode_decode(self):
-        data = ('k1', {'c1': 'Nome', 'c2': True, 'c3': [1, 2, 3]})
+        data = ("k1", {"c1": "Nome", "c2": True, "c3": [1, 2, 3]})
 
         encoded_data = hbase_encode_row(data)
         decoded_data = hbase_decode_row(encoded_data)

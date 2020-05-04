@@ -129,20 +129,20 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
     @classmethod
     def get_hbase_flags(cls, orgao_id, cpf):
         # orgao_id e cpf precisam ser str
-        row_prefix = bytes(orgao_id + cpf, encoding='utf-8')
+        row_prefix = bytes(orgao_id + cpf, encoding="utf-8")
         hbase = get_hbase_table(cls.hbase_namespace + cls.hbase_table_name)
 
         data = {
-            drow[1]['identificacao:nm_personagem']:
+            drow[1]["identificacao:nm_personagem"]:
                 {
-                    'is_pinned': (
-                        drow[1]['flags:is_pinned']
-                        if 'flags:is_pinned' in drow[1]
+                    "is_pinned": (
+                        drow[1]["flags:is_pinned"]
+                        if "flags:is_pinned" in drow[1]
                         else False
                     ),
-                    'is_removed': (
-                        drow[1]['flags:is_removed']
-                        if 'flags:is_removed' in drow[1]
+                    "is_removed": (
+                        drow[1]["flags:is_removed"]
+                        if "flags:is_removed" in drow[1]
                         else False
                     )
                 }
@@ -160,24 +160,24 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
         hbase = get_hbase_table(cls.hbase_namespace + cls.hbase_table_name)
 
         data = {
-            'identificacao:orgao_id': orgao_id,
-            'identificacao:cpf': cpf,
-            'identificacao:nm_personagem': nm_personagem
+            "identificacao:orgao_id": orgao_id,
+            "identificacao:cpf": cpf,
+            "identificacao:nm_personagem": nm_personagem
         }
         row = (row_key, data)
 
-        if action == 'unpin':
-            hbase.delete(bytes(row_key, 'utf-8'), columns=['flags:is_pinned'])
-        elif action == 'unremove':
-            hbase.delete(bytes(row_key, 'utf-8'), columns=['flags:is_removed'])
-        elif action == 'pin':
-            data['flags:is_pinned'] = True
+        if action == "unpin":
+            hbase.delete(bytes(row_key, "utf-8"), columns=["flags:is_pinned"])
+        elif action == "unremove":
+            hbase.delete(bytes(row_key, "utf-8"), columns=["flags:is_removed"])
+        elif action == "pin":
+            data["flags:is_pinned"] = True
             hbase.put(*hbase_encode_row(row))
-        elif action == 'remove':
-            data['flags:is_removed'] = True
+        elif action == "remove":
+            data["flags:is_removed"] = True
             hbase.put(*hbase_encode_row(row))
 
-        return {'status': 'Success!'}
+        return {"status": "Success!"}
 
     @classmethod
     def get(cls, orgao_id, cpf):
@@ -186,27 +186,27 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
 
         # Flags e dados precisam estar juntos para o front
         for row in data:
-            investigado = row['nm_investigado']
-            row['is_pinned'] = (
-                hbase_flags[investigado]['is_pinned']
+            investigado = row["nm_investigado"]
+            row["is_pinned"] = (
+                hbase_flags[investigado]["is_pinned"]
                 if investigado in hbase_flags
-                and 'is_pinned' in hbase_flags[investigado]
+                and "is_pinned" in hbase_flags[investigado]
                 else False
             )
-            row['is_removed'] = (
-                hbase_flags[investigado]['is_removed']
+            row["is_removed"] = (
+                hbase_flags[investigado]["is_removed"]
                 if investigado in hbase_flags
-                and 'is_removed' in hbase_flags[investigado]
+                and "is_removed" in hbase_flags[investigado]
                 else False
             )
 
         # Nomes que foram removidos não precisam ser entregues
-        data = [row for row in data if not row['is_removed']]
+        data = [row for row in data if not row["is_removed"]]
 
         data = sorted(
             data,
             key=lambda k:
-                (-k['is_pinned'], -k['nr_investigacoes'], k['nm_investigado'])
+                (-k["is_pinned"], -k["nr_investigacoes"], k["nm_investigado"])
         )
 
         return data
