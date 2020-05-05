@@ -31,12 +31,10 @@ class VistaManager(models.Manager):
         Returns:
             List[Tuple] -- Lista com o resultado da query.
         """
-        # docu_tpst_dk = 11 : documentos cancelados
         return self.abertas().filter(
-            Q(documento__docu_orgi_orga_dk_responsavel=orgao_id) |
-            Q(documento__docu_orgi_orga_dk_carga=orgao_id),
+            orgao=orgao_id,
             responsavel__cpf=cpf
-        ).exclude(documento__docu_tpst_dk=11)
+        )
 
     def abertas_por_data(self, orgao_id, cpf):
         """
@@ -84,14 +82,13 @@ class VistaManager(models.Manager):
 
     def aberturas_30_dias_PIP(self, orgao_id, cpf):
         # cldc_dk 590 = PIC, 3 e 494 = Inquerito Policial
-        # docu_tpst_dk = 11 : documentos cancelados
         return self.get_queryset().filter(
             Q(data_abertura__gte=date.today() - timedelta(days=30)),
-            Q(documento__docu_orgi_orga_dk_responsavel=orgao_id) |
-            Q(documento__docu_orgi_orga_dk_carga=orgao_id),
+            Q(data_abertura__lte=date.today()),
             Q(documento__docu_cldc_dk__in=[3, 494, 590]),
+            orgao=orgao_id,
             responsavel__cpf=cpf
-        ).exclude(documento__docu_tpst_dk=11)
+        )
 
 
 class InvestigacoesManager(models.Manager):
@@ -100,7 +97,7 @@ class InvestigacoesManager(models.Manager):
             docu_orgi_orga_dk_responsavel=orgao_id,
             docu_cldc_dk__in=regras,
             docu_fsdc_dk=1
-        )
+        ).exclude(docu_tpst_dk=11)
 
     def em_curso_pip_aisp(self, orgao_ids):
         return self.get_queryset().filter(
@@ -128,10 +125,13 @@ class ProcessosManager(InvestigacoesManager):
 
 class FinalizadosManager(models.Manager):
     def no_orgao(self, org_id, regras_saidas):
+        # docu_tpst_dk = 11 : documentos cancelados (desconsiderados)
+        # pcao_dt_cancelamento = null : andamentos valido
         return self.get_queryset().filter(
             andamento__vista__documento__docu_orgi_orga_dk_responsavel=org_id,
-            stao_tppr_dk__in=regras_saidas
-        )
+            stao_tppr_dk__in=regras_saidas,
+            andamento__pcao_dt_cancelamento__isnull=True
+        ).exclude(andamento__vista__documento__docu_tpst_dk=11)
 
     def trinta_dias(self, orgao_id, regras_saidas):
         finalizados = self.no_orgao(orgao_id, regras_saidas)
