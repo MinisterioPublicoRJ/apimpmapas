@@ -12,3 +12,9 @@ class PIPDetalheAproveitamentosSerializer(serializers.Serializer):
     nr_aisps = serializers.ListField(serializers.IntegerField(min_value=0))
     top_n_aisp = AproveitamentosPIPSerializer(many=True)
     tamanho_periodo_dias = serializers.IntegerField(min_value=0)
+
+
+class PIPPrincipaisInvestigadosSerializer(serializers.Serializer):
+    nm_investigado = serializers.CharField()
+    pip_codigo = serializers.IntegerField()
+    nr_investigacoes = serializers.IntegerField(min_value=0)
