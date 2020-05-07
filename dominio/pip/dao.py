@@ -5,7 +5,10 @@ from django.conf import settings
 from dominio.db_connectors import execute as impala_execute, get_hbase_table
 from dominio.exceptions import APIEmptyResultError
 from dominio.utils import format_text, hbase_encode_row, hbase_decode_row
-from dominio.pip.serializers import PIPPrincipaisInvestigadosSerializer
+from dominio.pip.serializers import (
+    PIPPrincipaisInvestigadosSerializer, 
+    PIPPrincipaisInvestigadosListaSerializer,
+)
 
 
 QUERIES_DIR = settings.BASE_DIR.child("dominio", "pip", "queries")
@@ -210,3 +213,17 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
         )
 
         return data
+
+
+class PIPPrincipaisInvestigadosListaDAO(GenericDAO):
+    query_file = "pip_principais_investigados_lista.sql"
+    columns = [
+        "representante_dk",
+        "pip_codigo",
+        "docu_nr_mp",
+        "docu_dt_cadastro",
+        "cldc_ds_classe",
+        "orgi_nm_orgao",
+    ]
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
+    serializer = PIPPrincipaisInvestigadosListaSerializer
