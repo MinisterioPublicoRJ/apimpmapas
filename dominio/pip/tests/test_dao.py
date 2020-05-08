@@ -10,6 +10,7 @@ from dominio.pip.dao import (
     GenericDAO,
     PIPRadarPerformanceDAO,
     PIPPrincipaisInvestigadosDAO,
+    PIPPrincipaisInvestigadosListaDAO,
     QUERIES_DIR,
 )
 
@@ -211,7 +212,7 @@ class TestPIPPrincipaisInvestigadosDAO:
             (
                 b"1",
                 {
-                    b"identificacao:nm_personagem": b"Nome1",
+                    b"identificacao:representante_dk": b"1234",
                     b"flags:is_pinned": b"True",
                     b"flags:is_removed": b"False"
                 }
@@ -219,7 +220,7 @@ class TestPIPPrincipaisInvestigadosDAO:
             (
                 b"2",
                 {
-                    b"identificacao:nm_personagem": b"Nome2",
+                    b"identificacao:representante_dk": b"123",
                     b"flags:is_pinned": b"True"
                 }
             )
@@ -227,8 +228,8 @@ class TestPIPPrincipaisInvestigadosDAO:
         _get_table.return_value = table_mock
 
         expected_output = {
-            "Nome1": {"is_pinned": True, "is_removed": False},
-            "Nome2": {"is_pinned": True, "is_removed": False},
+            1234: {"is_pinned": True, "is_removed": False},
+            123: {"is_pinned": True, "is_removed": False},
         }
 
         data = PIPPrincipaisInvestigadosDAO.get_hbase_flags("1", "2")
@@ -249,17 +250,17 @@ class TestPIPPrincipaisInvestigadosDAO:
         expected_call_arguments = {
             b"identificacao:orgao_id": b"1",
             b"identificacao:cpf": b"2",
-            b"identificacao:nm_personagem": b"Nome1",
+            b"identificacao:representante_dk": b"1234",
             b"flags:is_pinned": b"True"
         }
 
         data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(
-            "1", "2", "Nome1", "pin")
+            "1", "2", "1234", "pin")
 
         hbspace = settings.PROMOTRON_HBASE_NAMESPACE
         _get_table.assert_called_once_with(hbspace + "pip_investigados_flags")
         table_mock.put.assert_called_once_with(
-            b"12Nome1", expected_call_arguments)
+            b"121234", expected_call_arguments)
         assert expected_output == data
 
     @mock.patch("dominio.pip.dao.get_hbase_table")
@@ -273,17 +274,17 @@ class TestPIPPrincipaisInvestigadosDAO:
         expected_call_arguments = {
             b"identificacao:orgao_id": b"1",
             b"identificacao:cpf": b"2",
-            b"identificacao:nm_personagem": b"Nome1",
+            b"identificacao:representante_dk": b"1234",
             b"flags:is_removed": b"True"
         }
 
         data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(
-            "1", "2", "Nome1", "remove")
+            "1", "2", "1234", "remove")
 
         hbspace = settings.PROMOTRON_HBASE_NAMESPACE
         _get_table.assert_called_once_with(hbspace + "pip_investigados_flags")
         table_mock.put.assert_called_once_with(
-            b"12Nome1", expected_call_arguments)
+            b"121234", expected_call_arguments)
         assert expected_output == data
 
     @mock.patch("dominio.pip.dao.get_hbase_table")
@@ -295,12 +296,12 @@ class TestPIPPrincipaisInvestigadosDAO:
         expected_output = {"status": "Success!"}
 
         data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(
-            "1", "2", "Nome1", "unpin")
+            "1", "2", "1234", "unpin")
 
         hbspace = settings.PROMOTRON_HBASE_NAMESPACE
         _get_table.assert_called_once_with(hbspace + "pip_investigados_flags")
         table_mock.delete.assert_called_once_with(
-            b"12Nome1", columns=["flags:is_pinned"])
+            b"121234", columns=["flags:is_pinned"])
         assert expected_output == data
 
     @mock.patch("dominio.pip.dao.get_hbase_table")
@@ -312,51 +313,66 @@ class TestPIPPrincipaisInvestigadosDAO:
         expected_output = {"status": "Success!"}
 
         data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(
-            "1", "2", "Nome1", "unremove")
+            "1", "2", "1234", "unremove")
 
         hbspace = settings.PROMOTRON_HBASE_NAMESPACE
         _get_table.assert_called_once_with(hbspace + "pip_investigados_flags")
         table_mock.delete.assert_called_once_with(
-            b"12Nome1", columns=["flags:is_removed"])
+            b"121234", columns=["flags:is_removed"])
         assert expected_output == data
 
     @mock.patch.object(PIPPrincipaisInvestigadosDAO, "get_hbase_flags")
     @mock.patch.object(GenericDAO, "get")
     def test_get(self, _get, _get_hbase):
         _get_hbase.return_value = {
-            "Nome2": {"is_pinned": True, "is_removed": False},
-            "Nome3": {"is_pinned": False, "is_removed": True},
+            "1278": {"is_pinned": True, "is_removed": False},
+            "5678": {"is_pinned": False, "is_removed": True},
         }
         _get.return_value = [
             {
                 "nm_investigado": "Nome1",
+                "representante_dk": "1234",
                 "pip_codigo": 1,
-                "nr_investigacoes": 10
+                "nr_investigacoes": 10,
+                "flag_multipromotoria": None,
+                "flag_top50": True,
             },
             {
                 "nm_investigado": "Nome2",
+                "representante_dk": "1278",
                 "pip_codigo": 1,
-                "nr_investigacoes": 5
+                "nr_investigacoes": 5,
+                "flag_multipromotoria": True,
+                "flag_top50": None,
             },
             {
                 "nm_investigado": "Nome3",
+                "representante_dk": "5678",
                 "pip_codigo": 1,
-                "nr_investigacoes": 15
+                "nr_investigacoes": 15,
+                "flag_multipromotoria": None,
+                "flag_top50": None,
             },
         ]
 
         expected_output = [
             {
                 "nm_investigado": "Nome2",
+                "representante_dk": "1278",
                 "pip_codigo": 1,
                 "nr_investigacoes": 5,
+                "flag_multipromotoria": True,
+                "flag_top50": None,
                 "is_pinned": True,
                 "is_removed": False
             },
             {
                 "nm_investigado": "Nome1",
+                "representante_dk": "1234",
                 "pip_codigo": 1,
                 "nr_investigacoes": 10,
+                "flag_multipromotoria": None,
+                "flag_top50": True,
                 "is_pinned": False,
                 "is_removed": False
             },
@@ -364,3 +380,27 @@ class TestPIPPrincipaisInvestigadosDAO:
 
         data = PIPPrincipaisInvestigadosDAO.get("1", "2")
         assert data == expected_output
+
+
+class TestPIPPrincipaisInvestigadosListaDAO:
+    def test_serialize_result(self):
+        result_set = [
+            (
+                16,
+                29933850,
+                "123456",
+                datetime(2020, 4, 22, 13, 36, 6, 668000),
+                "Classe",
+                "5ª PROMOTORIA DE JUSTIÇA",
+            ),
+        ]
+        ser_data = PIPPrincipaisInvestigadosListaDAO.serialize(result_set)
+        expected_data = [{
+            "representante_dk": 16,
+            "orgao_id": 29933850,
+            "documento_nr_mp": "123456",
+            "documento_dt_cadastro": '2020-04-22T13:36:06.668000Z',
+            "documento_classe": "Classe",
+            "nm_orgao": "5ª Promotoria de Justiça",
+        }]
+        assert ser_data == expected_data
