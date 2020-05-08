@@ -118,8 +118,11 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
     query_file = "pip_principais_investigados.sql"
     columns = [
         "nm_investigado",
+        "representante_dk",
         "pip_codigo",
         "nr_investigacoes",
+        "flag_multipromotoria",
+        "flag_top50"
     ]
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
     serializer = PIPPrincipaisInvestigadosSerializer
@@ -136,7 +139,7 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
         hbase = get_hbase_table(cls.hbase_namespace + cls.hbase_table_name)
 
         data = {
-            drow[1]["identificacao:nm_personagem"]:
+            drow[1]["identificacao:representante_dk"]:
                 {
                     "is_pinned": (
                         drow[1]["flags:is_pinned"]
@@ -158,14 +161,14 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
         return data
 
     @classmethod
-    def save_hbase_flags(cls, orgao_id, cpf, nm_personagem, action):
-        row_key = orgao_id + cpf + nm_personagem
+    def save_hbase_flags(cls, orgao_id, cpf, representante_dk, action):
+        row_key = orgao_id + cpf + representante_dk
         hbase = get_hbase_table(cls.hbase_namespace + cls.hbase_table_name)
 
         data = {
             "identificacao:orgao_id": orgao_id,
             "identificacao:cpf": cpf,
-            "identificacao:nm_personagem": nm_personagem
+            "identificacao:representante_dk": representante_dk
         }
         row = (row_key, data)
 
@@ -189,17 +192,17 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
 
         # Flags e dados precisam estar juntos para o front
         for row in data:
-            investigado = row["nm_investigado"]
+            investigado_dk = row["representante_dk"]
             row["is_pinned"] = (
-                hbase_flags[investigado]["is_pinned"]
-                if investigado in hbase_flags
-                and "is_pinned" in hbase_flags[investigado]
+                hbase_flags[investigado_dk]["is_pinned"]
+                if investigado_dk in hbase_flags
+                and "is_pinned" in hbase_flags[investigado_dk]
                 else False
             )
             row["is_removed"] = (
-                hbase_flags[investigado]["is_removed"]
-                if investigado in hbase_flags
-                and "is_removed" in hbase_flags[investigado]
+                hbase_flags[investigado_dk]["is_removed"]
+                if investigado_dk in hbase_flags
+                and "is_removed" in hbase_flags[investigado_dk]
                 else False
             )
 
