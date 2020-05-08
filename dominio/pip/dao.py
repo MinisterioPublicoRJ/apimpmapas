@@ -222,11 +222,20 @@ class PIPPrincipaisInvestigadosListaDAO(GenericDAO):
     query_file = "pip_principais_investigados_lista.sql"
     columns = [
         "representante_dk",
-        "pip_codigo",
-        "docu_nr_mp",
-        "docu_dt_cadastro",
-        "cldc_ds_classe",
-        "orgi_nm_orgao",
+        "orgao_id",
+        "documento_nr_mp",
+        "documento_dt_cadastro",
+        "documento_classe",
+        "nm_orgao",
     ]
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
     serializer = PIPPrincipaisInvestigadosListaSerializer
+
+    @classmethod
+    def serialize(cls, result_set):
+        ser_data = super().serialize(result_set)
+        for row in ser_data:
+            nm_orgao = row['nm_orgao']
+            row['nm_orgao'] = format_text(nm_orgao)
+
+        return ser_data

@@ -25,8 +25,8 @@ class PIPPrincipaisInvestigadosSerializer(serializers.Serializer):
 
 class PIPPrincipaisInvestigadosListaSerializer(serializers.Serializer):
     representante_dk = serializers.IntegerField()
-    pip_codigo = serializers.IntegerField()
-    docu_nr_mp = serializers.CharField()
-    docu_dt_cadastro = serializers.DateTimeField()
-    cldc_ds_classe = serializers.CharField()
-    orgi_nm_orgao = serializers.CharField()
+    orgao_id = serializers.IntegerField()
+    documento_nr_mp = serializers.CharField()
+    documento_dt_cadastro = serializers.DateTimeField()
+    documento_classe = serializers.CharField()
+    nm_orgao = serializers.CharField()

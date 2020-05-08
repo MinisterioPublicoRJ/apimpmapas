@@ -37,7 +37,7 @@ urlpatterns = [
         name="pip-principais-investigados",
     ),
     path(
-        "principais-investigados/lista/<str:representante_dk>",
+        "principais-investigados-lista/<str:representante_dk>",
         PIPPrincipaisInvestigadosListaView.as_view(),
         name="pip-principais-investigados-lista",
     ),

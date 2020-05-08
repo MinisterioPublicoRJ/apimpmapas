@@ -178,7 +178,7 @@ class PIPPrincipaisInvestigadosListaView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = "PIP_PRINCIPAIS_INVESTIGADOS_LISTA_CACHE_TIMEOUT"
 
     def get(self, request, *args, **kwargs):
-        representante_dk = kwargs.get("representante_dk")
+        representante_dk = int(kwargs.get("representante_dk"))
 
         data = PIPPrincipaisInvestigadosListaDAO.get(dk=representante_dk)
 
