@@ -12,7 +12,8 @@ def get_aisps():
     (codigo_pip, codigo_aisp, nome_aisp)
     """
     query = "SELECT * FROM {namespace}.tb_pip_aisp".format(
-        namespace=settings.TABLE_NAMESPACE)
+        namespace=settings.TABLE_NAMESPACE
+    )
     return run_query(query)
 
 
@@ -57,5 +58,5 @@ def get_top_n_by_aisp(orgaos_same_aisps, data, **kwargs):
     mapping_orgao_to_data = {x[0]: x for x in data}
 
     return get_top_n_orderby_value_as_dict(
-            [mapping_orgao_to_data[orgao] for orgao in orgaos_same_aisps],
-            **kwargs)
+        [mapping_orgao_to_data[orgao] for orgao in orgaos_same_aisps], **kwargs
+    )

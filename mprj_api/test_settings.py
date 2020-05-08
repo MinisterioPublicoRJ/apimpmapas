@@ -97,12 +97,12 @@ WSGI_APPLICATION = 'mprj_api.wsgi.application'
 DATABASES = {
     'default': config(
         'DATABASE_TEST',
-        default='sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3'),
+        default='sqlite:///' + BASE_DIR.child('db.sqlite3'),
         cast=db_url
     ),
     'dominio_db': config(
         'DOMINIO_TEST',
-        default='sqlite:///' + os.path.join(BASE_DIR, 'dominio.sqlite3'),
+        default='sqlite:///' + BASE_DIR.child('dominio.sqlite3'),
         cast=db_url
     )
 }
@@ -168,7 +168,7 @@ STATIC_URL = config(
 )
 STATIC_ROOT = config(
     'STATIC_ROOT',
-    default=os.path.join(BASE_DIR, 'static')
+    default=BASE_DIR.child('static')
 )
 
 MEDIA_URL = config(
@@ -177,7 +177,7 @@ MEDIA_URL = config(
 )
 MEDIA_ROOT = config(
     'MEDIA_ROOT',
-    default=os.path.join(BASE_DIR, 'media')
+    default=BASE_DIR.child('media')
 )
 
 # CORS configuration
@@ -192,3 +192,25 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 CACHE_TIMEOUT = config("CACHE_TIMEOUT", default=300, cast=int)
 
 JWT_SECRET = SECRET_KEY + str(datetime.now())
+
+#HBASE
+HBASE_SERVER = config("HBASE_SERVER")
+HBASE_TIMEOUT = config("HBASE_TIMEOUT", cast=int, default=300000)
+EXADATA_DETRAN_PHOTO_ORIGIN = config("EXADATA_DETRAN_PHOTO_ORIGIN")
+
+EXADATA_DETRAN_DATA_ORIGIN = config("EXADATA_DETRAN_DATA_ORIGIN")
+
+# SIMPLE AUTH
+SIMPLE_AUTH_TOKEN = config("SIMPLE_AUTH_TOKEN", default="simple-token")
+
+# DETRAN
+DETRAN_CNPJ = config("DETRAN_CNPJ")
+DETRAN_CHAVE = config("DETRAN_CHAVE")
+DETRAN_PERFIL = config("DETRAN_PERFIL")
+DETRAN_CPF = config("DETRAN_CPF")
+DETRAN_URL_ENVIO = config("DETRAN_URL_ENVIO")
+DETRAN_URL_BUSCA = config("DETRAN_URL_BUSCA")
+
+PROMOTRON_HBASE_SERVER = config("PROMOTRON_HBASE_SERVER")
+PROMOTRON_HBASE_NAMESPACE = config("PROMOTRON_HBASE_NAMESPACE")
+PROMOTRON_HBASE_TIMEOUT = config("PROMOTRON_HBASE_TIMEOUT", cast=int, default=300000)

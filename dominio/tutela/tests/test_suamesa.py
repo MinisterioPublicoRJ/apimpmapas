@@ -111,8 +111,13 @@ class SuaMesaViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
         regras_finalizacoes = regras_saidas + regras_arquiv
         manager_mock = mock.MagicMock()
-        manager_mock.count.return_value = 1
+        values_mock = mock.MagicMock()
+        distinct_mock = mock.MagicMock()
+
         _SubAndamento.finalizados.trinta_dias.return_value = manager_mock
+        manager_mock.values.return_value = values_mock
+        values_mock.distinct.return_value = distinct_mock
+        distinct_mock.count.return_value = 1
         orgao_id = '10'
 
         url = reverse('dominio:suamesa-finalizados', args=(orgao_id, ))
@@ -123,7 +128,7 @@ class SuaMesaViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         _SubAndamento.finalizados.trinta_dias.assert_called_once_with(
             int(orgao_id), regras_finalizacoes
         )
-        manager_mock.count.assert_called_once_with()
+        distinct_mock.count.assert_called_once_with()
 
     @mock.patch('dominio.tutela.views.Vista')
     def test_sua_mesa_vistas_abertas(self, _Vista):

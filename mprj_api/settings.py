@@ -18,7 +18,6 @@ from unipath import Path
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
@@ -55,6 +54,7 @@ INSTALLED_APPS = [
     'mprj_plus',
     'nested_admin',
     'desaparecidos',
+    'proxies',
 ]
 
 MIDDLEWARE = [
@@ -187,9 +187,12 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 # CACHE Configuration
+CACHE_BACKEND = config(
+    "CACHE_BACKEND", default='django.core.cache.backends.locmem.LocMemCache'
+)
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        'BACKEND': CACHE_BACKEND,
         'LOCATION': config(
             'CACHE_LOCATION',
             default='localhost:6379'
@@ -204,4 +207,58 @@ CACHES = {
 }
 CACHE_TIMEOUT = config("CACHE_TIMEOUT", default=300, cast=int)
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} - {pathname}:{funcName} --> {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': config("DJANGO_LOG_LEVEL", default="INFO"),
+        },
+        'proxies': {
+            'level': config("PROXIES_LOG_LEVEL", default="INFO"),
+            'formatter': 'verbose',
+            'handlers': ['console'],
+            'propagate': True,
+        },
+    },
+}
+
+
+
+
 JWT_SECRET = SECRET_KEY
+
+#HBASE
+HBASE_SERVER = config("HBASE_SERVER")
+HBASE_TIMEOUT = config("HBASE_TIMEOUT", cast=int, default=300000)
+EXADATA_DETRAN_PHOTO_ORIGIN = config("EXADATA_DETRAN_PHOTO_ORIGIN")
+
+EXADATA_DETRAN_DATA_ORIGIN = config("EXADATA_DETRAN_DATA_ORIGIN")
+
+# SIMPLE AUTH
+SIMPLE_AUTH_TOKEN = config("SIMPLE_AUTH_TOKEN")
+
+# DETRAN
+DETRAN_CNPJ = config("DETRAN_CNPJ")
+DETRAN_CHAVE = config("DETRAN_CHAVE")
+DETRAN_PERFIL = config("DETRAN_PERFIL")
+DETRAN_CPF = config("DETRAN_CPF")
+DETRAN_URL_ENVIO = config("DETRAN_URL_ENVIO")
+DETRAN_URL_BUSCA = config("DETRAN_URL_BUSCA")
+
+PROMOTRON_HBASE_SERVER = config("PROMOTRON_HBASE_SERVER")
+PROMOTRON_HBASE_NAMESPACE = config("PROMOTRON_HBASE_NAMESPACE")
+PROMOTRON_HBASE_TIMEOUT = config("PROMOTRON_HBASE_TIMEOUT", cast=int, default=300000)

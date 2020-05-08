@@ -4,6 +4,7 @@ import logging
 from django.conf import settings
 from impala.dbapi import connect as bda_connect
 from impala.error import HiveServer2Error as BDA_Error
+from happybase import Connection as HBaseConnection
 
 from lupa.exceptions import QueryError
 
@@ -34,3 +35,15 @@ def run_query(query, parameters=None):
     if db_result and db_result[0]:
         return db_result
     return None
+
+
+def get_hbase_table(table_name, server=None, timeout=None):
+    hbase_server = server or settings.PROMOTRON_HBASE_SERVER
+    hbase_timeout = timeout or settings.PROMOTRON_HBASE_TIMEOUT
+
+    try:
+        connection = HBaseConnection(hbase_server, timeout=hbase_timeout)
+        return connection.table(table_name)
+    except Exception as e:
+        logger.error("Error getting table from hbase: " + str(e))
+        raise Exception(str(e)) from e

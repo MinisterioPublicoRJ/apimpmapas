@@ -334,7 +334,10 @@ class SuaMesaFinalizados(JWTAuthMixin, CacheMixin, APIView):
 
         regras_finalizacoes = regras_saidas + regras_arquiv
         doc_count = SubAndamento.finalizados.trinta_dias(
-            orgao_id, regras_finalizacoes).count()
+            orgao_id, regras_finalizacoes)\
+            .values('andamento__vista__documento__docu_dk')\
+            .distinct()\
+            .count()
 
         return Response(data={"suamesa_finalizados": doc_count})
 
@@ -515,6 +518,8 @@ class DesarquivamentosView(JWTAuthMixin, CacheMixin, APIView):
                                           7803, 6003, 7802, 7801)
                                           AND d.docu_cldc_dk = 392
                 AND d.DOCU_ORGI_ORGA_DK_RESPONSAVEL = %s
+                AND d.DOCU_TPST_DK != 11
+                AND a.pcao_dt_cancelamento IS NULL
                 GROUP BY docu_nr_mp, a.pcao_dt_andamento)
                 SELECT docu_nr_mp, COUNT(docu_nr_mp)
                 FROM AGRUPADOS GROUP BY docu_nr_mp
