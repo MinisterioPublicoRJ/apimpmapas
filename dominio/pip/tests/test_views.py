@@ -242,13 +242,17 @@ class TestPIPPrincipaisInvestigadosView(
             _save_flags.assert_not_called()
             assert resp.status_code == 200
 
+
 class TestPIPPrincipaisInvestigadosListaView(
         NoJWTTestCase, NoCacheTestCase, TestCase):
     @mock.patch("dominio.pip.views.PIPPrincipaisInvestigadosListaDAO.get")
     def test_correct_response(self, _get_data):
         _get_data.return_value = {"data": 1}
 
-        url = reverse("dominio:pip-principais-investigados-lista", args=("12345",))
+        url = reverse(
+            "dominio:pip-principais-investigados-lista",
+            args=("12345",)
+        )
         resp = self.client.get(url)
 
         _get_data.assert_called_once_with(dk=12345)

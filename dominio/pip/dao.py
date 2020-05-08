@@ -6,7 +6,7 @@ from dominio.db_connectors import execute as impala_execute, get_hbase_table
 from dominio.exceptions import APIEmptyResultError
 from dominio.utils import format_text, hbase_encode_row, hbase_decode_row
 from dominio.pip.serializers import (
-    PIPPrincipaisInvestigadosSerializer, 
+    PIPPrincipaisInvestigadosSerializer,
     PIPPrincipaisInvestigadosListaSerializer,
 )
 
