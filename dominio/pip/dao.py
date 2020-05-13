@@ -237,9 +237,9 @@ class PIPPrincipaisInvestigadosListaDAO(GenericDAO):
     def serialize(cls, result_set):
         # Assuntos vem separados por ' --- ' no banco
         result_set = [
-            row[:-1] + tuple([row[-1].split(' --- ')]) 
-                if isinstance(row[-1], str)
-                else row
+            row[:-1] + tuple([row[-1].split(' --- ')])
+            if isinstance(row[-1], str)
+            else row
             for row in result_set
         ]
 
