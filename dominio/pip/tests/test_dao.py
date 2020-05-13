@@ -392,6 +392,8 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 datetime(2020, 4, 22, 13, 36, 6, 668000),
                 "Classe",
                 "5ª PROMOTORIA DE JUSTIÇA",
+                "Etiqueta",
+                "Assunto 1 --- Assunto 2"
             ),
         ]
         ser_data = PIPPrincipaisInvestigadosListaDAO.serialize(result_set)
@@ -402,5 +404,7 @@ class TestPIPPrincipaisInvestigadosListaDAO:
             "documento_dt_cadastro": '2020-04-22T13:36:06.668000Z',
             "documento_classe": "Classe",
             "nm_orgao": "5ª Promotoria de Justiça",
+            "etiqueta": "Etiqueta",
+            "assuntos": ["Assunto 1", "Assunto 2"]
         }]
         assert ser_data == expected_data

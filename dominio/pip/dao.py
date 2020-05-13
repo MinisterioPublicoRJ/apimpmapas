@@ -227,12 +227,22 @@ class PIPPrincipaisInvestigadosListaDAO(GenericDAO):
         "documento_dt_cadastro",
         "documento_classe",
         "nm_orgao",
+        "etiqueta",
+        "assuntos",
     ]
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
     serializer = PIPPrincipaisInvestigadosListaSerializer
 
     @classmethod
     def serialize(cls, result_set):
+        # Assuntos vem separados por ' --- ' no banco
+        result_set = [
+            row[:-1] + tuple([row[-1].split(' --- ')]) 
+                if isinstance(row[-1], str)
+                else row
+            for row in result_set
+        ]
+
         ser_data = super().serialize(result_set)
         for row in ser_data:
             nm_orgao = row['nm_orgao']

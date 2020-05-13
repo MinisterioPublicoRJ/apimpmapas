@@ -30,3 +30,5 @@ class PIPPrincipaisInvestigadosListaSerializer(serializers.Serializer):
     documento_dt_cadastro = serializers.DateTimeField()
     documento_classe = serializers.CharField()
     nm_orgao = serializers.CharField()
+    etiqueta = serializers.CharField()
+    assuntos = serializers.ListField(serializers.CharField())
