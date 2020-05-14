@@ -4,8 +4,19 @@ from django.conf import settings
 
 from dominio.db_connectors import execute as impala_execute, get_hbase_table
 from dominio.exceptions import APIEmptyResultError
-from dominio.utils import format_text, hbase_encode_row, hbase_decode_row
-from dominio.pip.serializers import PIPPrincipaisInvestigadosSerializer
+from dominio.utils import (
+    format_text,
+    hbase_encode_row,
+    hbase_decode_row,
+    get_top_n_orderby_value_as_dict,
+    get_value_given_key,
+)
+from dominio.pip.serializers import (
+    PIPPrincipaisInvestigadosSerializer,
+    PIPDetalheAproveitamentosSerializer,
+)
+
+from .utils import get_top_n_by_aisp, get_orgaos_same_aisps
 
 
 QUERIES_DIR = settings.BASE_DIR.child("dominio", "pip", "queries")
@@ -52,6 +63,69 @@ class GenericDAO:
             raise APIEmptyResultError
 
         return cls.serialize(result_set)
+
+
+class PIPDetalheAproveitamentosDAO(GenericDAO):
+    query_file = "pip_detalhe_aproveitamentos.sql"
+    serializer = PIPDetalheAproveitamentosSerializer
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
+
+    @classmethod
+    @lru_cache(maxsize=None)
+    def query(cls):
+        return super().query()
+
+    @classmethod
+    def get(cls, **kwargs):
+        data = super().execute(**kwargs)
+        if not data:
+            raise APIEmptyResultError
+
+        orgao_id = kwargs['orgao_id']
+
+        aisps, orgaos_same_aisps = get_orgaos_same_aisps(orgao_id)
+        top_n_aisp = get_top_n_by_aisp(
+            orgaos_same_aisps,
+            data,
+            name_position=1,
+            value_position=2,
+            name_fieldname="nm_promotoria",
+            value_fieldname="nr_aproveitamentos_periodo",
+            n=3,
+        )
+        for row in top_n_aisp:
+            row['nm_promotoria'] = format_text(row['nm_promotoria'])
+
+        nr_aproveitamentos_periodo = get_value_given_key(
+            data, orgao_id, key_position=0, value_position=2
+        )
+        variacao_periodo = get_value_given_key(
+            data, orgao_id, key_position=0, value_position=4
+        )
+        tamanho_periodo_dias = get_value_given_key(
+            data, orgao_id, key_position=0, value_position=5
+        )
+        top_n_pacote = get_top_n_orderby_value_as_dict(
+            data,
+            name_position=1,
+            value_position=2,
+            name_fieldname="nm_promotoria",
+            value_fieldname="nr_aproveitamentos_periodo",
+            n=3,
+        )
+        for row in top_n_pacote:
+            row['nm_promotoria'] = format_text(row['nm_promotoria'])
+
+        data_obj = {
+            "nr_aproveitamentos_periodo": nr_aproveitamentos_periodo,
+            "variacao_periodo": variacao_periodo,
+            "top_n_pacote": top_n_pacote,
+            "nr_aisps": aisps,
+            "top_n_aisp": top_n_aisp,
+            "tamanho_periodo_dias": tamanho_periodo_dias,
+        }
+        data = cls.serializer(data_obj).data
+        return data
 
 
 class PIPRadarPerformanceDAO(GenericDAO):

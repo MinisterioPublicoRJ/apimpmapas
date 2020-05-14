@@ -2,11 +2,11 @@ from django.urls import path
 
 from .views import (
     PIPDetalheAproveitamentosView,
-    PIPInvestigacoesCursoAISP,
+    PIPSuaMesaInvestigacoesAISPView,
     PIPSuaMesaInqueritosView,
     PIPSuaMesaPICsView,
     PIPRadarPerformanceView,
-    PIPVistasAbertasMensal,
+    PIPVistasAbertasMensalView,
     PIPPrincipaisInvestigadosView,
 )
 
@@ -19,13 +19,13 @@ urlpatterns = [
     ),
     path(
         "aberturas-mensal/<str:orgao_id>/<str:cpf>",
-        PIPVistasAbertasMensal.as_view(),
+        PIPVistasAbertasMensalView.as_view(),
         name="pip-aberturas-mensal",
     ),
     path(
-        "aisp/investigacoes/<str:orgao_id>",
-        PIPInvestigacoesCursoAISP.as_view(),
-        name="pip-aisp-investigacoes",
+        "suamesa/investigacoes-aisp/<str:orgao_id>",
+        PIPSuaMesaInvestigacoesAISPView.as_view(),
+        name="pip-suamesa-investigacoes-aisp",
     ),
     path(
         "suamesa/inqueritos/<str:orgao_id>",
