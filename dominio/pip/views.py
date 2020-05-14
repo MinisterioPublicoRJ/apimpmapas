@@ -1,14 +1,8 @@
-from functools import lru_cache
-
-from django.conf import settings
-from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from dominio.db_connectors import run_query
 from dominio.mixins import CacheMixin, JWTAuthMixin, PaginatorMixin
 from dominio.models import Vista, Documento
-from .serializers import PIPDetalheAproveitamentosSerializer
 from dominio.pip.dao import (
     PIPDetalheAproveitamentosDAO,
     PIPRadarPerformanceDAO,

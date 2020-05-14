@@ -1,10 +1,8 @@
 from unittest import mock
 
-from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 
-from dominio.pip.views import PIPDetalheAproveitamentosView
 from dominio.tests.testconf import NoJWTTestCase, NoCacheTestCase
 from dominio.pip.utils import get_aisps
 
@@ -83,7 +81,10 @@ class PIPInvestigacoesCursoAISPTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
         get_aisps.cache_clear()
         orgao_id = "1"
-        url = reverse("dominio:pip-suamesa-investigacoes-aisp", args=(orgao_id,))
+        url = reverse(
+            "dominio:pip-suamesa-investigacoes-aisp",
+            args=(orgao_id,)
+        )
         resp = self.client.get(url)
 
         expected_output = {"aisp_nr_investigacoes": 100}

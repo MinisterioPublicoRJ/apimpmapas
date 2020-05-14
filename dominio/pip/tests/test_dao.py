@@ -119,7 +119,8 @@ class TestGenericDAO:
 class TestPIPDetalheAproveitamentosDAO:
     @mock.patch("dominio.pip.utils.run_query")
     @mock.patch("dominio.pip.dao.impala_execute")
-    def test_pip_aproveitamentos_result(self, _impala_execute, _run_query_aisps):
+    def test_pip_aproveitamentos_result(
+            self, _impala_execute, _run_query_aisps):
         _impala_execute.return_value = [
             (1, "TC 1", 20, 50, 0.75, 30),
             (2, "TC 2", 30, 10, 0.5, 30),
