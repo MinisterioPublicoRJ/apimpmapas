@@ -164,6 +164,48 @@ class PIPInvestigacoesCursoAISPTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         manager_mock.count.assert_called_once_with()
 
 
+class PIPSuaMesaInqueritosTest(NoJWTTestCase, NoCacheTestCase, TestCase):
+    @mock.patch("dominio.pip.views.Documento")
+    def test_pip_suamesa_inqueritos(self, _Documento):
+        manager_mock = mock.MagicMock()
+        manager_mock.count.return_value = 100
+        _Documento.investigacoes.em_curso.return_value = manager_mock
+
+        orgao_id = "1"
+        url = reverse("dominio:pip-suamesa-inqueritos", args=(orgao_id,))
+        resp = self.client.get(url)
+
+        expected_output = {"pip_nr_inqueritos": 100}
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, expected_output)
+        _Documento.investigacoes.em_curso.assert_called_once_with(
+            1, [3, 494]
+        )
+        manager_mock.count.assert_called_once_with()
+
+
+class PIPSuaMesaPICsTest(NoJWTTestCase, NoCacheTestCase, TestCase):
+    @mock.patch("dominio.pip.views.Documento")
+    def test_pip_suamesa_pics(self, _Documento):
+        manager_mock = mock.MagicMock()
+        manager_mock.count.return_value = 100
+        _Documento.investigacoes.em_curso.return_value = manager_mock
+
+        orgao_id = "1"
+        url = reverse("dominio:pip-suamesa-pics", args=(orgao_id,))
+        resp = self.client.get(url)
+
+        expected_output = {"pip_nr_pics": 100}
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, expected_output)
+        _Documento.investigacoes.em_curso.assert_called_once_with(
+            1, [590]
+        )
+        manager_mock.count.assert_called_once_with()
+
+
 class TestPIPRadarPerformance(NoJWTTestCase, NoCacheTestCase, TestCase):
     @mock.patch("dominio.pip.views.PIPRadarPerformanceDAO.get")
     def test_correct_response(self, _get_data):

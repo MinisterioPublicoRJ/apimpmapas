@@ -3,6 +3,8 @@ from django.urls import path
 from .views import (
     PIPDetalheAproveitamentosView,
     PIPInvestigacoesCursoAISP,
+    PIPSuaMesaInqueritosView,
+    PIPSuaMesaPICsView,
     PIPRadarPerformanceView,
     PIPVistasAbertasMensal,
     PIPPrincipaisInvestigadosView,
@@ -24,6 +26,16 @@ urlpatterns = [
         "aisp/investigacoes/<str:orgao_id>",
         PIPInvestigacoesCursoAISP.as_view(),
         name="pip-aisp-investigacoes",
+    ),
+    path(
+        "suamesa/inqueritos/<str:orgao_id>",
+        PIPSuaMesaInqueritosView.as_view(),
+        name="pip-suamesa-inqueritos",
+    ),
+    path(
+        "suamesa/pics/<str:orgao_id>",
+        PIPSuaMesaPICsView.as_view(),
+        name="pip-suamesa-pics",
     ),
     path(
         "radar-performance/<str:orgao_id>",

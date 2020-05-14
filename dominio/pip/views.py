@@ -125,6 +125,36 @@ class PIPInvestigacoesCursoAISP(JWTAuthMixin, CacheMixin, APIView):
         return Response(data=data)
 
 
+class PIPSuaMesaInqueritosView(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = "PIP_SUAMESAINQUERITOS_CACHE_TIMEOUT"
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+
+        doc_count = Documento.investigacoes.em_curso(
+            orgao_id, [3, 494]
+        ).count()
+
+        data = {"pip_nr_inqueritos": doc_count}
+
+        return Response(data=data)
+
+
+class PIPSuaMesaPICsView(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = "PIP_SUAMESAPICS_CACHE_TIMEOUT"
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+
+        doc_count = Documento.investigacoes.em_curso(
+            orgao_id, [590]
+        ).count()
+
+        data = {"pip_nr_pics": doc_count}
+
+        return Response(data=data)
+
+
 class PIPRadarPerformanceView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = "PIP_RADAR_PERFORMANCE_CACHE_TIMEOUT"
 
