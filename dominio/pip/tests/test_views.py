@@ -176,11 +176,11 @@ class TestPIPPrincipaisInvestigadosView(
             "dominio:pip-principais-investigados",
             args=("1234", "123")
         )
-        data = {"nm_personagem": "Nome Teste", "action": "qualquer"}
+        data = {"representante_dk": "123456", "action": "qualquer"}
         resp = self.client.post(url, data)
 
         _save_flags.assert_called_once_with(
-            "1234", "123", "Nome Teste", "qualquer"
+            "1234", "123", "123456", "qualquer"
         )
         assert resp.status_code == 200
         assert resp.data == {"data": 1}
@@ -194,7 +194,7 @@ class TestPIPPrincipaisInvestigadosView(
             "dominio:pip-principais-investigados",
             args=("1234", "123")
         )
-        data = {"is_pinned": True}
+        data = {"action": "qualquer"}
         with self.assertRaises(ValueError):
             resp = self.client.post(url, data)
 
@@ -210,9 +210,26 @@ class TestPIPPrincipaisInvestigadosView(
             "dominio:pip-principais-investigados",
             args=("1234", "123")
         )
-        data = {"nm_personagem": "Nome1"}
+        data = {"representante_dk": "123456"}
         with self.assertRaises(ValueError):
             resp = self.client.post(url, data)
 
             _save_flags.assert_not_called()
             assert resp.status_code == 200
+
+
+class TestPIPPrincipaisInvestigadosListaView(
+        NoJWTTestCase, NoCacheTestCase, TestCase):
+    @mock.patch("dominio.pip.views.PIPPrincipaisInvestigadosListaDAO.get")
+    def test_correct_response(self, _get_data):
+        _get_data.return_value = {"data": 1}
+
+        url = reverse(
+            "dominio:pip-principais-investigados-lista",
+            args=("12345",)
+        )
+        resp = self.client.get(url)
+
+        _get_data.assert_called_once_with(dk=12345)
+        assert resp.status_code == 200
+        assert resp.data == {"data": 1}

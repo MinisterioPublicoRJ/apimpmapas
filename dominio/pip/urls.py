@@ -8,6 +8,7 @@ from .views import (
     PIPRadarPerformanceView,
     PIPVistasAbertasMensalView,
     PIPPrincipaisInvestigadosView,
+    PIPPrincipaisInvestigadosListaView,
 )
 
 
@@ -46,5 +47,10 @@ urlpatterns = [
         "principais-investigados/<str:orgao_id>/<str:cpf>",
         PIPPrincipaisInvestigadosView.as_view(),
         name="pip-principais-investigados",
+    ),
+    path(
+        "principais-investigados-lista/<str:representante_dk>",
+        PIPPrincipaisInvestigadosListaView.as_view(),
+        name="pip-principais-investigados-lista",
     ),
 ]

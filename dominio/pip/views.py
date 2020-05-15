@@ -7,6 +7,7 @@ from dominio.pip.dao import (
     PIPDetalheAproveitamentosDAO,
     PIPRadarPerformanceDAO,
     PIPPrincipaisInvestigadosDAO,
+    PIPPrincipaisInvestigadosListaDAO,
 )
 from .utils import get_orgaos_same_aisps
 
@@ -123,15 +124,26 @@ class PIPPrincipaisInvestigadosView(
 
         # TODO: Verificar que o post foi feito pelo mesmo orgao
         action = request.POST.get("action")
-        nm_personagem = request.POST.get("nm_personagem")
+        representante_dk = request.POST.get("representante_dk")
 
         # Nome de personagem é necessário para a chave do HBase
-        if not nm_personagem:
-            raise ValueError("Campo 'nm_personagem' não foi dado!")
+        if not representante_dk:
+            raise ValueError("Campo 'representante_dk' não foi dado!")
         if not action:
             raise ValueError("Campo 'action' não foi dado!")
 
         data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(
-            orgao_id, cpf, nm_personagem, action)
+            orgao_id, cpf, representante_dk, action)
+
+        return Response(data)
+
+
+class PIPPrincipaisInvestigadosListaView(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = "PIP_PRINCIPAIS_INVESTIGADOS_LISTA_CACHE_TIMEOUT"
+
+    def get(self, request, *args, **kwargs):
+        representante_dk = int(kwargs.get("representante_dk"))
+
+        data = PIPPrincipaisInvestigadosListaDAO.get(dk=representante_dk)
 
         return Response(data)
