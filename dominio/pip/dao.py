@@ -4,8 +4,20 @@ from django.conf import settings
 
 from dominio.db_connectors import execute as impala_execute, get_hbase_table
 from dominio.exceptions import APIEmptyResultError
-from dominio.utils import format_text, hbase_encode_row, hbase_decode_row
-from dominio.pip.serializers import PIPPrincipaisInvestigadosSerializer
+from dominio.utils import (
+    format_text,
+    hbase_encode_row,
+    hbase_decode_row,
+    get_top_n_orderby_value_as_dict,
+    get_value_given_key,
+)
+from dominio.pip.serializers import (
+    PIPPrincipaisInvestigadosSerializer,
+    PIPDetalheAproveitamentosSerializer,
+    PIPPrincipaisInvestigadosListaSerializer,
+)
+
+from .utils import get_top_n_by_aisp, get_orgaos_same_aisps
 
 
 QUERIES_DIR = settings.BASE_DIR.child("dominio", "pip", "queries")
@@ -62,6 +74,69 @@ class PIPTaxaResolutividadeDAO(GenericDAO):
     @classmethod
     def serialize(cls, result_set):
         return {cls.column: result_set[0][0]}
+
+
+class PIPDetalheAproveitamentosDAO(GenericDAO):
+    query_file = "pip_detalhe_aproveitamentos.sql"
+    serializer = PIPDetalheAproveitamentosSerializer
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
+
+    @classmethod
+    @lru_cache(maxsize=None)
+    def query(cls):
+        return super().query()
+
+    @classmethod
+    def get(cls, **kwargs):
+        data = super().execute(**kwargs)
+        if not data:
+            raise APIEmptyResultError
+
+        orgao_id = kwargs['orgao_id']
+
+        aisps, orgaos_same_aisps = get_orgaos_same_aisps(orgao_id)
+        top_n_aisp = get_top_n_by_aisp(
+            orgaos_same_aisps,
+            data,
+            name_position=1,
+            value_position=2,
+            name_fieldname="nm_promotoria",
+            value_fieldname="nr_aproveitamentos_periodo",
+            n=3,
+        )
+        for row in top_n_aisp:
+            row['nm_promotoria'] = format_text(row['nm_promotoria'])
+
+        nr_aproveitamentos_periodo = get_value_given_key(
+            data, orgao_id, key_position=0, value_position=2
+        )
+        variacao_periodo = get_value_given_key(
+            data, orgao_id, key_position=0, value_position=4
+        )
+        tamanho_periodo_dias = get_value_given_key(
+            data, orgao_id, key_position=0, value_position=5
+        )
+        top_n_pacote = get_top_n_orderby_value_as_dict(
+            data,
+            name_position=1,
+            value_position=2,
+            name_fieldname="nm_promotoria",
+            value_fieldname="nr_aproveitamentos_periodo",
+            n=3,
+        )
+        for row in top_n_pacote:
+            row['nm_promotoria'] = format_text(row['nm_promotoria'])
+
+        data_obj = {
+            "nr_aproveitamentos_periodo": nr_aproveitamentos_periodo,
+            "variacao_periodo": variacao_periodo,
+            "top_n_pacote": top_n_pacote,
+            "nr_aisps": aisps,
+            "top_n_aisp": top_n_aisp,
+            "tamanho_periodo_dias": tamanho_periodo_dias,
+        }
+        data = cls.serializer(data_obj).data
+        return data
 
 
 class PIPRadarPerformanceDAO(GenericDAO):
@@ -125,8 +200,11 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
     query_file = "pip_principais_investigados.sql"
     columns = [
         "nm_investigado",
+        "representante_dk",
         "pip_codigo",
         "nr_investigacoes",
+        "flag_multipromotoria",
+        "flag_top50"
     ]
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
     serializer = PIPPrincipaisInvestigadosSerializer
@@ -143,7 +221,7 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
         hbase = get_hbase_table(cls.hbase_namespace + cls.hbase_table_name)
 
         data = {
-            drow[1]["identificacao:nm_personagem"]:
+            drow[1]["identificacao:representante_dk"]:
                 {
                     "is_pinned": (
                         drow[1]["flags:is_pinned"]
@@ -165,14 +243,14 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
         return data
 
     @classmethod
-    def save_hbase_flags(cls, orgao_id, cpf, nm_personagem, action):
-        row_key = orgao_id + cpf + nm_personagem
+    def save_hbase_flags(cls, orgao_id, cpf, representante_dk, action):
+        row_key = orgao_id + cpf + representante_dk
         hbase = get_hbase_table(cls.hbase_namespace + cls.hbase_table_name)
 
         data = {
             "identificacao:orgao_id": orgao_id,
             "identificacao:cpf": cpf,
-            "identificacao:nm_personagem": nm_personagem
+            "identificacao:representante_dk": representante_dk
         }
         row = (row_key, data)
 
@@ -196,17 +274,17 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
 
         # Flags e dados precisam estar juntos para o front
         for row in data:
-            investigado = row["nm_investigado"]
+            investigado_dk = row["representante_dk"]
             row["is_pinned"] = (
-                hbase_flags[investigado]["is_pinned"]
-                if investigado in hbase_flags
-                and "is_pinned" in hbase_flags[investigado]
+                hbase_flags[investigado_dk]["is_pinned"]
+                if investigado_dk in hbase_flags
+                and "is_pinned" in hbase_flags[investigado_dk]
                 else False
             )
             row["is_removed"] = (
-                hbase_flags[investigado]["is_removed"]
-                if investigado in hbase_flags
-                and "is_removed" in hbase_flags[investigado]
+                hbase_flags[investigado_dk]["is_removed"]
+                if investigado_dk in hbase_flags
+                and "is_removed" in hbase_flags[investigado_dk]
                 else False
             )
 
@@ -237,3 +315,36 @@ class PIPRankingDenunciasDAO(GenericDAO):
             "others": {"count": others_count, "perc": others_count / total},
         }
         return agg_data
+
+
+class PIPPrincipaisInvestigadosListaDAO(GenericDAO):
+    query_file = "pip_principais_investigados_lista.sql"
+    columns = [
+        "representante_dk",
+        "orgao_id",
+        "documento_nr_mp",
+        "documento_dt_cadastro",
+        "documento_classe",
+        "nm_orgao",
+        "etiqueta",
+        "assuntos",
+    ]
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
+    serializer = PIPPrincipaisInvestigadosListaSerializer
+
+    @classmethod
+    def serialize(cls, result_set):
+        # Assuntos vem separados por ' --- ' no banco
+        result_set = [
+            row[:-1] + tuple([row[-1].split(' --- ')])
+            if isinstance(row[-1], str)
+            else row
+            for row in result_set
+        ]
+
+        ser_data = super().serialize(result_set)
+        for row in ser_data:
+            nm_orgao = row['nm_orgao']
+            row['nm_orgao'] = format_text(nm_orgao)
+
+        return ser_data

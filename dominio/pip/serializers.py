@@ -16,5 +16,19 @@ class PIPDetalheAproveitamentosSerializer(serializers.Serializer):
 
 class PIPPrincipaisInvestigadosSerializer(serializers.Serializer):
     nm_investigado = serializers.CharField()
+    representante_dk = serializers.IntegerField()
     pip_codigo = serializers.IntegerField()
     nr_investigacoes = serializers.IntegerField(min_value=0)
+    flag_multipromotoria = serializers.BooleanField()
+    flag_top50 = serializers.BooleanField()
+
+
+class PIPPrincipaisInvestigadosListaSerializer(serializers.Serializer):
+    representante_dk = serializers.IntegerField()
+    orgao_id = serializers.IntegerField()
+    documento_nr_mp = serializers.CharField()
+    documento_dt_cadastro = serializers.DateTimeField()
+    documento_classe = serializers.CharField()
+    nm_orgao = serializers.CharField()
+    etiqueta = serializers.CharField()
+    assuntos = serializers.ListField(serializers.CharField())

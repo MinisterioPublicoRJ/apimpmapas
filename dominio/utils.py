@@ -19,14 +19,15 @@ def format_text(text):
 
 
 def get_top_n_orderby_value_as_dict(
-        l, name_position=1, value_position=2, name_fieldname='nm_promotoria',
-        value_fieldname='valor', n=3, cast_f=float):
+        data, name_position=1, value_position=2,
+        name_fieldname='nm_promotoria', value_fieldname='valor',
+        n=3, cast_f=float):
     """Ordena uma lista de tuplas utilizando uma posição escolhida,
     e retorna os top N maiores em um formato de lista de dicionários
     com um campo de nome e um campo de valor.
 
     Arguments:
-        l {list} -- Lista de dados.
+        data {list} -- Lista de dados.
         name_position {int} --Posição da tupla onde está o nome da promotoria.
         value_position {int} -- Posição da tupla onde está o valor usado
             para ordenação.
@@ -45,7 +46,7 @@ def get_top_n_orderby_value_as_dict(
         List[dict] -- Lista de dicionários contendo os Top N em ordem.
     """
     sorted_list = sorted(
-        l,
+        data,
         key=lambda el: cast_f(el[value_position]),
         reverse=True)
     result_list = [
@@ -58,7 +59,7 @@ def get_top_n_orderby_value_as_dict(
     return result_list[:n]
 
 
-def get_value_given_key(l, key_value, key_position, value_position):
+def get_value_given_key(data, key_value, key_position, value_position):
     """Busca o valor associada a uma chave, em uma lista de tuplas.
 
     Arguments:
@@ -70,7 +71,7 @@ def get_value_given_key(l, key_value, key_position, value_position):
     Returns:
         value -- Valor presente na lista, referente à chave dada.
     """
-    for element in l:
+    for element in data:
         if element[key_position] == key_value:
             return element[value_position]
     return None

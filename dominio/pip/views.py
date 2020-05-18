@@ -1,95 +1,30 @@
-from functools import lru_cache
-
-from django.conf import settings
-from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from dominio.db_connectors import run_query
 from dominio.mixins import CacheMixin, JWTAuthMixin, PaginatorMixin
 from dominio.models import Vista, Documento
-from dominio.utils import get_top_n_orderby_value_as_dict, get_value_given_key
 from dominio.pip.dao import (
+    PIPDetalheAproveitamentosDAO,
     PIPRadarPerformanceDAO,
     PIPRankingDenunciasDAO,
     PIPPrincipaisInvestigadosDAO,
+    PIPPrincipaisInvestigadosListaDAO,
     PIPTaxaResolutividadeDAO,
 )
-from dominio.pip.serializers import PIPDetalheAproveitamentosSerializer
-from dominio.pip.utils import get_top_n_by_aisp, get_orgaos_same_aisps
+from dominio.pip.utils import get_orgaos_same_aisps
 
 
 class PIPDetalheAproveitamentosView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = "PIP_DETALHEAPROVEITAMENTOS_CACHE_TIMEOUT"
 
-    @staticmethod
-    @lru_cache()
-    def get_numero_aproveitamentos_pips():
-        query = """
-            SELECT
-                orgao_id,
-                nm_orgao,
-                nr_aproveitamentos_periodo_atual,
-                nr_aproveitamentos_periodo_anterior,
-                variacao_periodo,
-                tamanho_periodo_dias
-            FROM {namespace}.tb_pip_detalhe_aproveitamentos
-        """.format(
-            namespace=settings.TABLE_NAMESPACE
-        )
-        return run_query(query)
-
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs["orgao_id"])
 
-        data = self.get_numero_aproveitamentos_pips()
-
-        if not data:
-            raise Http404
-
-        aisps, orgaos_same_aisps = get_orgaos_same_aisps(orgao_id)
-        top_n_aisp = get_top_n_by_aisp(
-            orgaos_same_aisps,
-            data,
-            name_position=1,
-            value_position=2,
-            name_fieldname="nm_promotoria",
-            value_fieldname="nr_aproveitamentos_periodo",
-            n=3,
-        )
-
-        nr_aproveitamentos_periodo = get_value_given_key(
-            data, orgao_id, key_position=0, value_position=2
-        )
-        variacao_periodo = get_value_given_key(
-            data, orgao_id, key_position=0, value_position=4
-        )
-        tamanho_periodo_dias = get_value_given_key(
-            data, orgao_id, key_position=0, value_position=5
-        )
-        top_n_pacote = get_top_n_orderby_value_as_dict(
-            data,
-            name_position=1,
-            value_position=2,
-            name_fieldname="nm_promotoria",
-            value_fieldname="nr_aproveitamentos_periodo",
-            n=3,
-        )
-
-        data_obj = {
-            "nr_aproveitamentos_periodo": nr_aproveitamentos_periodo,
-            "variacao_periodo": variacao_periodo,
-            "top_n_pacote": top_n_pacote,
-            "nr_aisps": aisps,
-            "top_n_aisp": top_n_aisp,
-            "tamanho_periodo_dias": tamanho_periodo_dias,
-        }
-
-        data = PIPDetalheAproveitamentosSerializer(data_obj).data
+        data = PIPDetalheAproveitamentosDAO.get(orgao_id=orgao_id)
         return Response(data)
 
 
-class PIPVistasAbertasMensal(JWTAuthMixin, CacheMixin, APIView):
+class PIPVistasAbertasMensalView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = "PIP_VISTASABERTASMENSAL_CACHE_TIMEOUT"
 
     def get(self, request, *args, **kwargs):
@@ -110,8 +45,8 @@ class PIPVistasAbertasMensal(JWTAuthMixin, CacheMixin, APIView):
         return Response(data=data)
 
 
-class PIPInvestigacoesCursoAISP(JWTAuthMixin, CacheMixin, APIView):
-    cache_config = "PIP_INVESTIGACOESCURSOAISP_CACHE_TIMEOUT"
+class PIPSuaMesaInvestigacoesAISPView(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = "PIP_SUAMESAINVESTIGACOESAISP_CACHE_TIMEOUT"
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
@@ -135,7 +70,35 @@ class PIPIndicadoresDeSucessoView(JWTAuthMixin, CacheMixin, APIView):
         resolutividade = PIPTaxaResolutividadeDAO.get(orgao_id=orgao_id)
         ranking = PIPRankingDenunciasDAO.get(orgao_id=orgao_id)
         data = {**resolutividade, **ranking}
+        return Response(data=data)
 
+
+class PIPSuaMesaInqueritosView(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = "PIP_SUAMESAINQUERITOS_CACHE_TIMEOUT"
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+
+        doc_count = Documento.investigacoes.em_curso(
+            orgao_id, [3, 494]
+        ).count()
+
+        data = {"pip_nr_inqueritos": doc_count}
+
+        return Response(data=data)
+
+
+class PIPSuaMesaPICsView(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = "PIP_SUAMESAPICS_CACHE_TIMEOUT"
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+
+        doc_count = Documento.investigacoes.em_curso(
+            orgao_id, [590]
+        ).count()
+
+        data = {"pip_nr_pics": doc_count}
 
         return Response(data=data)
 
@@ -174,15 +137,26 @@ class PIPPrincipaisInvestigadosView(
 
         # TODO: Verificar que o post foi feito pelo mesmo orgao
         action = request.POST.get("action")
-        nm_personagem = request.POST.get("nm_personagem")
+        representante_dk = request.POST.get("representante_dk")
 
         # Nome de personagem é necessário para a chave do HBase
-        if not nm_personagem:
-            raise ValueError("Campo 'nm_personagem' não foi dado!")
+        if not representante_dk:
+            raise ValueError("Campo 'representante_dk' não foi dado!")
         if not action:
             raise ValueError("Campo 'action' não foi dado!")
 
         data = PIPPrincipaisInvestigadosDAO.save_hbase_flags(
-            orgao_id, cpf, nm_personagem, action)
+            orgao_id, cpf, representante_dk, action)
+
+        return Response(data)
+
+
+class PIPPrincipaisInvestigadosListaView(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = "PIP_PRINCIPAIS_INVESTIGADOS_LISTA_CACHE_TIMEOUT"
+
+    def get(self, request, *args, **kwargs):
+        representante_dk = int(kwargs.get("representante_dk"))
+
+        data = PIPPrincipaisInvestigadosListaDAO.get(dk=representante_dk)
 
         return Response(data)

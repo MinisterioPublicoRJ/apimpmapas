@@ -3,10 +3,13 @@ from django.urls import path
 from .views import (
     PIPDetalheAproveitamentosView,
     PIPIndicadoresDeSucessoView,
-    PIPInvestigacoesCursoAISP,
+    PIPSuaMesaInvestigacoesAISPView,
+    PIPSuaMesaInqueritosView,
+    PIPSuaMesaPICsView,
     PIPRadarPerformanceView,
-    PIPVistasAbertasMensal,
+    PIPVistasAbertasMensalView,
     PIPPrincipaisInvestigadosView,
+    PIPPrincipaisInvestigadosListaView,
 )
 
 
@@ -18,13 +21,23 @@ urlpatterns = [
     ),
     path(
         "aberturas-mensal/<str:orgao_id>/<str:cpf>",
-        PIPVistasAbertasMensal.as_view(),
+        PIPVistasAbertasMensalView.as_view(),
         name="pip-aberturas-mensal",
     ),
     path(
-        "aisp/investigacoes/<str:orgao_id>",
-        PIPInvestigacoesCursoAISP.as_view(),
-        name="pip-aisp-investigacoes",
+        "suamesa/investigacoes-aisp/<str:orgao_id>",
+        PIPSuaMesaInvestigacoesAISPView.as_view(),
+        name="pip-suamesa-investigacoes-aisp",
+    ),
+    path(
+        "suamesa/inqueritos/<str:orgao_id>",
+        PIPSuaMesaInqueritosView.as_view(),
+        name="pip-suamesa-inqueritos",
+    ),
+    path(
+        "suamesa/pics/<str:orgao_id>",
+        PIPSuaMesaPICsView.as_view(),
+        name="pip-suamesa-pics",
     ),
     path(
         "radar-performance/<str:orgao_id>",
@@ -40,5 +53,10 @@ urlpatterns = [
         "taxa-resolutividade/<str:orgao_id>",
         PIPIndicadoresDeSucessoView.as_view(),
         name="pip-taxa-resolutividade",
-    )
+    ),
+    path(
+        "principais-investigados-lista/<str:representante_dk>",
+        PIPPrincipaisInvestigadosListaView.as_view(),
+        name="pip-principais-investigados-lista",
+    ),
 ]
