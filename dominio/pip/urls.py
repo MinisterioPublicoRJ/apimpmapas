@@ -50,9 +50,9 @@ urlpatterns = [
         name="pip-principais-investigados",
     ),
     path(
-        "taxa-resolutividade/<str:orgao_id>",
+        "indicadores-sucesso/<str:orgao_id>",
         PIPIndicadoresDeSucessoView.as_view(),
-        name="pip-taxa-resolutividade",
+        name="pip-indicadores-sucesso",
     ),
     path(
         "principais-investigados-lista/<str:representante_dk>",

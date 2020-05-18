@@ -106,7 +106,7 @@ class TestPIPIndicadoresSucesso(NoJWTTestCase, NoCacheTestCase, TestCase):
         _PIPRankingDenuncias.get.return_value = {"ranking": 1}
 
         orgao_id = "12345"
-        url = reverse("dominio:pip-taxa-resolutividade", args=(orgao_id,))
+        url = reverse("dominio:pip-indicadores-sucesso", args=(orgao_id,))
         resp = self.client.get(url)
         expected = {"data": 1, "ranking": 1}
 
