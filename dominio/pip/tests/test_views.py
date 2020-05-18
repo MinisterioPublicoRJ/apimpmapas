@@ -165,16 +165,19 @@ class PIPInvestigacoesCursoAISPTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
 
 class TestPIPIndicadoresSucesso(NoJWTTestCase, NoCacheTestCase, TestCase):
+    @mock.patch("dominio.pip.views.PIPRankingDenunciasDAO")
     @mock.patch("dominio.pip.views.PIPTaxaResolutividadeDAO")
-    def test_correct_response(self, _PIPTaxaResolutividade):
+    def test_correct_response(self, _PIPTaxaResolutividade, _PIPRankingDenuncias):
         _PIPTaxaResolutividade.get.return_value = {"data": 1}
+        _PIPRankingDenuncias.get.return_value = {"ranking": 1}
 
         orgao_id = "12345"
         url = reverse("dominio:pip-taxa-resolutividade", args=(orgao_id,))
         resp = self.client.get(url)
+        expected = {"data": 1, "ranking": 1}
 
         assert resp.status_code == 200
-        assert resp.data == {"data": 1}
+        assert resp.data == expected
 
 
 class TestPIPRadarPerformance(NoJWTTestCase, NoCacheTestCase, TestCase):

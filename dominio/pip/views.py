@@ -11,6 +11,7 @@ from dominio.models import Vista, Documento
 from dominio.utils import get_top_n_orderby_value_as_dict, get_value_given_key
 from dominio.pip.dao import (
     PIPRadarPerformanceDAO,
+    PIPRankingDenunciasDAO,
     PIPPrincipaisInvestigadosDAO,
     PIPTaxaResolutividadeDAO,
 )
@@ -131,7 +132,10 @@ class PIPIndicadoresDeSucessoView(JWTAuthMixin, CacheMixin, APIView):
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
-        data = PIPTaxaResolutividadeDAO.get(orgao_id=orgao_id)
+        resolutividade = PIPTaxaResolutividadeDAO.get(orgao_id=orgao_id)
+        ranking = PIPRankingDenunciasDAO.get(orgao_id=orgao_id)
+        data = {**resolutividade, **ranking}
+
 
         return Response(data=data)
 
