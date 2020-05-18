@@ -647,3 +647,27 @@ Vary: Accept
     },
 ]
 ```
+
+### Indicadores de Sucesso da PIP
+```
+GET /dominio/pip/indicadores-sucesso/<str:orgao_id>
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{'taxa_resolutivdade': 0.42857142857142855,
+ 'ranking': [{'assunto': 'Roubo',
+   'count': 10,
+   'total': 72,
+   'perc': 0.1388888888888889},
+  {'assunto': 'Roubo Majorado', 'count': 9, 'total': 72, 'perc': 0.125},
+  {'assunto': 'Estelionato',
+   'count': 6,
+   'total': 72,
+   'perc': 0.08333333333333333}],
+ 'others': {'count': 47, 'perc': 0.6527777777777778}}
+```
