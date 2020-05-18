@@ -220,3 +220,20 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
         )
 
         return data
+
+
+class PIPRankingDenunciasDAO(GenericDAO):
+    query_file = "pip_ranking_denuncias.sql"
+    columns = ["assunto", "count", "total", "perc"]
+    table_namespaces = {"schema": settings.EXADATA_NAMESPACE}
+
+    @classmethod
+    def get(cls, orgao_id):
+        data = super().get(orgao_id=orgao_id)
+        total = data[0]["total"]
+        others_count = total - sum([row["count"] for row in data])
+        agg_data = {
+            "ranking": data,
+            "others": {"count": others_count, "perc": others_count / total},
+        }
+        return agg_data
