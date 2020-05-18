@@ -175,7 +175,7 @@ class TestPIPIndicadoresSucesso(NoJWTTestCase, NoCacheTestCase, TestCase):
 
         assert resp.status_code == 200
         assert resp.data == {"data": 1}
-        
+
 
 class TestPIPRadarPerformance(NoJWTTestCase, NoCacheTestCase, TestCase):
     @mock.patch("dominio.pip.views.PIPRadarPerformanceDAO.get")

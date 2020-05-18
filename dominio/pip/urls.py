@@ -2,8 +2,8 @@ from django.urls import path
 
 from .views import (
     PIPDetalheAproveitamentosView,
+    PIPIndicadoresDeSucessoView,
     PIPInvestigacoesCursoAISP,
-    PIPTaxaResolutividadeView,
     PIPRadarPerformanceView,
     PIPVistasAbertasMensal,
     PIPPrincipaisInvestigadosView,
@@ -38,7 +38,7 @@ urlpatterns = [
     ),
     path(
         "taxa-resolutividade/<str:orgao_id>",
-        PIPTaxaResolutividadeView.as_view(),
+        PIPIndicadoresDeSucessoView.as_view(),
         name="pip-taxa-resolutividade",
     )
 ]

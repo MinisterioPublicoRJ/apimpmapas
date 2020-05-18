@@ -126,8 +126,8 @@ class PIPInvestigacoesCursoAISP(JWTAuthMixin, CacheMixin, APIView):
         return Response(data=data)
 
 
-class PIPTaxaResolutividadeView(JWTAuthMixin, CacheMixin, APIView):
-    cache_config = "PIP_RESOLUTIVIDADE_CACHE_TIMEOUT"
+class PIPIndicadoresDeSucessoView(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = "PIP_INDICADORES_SUCESSO_CACHE_TIMEOUT"
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))

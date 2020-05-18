@@ -372,8 +372,10 @@ class TestPIPIndicadoresSucesso:
         with open(QUERIES_DIR.child("pip_taxa_resolutividade.sql")) as fobj:
             query = fobj.read()
 
+        cls = PIPTaxaResolutividadeDAO
+        query = query.format(schema=cls.table_namespaces["schema"])
         orgao_id = "12345"
-        PIPTaxaResolutividadeDAO.execute(orgao_id=orgao_id)
+        cls.execute(orgao_id=orgao_id)
 
         _impala_execute.assert_called_once_with(
             query, {"orgao_id": orgao_id}
@@ -387,6 +389,9 @@ class TestPIPIndicadoresSucesso:
         assert ser_data == expected
 
     @mock.patch.object(PIPTaxaResolutividadeDAO, "execute")
-    @mock.patch.object(PIPTaxaResolutividadeDAO, "serialize")
-    def test_get_data(self, _serialize, _execute):
-        result_set = [(0.133)]
+    def test_get_data(self, _execute):
+        _execute.return_value = [(0.133,)]
+
+        data = PIPTaxaResolutividadeDAO.get()
+
+        assert data == {"taxa_resolutivdade": 0.133}

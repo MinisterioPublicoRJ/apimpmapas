@@ -54,22 +54,16 @@ class GenericDAO:
         return cls.serialize(result_set)
 
 
-class PIPTaxaResolutividadeDAO:
+class PIPTaxaResolutividadeDAO(GenericDAO):
     query_file = "pip_taxa_resolutividade.sql"
     column = "taxa_resolutivdade"
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
 
     @classmethod
     def serialize(cls, result_set):
         return {cls.column: result_set[0][0]}
 
-    @classmethod
-    def execute(cls, **kwargs):
-        with open(QUERIES_DIR.child(cls.query_file)) as fobj:
-            query = fobj.read()
 
-        return impala_execute(query, kwargs)
-
-    
 class PIPRadarPerformanceDAO(GenericDAO):
     query_file = "pip_radar_performance.sql"
     columns = [
