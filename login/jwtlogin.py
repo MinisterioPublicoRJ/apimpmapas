@@ -14,8 +14,17 @@ def get_jwt_from_get(request):
 
 def tipo_orgao(nome_orgao):
     nome_orgao = nome_orgao.lower()
-    return int("tutela" in nome_orgao
-               and not ("idoso" in nome_orgao or "infância" in nome_orgao))
+    if "investigação penal" in nome_orgao:
+        orgao = 2
+    elif (
+        "tutela" in nome_orgao
+        and not ("idoso" in nome_orgao or "infância" in nome_orgao)
+    ):
+        orgao = 1
+    else:
+        orgao = 0
+
+    return orgao
 
 
 def unpack_jwt(request):
