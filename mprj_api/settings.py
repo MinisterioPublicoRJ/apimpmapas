@@ -15,6 +15,7 @@ from decouple import config, Csv
 from dj_database_url import parse as db_url
 from unipath import Path
 
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).parent.parent
 
 # Quick-start development settings - unsuitable for production
@@ -106,6 +107,7 @@ DATABASES = {
 }
 
 TABLE_NAMESPACE = config('TABLE_NAMESPACE')
+EXADATA_NAMESPACE = config("EXADATA_NAMESPACE")
 IMPALA_HOST = config('IMPALA_HOST')
 IMPALA_PORT = config('IMPALA_PORT', cast=int)
 

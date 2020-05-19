@@ -97,6 +97,23 @@ class PIPInvestigacoesCursoAISPTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         manager_mock.count.assert_called_once_with()
 
 
+class TestPIPIndicadoresSucesso(NoJWTTestCase, NoCacheTestCase, TestCase):
+    @mock.patch("dominio.pip.views.PIPRankingDenunciasDAO")
+    @mock.patch("dominio.pip.views.PIPTaxaResolutividadeDAO")
+    def test_correct_response(
+            self, _PIPTaxaResolutividade, _PIPRankingDenuncias):
+        _PIPTaxaResolutividade.get.return_value = {"data": 1}
+        _PIPRankingDenuncias.get.return_value = {"ranking": 1}
+
+        orgao_id = "12345"
+        url = reverse("dominio:pip-indicadores-sucesso", args=(orgao_id,))
+        resp = self.client.get(url)
+        expected = {"data": 1, "ranking": 1}
+
+        assert resp.status_code == 200
+        assert resp.data == expected
+
+
 class PIPSuaMesaInqueritosTest(NoJWTTestCase, NoCacheTestCase, TestCase):
     @mock.patch("dominio.pip.views.Documento")
     def test_pip_suamesa_inqueritos(self, _Documento):

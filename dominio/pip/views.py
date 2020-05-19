@@ -6,10 +6,12 @@ from dominio.models import Vista, Documento
 from dominio.pip.dao import (
     PIPDetalheAproveitamentosDAO,
     PIPRadarPerformanceDAO,
+    PIPRankingDenunciasDAO,
     PIPPrincipaisInvestigadosDAO,
     PIPPrincipaisInvestigadosListaDAO,
+    PIPTaxaResolutividadeDAO,
 )
-from .utils import get_orgaos_same_aisps
+from dominio.pip.utils import get_orgaos_same_aisps
 
 
 class PIPDetalheAproveitamentosView(JWTAuthMixin, CacheMixin, APIView):
@@ -57,6 +59,17 @@ class PIPSuaMesaInvestigacoesAISPView(JWTAuthMixin, CacheMixin, APIView):
 
         data = {"aisp_nr_investigacoes": doc_count}
 
+        return Response(data=data)
+
+
+class PIPIndicadoresDeSucessoView(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = "PIP_INDICADORES_SUCESSO_CACHE_TIMEOUT"
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+        resolutividade = PIPTaxaResolutividadeDAO.get(orgao_id=orgao_id)
+        ranking = PIPRankingDenunciasDAO.get(orgao_id=orgao_id)
+        data = {**resolutividade, **ranking}
         return Response(data=data)
 
 
