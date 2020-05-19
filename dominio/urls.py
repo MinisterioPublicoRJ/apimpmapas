@@ -7,5 +7,6 @@ urlpatterns = [
     path('token/', include("dominio.login.urls")),
     path("alertas/", include("dominio.alertas.urls")),
     path("pip/", include("dominio.pip.urls")),
+    path("suamesa_teste/", include("dominio.suamesa.urls")),
     path("", include("dominio.tutela.urls")),
 ]
