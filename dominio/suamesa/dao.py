@@ -31,7 +31,7 @@ class SuaMesaDAO:
         'pip_inqueritos': get_pip_inqueritos,
         'pip_pics': get_pip_pics,
         'pip_aisp': get_pip_aisp,
-        'finalizados': get_finalizados
+        'tutela_finalizados': get_finalizados
     }
 
     @classmethod
