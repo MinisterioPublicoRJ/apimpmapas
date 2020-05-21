@@ -131,8 +131,35 @@ Vary: Accept
 
 ## Sua Mesa
 
-### Vistas Abertas
+### Sua Mesa Integrado
+```
+GET /dominio/suamesa/documentos/<str:orgao_id>?tipo=tipo_de_dado&cpf=1234
 
+CPF é opcional, dependendo do tipo de dado requisitado (ver lista abaixo).
+
+Tipos aceitos:
+- vistas: Vistas abertas para um órgão e CPF. (cpf obrigatório)
+- tutela_investigacoes: Número de investigações em curso de uma tutela.
+- tutela_processos: Número de processos em juízo de uma tutela.
+- tutela_finalizados: Número de documentos finalizados nos últimos 30 dias em uma tutela.
+- pip_inqueritos: Número de inquéritos ativos em uma PIP.
+- pip_pics: Número de PICs ativas em uma PIP.
+- pip_aisp: Número de inquéritos e PICs ativos na AISP de uma PIP.
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "nr_documentos": 1
+}
+```
+
+### Vistas Abertas
+(Será substituído pelo Sua Mesa Integrado!)
 ```
 GET /dominio/suamesa/vistas/<id_orgao>/<cpf>
 ```
@@ -149,7 +176,7 @@ Vary: Accept
 ```
 
 ### Investigações em curso
-
+(Será substituído pelo Sua Mesa Integrado!)
 ```
 GET /dominio/suamesa/investigacoes/<id_orgao>
 ```
@@ -166,7 +193,7 @@ Vary: Accept
 ```
 
 ### Processos em juízo
-
+(Será substituído pelo Sua Mesa Integrado!)
 ```
 GET /dominio/suamesa/processos/<id_orgao>
 ```
@@ -183,7 +210,7 @@ Vary: Accept
 ```
 
 ### Finalizados nos últimos 30 dias
-
+(Será substituído pelo Sua Mesa Integrado!)
 ```
 GET /dominio/suamesa/finalizados/<id_orgao>
 ```
@@ -496,8 +523,9 @@ Vary: Accept
 ```
 
 ### Numero de Investigações AISP da PIP
+(Será substituído pelo Sua Mesa Integrado!)
 ```
-GET /dominio/pip/aisp/investigacoes/<str:orgao_id>
+GET /dominio/pip/suamesa/investigacoes-aisp/<str:orgao_id>
 ```
 
 ```
@@ -508,6 +536,40 @@ Vary: Accept
 
 {
     "aisp_nr_investigacoes": 34
+}
+```
+
+### Numero de Inquéritos da PIP
+(Será substituído pelo Sua Mesa Integrado!)
+```
+GET /dominio/pip/suamesa/inqueritos/<str:orgao_id>
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "pip_nr_inqueritos": 34
+}
+```
+
+### Numero de PICs da PIP
+(Será substituído pelo Sua Mesa Integrado!)
+```
+GET /dominio/pip/suamesa/pics/<str:orgao_id>
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "pip_nr_pics": 34
 }
 ```
 
