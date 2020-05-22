@@ -102,3 +102,39 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, alertas_expected)
+
+
+class AlertaResumoTest(NoJWTTestCase, NoCacheTestCase, TestCase):
+
+    @mock.patch('dominio.alertas.views.Alerta')
+    def test_alert_resumo(self, _Alerta):
+        orgao_id = '0000000'
+
+        alertas_return = [
+            {
+                'sigla': 'mock',
+                'descricao': 'mock',
+                'orgao': int(orgao_id),
+                'count': 10
+            },
+        ]
+
+        alertas_expected = [
+            {
+                'sigla': 'mock',
+                'descricao': 'mock',
+                'orgao': 0,
+                'count': 10
+            }
+        ]
+
+        _Alerta.resumo_por_orgao.return_value = alertas_return
+
+        url = reverse(
+            'dominio:resumo_alertas',
+            args=(orgao_id,)
+        )
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, alertas_expected)
