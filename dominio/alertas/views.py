@@ -7,7 +7,8 @@ from dominio.models import Alerta
 from .serializers import AlertasListaSerializer
 
 
-class AlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
+#class AlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
+class AlertasView(CacheMixin, PaginatorMixin, APIView):
     cache_config = 'ALERTAS_CACHE_TIMEOUT'
     # TODO: Mover constante para um lugar decente
     ALERTAS_SIZE = 25
@@ -15,8 +16,9 @@ class AlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
         page = int(request.GET.get("page", 1))
+        tipo_alerta = request.GET.get("tipo_alerta", None)
 
-        data = Alerta.validos_por_orgao(orgao_id)
+        data = Alerta.validos_por_orgao(orgao_id, tipo_alerta)
         page_data = self.paginate(
             data,
             page=page,
