@@ -73,7 +73,7 @@ def get_pip_aisp(orgao_id, request):
     ).count()
 
 
-def get_finalizados(orgao_id, request):
+def get_tutela_finalizados(orgao_id, request):
     """
     Busca o número de documentos finalizados nos últimos 30 dias, ou seja, que
     tiveram algum dos movimentos finalizadores definidos nesta função.
@@ -91,6 +91,18 @@ def get_finalizados(orgao_id, request):
     regras = regras_saidas + regras_arquiv
     return SubAndamento.finalizados.trinta_dias(
         orgao_id, regras)\
+        .values('andamento__vista__documento__docu_dk')\
+        .distinct()\
+        .count()
+
+
+def get_pip_finalizados(orgao_id, request):
+    regras_arquiv = (6682,6669,6018,6341,6338,6019,6017,6591,6339,7871,
+                     6343,6340,6342,7745,6346,7915,6272,6253,6392,6377,
+                     6378,6359,6362,6361,6436,6524,7737,7811,6625,6718)
+
+    return SubAndamento.finalizados.trinta_dias(
+        orgao_id, regras_arquiv)\
         .values('andamento__vista__documento__docu_dk')\
         .distinct()\
         .count()

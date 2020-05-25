@@ -19,7 +19,8 @@ from dominio.suamesa.dao_functions import (
     get_pip_inqueritos,
     get_pip_pics,
     get_pip_aisp,
-    get_finalizados
+    get_tutela_finalizados,
+    get_pip_finalizados,
 )
 
 
@@ -31,7 +32,8 @@ class SuaMesaDAO:
         'pip_inqueritos': get_pip_inqueritos,
         'pip_pics': get_pip_pics,
         'pip_aisp': get_pip_aisp,
-        'tutela_finalizados': get_finalizados
+        'tutela_finalizados': get_tutela_finalizados,
+        'pip_finalizados': get_pip_finalizados
     }
 
     @classmethod
