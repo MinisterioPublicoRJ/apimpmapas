@@ -13,3 +13,10 @@ class AlertasListaSerializer(serializers.Serializer):
     orgao = serializers.IntegerField()
     classe_hier = serializers.CharField()
     dias_passados = serializers.IntegerField()
+
+
+class AlertasResumoSerializer(serializers.Serializer):
+    sigla = serializers.CharField()
+    descricao = serializers.CharField()
+    orgao = serializers.IntegerField()
+    count = serializers.IntegerField()

@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from dominio.mixins import CacheMixin, PaginatorMixin, JWTAuthMixin
 from dominio.models import Alerta
 
-from .serializers import AlertasListaSerializer
+from .serializers import AlertasListaSerializer, AlertasResumoSerializer
 
 
 class AlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
@@ -15,14 +15,26 @@ class AlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
         page = int(request.GET.get("page", 1))
+        tipo_alerta = request.GET.get("tipo_alerta", None)
 
-        data = Alerta.validos_por_orgao(orgao_id)
+        data = Alerta.validos_por_orgao(orgao_id, tipo_alerta)
         page_data = self.paginate(
             data,
             page=page,
             page_size=self.ALERTAS_SIZE
         )
-
         alertas_lista = AlertasListaSerializer(page_data, many=True)
 
         return Response(data=alertas_lista.data)
+
+
+class ResumoAlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
+    cache_config = 'ALERTAS_CACHE_TIMEOUT'
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+
+        data = Alerta.resumo_por_orgao(orgao_id)
+        alertas_resumo = AlertasResumoSerializer(data, many=True)
+
+        return Response(data=alertas_resumo.data)
