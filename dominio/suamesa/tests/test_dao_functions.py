@@ -174,9 +174,10 @@ class TestSuaMesaFunctions(NoJWTTestCase, NoCacheTestCase, TestCase):
 
     @mock.patch('dominio.suamesa.dao_functions.SubAndamento')
     def test_get_pip_finalizados(self, _SubAndamento):
-        regras_arquiv = (6682,6669,6018,6341,6338,6019,6017,6591,6339,7871,
-                         6343,6340,6342,7745,6346,7915,6272,6253,6392,6377,
-                         6378,6359,6362,6361,6436,6524,7737,7811,6625,6718)
+        regras_arquiv = (6682, 6669, 6018, 6341, 6338, 6019, 6017, 6591, 6339,
+                         7871, 6343, 6340, 6342, 7745, 6346, 7915, 6272, 6253,
+                         6392, 6377, 6378, 6359, 6362, 6361, 6436, 6524, 7737,
+                         7811, 6625, 6718)
 
         manager_mock = mock.MagicMock()
         values_mock = mock.MagicMock()
