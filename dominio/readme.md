@@ -373,6 +373,11 @@ Vary: Accept
 ```
 GET /dominio/alertas/<id_orgao>
 ```
+a requisição aceita uma `querystring` opicional que diz o tipo de alerta desejado:
+
+```
+GET /dominio/alertas/<id_orgao>?tipo_alerta=MVVD
+```
 
 ```
 [
@@ -402,6 +407,29 @@ GET /dominio/alertas/<id_orgao>
         "classe_hier": "CLASSE|HIERARQUIA",
         "dias_passados": -1
     }
+]
+```
+
+## Resumo dos Alertas
+
+```
+GET /dominio/alertas/list/<id_orgao>
+```
+
+```
+[
+ {
+    'sigla': 'SIGLA 1',
+    'descricao': 'DESC 1',
+    'orgao': 0,
+    'count': 10
+ },
+  {
+    'sigla': 'SIGLA 2',
+    'descricao': 'DESC 2',
+    'orgao': 1,
+    'count': 12
+ },
 ]
 ```
 
