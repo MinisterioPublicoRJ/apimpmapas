@@ -153,6 +153,10 @@ class Andamento(models.Model):
     pcao_dt_andamento = models.DateField(
         db_column="PCAO_DT_ANDAMENTO"
     )
+    pcao_dt_cancelamento = models.DateField(
+        null=True,
+        db_column='PCAO_DT_CANCELAMENTO'
+    )
 
     vista = models.ForeignKey(
         "Vista",
@@ -187,7 +191,7 @@ class SubAndamento(models.Model):
 
 
 class Alerta:
-    query = """
+    query_base = """
         WITH last_session AS (
             SELECT dt_partition
             from {schema}.mmps_alerta_sessao s1
@@ -203,13 +207,58 @@ class Alerta:
         AND alrt.alrt_orgi_orga_dk = :orgao_id
     """.format(schema=settings.TABLE_NAMESPACE)
 
+    query_tipo = """
+            WITH last_session AS (
+                SELECT dt_partition
+                from {schema}.mmps_alerta_sessao s1
+            join (
+                SELECT max(alrt_session_finish) as alrt_session_finish
+                from {schema}.mmps_alerta_sessao
+                 ) s2 on s1.alrt_session_finish = s2.alrt_session_finish
+            )
+            SELECT *
+            FROM {schema}.mmps_alertas alrt
+            where alrt.dt_partition in
+                (select dt_partition FROM last_session)
+                AND alrt.alrt_orgi_orga_dk = :orgao_id
+                AND alrt.alrt_sigla = :tipo_alerta
+    """.format(schema=settings.TABLE_NAMESPACE)
+
+    query_resumo = """
+        WITH last_session AS (
+            SELECT dt_partition
+            from {schema}.mmps_alerta_sessao s1
+            join (
+                SELECT max(alrt_session_finish) as alrt_session_finish
+                from {schema}.mmps_alerta_sessao
+            ) s2 on s1.alrt_session_finish = s2.alrt_session_finish
+        )
+        SELECT
+            alrt.alrt_sigla,
+            alrt.alrt_descricao,
+            alrt.alrt_orgi_orga_dk,
+            count(alrt.alrt_sigla) as "count"
+        FROM {schema}.mmps_alertas alrt
+        WHERE alrt.dt_partition in
+            (select dt_partition FROM last_session)
+            AND alrt.alrt_orgi_orga_dk = :orgao_id
+        GROUP BY
+            alrt.alrt_sigla,
+            alrt.alrt_descricao,
+            alrt.alrt_orgi_orga_dk
+    """.format(schema=settings.TABLE_NAMESPACE)
+
     @classmethod
-    def validos_por_orgao(cls, orgao_id):
+    def validos_por_orgao(cls, orgao_id, tipo_alerta=None):
         parameters = {
             'orgao_id': orgao_id,
         }
-
-        data = run_query(cls.query, parameters)
+        if tipo_alerta:
+            parameters['tipo_alerta'] = tipo_alerta
+            query = cls.query_tipo
+        else:
+            query = cls.query_base
+        data = run_query(query, parameters) or []
 
         dataset = []
         for row in data:
@@ -225,6 +274,26 @@ class Alerta:
                 'dias_passados': row[8],
                 'descricao': row[9],
                 'sigla': row[10],
+            }
+            dataset.append(dict_row)
+
+        return dataset
+
+    @classmethod
+    def resumo_por_orgao(cls, orgao_id):
+        parameters = {
+            'orgao_id': orgao_id,
+        }
+
+        data = run_query(cls.query_resumo, parameters) or []
+
+        dataset = []
+        for row in data:
+            dict_row = {
+                'sigla': row[0],
+                'descricao': row[1],
+                'orgao': row[2],
+                'count': row[3],
             }
             dataset.append(dict_row)
 

@@ -71,34 +71,3 @@ class DetalheProcessosJuizoSerializer(serializers.Serializer):
     nr_acoes_propostas_60_dias = serializers.IntegerField(min_value=0)
     variacao_12_meses = serializers.FloatField()
     top_n = AcoesPromotoriaSerializer(many=True)
-
-
-class AlertasListaSerializer(serializers.Serializer):
-    sigla = serializers.CharField()
-    descricao = serializers.CharField()
-    doc_dk = serializers.IntegerField()
-    num_doc = serializers.CharField()
-    num_ext = serializers.CharField()
-    etiqueta = serializers.CharField()
-    classe_doc = serializers.CharField()
-    data_alerta = serializers.DateTimeField()
-    orgao = serializers.IntegerField()
-    classe_hier = serializers.CharField()
-    dias_passados = serializers.IntegerField()
-
-
-# Ver como deixar isso mais bonito
-class AproveitamentosPIPSerializer(serializers.Serializer):
-    nm_promotoria = serializers.CharField()
-    nr_aproveitamentos_30_dias = serializers.IntegerField(min_value=0)
-
-
-class PIPDetalheAproveitamentosSerializer(serializers.Serializer):
-    class TopNByAISPSerializer(serializers.Serializer):
-        nr_aisp = serializers.IntegerField()
-        top_n = AproveitamentosPIPSerializer(many=True)
-
-    nr_aproveitamentos_30_dias = serializers.IntegerField(min_value=0)
-    variacao_1_mes = serializers.FloatField()
-    top_n_pacote = AproveitamentosPIPSerializer(many=True)
-    top_n_by_aisp = TopNByAISPSerializer(many=True)

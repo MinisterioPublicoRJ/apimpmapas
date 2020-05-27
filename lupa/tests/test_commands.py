@@ -219,7 +219,7 @@ class TestCheckConsistency(TestCase):
             )
 
         _ptst.assert_called_once_with(
-            f'Dado: Bairro id=3 - ',
+            'Dado: Bairro id=3 - ',
             end=' '
         )
 

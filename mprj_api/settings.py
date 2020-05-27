@@ -13,11 +13,10 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 from decouple import config, Csv
 from dj_database_url import parse as db_url
-from datetime import datetime
+from unipath import Path
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+BASE_DIR = Path(__file__).parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -55,6 +54,7 @@ INSTALLED_APPS = [
     'mprj_plus',
     'nested_admin',
     'desaparecidos',
+    'proxies',
 ]
 
 MIDDLEWARE = [
@@ -96,17 +96,18 @@ WSGI_APPLICATION = 'mprj_api.wsgi.application'
 DATABASES = {
     'default': config(
         'DATABASE_URL',
-        default='sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3'),
+        default='sqlite:///' + BASE_DIR.child('db.sqlite3'),
         cast=db_url
     ),
     'dominio_db': config(
         'DOMINIO_DB',
-        default='sqlite:///' + os.path.join(BASE_DIR, 'dominio.sqlite3'),
+        default='sqlite:///' + BASE_DIR.child('dominio.sqlite3'),
         cast=db_url
     )
 }
 
 TABLE_NAMESPACE = config('TABLE_NAMESPACE')
+EXADATA_NAMESPACE = config("EXADATA_NAMESPACE")
 IMPALA_HOST = config('IMPALA_HOST')
 IMPALA_PORT = config('IMPALA_PORT', cast=int)
 
@@ -164,7 +165,7 @@ STATIC_URL = config(
 )
 STATIC_ROOT = config(
     'STATIC_ROOT',
-    default=os.path.join(BASE_DIR, 'static')
+    default=BASE_DIR.child('static')
 )
 
 MEDIA_URL = config(
@@ -173,7 +174,7 @@ MEDIA_URL = config(
 )
 MEDIA_ROOT = config(
     'MEDIA_ROOT',
-    default=os.path.join(BASE_DIR, 'media')
+    default=BASE_DIR.child('media')
 )
 
 # CORS configuration
@@ -187,9 +188,12 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 # CACHE Configuration
+CACHE_BACKEND = config(
+    "CACHE_BACKEND", default='django.core.cache.backends.locmem.LocMemCache'
+)
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        'BACKEND': CACHE_BACKEND,
         'LOCATION': config(
             'CACHE_LOCATION',
             default='localhost:6379'
@@ -204,4 +208,58 @@ CACHES = {
 }
 CACHE_TIMEOUT = config("CACHE_TIMEOUT", default=300, cast=int)
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} - {pathname}:{funcName} --> {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': config("DJANGO_LOG_LEVEL", default="INFO"),
+        },
+        'proxies': {
+            'level': config("PROXIES_LOG_LEVEL", default="INFO"),
+            'formatter': 'verbose',
+            'handlers': ['console'],
+            'propagate': True,
+        },
+    },
+}
+
+
+
+
 JWT_SECRET = SECRET_KEY
+
+#HBASE
+HBASE_SERVER = config("HBASE_SERVER")
+HBASE_TIMEOUT = config("HBASE_TIMEOUT", cast=int, default=300000)
+EXADATA_DETRAN_PHOTO_ORIGIN = config("EXADATA_DETRAN_PHOTO_ORIGIN")
+
+EXADATA_DETRAN_DATA_ORIGIN = config("EXADATA_DETRAN_DATA_ORIGIN")
+
+# SIMPLE AUTH
+SIMPLE_AUTH_TOKEN = config("SIMPLE_AUTH_TOKEN")
+
+# DETRAN
+DETRAN_CNPJ = config("DETRAN_CNPJ")
+DETRAN_CHAVE = config("DETRAN_CHAVE")
+DETRAN_PERFIL = config("DETRAN_PERFIL")
+DETRAN_CPF = config("DETRAN_CPF")
+DETRAN_URL_ENVIO = config("DETRAN_URL_ENVIO")
+DETRAN_URL_BUSCA = config("DETRAN_URL_BUSCA")
+
+PROMOTRON_HBASE_SERVER = config("PROMOTRON_HBASE_SERVER")
+PROMOTRON_HBASE_NAMESPACE = config("PROMOTRON_HBASE_NAMESPACE")
+PROMOTRON_HBASE_TIMEOUT = config("PROMOTRON_HBASE_TIMEOUT", cast=int, default=300000)
