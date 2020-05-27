@@ -6,7 +6,6 @@ from django.test import TestCase
 from django.urls import reverse
 
 from dominio.tutela.views import DetalheProcessosJuizoView
-
 from dominio.tests.testconf import NoJWTTestCase, NoCacheTestCase
 
 
@@ -431,8 +430,8 @@ class ListaProcessosViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
 
 class TestTempoTramitacao(NoJWTTestCase, TestCase):
-    @mock.patch('dominio.tutela.views.run_query')
-    def test_correct_response(self, _run_query):
+    @mock.patch('dominio.tutela.dao.TempoTramitacaoDAO.get')
+    def test_correct_response(self, _get_data):
         expected = {
             "id_orgao": 12345,
             "media_orgao": 10.1243,
@@ -460,9 +459,30 @@ class TestTempoTramitacao(NoJWTTestCase, TestCase):
             "maximo_orgao_t2": 1324,
             "mediana_orgao_t2": 2242.3232
         }
-        _run_query.return_value = [expected.values()]
+        _get_data.return_value = expected
         url = reverse("dominio:tempo-tramitacao", args=("1234", ))
         resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, expected)
+
+    @mock.patch('dominio.tutela.dao.TempoTramitacaoIntegradoDAO.get')
+    def test_correct_response_v11(self, _get_data):
+        expected = {
+            "id_orgao": 1234,
+            "tp_tempo": 'tipo',
+            "media_orgao": 12.34,
+            "minimo_orgao": 12.34,
+            "maximo_orgao": 12.34,
+            "mediana_orgao": 12.34,
+            "media_pacote": 12.34,
+            "minimo_pacote": 12.34,
+            "maximo_pacote": 12.34,
+            "mediana_pacote": 12.34
+        }
+        _get_data.return_value = expected
+        url = reverse("dominio:tempo-tramitacao", args=("1234", ))
+        resp = self.client.get(url, data={'version': '1.1'})
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, expected)
