@@ -17,6 +17,7 @@ gunicorn==19.9.0
 happybase==1.2.0
 impyla
 newrelic==5.4.0.132
+pymongo==3.10.1
 psycopg2-binary
 pyjwt
 python-decouple
