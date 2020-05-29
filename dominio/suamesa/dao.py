@@ -12,28 +12,19 @@ from dominio.suamesa.exceptions import (
     APIInvalidSuaMesaType,
     APIMissingSuaMesaType,
 )
-from dominio.suamesa.dao_functions import (
-    get_vistas,
-    get_tutela_investigacoes,
-    get_tutela_processos,
-    get_pip_inqueritos,
-    get_pip_pics,
-    get_pip_aisp,
-    get_tutela_finalizados,
-    get_pip_finalizados,
-)
+from dominio.suamesa import dao_functions
 
 
 class SuaMesaDAO:
     _type_switcher = {
-        'vistas': get_vistas,
-        'tutela_investigacoes': get_tutela_investigacoes,
-        'tutela_processos': get_tutela_processos,
-        'pip_inqueritos': get_pip_inqueritos,
-        'pip_pics': get_pip_pics,
-        'pip_aisp': get_pip_aisp,
-        'tutela_finalizados': get_tutela_finalizados,
-        'pip_finalizados': get_pip_finalizados
+        'vistas': dao_functions.get_vistas,
+        'tutela_investigacoes': dao_functions.get_tutela_investigacoes,
+        'tutela_processos': dao_functions.get_tutela_processos,
+        'pip_inqueritos': dao_functions.get_pip_inqueritos,
+        'pip_pics': dao_functions.get_pip_pics,
+        'pip_aisp': dao_functions.get_pip_aisp,
+        'tutela_finalizados': dao_functions.get_tutela_finalizados,
+        'pip_finalizados': dao_functions.get_pip_finalizados
     }
 
     @classmethod
