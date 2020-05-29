@@ -11,7 +11,7 @@ login_logger = logging.getLogger(__name__)
 def authenticate_integra(request):
     token_part = get_jwt_from_post(request)
     payload = jwt.decode(token_part, verify=False)
-    login_logger.error(
+    login_logger.info(
         f"Login efetuado pelo órgão ->"
         f" {payload['scaUser'].get('nomeOrgaoUsuario', '-')}"
         f" : {payload['scaUser'].get('nomeOrgao', '-')}"
