@@ -13,9 +13,9 @@ def authenticate_integra(request):
     payload = jwt.decode(token_part, verify=False)
     login_logger.error(
         f"Login efetuado pelo órgão ->"
-        f" {payload['scaUser']['nomeOrgaoUsuario']}"
-        f" : {payload['scaUser']['nomeOrgao']}"
-        f" : {payload['scaUser']['orgaoUsuario']}"
+        f" {payload['scaUser'].get('nomeOrgaoUsuario', '-')}"
+        f" : {payload['scaUser'].get('nomeOrgao', '-')}"
+        f" : {payload['scaUser'].get('orgaoUsuario', '-')}"
     )
 
     user_name = payload['user_name']
