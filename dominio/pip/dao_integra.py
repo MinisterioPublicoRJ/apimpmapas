@@ -15,11 +15,15 @@ class GenericMongoDAO:
     @classmethod
     def get(cls, query):
         collection = cls.db_connect()
-        return collection.aggregate(query)
+        return collection.find(query)
 
 
 class PIPRankingDenunciasIntegraDAO(GenericMongoDAO):
     uri = settings.MONGO_INTEGRA_URI
     collection_name = settings.MONGO_INTEGRA_DB
 
-    pass
+    @classmethod
+    def get_assuntos_orgao(cls, orgao_id):
+        query = {'controleMP.movimentos.0.idOrgao': orgao_id}
+        collection = cls.get(query)
+        return list(collection)
