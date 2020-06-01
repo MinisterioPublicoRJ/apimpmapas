@@ -275,6 +275,7 @@ class EntradasView(JWTAuthMixin, CacheMixin, APIView):
         return Response(data)
 
 
+# Será substituído pelo dominio.suamesa.views.SuaMesaView
 class SuaMesaVistasAbertas(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAMESAVISTAS_CACHE_TIMEOUT'
 
@@ -287,6 +288,7 @@ class SuaMesaVistasAbertas(JWTAuthMixin, CacheMixin, APIView):
         return Response(data={"suamesa_vistas": doc_count})
 
 
+# Será substituído pelo dominio.suamesa.views.SuaMesaView
 class SuaMesaInvestigacoes(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAMESAINVESTIGACOES_CACHE_TIMEOUT'
 
@@ -303,6 +305,7 @@ class SuaMesaInvestigacoes(JWTAuthMixin, CacheMixin, APIView):
         return Response(data={"suamesa_investigacoes": doc_count})
 
 
+# Será substituído pelo dominio.suamesa.views.SuaMesaView
 class SuaMesaProcessos(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAMESAPROCESSOS_CACHE_TIMEOUT'
 
@@ -316,6 +319,7 @@ class SuaMesaProcessos(JWTAuthMixin, CacheMixin, APIView):
         return Response(data={"suamesa_processos": doc_count})
 
 
+# Será substituído pelo dominio.suamesa.views.SuaMesaView
 class SuaMesaFinalizados(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAMESAFINALIZADOS_CACHE_TIMEOUT'
 

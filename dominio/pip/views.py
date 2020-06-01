@@ -45,6 +45,7 @@ class PIPVistasAbertasMensalView(JWTAuthMixin, CacheMixin, APIView):
         return Response(data=data)
 
 
+# Será substituído pelo dominio.suamesa.views.SuaMesaView
 class PIPSuaMesaInvestigacoesAISPView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = "PIP_SUAMESAINVESTIGACOESAISP_CACHE_TIMEOUT"
 
@@ -73,6 +74,7 @@ class PIPIndicadoresDeSucessoView(JWTAuthMixin, CacheMixin, APIView):
         return Response(data=data)
 
 
+# Será substituído pelo dominio.suamesa.views.SuaMesaView
 class PIPSuaMesaInqueritosView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = "PIP_SUAMESAINQUERITOS_CACHE_TIMEOUT"
 
@@ -88,6 +90,7 @@ class PIPSuaMesaInqueritosView(JWTAuthMixin, CacheMixin, APIView):
         return Response(data=data)
 
 
+# Será substituído pelo dominio.suamesa.views.SuaMesaView
 class PIPSuaMesaPICsView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = "PIP_SUAMESAPICS_CACHE_TIMEOUT"
 
