@@ -15,10 +15,10 @@ class GenericMongoDAO:
 
 
     @classmethod
-    def get(cls, query):
+    def get(cls, query, projection=None):
         db = cls.db_connect()
         collection = db[cls.collection_name]
-        return collection.find(query)
+        return collection.find(query, projection)
 
 
 class PIPRankingDenunciasIntegraDAO(GenericMongoDAO):
@@ -29,5 +29,6 @@ class PIPRankingDenunciasIntegraDAO(GenericMongoDAO):
     @classmethod
     def get_assuntos_orgao(cls, orgao_id):
         query = {'controleMP.movimentos.0.idOrgao': orgao_id}
-        collection = cls.get(query)
+        projection = {'ocorrencias.idTipoDelito': 1}
+        collection = cls.get(query, projection)
         return list(collection)
