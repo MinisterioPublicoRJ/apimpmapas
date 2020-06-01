@@ -19,7 +19,7 @@ class GenericMongoDAO:
         return collection.find(query, projection)
 
     @classmethod
-    def group(cls, group, match=None, unwind=None):
+    def group(cls, group, match=None, unwind=None, sort=None):
         collection = cls.db_connect()
         clauses = []
         if match:
@@ -27,6 +27,8 @@ class GenericMongoDAO:
         if unwind:
             clauses.append({'$unwind': unwind})
         clauses.append({'$group': group})
+        if sort:
+            clauses.append({'$sort': sort})
         return collection.aggregate(clauses)
 
 
@@ -43,5 +45,8 @@ class PIPRankingDenunciasIntegraDAO(GenericMongoDAO):
             '_id': '$ocorrencias.idTipoDelito',
             'qtd': {'$sum': 1}
         }
-        collection = cls.group(match=match, unwind=unwind, group=group)
+        sort = {'qtd': -1}
+        collection = cls.group(
+            match=match, unwind=unwind, group=group, sort=sort
+        )
         return list(collection)
