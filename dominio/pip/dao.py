@@ -2,7 +2,7 @@ from functools import lru_cache
 
 from django.conf import settings
 
-from dominio.db_connectors import execute as impala_execute, get_hbase_table
+from dominio.db_connectors import get_hbase_table
 from dominio.exceptions import APIEmptyResultError
 from dominio.utils import (
     format_text,
@@ -18,55 +18,14 @@ from dominio.pip.serializers import (
 )
 
 from .utils import get_top_n_by_aisp, get_orgaos_same_aisps
+from dominio.dao import GenericDAO
 
 
-QUERIES_DIR = settings.BASE_DIR.child("dominio", "pip", "queries")
+class GenericPIPDAO(GenericDAO):
+    QUERIES_DIR = settings.BASE_DIR.child("dominio", "pip", "queries")
 
 
-class GenericDAO:
-    """Classe que implementa métodos genéricos de execução de query no
-    impala a partir de um arquivo, e posterior serialização.
-
-    Atributos:
-    - query_file (str): Nome do arquivo .sql contendo a query a executar.
-    - columns (list): Lista de nome das colunas a usar na serialização.
-    - serializer (Serializer): Serializador a ser utilizado (opcional).
-    - table_namespaces (dict): Define os schemas a serem formatados na query.
-    """
-
-    query_file = ""
-    columns = []
-    serializer = None
-    table_namespaces = {}
-
-    @classmethod
-    def query(cls):
-        with open(QUERIES_DIR.child(cls.query_file)) as fobj:
-            query = fobj.read()
-
-        return query.format(**cls.table_namespaces)
-
-    @classmethod
-    def execute(cls, **kwargs):
-        return impala_execute(cls.query(), kwargs)
-
-    @classmethod
-    def serialize(cls, result_set):
-        ser_data = [dict(zip(cls.columns, row)) for row in result_set]
-        if cls.serializer:
-            ser_data = cls.serializer(ser_data, many=True).data
-        return ser_data
-
-    @classmethod
-    def get(cls, **kwargs):
-        result_set = cls.execute(**kwargs)
-        if not result_set:
-            raise APIEmptyResultError
-
-        return cls.serialize(result_set)
-
-
-class PIPTaxaResolutividadeDAO(GenericDAO):
+class PIPTaxaResolutividadeDAO(GenericPIPDAO):
     query_file = "pip_taxa_resolutividade.sql"
     column = "taxa_resolutivdade"
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
@@ -76,7 +35,7 @@ class PIPTaxaResolutividadeDAO(GenericDAO):
         return {cls.column: result_set[0][0]}
 
 
-class PIPDetalheAproveitamentosDAO(GenericDAO):
+class PIPDetalheAproveitamentosDAO(GenericPIPDAO):
     query_file = "pip_detalhe_aproveitamentos.sql"
     serializer = PIPDetalheAproveitamentosSerializer
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
@@ -139,7 +98,7 @@ class PIPDetalheAproveitamentosDAO(GenericDAO):
         return data
 
 
-class PIPRadarPerformanceDAO(GenericDAO):
+class PIPRadarPerformanceDAO(GenericPIPDAO):
     query_file = "pip_radar_performance.sql"
     columns = [
         "aisp_codigo",
@@ -194,7 +153,7 @@ class PIPRadarPerformanceDAO(GenericDAO):
         return ser_data
 
 
-class PIPPrincipaisInvestigadosDAO(GenericDAO):
+class PIPPrincipaisInvestigadosDAO(GenericPIPDAO):
     hbase_table_name = "pip_investigados_flags"
     hbase_namespace = settings.PROMOTRON_HBASE_NAMESPACE
     query_file = "pip_principais_investigados.sql"
@@ -300,7 +259,7 @@ class PIPPrincipaisInvestigadosDAO(GenericDAO):
         return data
 
 
-class PIPRankingDenunciasDAO(GenericDAO):
+class PIPRankingDenunciasDAO(GenericPIPDAO):
     query_file = "pip_ranking_denuncias.sql"
     columns = ["assunto", "count", "total", "perc"]
     table_namespaces = {"schema": settings.EXADATA_NAMESPACE}
@@ -317,7 +276,7 @@ class PIPRankingDenunciasDAO(GenericDAO):
         return agg_data
 
 
-class PIPPrincipaisInvestigadosListaDAO(GenericDAO):
+class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
     query_file = "pip_principais_investigados_lista.sql"
     columns = [
         "representante_dk",
