@@ -1,12 +1,22 @@
+import logging
 import jwt
 from django.conf import settings
 
 from login.jwtlogin import get_jwt_from_post, tipo_orgao
 
 
+login_logger = logging.getLogger(__name__)
+
+
 def authenticate_integra(request):
     token_part = get_jwt_from_post(request)
     payload = jwt.decode(token_part, verify=False)
+    login_logger.info(
+        f"Login efetuado pelo órgão ->"
+        f" {payload['scaUser'].get('nomeOrgaoUsuario', '-')}"
+        f" : {payload['scaUser'].get('nomeOrgao', '-')}"
+        f" : {payload['scaUser'].get('orgaoUsuario', '-')}"
+    )
 
     user_name = payload['user_name']
     cpf = payload['scaUser']['cpfUsuario']

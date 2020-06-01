@@ -24,6 +24,7 @@ from dominio.utils import (
     get_value_given_key,
     get_top_n_orderby_value_as_dict
 )
+from dominio.tutela.dao import TempoTramitacaoIntegradoDAO, TempoTramitacaoDAO
 
 
 class DetalheAcervoView(JWTAuthMixin, CacheMixin, APIView):
@@ -275,6 +276,7 @@ class EntradasView(JWTAuthMixin, CacheMixin, APIView):
         return Response(data)
 
 
+# Será substituído pelo dominio.suamesa.views.SuaMesaView
 class SuaMesaVistasAbertas(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAMESAVISTAS_CACHE_TIMEOUT'
 
@@ -287,6 +289,7 @@ class SuaMesaVistasAbertas(JWTAuthMixin, CacheMixin, APIView):
         return Response(data={"suamesa_vistas": doc_count})
 
 
+# Será substituído pelo dominio.suamesa.views.SuaMesaView
 class SuaMesaInvestigacoes(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAMESAINVESTIGACOES_CACHE_TIMEOUT'
 
@@ -303,6 +306,7 @@ class SuaMesaInvestigacoes(JWTAuthMixin, CacheMixin, APIView):
         return Response(data={"suamesa_investigacoes": doc_count})
 
 
+# Será substituído pelo dominio.suamesa.views.SuaMesaView
 class SuaMesaProcessos(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAMESAPROCESSOS_CACHE_TIMEOUT'
 
@@ -316,6 +320,7 @@ class SuaMesaProcessos(JWTAuthMixin, CacheMixin, APIView):
         return Response(data={"suamesa_processos": doc_count})
 
 
+# Será substituído pelo dominio.suamesa.views.SuaMesaView
 class SuaMesaFinalizados(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAMESAFINALIZADOS_CACHE_TIMEOUT'
 
@@ -449,53 +454,19 @@ class SuaMesaVistasListaView(
 
 class TempoTramitacaoView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'TEMPO_TRAMITACAO_CACHE_TIMEOUT'
-    fields = [
-        "id_orgao",
-        "media_orgao",
-        "minimo_orgao",
-        "maximo_orgao",
-        "mediana_orgao",
-        "media_pacote",
-        "minimo_pacote",
-        "maximo_pacote",
-        "mediana_pacote",
-        "media_pacote_t1",
-        "minimo_pacote_t1",
-        "maximo_pacote_t1",
-        "mediana_pacote_t1",
-        "media_orgao_t1",
-        "minimo_orgao_t1",
-        "maximo_orgao_t1",
-        "mediana_orgao_t1",
-        "media_pacote_t2",
-        "minimo_pacote_t2",
-        "maximo_pacote_t2",
-        "mediana_pacote_t2",
-        "media_orgao_t2",
-        "minimo_orgao_t2",
-        "maximo_orgao_t2",
-        "mediana_orgao_t2",
-    ]
-
-    def get_data(self, orgao_id):
-        query = """
-            SELECT * FROM {namespace}.tb_tempo_tramitacao
-            WHERE id_orgao = :orgao_id
-        """.format(namespace=settings.TABLE_NAMESPACE)
-        parameters = {"orgao_id": orgao_id}
-
-        return run_query(query, parameters)
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs['orgao_id'])
+        version = self.request.GET.get('version')
 
-        data = self.get_data(orgao_id)
+        if version == '1.1':
+            DAO = TempoTramitacaoIntegradoDAO
+        else:
+            DAO = TempoTramitacaoDAO
 
-        if not data:
-            raise Http404
+        data = DAO.get(orgao_id=orgao_id)
 
-        ser_data = dict(zip(self.fields, data[0]))
-        return Response(ser_data)
+        return Response(data)
 
 
 class DesarquivamentosView(JWTAuthMixin, CacheMixin, APIView):

@@ -104,7 +104,14 @@ class InvestigacoesManager(models.Manager):
             docu_orgi_orga_dk_responsavel__in=orgao_ids,
             docu_cldc_dk__in=[3, 494, 590],
             docu_fsdc_dk=1
-        )
+        ).exclude(docu_tpst_dk=11)
+
+    def em_curso_grupo(self, orgao_ids, regras):
+        return self.get_queryset().filter(
+            docu_orgi_orga_dk_responsavel__in=orgao_ids,
+            docu_cldc_dk__in=regras,
+            docu_fsdc_dk=1
+        ).exclude(docu_tpst_dk=11)
 
 
 class ProcessosManager(InvestigacoesManager):

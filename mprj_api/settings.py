@@ -222,6 +222,11 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR.child("dominio_login.log"),
+            'formatter': 'verbose',
+        },
     },
     'loggers': {
         'django': {
@@ -232,6 +237,12 @@ LOGGING = {
             'level': config("PROXIES_LOG_LEVEL", default="INFO"),
             'formatter': 'verbose',
             'handlers': ['console'],
+            'propagate': True,
+        },
+        'dominio.login': {
+            'level': config("DOMINIO_LOG_LEVEL", default="INFO"),
+            'formatter': 'verbose',
+            'handlers': ['console', 'file'],
             'propagate': True,
         },
     },
