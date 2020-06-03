@@ -334,7 +334,11 @@ Vary: Accept
 ## Tempo Tramitação
 
 ```
-GET /dominio/tempo-tramitacao/<id_orgao>
+GET /dominio/tempo-tramitacao/<id_orgao>?version=<str>
+
+'version' é um parâmetro opcional.
+Para usar a nova versão do tempo de tramitação, usar 'version=1.1'.
+Qualquer outro valor de version (ou sem version) irá usar a versão antiga.
 ```
 
 ```
