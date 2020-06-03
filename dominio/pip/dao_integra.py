@@ -49,4 +49,24 @@ class PIPRankingDenunciasIntegraDAO(GenericMongoDAO):
         collection = cls.group(
             match=match, unwind=unwind, group=group, sort=sort
         )
-        return list(collection)
+        assuntos = list(collection)
+
+        total = 0
+        for assunto in assuntos:
+            total += assunto['qtd']
+
+        mais_comuns = assuntos[:3]
+        prop_comum = 0.0
+        total_comum = 0
+        for assunto in mais_comuns:
+            proporcao = assunto['qtd']/total
+            prop_comum += proporcao
+            total_comum += assunto['qtd']
+            assunto['proporcao'] = proporcao
+
+        mais_comuns.append({
+            'qtd': total - total_comum,
+            'proporcao': 1.0 - prop_comum
+        })
+
+        return mais_comuns
