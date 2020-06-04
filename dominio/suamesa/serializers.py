@@ -18,3 +18,8 @@ class SuaMesaDetalheCPFSerializer(serializers.Serializer):
     variacao_nr_aberturas_vista = serializers.FloatField()
     variacao_nr_aproveitamentos = serializers.FloatField()
     variacao_nr_instaurados = serializers.FloatField()
+
+
+class SuaMesaDetalheTopNSerializer(serializers.Serializer):
+    nm_orgao = serializers.CharField()
+    valor = serializers.FloatField()

@@ -15,7 +15,7 @@ from dominio.suamesa.exceptions import (
     APIMissingSuaMesaType,
 )
 from dominio.suamesa import dao_functions
-from dominio.suamesa.serializers import SuaMesaDetalheCPFSerializer
+from dominio.suamesa.serializers import SuaMesaDetalheCPFSerializer, SuaMesaDetalheTopNSerializer
 from dominio.dao import GenericDAO
 
 
@@ -46,6 +46,22 @@ class SuaMesaDAO:
         if tipo not in cls._type_switcher:
             raise APIInvalidSuaMesaType
         return cls._type_switcher[tipo]
+
+
+class SuaMesaDetalheTopNDAO(GenericDAO):
+    QUERIES_DIR = settings.BASE_DIR.child("dominio", "suamesa", "queries")
+    query_file = "top_n_documento_orgao.sql"
+    columns = [
+        'nm_orgao',
+        'valor',
+    ]
+    serializer = SuaMesaDetalheTopNSerializer
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
+
+    # Not a class method so it wont change the class attribute!
+    def get(self, nm_campo, **kwargs):
+        self.table_namespaces['nm_campo'] = nm_campo
+        return super(SuaMesaDetalheTopNDAO, self).get(**kwargs)
 
 
 class SuaMesaDetalheCPFDAO(GenericDAO):
@@ -80,15 +96,54 @@ class SuaMesaDetalheCPFDAO(GenericDAO):
             'cpf': request.GET.get('cpf'),
         }
 
-        return super().get(**kwargs)
+        result_set = cls.execute(**kwargs)
+        return cls.serialize(result_set)
+
 
 
 class SuaMesaDetalhePIPInqueritoDAO(SuaMesaDetalheCPFDAO):
-    nome_tipo_tabela = 'pip_inqueritos'
+    @classmethod
+    def get(cls, orgao, request):
+        data = super().get(orgao, request)
+        data = data[0] if data else data
+
+        kwargs = {
+            'orgao_id': orgao,
+            'tipo_detalhe': request.GET.get('tipo'),
+            'n': request.GET.get('n', 3)
+        }
+
+        topn_dao = SuaMesaDetalheTopNDAO()
+        data_top_n = topn_dao.get('variacao_documentos_distintos', **kwargs)
+
+        result = {
+            'metrics': data,
+            'top_n': data_top_n,    
+        }
+
+        return result
 
 
 class SuaMesaDetalhePIPPICSDAO(SuaMesaDetalheCPFDAO):
-    nome_tipo_tabela = 'pip_pics'
+    @classmethod
+    def get(cls, orgao, request):
+        data = super().get(orgao, request)
+        data = data[0] if data else {}
+
+        kwargs = {
+            'orgao_id': orgao,
+            'tipo_detalhe': request.GET.get('tipo'),
+            'n': request.GET.get('n', 3)
+        }
+
+        # Problemas com APIEmptyResult - pode valer a pena fazer um hibrido CPF/Top N com lista de campos para fazer Top Ns
+        print('aqui')
+        topn_dao = SuaMesaDetalheTopNDAO()
+        data_top_n = topn_dao.get('variacao_documentos_distintos', **kwargs)
+        data['top_n'] = data_top_n
+        print('chegou')
+
+        return data
 
 
 class SuaMesaDetalheFactoryDAO(SuaMesaDAO):
