@@ -39,9 +39,13 @@ class GenericDAO:
         return ser_data
 
     @classmethod
-    def get(cls, **kwargs):
+    def get(cls, accept_empty=False, **kwargs):
         result_set = cls.execute(**kwargs)
-        if not result_set:
+        if not result_set and not accept_empty:
             raise APIEmptyResultError
 
         return cls.serialize(result_set)
+
+    @classmethod
+    def raise_empty_result_error(cls):
+        raise APIEmptyResultError
