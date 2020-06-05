@@ -15,8 +15,10 @@ from dominio.suamesa.exceptions import (
     APIMissingSuaMesaType,
 )
 from dominio.suamesa import dao_functions
-from dominio.suamesa.serializers import SuaMesaDetalheCPFSerializer, SuaMesaDetalheTopNSerializer
+from dominio.suamesa.serializers import SuaMesaDetalheCPFSerializer, SuaMesaDetalheTopNSerializer, SuaMesaDetalheOrgaoSerializer, SuaMesaDetalheAISPSerializer
 from dominio.dao import GenericDAO
+from dominio.db_connectors import execute as impala_execute
+from dominio.pip.utils import get_orgaos_same_aisps
 
 
 class SuaMesaDAO:
@@ -48,20 +50,42 @@ class SuaMesaDAO:
         return cls._type_switcher[tipo]
 
 
-class SuaMesaDetalheTopNDAO(GenericDAO):
+class SuaMesaDetalheOrgaoDAO(GenericDAO):
     QUERIES_DIR = settings.BASE_DIR.child("dominio", "suamesa", "queries")
-    query_file = "top_n_documento_orgao.sql"
+    query_file = "detalhe_documento_orgao.sql"
     columns = [
+        'tipo_detalhe',
+        'intervalo',
         'nm_orgao',
-        'valor',
+        'cod_pacote',
+        'orgao_id',
+        'nr_documentos_distintos_atual',
+        'nr_aberturas_vista_atual',
+        'nr_aproveitamentos_atual',
+        'nr_instaurados_atual',
+        'acervo_anterior',
+        'acervo_atual',
+        'variacao_acervo',
+        'nr_documentos_distintos_anterior',
+        'nr_aberturas_vista_anterior',
+        'nr_aproveitamentos_anterior',
+        'nr_instaurados_anterior',
+        'variacao_documentos_distintos',
+        'variacao_aberturas_vista',
+        'variacao_aproveitamentos',
+        'variacao_instaurados'
     ]
-    serializer = SuaMesaDetalheTopNSerializer
+    serializer = SuaMesaDetalheOrgaoSerializer
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
 
-    # Not a class method so it wont change the class attribute!
-    def get(self, nm_campo, **kwargs):
-        self.table_namespaces['nm_campo'] = nm_campo
-        return super(SuaMesaDetalheTopNDAO, self).get(**kwargs)
+    @classmethod
+    def get(cls, orgao_id, request, accept_empty=True):
+        kwargs = {
+            'orgao_id': orgao_id,
+            'tipo_detalhe': request.GET.get('tipo'),
+        }
+
+        return super().get(accept_empty, **kwargs)
 
 
 class SuaMesaDetalheCPFDAO(GenericDAO):
@@ -80,76 +104,130 @@ class SuaMesaDetalheCPFDAO(GenericDAO):
         'nr_aberturas_vista_anterior',
         'nr_aproveitamentos_anterior',
         'nr_instaurados_anterior',
-        'variacao_nr_documentos_distintos',
-        'variacao_nr_aberturas_vista',
-        'variacao_nr_aproveitamentos',
-        'variacao_nr_instaurados'
+        'variacao_documentos_distintos',
+        'variacao_aberturas_vista',
+        'variacao_aproveitamentos',
+        'variacao_instaurados'
     ]
     serializer = SuaMesaDetalheCPFSerializer
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
 
     @classmethod
-    def get(cls, orgao_id, request):
+    def get(cls, orgao_id, request, accept_empty=True):
         kwargs = {
             'orgao_id': orgao_id,
             'tipo_detalhe': request.GET.get('tipo'),
             'cpf': request.GET.get('cpf'),
         }
 
-        result_set = cls.execute(**kwargs)
-        return cls.serialize(result_set)
+        return super().get(accept_empty, **kwargs)
 
 
+class SuaMesaDetalheTopNDAO(GenericDAO):
+    QUERIES_DIR = settings.BASE_DIR.child("dominio", "suamesa", "queries")
+    query_file = "top_n_documento_orgao.sql"
+    columns = [
+        'nm_orgao',
+        'valor',
+    ]
+    serializer = SuaMesaDetalheTopNSerializer
+    table_namespaces = {
+        "schema": settings.TABLE_NAMESPACE,
+        "nm_campo": "{nm_campo}",
+    }
 
-class SuaMesaDetalhePIPInqueritoDAO(SuaMesaDetalheCPFDAO):
+    def __init__(self, ranking_fieldname):
+        self.ranking_fieldname = ranking_fieldname
+
+    def execute(self, **kwargs):
+        return impala_execute(super().query().format(nm_campo=self.ranking_fieldname), kwargs)
+
+    def get(self, accept_empty=False, **kwargs):
+        result_set = self.execute(**kwargs)
+        if not result_set and not accept_empty:
+            raise APIEmptyResultError
+
+        return super().serialize(result_set)
+
+
+class SuaMesaDetalheTopNAISPDAO(SuaMesaDetalheTopNDAO):
+    query_file = "top_n_documento_aisp.sql"
+
+
+class SuaMesaDetalheAggMixin:
+    ranking_fields = []
+    ranking_dao = SuaMesaDetalheTopNDAO
+
     @classmethod
-    def get(cls, orgao, request):
-        data = super().get(orgao, request)
-        data = data[0] if data else data
+    def get_metrics_data(cls, orgao, request, accept_empty=True):
+        data = super().get(orgao, request, accept_empty=accept_empty)
+        data = data[0] if data else {}
+        return data
 
+    @classmethod
+    def get_ranking_data(cls, orgao, request, accept_empty=True):
         kwargs = {
             'orgao_id': orgao,
             'tipo_detalhe': request.GET.get('tipo'),
             'n': request.GET.get('n', 3)
         }
 
-        topn_dao = SuaMesaDetalheTopNDAO()
-        data_top_n = topn_dao.get('variacao_documentos_distintos', **kwargs)
+        data = []
+
+        for fieldname in cls.ranking_fields:
+            ranking_dao = cls.ranking_dao(fieldname)
+            response = ranking_dao.get(accept_empty=True, **kwargs)
+            if response:
+                data.append({'ranking_fieldname': fieldname, 'data': response})
+        
+        return data
+
+    @classmethod
+    def get(cls, orgao, request):
+        metrics_data = cls.get_metrics_data(orgao, request)
+        ranking_data = cls.get_ranking_data(orgao, request)
+
+        if not metrics_data and not ranking_data:
+            cls.raise_empty_result_error()
 
         result = {
-            'metrics': data,
-            'top_n': data_top_n,    
+            'metrics': metrics_data,
+            'rankings': ranking_data,
+            'mapData': {},
         }
 
         return result
 
 
-class SuaMesaDetalhePIPPICSDAO(SuaMesaDetalheCPFDAO):
-    @classmethod
-    def get(cls, orgao, request):
-        data = super().get(orgao, request)
-        data = data[0] if data else {}
+class SuaMesaDetalhePIPInqueritoDAO(SuaMesaDetalheAggMixin, SuaMesaDetalheCPFDAO):
+    ranking_fields = ['variacao_documentos_distintos']
 
-        kwargs = {
-            'orgao_id': orgao,
-            'tipo_detalhe': request.GET.get('tipo'),
-            'n': request.GET.get('n', 3)
-        }
 
-        # Problemas com APIEmptyResult - pode valer a pena fazer um hibrido CPF/Top N com lista de campos para fazer Top Ns
-        print('aqui')
-        topn_dao = SuaMesaDetalheTopNDAO()
-        data_top_n = topn_dao.get('variacao_documentos_distintos', **kwargs)
-        data['top_n'] = data_top_n
-        print('chegou')
+class SuaMesaDetalhePIPPICSDAO(SuaMesaDetalheAggMixin, SuaMesaDetalheCPFDAO):
+    ranking_fields = ['nr_documentos_distintos_atual', 'nr_aproveitamentos_atual']
 
-        return data
+
+class SuaMesaDetalhePIPAISPDAO(SuaMesaDetalheAggMixin, SuaMesaDetalheOrgaoDAO):
+    query_file = "detalhe_documento_aisp.sql"
+    columns = [
+        'acervo_inicio',
+        'acervo_fim',
+        'variacao_acervo',
+        'aisp_nomes'
+    ]
+    serializer = SuaMesaDetalheAISPSerializer
+
+
+class SuaMesaDetalheTutelaInvestigacoesDAO(SuaMesaDetalheAggMixin, SuaMesaDetalheOrgaoDAO):
+    ranking_fields = ['variacao_acervo']
 
 
 class SuaMesaDetalheFactoryDAO(SuaMesaDAO):
     _type_switcher = {
         'pip_inqueritos': SuaMesaDetalhePIPInqueritoDAO,
         'pip_pics': SuaMesaDetalhePIPPICSDAO,
+        'pip_aisp': SuaMesaDetalhePIPAISPDAO,
+        'tutela_investigacoes': SuaMesaDetalheTutelaInvestigacoesDAO,
     }
 
     @classmethod
