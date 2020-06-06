@@ -216,6 +216,8 @@ class SuaMesaDetalhePIPAISPDAO(SuaMesaDetalheAggMixin, SuaMesaDetalheOrgaoDAO):
         'aisp_nomes'
     ]
     serializer = SuaMesaDetalheAISPSerializer
+    ranking_fields = ['acervo_fim']
+    ranking_dao = SuaMesaDetalheTopNAISPDAO
 
 
 class SuaMesaDetalheTutelaInvestigacoesDAO(SuaMesaDetalheAggMixin, SuaMesaDetalheOrgaoDAO):
