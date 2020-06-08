@@ -131,8 +131,36 @@ Vary: Accept
 
 ## Sua Mesa
 
-### Vistas Abertas
+### Sua Mesa Integrado
+```
+GET /dominio/suamesa/documentos/<str:orgao_id>?tipo=tipo_de_dado&cpf=1234
 
+CPF é opcional, dependendo do tipo de dado requisitado (ver lista abaixo).
+
+Tipos aceitos:
+- vistas: Vistas abertas para um órgão e CPF. (cpf obrigatório)
+- tutela_investigacoes: Número de investigações em curso de uma tutela.
+- tutela_processos: Número de processos em juízo de uma tutela.
+- tutela_finalizados: Número de documentos finalizados nos últimos 30 dias em uma tutela.
+- pip_inqueritos: Número de inquéritos ativos em uma PIP.
+- pip_pics: Número de PICs ativas em uma PIP.
+- pip_aisp: Número de inquéritos e PICs ativos na AISP de uma PIP.
+- pip_finalizados: Número de documentos finalizados nos últimos 30 dias para PIPs.
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "nr_documentos": 1
+}
+```
+
+### Vistas Abertas
+(Será substituído pelo Sua Mesa Integrado!)
 ```
 GET /dominio/suamesa/vistas/<id_orgao>/<cpf>
 ```
@@ -149,7 +177,7 @@ Vary: Accept
 ```
 
 ### Investigações em curso
-
+(Será substituído pelo Sua Mesa Integrado!)
 ```
 GET /dominio/suamesa/investigacoes/<id_orgao>
 ```
@@ -166,7 +194,7 @@ Vary: Accept
 ```
 
 ### Processos em juízo
-
+(Será substituído pelo Sua Mesa Integrado!)
 ```
 GET /dominio/suamesa/processos/<id_orgao>
 ```
@@ -183,7 +211,7 @@ Vary: Accept
 ```
 
 ### Finalizados nos últimos 30 dias
-
+(Será substituído pelo Sua Mesa Integrado!)
 ```
 GET /dominio/suamesa/finalizados/<id_orgao>
 ```
@@ -306,7 +334,11 @@ Vary: Accept
 ## Tempo Tramitação
 
 ```
-GET /dominio/tempo-tramitacao/<id_orgao>
+GET /dominio/tempo-tramitacao/<id_orgao>?version=<str>
+
+'version' é um parâmetro opcional.
+Para usar a nova versão do tempo de tramitação, usar 'version=1.1'.
+Qualquer outro valor de version (ou sem version) irá usar a versão antiga.
 ```
 
 ```
@@ -373,6 +405,11 @@ Vary: Accept
 ```
 GET /dominio/alertas/<id_orgao>
 ```
+a requisição aceita uma `querystring` opicional que diz o tipo de alerta desejado:
+
+```
+GET /dominio/alertas/<id_orgao>?tipo_alerta=MVVD
+```
 
 ```
 [
@@ -402,6 +439,29 @@ GET /dominio/alertas/<id_orgao>
         "classe_hier": "CLASSE|HIERARQUIA",
         "dias_passados": -1
     }
+]
+```
+
+## Resumo dos Alertas
+
+```
+GET /dominio/alertas/list/<id_orgao>
+```
+
+```
+[
+ {
+    'sigla': 'SIGLA 1',
+    'descricao': 'DESC 1',
+    'orgao': 0,
+    'count': 10
+ },
+  {
+    'sigla': 'SIGLA 2',
+    'descricao': 'DESC 2',
+    'orgao': 1,
+    'count': 12
+ },
 ]
 ```
 
@@ -445,4 +505,264 @@ Vary: Accept
         "url_tjrj": "http://www4.tjrj.jus.br/numeracaoUnica/faces/index.jsp?numProcesso=8765"
     }
 ]
+```
+
+## PIP
+
+### Aproveitamentos PIP
+```
+GET /dominio/pip/aproveitamentos/<str:orgao_id>
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+[
+  {
+    "nr_aproveitamentos_periodo": 10,
+    "variacao_periodo": 0.25,
+    "top_n_pacote": [
+        {"nm_promotoria": "Promotoria 1", "nr_aproveitamentos_periodo": 15},
+        {"nm_promotoria": "Promotoria 2", "nr_aproveitamentos_periodo": 8},
+    ],
+    "nr_aisps": [1, 5],
+    "top_n_aisp": [
+        {"nm_promotoria": "Promotoria 3", "nr_aproveitamentos_periodo": 10},
+        {"nm_promotoria": "Promotoria 2", "nr_aproveitamentos_periodo": 8},
+    ],
+    "tamanho_periodo_dias": 30,
+  }
+]
+```
+
+### Aberturas Mensais PIP
+```
+GET /dominio/pip/aberturas-mensal/<str:orgao_id>/<str:cpf>
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "nr_aberturas_30_dias": 15,
+    "nr_investigacoes_30_dias": 10
+}
+```
+
+### Numero de Investigações AISP da PIP
+(Será substituído pelo Sua Mesa Integrado!)
+```
+GET /dominio/pip/suamesa/investigacoes-aisp/<str:orgao_id>
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "aisp_nr_investigacoes": 34
+}
+```
+
+### Numero de Inquéritos da PIP
+(Será substituído pelo Sua Mesa Integrado!)
+```
+GET /dominio/pip/suamesa/inqueritos/<str:orgao_id>
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "pip_nr_inqueritos": 34
+}
+```
+
+### Numero de PICs da PIP
+(Será substituído pelo Sua Mesa Integrado!)
+```
+GET /dominio/pip/suamesa/pics/<str:orgao_id>
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "pip_nr_pics": 34
+}
+```
+
+### Radar de Performance PIP
+```
+GET /dominio/pip/radar-performance/<str:orgao_id>
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "aisp_codigo": 16,
+    "aisp_nome": "16",
+    "orgao_id": 29933850,
+    "nr_denuncias": 3,
+    "nr_cautelares": 2,
+    "nr_acordos_n_persecucao": 0,
+    "nr_arquivamentos": 0,
+    "nr_aberturas_vista": 12,
+    "max_aisp_denuncias": 15,
+    "max_aisp_cautelares": 6,
+    "max_aisp_acordos": 0,
+    "max_aisp_arquivamentos": 6,
+    "max_aisp_aberturas_vista": 486,
+    "perc_denuncias": 0.42857142857142855,
+    "perc_cautelares": 0.3333333333333333,
+    "perc_acordos": None,
+    "perc_arquivamentos": 0.0,
+    "perc_aberturas_vista": 0.030864197530864196,
+    "med_aisp_denuncias": 3.0,
+    "med_aisp_cautelares": 5.0,
+    "med_aisp_acordos": 0.0,
+    "med_aisp_arquivamentos": 0.0,
+    "med_aisp_aberturas_vista": 79.0,
+    "var_med_denuncias": 0.0,
+    "var_med_cautelares": -0.6,
+    "var_med_acordos": None,
+    "var_med_arquivamentos": None,
+    "var_med_aberturas_vista": -0.810126582278481,
+    "dt_calculo": datetime(2020, 4, 22, 13, 36, 6, 668000),
+    "nm_max_denuncias": "1ª Promotoria de Justiça",
+    "nm_max_cautelares": "2ª Promotoria de Justiça",
+    "nm_max_acordos": "3ª Promotoria de Justiça",
+    "nm_max_arquivamentos": "4ª Promotoria de Justiça",
+    "nm_max_abeturas_vista": "5ª Promotoria de Justiça",
+}
+```
+
+### Principais Investigados da PIP
+```
+GET /dominio/pip/principais-investigados/<str:orgao_id>/<str:cpf>?page=<int>
+
+page: default=1
+page_size (elementos por página): 20
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+[
+    {
+        "nm_investigado": "Nome2",
+        "representante_dk": "1278",
+        "pip_codigo": 1,
+        "nr_investigacoes": 5,
+        "flag_multipromotoria": True,
+        "flag_top50": None,
+        "is_pinned": True,
+        "is_removed": False
+    },
+    {
+        "nm_investigado": "Nome1",
+        "representante_dk": "1234",
+        "pip_codigo": 1,
+        "nr_investigacoes": 10,
+        "flag_multipromotoria": None,
+        "flag_top50": True,
+        "is_pinned": False,
+        "is_removed": False
+    },
+]
+```
+
+```
+POST /dominio/pip/principais-investigados/<str:orgao_id>/<str:cpf>?action=<str>&representante_dk=<int>
+
+action pode ser 'remove', 'unremove', 'pin' ou 'unpin'.
+```
+
+```
+HTTP 200 OK
+Allow: POST, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{"status": "Success!"}
+```
+
+### Principais Investigados (Perfil) da PIP
+```
+GET /dominio/pip/principais-investigados-lista/<str:representante_dk>
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+[
+    {
+        "representante_dk": 16,
+        "orgao_id": 123,
+        "documento_nr_mp": "123456",
+        "documento_dt_cadastro": '2020-04-22T13:36:06.668000Z',
+        "documento_classe": "Classe",
+        "nm_orgao": "5ª Promotoria de Justiça",
+        "etiqueta": "Etiqueta",
+        "assuntos": ["Assunto 1", "Assunto 2"]
+    },
+    {
+        "representante_dk": 16,
+        "orgao_id": 456,
+        "documento_nr_mp": "124578",
+        "documento_dt_cadastro": '2020-04-22T13:36:06.668000Z',
+        "documento_classe": "Classe",
+        "nm_orgao": "4ª Promotoria de Justiça",
+        "etiqueta": "Etiqueta",
+        "assuntos": ["Assunto 1"]
+    },
+]
+```
+
+### Indicadores de Sucesso da PIP
+```
+GET /dominio/pip/indicadores-sucesso/<str:orgao_id>
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{'taxa_resolutivdade': 0.42857142857142855,
+ 'ranking': [{'assunto': 'Roubo',
+   'count': 10,
+   'total': 72,
+   'perc': 0.1388888888888889},
+  {'assunto': 'Roubo Majorado', 'count': 9, 'total': 72, 'perc': 0.125},
+  {'assunto': 'Estelionato',
+   'count': 6,
+   'total': 72,
+   'perc': 0.08333333333333333}],
+ 'others': {'count': 47, 'perc': 0.6527777777777778}}
 ```

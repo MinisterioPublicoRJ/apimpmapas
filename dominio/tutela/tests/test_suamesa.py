@@ -1,0 +1,261 @@
+from datetime import date
+from unittest import mock
+
+from django.conf import settings
+from django.urls import reverse
+from django.test import TestCase
+
+from dominio.tutela.suamesa import (
+    get_regras,
+    QUERY_REGRAS,
+    VISTAS_PAGE_SIZE,
+)
+
+from dominio.tests.testconf import NoJWTTestCase, NoCacheTestCase
+
+
+class TestSuaMesa(TestCase):
+    @mock.patch('dominio.tutela.suamesa.run_query')
+    def test_sua_mesa_get_regras_investigacao(self, _run_query):
+        _run_query.return_value = [(20,), (30,)]
+
+        orgao_id = 10
+        output = get_regras(orgao_id, 'investigacao')
+        expected_output = [20, 30]
+
+        expected_query = QUERY_REGRAS.format(
+            regras_table="tb_regra_negocio_investigacao",
+            namespace=settings.TABLE_NAMESPACE
+        )
+        expected_parameters = {
+            'orgao_id': orgao_id
+        }
+
+        _run_query.assert_called_once_with(expected_query, expected_parameters)
+        self.assertEqual(output, expected_output)
+
+    @mock.patch('dominio.tutela.suamesa.run_query')
+    def test_sua_mesa_get_regras_processo(self, _run_query):
+        _run_query.return_value = [(20,), (30,)]
+
+        orgao_id = 10
+        output = get_regras(orgao_id, 'processo')
+        expected_output = [20, 30]
+
+        expected_query = QUERY_REGRAS.format(
+            regras_table="tb_regra_negocio_processo",
+            namespace=settings.TABLE_NAMESPACE
+        )
+        expected_parameters = {
+            'orgao_id': orgao_id
+        }
+
+        _run_query.assert_called_once_with(expected_query, expected_parameters)
+        self.assertEqual(output, expected_output)
+
+
+class SuaMesaViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
+    @mock.patch('dominio.tutela.views.suamesa.get_regras')
+    @mock.patch('dominio.tutela.views.Documento')
+    def test_sua_mesa_investigacoes(self, _Documento, _get_regras):
+        manager_mock = mock.MagicMock()
+        manager_mock.count.return_value = 1
+        _Documento.investigacoes.em_curso.return_value = manager_mock
+        orgao_id = '10'
+        regras = [(30,), (50,)]
+        _get_regras.return_value = regras
+
+        url = reverse('dominio:suamesa-investigacoes', args=(orgao_id, ))
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.data, {"suamesa_investigacoes": 1})
+        self.assertEqual(resp.status_code, 200)
+        _get_regras.assert_called_once_with(int(orgao_id), tipo='investigacao')
+        _Documento.investigacoes.em_curso.assert_called_once_with(
+            int(orgao_id), regras
+        )
+        manager_mock.count.assert_called_once_with()
+
+    @mock.patch('dominio.tutela.views.suamesa.get_regras')
+    @mock.patch('dominio.tutela.views.Documento')
+    def test_sua_mesa_processos(self, _Documento, _get_regras):
+        manager_mock = mock.MagicMock()
+        manager_mock.count.return_value = 1
+        _Documento.processos.em_juizo.return_value = manager_mock
+        orgao_id = '10'
+        regras = [(30,), (50,)]
+        _get_regras.return_value = regras
+
+        url = reverse('dominio:suamesa-processos', args=(orgao_id, ))
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.data, {"suamesa_processos": 1})
+        self.assertEqual(resp.status_code, 200)
+        _get_regras.assert_called_once_with(int(orgao_id), tipo='processo')
+        _Documento.processos.em_juizo.assert_called_once_with(
+            int(orgao_id), regras
+        )
+        manager_mock.count.assert_called_once_with()
+
+    @mock.patch('dominio.tutela.views.SubAndamento')
+    def test_sua_mesa_finalizados(self, _SubAndamento):
+        regras_saidas = (6251, 6657, 6655, 6644, 6326)
+        regras_arquiv = (7912, 6548, 6326, 6681, 6678, 6645, 6682, 6680, 6679,
+                         6644, 6668, 6666, 6665, 6669, 6667, 6664, 6655, 6662,
+                         6659, 6658, 6663, 6661, 6660, 6657, 6670, 6676, 6674,
+                         6673, 6677, 6675, 6672, 6018, 6341, 6338, 6019, 6017,
+                         6591, 6339, 6553, 7871, 6343, 6340, 6342, 6021, 6334,
+                         6331, 6022, 6020, 6593, 6332, 7872, 6336, 6333, 6335,
+                         7745, 6346, 6345, 6015, 6016, 6325, 6327, 6328, 6329,
+                         6330, 6337, 6344, 6656, 6671, 7869, 7870, 6324)
+
+        regras_finalizacoes = regras_saidas + regras_arquiv
+        manager_mock = mock.MagicMock()
+        values_mock = mock.MagicMock()
+        distinct_mock = mock.MagicMock()
+
+        _SubAndamento.finalizados.trinta_dias.return_value = manager_mock
+        manager_mock.values.return_value = values_mock
+        values_mock.distinct.return_value = distinct_mock
+        distinct_mock.count.return_value = 1
+        orgao_id = '10'
+
+        url = reverse('dominio:suamesa-finalizados', args=(orgao_id, ))
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.data, {"suamesa_finalizados": 1})
+        self.assertEqual(resp.status_code, 200)
+        _SubAndamento.finalizados.trinta_dias.assert_called_once_with(
+            int(orgao_id), regras_finalizacoes
+        )
+        distinct_mock.count.assert_called_once_with()
+
+    @mock.patch('dominio.tutela.views.Vista')
+    def test_sua_mesa_vistas_abertas(self, _Vista):
+        manager_mock = mock.MagicMock()
+        manager_mock.count.return_value = 1
+        _Vista.vistas.abertas_promotor.return_value = manager_mock
+        orgao_id = '10'
+        cpf = '123456789'
+
+        url = reverse('dominio:suamesa-vistas', args=(orgao_id, cpf))
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, {"suamesa_vistas": 1})
+        _Vista.vistas.abertas_promotor.assert_called_once_with(
+            int(orgao_id), cpf
+        )
+        manager_mock.count.assert_called_once_with()
+
+
+class TestSuaMesaDetalheVistas(NoJWTTestCase, NoCacheTestCase, TestCase):
+    @mock.patch('dominio.tutela.views.Vista')
+    def test_correct_response(self, _Vista):
+        expected_resp = {
+            'soma_ate_vinte': 25,
+            'soma_vinte_trinta': 2,
+            'soma_trinta_mais': 4
+        }
+        _Vista.vistas.agg_abertas_por_data.return_value = expected_resp
+
+        url = reverse('dominio:suamesa-detalhe-vistas', args=('1', '2'))
+
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, expected_resp)
+
+    @mock.patch('dominio.tutela.views.Vista')
+    def test_404_response(self, _Vista):
+        query_resp = {
+            'soma_ate_vinte': None,
+            'soma_vinte_trinta': None,
+            'soma_trinta_mais': None
+        }
+        _Vista.vistas.agg_abertas_por_data.return_value = query_resp
+
+        url = reverse('dominio:suamesa-detalhe-vistas', args=('1', '2'))
+
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 404)
+
+
+class TestSuaMesaListaVistasAbertas(NoJWTTestCase, NoCacheTestCase, TestCase):
+    @mock.patch('dominio.mixins.Paginator')
+    @mock.patch('dominio.tutela.views.Vista')
+    def test_correct_response(self, _Vista, _Paginator):
+        page_mock = mock.MagicMock()
+        paginate_mock = mock.MagicMock()
+        manager_mock = mock.MagicMock()
+        orderby_mock = mock.MagicMock()
+        values_mock = mock.MagicMock()
+        paginator_response = [
+            {
+                "numero_mprj": "1234",
+                "numero_externo": "tj1234",
+                "dt_abertura": date(2020, 1, 1),
+                "classe": "classe 1",
+            },
+            {
+                "numero_mprj": "9012",
+                "numero_externo": "tj9012",
+                "dt_abertura": date(2018, 1, 1),
+                "classe": "classe 3",
+            },
+        ]
+
+        page_mock.object_list = paginator_response
+        paginate_mock.page.return_value = page_mock
+        _Paginator.return_value = paginate_mock
+        values_mock.values.return_value = 'model response'
+        orderby_mock.order_by.return_value = values_mock
+        manager_mock.filter.return_value = orderby_mock
+
+        _Vista.vistas.abertas_por_data.return_value = manager_mock
+
+        expected = [
+            {
+                "numero_mprj": "1234",
+                "numero_externo": "tj1234",
+                "dt_abertura": '2020-01-01',
+                "classe": "classe 1",
+            },
+            {
+                "numero_mprj": "9012",
+                "numero_externo": "tj9012",
+                "dt_abertura": '2018-01-01',
+                "classe": "classe 3",
+            },
+        ]
+        url = reverse(
+            'dominio:suamesa-lista-vistas',
+            args=('1', '2', "trinta_mais")
+        )
+        url += '?page=2'
+
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, expected)
+        manager_mock.filter.assert_called_once_with(trinta_mais=1)
+        orderby_mock.order_by.assert_called_once_with('-data_abertura')
+        _Paginator.assert_called_once_with(
+            'model response',
+            VISTAS_PAGE_SIZE,
+        )
+        paginate_mock.page.assert_called_once_with(2)
+
+    def test_return_404_for_incorrcect_data_abertura_value(self):
+        url = reverse(
+            'dominio:suamesa-lista-vistas',
+            args=('1', '2', "invalid")
+        )
+
+        resp = self.client.get(url)
+        expected_msg = "data_abertura inválida. Opções são: ate_vinte, "\
+            "vinte_trinta, trinta_mais"
+
+        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.data, expected_msg)
