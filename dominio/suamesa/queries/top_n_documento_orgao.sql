@@ -1,6 +1,7 @@
 SELECT orgi_nm_orgao, {nm_campo} 
 FROM {schema}.tb_detalhe_documentos_orgao
 WHERE tipo_detalhe = :tipo_detalhe
+AND intervalo = :intervalo
 AND cod_pct IN (
     SELECT cod_pct
     FROM {schema}.atualizacao_pj_pacote

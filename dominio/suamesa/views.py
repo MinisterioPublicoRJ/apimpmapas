@@ -15,7 +15,7 @@ class SuaMesaView(JWTAuthMixin, CacheMixin, APIView):
 
         return Response(data=data)
 
- 
+
 class SuaMesaDetalheView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAMESA_DETALHE_CACHE_TIMEOUT'
 

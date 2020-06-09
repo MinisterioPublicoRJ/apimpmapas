@@ -53,3 +53,14 @@ class SuaMesaDetalheAISPSerializer(serializers.Serializer):
     acervo_fim = serializers.IntegerField(min_value=0)
     variacao_acervo = serializers.FloatField()
     aisp_nomes = serializers.CharField()
+
+
+class SuaMesaDetalheAndamentosSerializer(serializers.Serializer):
+    orgao_id = serializers.IntegerField()
+    tipo_detalhe = serializers.CharField
+    intervalo = serializers.IntegerField()
+    nm_orgao = serializers.CharField()
+    cod_pct = serializers.IntegerField()
+    nr_andamentos_atual = serializers.IntegerField(min_value=0)
+    nr_andamentos_anterior = serializers.IntegerField(min_value=0)
+    variacao_andamentos = serializers.FloatField()

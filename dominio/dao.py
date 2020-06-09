@@ -49,3 +49,10 @@ class GenericDAO:
     @classmethod
     def raise_empty_result_error(cls):
         raise APIEmptyResultError
+
+
+class SingleDataObjectDAO(GenericDAO):
+    @classmethod
+    def serialize(cls, result_set):
+        data = super().serialize(result_set)
+        return data[0] if data else {}

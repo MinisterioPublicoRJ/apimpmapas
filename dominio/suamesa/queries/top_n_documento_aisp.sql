@@ -9,6 +9,7 @@ FROM (
     FROM {schema}.tb_detalhe_documentos_orgao
     JOIN {schema}.tb_pip_aisp ON pip_codigo = vist_orgi_orga_dk
     WHERE tipo_detalhe IN ('pip_inqueritos', 'pip_pics')
+    AND intervalo = :intervalo
     GROUP BY aisp_nome
     ) t
 GROUP BY pmax

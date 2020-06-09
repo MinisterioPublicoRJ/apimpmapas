@@ -15,6 +15,7 @@ FROM (
         WHERE a1.pip_codigo = :orgao_id
         ) t ON pip_codigo = vist_orgi_orga_dk
     WHERE tipo_detalhe IN ('pip_inqueritos', 'pip_pics')
+    AND intervalo = :intervalo
     ) t
 JOIN (
     SELECT a.pip_codigo, group_concat(a.aisp_nome) as aisp_nomes
