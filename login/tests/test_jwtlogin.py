@@ -1,6 +1,8 @@
 from unittest import mock, TestCase
 
+import pytest
 from django.conf import settings
+from jwt import DecodeError
 
 from login.jwtlogin import (
     get_jwt_from_get,
@@ -20,12 +22,30 @@ class TestJWTLogin(TestCase):
 
         self.assertEqual(token, expected_token)
 
+    def test_get_jwt_from_get_no_jwt_provided(self):
+        req_mock = mock.MagicMock()
+        req_mock.GET = dict()
+
+        token = get_jwt_from_get(req_mock)
+        expected_token = ''
+
+        self.assertEqual(token, expected_token)
+
     def test_get_jwt_from_post(self):
         req_mock = mock.MagicMock()
         req_mock.POST = {'jwt': 'TOKEN'}
 
         token = get_jwt_from_post(req_mock)
         expected_token = 'TOKEN'
+
+        self.assertEqual(token, expected_token)
+
+    def test_get_jwt_from_post_no_jwt_provided(self):
+        req_mock = mock.MagicMock()
+        req_mock.POST = dict()
+
+        token = get_jwt_from_post(req_mock)
+        expected_token = ''
 
         self.assertEqual(token, expected_token)
 
@@ -56,3 +76,9 @@ class TestJWTLogin(TestCase):
             algorithm='HS256',
         )
         self.assertEqual(resp, "payload")
+
+    @mock.patch('login.jwtlogin.get_jwt_from_get', return_value="")
+    def test_unpack_no_jwt_provided(self, _get_jwt):
+        request = mock.Mock()
+        with pytest.raises(DecodeError):
+            unpack_jwt(request)
