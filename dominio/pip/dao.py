@@ -25,16 +25,6 @@ class GenericPIPDAO(GenericDAO):
     QUERIES_DIR = settings.BASE_DIR.child("dominio", "pip", "queries")
 
 
-class PIPTaxaResolutividadeDAO(GenericPIPDAO):
-    query_file = "pip_taxa_resolutividade.sql"
-    column = "taxa_resolutivdade"
-    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
-
-    @classmethod
-    def serialize(cls, result_set):
-        return {cls.column: result_set[0][0]}
-
-
 class PIPDetalheAproveitamentosDAO(GenericPIPDAO):
     query_file = "pip_detalhe_aproveitamentos.sql"
     serializer = PIPDetalheAproveitamentosSerializer
@@ -257,23 +247,6 @@ class PIPPrincipaisInvestigadosDAO(GenericPIPDAO):
         )
 
         return data
-
-
-class PIPRankingDenunciasDAO(GenericPIPDAO):
-    query_file = "pip_ranking_denuncias.sql"
-    columns = ["assunto", "count", "total", "perc"]
-    table_namespaces = {"schema": settings.EXADATA_NAMESPACE}
-
-    @classmethod
-    def get(cls, orgao_id):
-        data = super().get(orgao_id=orgao_id)
-        total = data[0]["total"]
-        others_count = total - sum([row["count"] for row in data])
-        agg_data = {
-            "ranking": data,
-            "others": {"count": others_count, "perc": others_count / total},
-        }
-        return agg_data
 
 
 class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):

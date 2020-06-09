@@ -98,13 +98,7 @@ class PIPInvestigacoesCursoAISPTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
 
 class TestPIPIndicadoresSucesso(NoJWTTestCase, NoCacheTestCase, TestCase):
-    @mock.patch("dominio.pip.views.PIPRankingDenunciasDAO")
-    @mock.patch("dominio.pip.views.PIPTaxaResolutividadeDAO")
-    def test_correct_response(
-            self, _PIPTaxaResolutividade, _PIPRankingDenuncias):
-        _PIPTaxaResolutividade.get.return_value = {"data": 1}
-        _PIPRankingDenuncias.get.return_value = {"ranking": 1}
-
+    def test_correct_response(self):
         orgao_id = "12345"
         url = reverse("dominio:pip-indicadores-sucesso", args=(orgao_id,))
         resp = self.client.get(url)
