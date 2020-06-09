@@ -98,11 +98,21 @@ class PIPInvestigacoesCursoAISPTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
 
 class TestPIPIndicadoresSucesso(NoJWTTestCase, NoCacheTestCase, TestCase):
-    def test_correct_response(self):
+    @mock.patch("dominio.pip.views.PIPIndicadoresDeSucessoDAO.execute")
+    def test_correct_response(self, _execute):
+        _execute.return_value = [
+            ("12345", 0.344, "p_finalizacoes"),
+            ("12345", 0.123, "p_resolutividade"),
+            ("12345", 0.983, "p_eludcidacoes"),
+        ]
         orgao_id = "12345"
         url = reverse("dominio:pip-indicadores-sucesso", args=(orgao_id,))
         resp = self.client.get(url)
-        expected = {"data": 1, "ranking": 1}
+        expected = [
+            {"orgao_id": 12345, "indice": 0.344, "tipo": "p_finalizacoes"},
+            {"orgao_id": 12345, "indice": 0.123, "tipo": "p_resolutividade"},
+            {"orgao_id": 12345, "indice": 0.983, "tipo": "p_eludcidacoes"},
+        ]
 
         assert resp.status_code == 200
         assert resp.data == expected

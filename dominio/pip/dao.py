@@ -13,6 +13,7 @@ from dominio.utils import (
 )
 from dominio.pip.serializers import (
     PIPPrincipaisInvestigadosSerializer,
+    PIPIndicadoresSucessoParser,
     PIPDetalheAproveitamentosSerializer,
     PIPPrincipaisInvestigadosListaSerializer,
 )
@@ -280,3 +281,10 @@ class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
             row['nm_orgao'] = format_text(nm_orgao)
 
         return ser_data
+
+
+class PIPIndicadoresDeSucessoDAO(GenericPIPDAO):
+    query_file = "pip_indicadores_sucesso.sql"
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
+    serializer = PIPIndicadoresSucessoParser
+    columns = ["orgao_id", "indice", "tipo"]
