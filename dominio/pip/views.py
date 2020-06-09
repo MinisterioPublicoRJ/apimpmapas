@@ -5,11 +5,10 @@ from dominio.mixins import CacheMixin, JWTAuthMixin, PaginatorMixin
 from dominio.models import Vista, Documento
 from dominio.pip.dao import (
     PIPDetalheAproveitamentosDAO,
+    PIPIndicadoresDeSucessoDAO,
     PIPRadarPerformanceDAO,
-    PIPRankingDenunciasDAO,
     PIPPrincipaisInvestigadosDAO,
     PIPPrincipaisInvestigadosListaDAO,
-    PIPTaxaResolutividadeDAO,
 )
 from dominio.pip.utils import get_orgaos_same_aisps
 
@@ -68,9 +67,7 @@ class PIPIndicadoresDeSucessoView(JWTAuthMixin, CacheMixin, APIView):
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
-        resolutividade = PIPTaxaResolutividadeDAO.get(orgao_id=orgao_id)
-        ranking = PIPRankingDenunciasDAO.get(orgao_id=orgao_id)
-        data = {**resolutividade, **ranking}
+        data = PIPIndicadoresDeSucessoDAO.get(orgao_id=orgao_id)
         return Response(data=data)
 
 

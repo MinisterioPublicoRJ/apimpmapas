@@ -8,10 +8,9 @@ from dominio.exceptions import APIEmptyResultError
 from dominio.pip.dao import (
     GenericPIPDAO,
     PIPDetalheAproveitamentosDAO,
+    PIPIndicadoresDeSucessoDAO,
     PIPRadarPerformanceDAO,
     PIPPrincipaisInvestigadosDAO,
-    PIPRankingDenunciasDAO,
-    PIPTaxaResolutividadeDAO,
     PIPPrincipaisInvestigadosListaDAO,
 )
 from dominio.pip.utils import get_aisps
@@ -341,10 +340,10 @@ class TestPIPPrincipaisInvestigadosDAO:
 class TestPIPIndicadoresSucesso:
     @mock.patch("dominio.dao.impala_execute")
     def test_execute_query(self, _impala_execute):
-        with open(QUERIES_DIR.child("pip_taxa_resolutividade.sql")) as fobj:
+        with open(QUERIES_DIR.child("pip_indicadores_sucesso.sql")) as fobj:
             query = fobj.read()
 
-        cls = PIPTaxaResolutividadeDAO
+        cls = PIPIndicadoresDeSucessoDAO
         query = query.format(schema=cls.table_namespaces["schema"])
         orgao_id = "12345"
         cls.execute(orgao_id=orgao_id)
@@ -355,68 +354,34 @@ class TestPIPIndicadoresSucesso:
         assert cls.table_namespaces["schema"] == settings.TABLE_NAMESPACE
 
     def test_serialize_result_set(self):
-        result_set = [(0.133,)]
-        ser_data = PIPTaxaResolutividadeDAO.serialize(result_set)
-        expected = {"taxa_resolutivdade": 0.133}
+        result_set = [
+            ("12345", 0.344, "p_finalizacoes"),
+            ("12345", 0.123, "p_resolutividade"),
+            ("12345", 0.983, "p_eludcidacoes"),
+        ]
+        ser_data = PIPIndicadoresDeSucessoDAO.serialize(result_set)
+        expected = [
+            {"orgao_id": 12345, "indice": 0.344, "tipo": "p_finalizacoes"},
+            {"orgao_id": 12345, "indice": 0.123, "tipo": "p_resolutividade"},
+            {"orgao_id": 12345, "indice": 0.983, "tipo": "p_eludcidacoes"},
+        ]
 
         assert ser_data == expected
 
-    @mock.patch.object(PIPTaxaResolutividadeDAO, "execute")
+    @mock.patch.object(PIPIndicadoresDeSucessoDAO, "execute")
     def test_get_data(self, _execute):
-        _execute.return_value = [(0.133,)]
-
-        data = PIPTaxaResolutividadeDAO.get()
-
-        assert data == {"taxa_resolutivdade": 0.133}
-
-    @mock.patch("dominio.dao.impala_execute")
-    def test_execute_query_ranking_denuncias(self, _impala_execute):
-        with open(QUERIES_DIR.child("pip_ranking_denuncias.sql")) as fobj:
-            query = fobj.read()
-
-        cls = PIPRankingDenunciasDAO
-        query = query.format(schema=cls.table_namespaces["schema"])
-        orgao_id = "12345"
-        cls.execute(orgao_id=orgao_id)
-
-        _impala_execute.assert_called_once_with(query, {"orgao_id": orgao_id})
-        assert cls.table_namespaces["schema"] == settings.EXADATA_NAMESPACE
-
-    @mock.patch.object(PIPRankingDenunciasDAO, "execute")
-    def test_get_data_ranking_denuncias(self, _execute):
         _execute.return_value = [
-            ("Assunto 1", 10, 100, 0.1),
-            ("Assunto 2", 5, 100, 0.05),
-            ("Assunto 3", 3, 100, 0.03),
+            ("12345", 0.344, "p_finalizacoes"),
+            ("12345", 0.123, "p_resolutividade"),
+            ("12345", 0.983, "p_eludcidacoes"),
         ]
 
-        orgao_id = "12345"
-        data = PIPRankingDenunciasDAO.get(orgao_id=orgao_id)
-        expected = {
-            "ranking": [
-                {
-                    "assunto": "Assunto 1",
-                    "count": 10,
-                    "total": 100,
-                    "perc": 0.1,
-                },
-                {
-                    "assunto": "Assunto 2",
-                    "count": 5,
-                    "total": 100,
-                    "perc": 0.05,
-                },
-                {
-                    "assunto": "Assunto 3",
-                    "count": 3,
-                    "total": 100,
-                    "perc": 0.03,
-                },
-            ],
-            "others": {"count": 82, "perc": 0.82},
-        }
-
-        _execute.assert_called_once_with(orgao_id=orgao_id)
+        expected = [
+            {"orgao_id": 12345, "indice": 0.344, "tipo": "p_finalizacoes"},
+            {"orgao_id": 12345, "indice": 0.123, "tipo": "p_resolutividade"},
+            {"orgao_id": 12345, "indice": 0.983, "tipo": "p_eludcidacoes"},
+        ]
+        data = PIPIndicadoresDeSucessoDAO.get()
 
         assert data == expected
 

@@ -754,15 +754,21 @@ Allow: GET, HEAD, OPTIONS
 Content-Type: application/json
 Vary: Accept
 
-{'taxa_resolutivdade': 0.42857142857142855,
- 'ranking': [{'assunto': 'Roubo',
-   'count': 10,
-   'total': 72,
-   'perc': 0.1388888888888889},
-  {'assunto': 'Roubo Majorado', 'count': 9, 'total': 72, 'perc': 0.125},
-  {'assunto': 'Estelionato',
-   'count': 6,
-   'total': 72,
-   'perc': 0.08333333333333333}],
- 'others': {'count': 47, 'perc': 0.6527777777777778}}
+[
+    {
+       "orgao_id":12345,
+       "indice":0.342684993409904,
+       "tipo":"p_finalizacoes"
+     },
+     {
+       "orgao_id":12345,
+       "indice":0.3333333333333333,
+       "tipo":"p_resolutividade"
+      },
+      {
+       "orgao_id":12345,
+       "indice":0.139710035774807,
+       "tipo":"p_elucidacoes"
+      }
+]
 ```
