@@ -45,7 +45,7 @@ class TestMetricsDataObjectDAO(NoJWTTestCase, NoCacheTestCase, TestCase):
             'orgao_id': 10,
             'tipo_detalhe': 'teste',
             'cpf': None,
-            'intervalo': 30,
+            'intervalo': 'mes',
         }
 
         output = MetricsDataObjectDAO.get(orgao_id, mock_request)
@@ -65,7 +65,7 @@ class TestMetricsDataObjectDAO(NoJWTTestCase, NoCacheTestCase, TestCase):
             'orgao_id': 10,
             'tipo_detalhe': 'teste',
             'cpf': None,
-            'intervalo': 30,
+            'intervalo': 'mes',
         }
 
         output = MetricsDataObjectDAO.get(orgao_id, mock_request)
@@ -85,7 +85,7 @@ class TestMetricsDataObjectDAO(NoJWTTestCase, NoCacheTestCase, TestCase):
             'orgao_id': 10,
             'tipo_detalhe': 'teste',
             'cpf': None,
-            'intervalo': 30,
+            'intervalo': 'mes',
         }
 
         output = MetricsDataObjectDAO.get(

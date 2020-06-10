@@ -106,7 +106,7 @@ class TestRankingMixin(NoJWTTestCase, NoCacheTestCase, TestCase):
             'orgao_id': orgao_id,
             'tipo_detalhe': 'teste',
             'n': 3,
-            'intervalo': 30
+            'intervalo': 'mes'
         }
 
         output = RankingMixin.get_ranking_data(orgao_id, mock_request)
@@ -146,7 +146,7 @@ class TestRankingMixin(NoJWTTestCase, NoCacheTestCase, TestCase):
             'orgao_id': orgao_id,
             'tipo_detalhe': 'teste',
             'n': 3,
-            'intervalo': 30
+            'intervalo': 'mes'
         }
 
         output = RankingMixin.get_ranking_data(orgao_id, mock_request)

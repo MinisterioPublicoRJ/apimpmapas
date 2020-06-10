@@ -68,7 +68,7 @@ class RankingMixin:
             'orgao_id': orgao_id,
             'tipo_detalhe': request.GET.get('tipo'),
             'n': int(request.GET.get('n', 3)),
-            'intervalo': int(request.GET.get('intervalo', 30))
+            'intervalo': request.GET.get('intervalo', 'mes')
         }
 
         data = []
