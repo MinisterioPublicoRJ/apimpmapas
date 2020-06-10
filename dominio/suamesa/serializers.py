@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 
-class SuaMesaDetalheCPFSerializer(serializers.Serializer):
+class MetricsDetalheDocumentoOrgaoCPFSerializer(serializers.Serializer):
     tipo_detalhe = serializers.CharField()
     intervalo = serializers.IntegerField()
     orgao_id = serializers.IntegerField()
@@ -20,7 +20,7 @@ class SuaMesaDetalheCPFSerializer(serializers.Serializer):
     variacao_instaurados = serializers.FloatField()
 
 
-class SuaMesaDetalheOrgaoSerializer(serializers.Serializer):
+class MetricsDetalheDocumentoOrgaoSerializer(serializers.Serializer):
     tipo_detalhe = serializers.CharField()
     intervalo = serializers.IntegerField()
     nm_orgao = serializers.CharField()
@@ -43,9 +43,19 @@ class SuaMesaDetalheOrgaoSerializer(serializers.Serializer):
     variacao_instaurados = serializers.FloatField()
 
 
-class SuaMesaDetalheTopNSerializer(serializers.Serializer):
+class RankingSerializer(serializers.Serializer):
+    nm_orgao = serializers.CharField()
+    valor = serializers.IntegerField()
+
+
+class RankingFloatSerializer(serializers.Serializer):
     nm_orgao = serializers.CharField()
     valor = serializers.FloatField()
+
+
+class RankingPercentageSerializer(serializers.Serializer):
+    nm_orgao = serializers.CharField()
+    valor_percentual = serializers.FloatField()
 
 
 class SuaMesaDetalheAISPSerializer(serializers.Serializer):
@@ -55,12 +65,9 @@ class SuaMesaDetalheAISPSerializer(serializers.Serializer):
     aisp_nomes = serializers.CharField()
 
 
-class SuaMesaDetalheAndamentosSerializer(serializers.Serializer):
+class SuaMesaDetalheTutelaProcessosSerializer(serializers.Serializer):
     orgao_id = serializers.IntegerField()
-    tipo_detalhe = serializers.CharField
-    intervalo = serializers.IntegerField()
     nm_orgao = serializers.CharField()
-    cod_pct = serializers.IntegerField()
-    nr_andamentos_atual = serializers.IntegerField(min_value=0)
-    nr_andamentos_anterior = serializers.IntegerField(min_value=0)
-    variacao_andamentos = serializers.FloatField()
+    nr_acoes_ultimos_60_dias = serializers.IntegerField(min_value=0)
+    variacao_12_meses = serializers.FloatField()
+    nr_acoes_ultimos_30_dias = serializers.IntegerField(min_value=0)
