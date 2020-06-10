@@ -42,7 +42,7 @@ class GenericDAO:
     def get(cls, accept_empty=False, **kwargs):
         result_set = cls.execute(**kwargs)
         if not result_set and not accept_empty:
-            raise APIEmptyResultError
+            cls.raise_empty_result_error()
 
         return cls.serialize(result_set)
 
