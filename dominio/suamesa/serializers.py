@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 class MetricsDetalheDocumentoOrgaoCPFSerializer(serializers.Serializer):
     tipo_detalhe = serializers.CharField()
-    intervalo = serializers.IntegerField()
+    intervalo = serializers.CharField()
     orgao_id = serializers.IntegerField()
     cpf = serializers.CharField()
     nr_documentos_distintos_atual = serializers.IntegerField(min_value=0)
@@ -22,7 +22,7 @@ class MetricsDetalheDocumentoOrgaoCPFSerializer(serializers.Serializer):
 
 class MetricsDetalheDocumentoOrgaoSerializer(serializers.Serializer):
     tipo_detalhe = serializers.CharField()
-    intervalo = serializers.IntegerField()
+    intervalo = serializers.CharField()
     nm_orgao = serializers.CharField()
     cod_pacote = serializers.IntegerField()
     orgao_id = serializers.IntegerField()

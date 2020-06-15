@@ -28,7 +28,7 @@ class MetricsDataObjectDAO(SingleDataObjectDAO):
             'orgao_id': orgao_id,
             'tipo_detalhe': request.GET.get('tipo'),
             'cpf': request.GET.get('cpf'),
-            'intervalo': int(request.GET.get('intervalo', 30))
+            'intervalo': request.GET.get('intervalo', 'mes')
         }
 
         data = super().get(accept_empty=accept_empty, **kwargs)
