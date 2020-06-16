@@ -24,6 +24,7 @@ def authenticate_integra(request):
     pess_dk = payload['scaUser']['pessDK']
     nome_usuario = payload['scaUser']['nomeUsuario']
     nome_orgao = payload['scaUser']['nomeOrgaoUsuario']
+    matricula = payload["scaUser"]["matricula"]
 
     payload = {
         'username': user_name,
@@ -32,6 +33,7 @@ def authenticate_integra(request):
         'pess_dk': pess_dk,
         'nome': nome_usuario,
         'tipo_orgao': tipo_orgao(nome_orgao),
+        'matricula': matricula,
     }
 
     token = jwt.encode(

@@ -42,6 +42,18 @@ class TestUsuario(TestCase):
 
         self.assertFalse(first_time_today)
 
+    @mock.patch("dominio.models.RHFuncionario")
+    def test_get_gender(self, _RhFuncionaio):
+        mock_rh_obj = mock.Mock(sexo="X")
+        _RhFuncionaio.objects.get.return_value = mock_rh_obj
+        usuario = Usuario.objects.create(
+            username="user_name",
+        )
+
+        gender = usuario.get_gender(cdmatricula="12345")
+
+        self.assertEqual(gender, "X")
+
 
 class TestAlertaModels(TestCase):
     @mock.patch("dominio.models.run_query")

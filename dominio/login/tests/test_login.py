@@ -13,9 +13,15 @@ from dominio.login.integra import authenticate_integra
 
 @pytest.mark.django_db(transaction=True)
 class TestLogin(TestCase):
+    @mock.patch("dominio.models.RHFuncionario")
     @mock.patch("dominio.login.views.authenticate_integra")
-    def test_correct_response(self, _auth_integra):
-        _auth_integra.return_value = {"username": "username"}
+    def test_correct_response(self, _auth_integra, _RhFuncionaio):
+        mock_rh_obj = mock.Mock(sexo="X")
+        _RhFuncionaio.objects.get.return_value = mock_rh_obj
+        _auth_integra.return_value = {
+            "username": "username",
+            "matricula": "12345",
+        }
         url = reverse("dominio:login")
 
         resp = self.client.post(url)
@@ -23,16 +29,24 @@ class TestLogin(TestCase):
             "first_login": True,
             "first_login_today": True,
             "username": "username",
+            "matricula": "12345",
+            "sexo": "X",
         }
 
         self.assertEqual(resp.status_code, 200)
         _auth_integra.assert_called()
         self.assertEqual(resp.json(), expected_data)
 
+    @mock.patch("dominio.models.RHFuncionario")
     @freeze_time('2020-01-01')
     @mock.patch("dominio.login.views.authenticate_integra")
-    def test_user_already_logged_in(self, _auth_integra):
-        _auth_integra.return_value = {"username": "username"}
+    def test_user_already_logged_in(self, _auth_integra, _RhFuncionaio):
+        mock_rh_obj = mock.Mock(sexo="X")
+        _RhFuncionaio.objects.get.return_value = mock_rh_obj
+        _auth_integra.return_value = {
+            "username": "username",
+            "matricula": "12345",
+        }
         url = reverse("dominio:login")
 
         make("dominio.Usuario", username="username")
@@ -44,16 +58,24 @@ class TestLogin(TestCase):
             "first_login": False,
             "first_login_today": True,
             "username": "username",
+            "matricula": "12345",
+            "sexo": "X",
         }
 
         self.assertEqual(resp.status_code, 200)
         _auth_integra.assert_called()
         self.assertEqual(resp.json(), expected_data)
 
+    @mock.patch("dominio.models.RHFuncionario")
     @freeze_time('2020-01-01')
     @mock.patch("dominio.login.views.authenticate_integra")
-    def test_user_already_logged_in_today(self, _auth_integra):
-        _auth_integra.return_value = {"username": "username"}
+    def test_user_already_logged_in_today(self, _auth_integra, _RhFuncionaio):
+        mock_rh_obj = mock.Mock(sexo="X")
+        _RhFuncionaio.objects.get.return_value = mock_rh_obj
+        _auth_integra.return_value = {
+            "username": "username",
+            "matricula": "12345",
+        }
         url = reverse("dominio:login")
 
         make("dominio.Usuario", username="username")
@@ -65,6 +87,8 @@ class TestLogin(TestCase):
             "first_login": False,
             "first_login_today": False,
             "username": "username",
+            "matricula": "12345",
+            "sexo": "X",
         }
 
         self.assertEqual(resp.status_code, 200)
@@ -86,7 +110,8 @@ class AuthenticateIntegraTest(TestCase):
                 "orgao": "1234",
                 "pessDK": "4567",
                 "nomeUsuario": "nome",
-                "nomeOrgaoUsuario": "Tutela Coletiva"
+                "nomeOrgaoUsuario": "Tutela Coletiva",
+                "matricula": "12345",
              }
         }
         jwt_payload = {
@@ -95,7 +120,8 @@ class AuthenticateIntegraTest(TestCase):
             "orgao": "1234",
             "pess_dk": "4567",
             "nome": "nome",
-            "tipo_orgao": 1
+            "tipo_orgao": 1,
+            "matricula": "12345",
         }
         resp_payload = authenticate_integra('request')
         expected_payload = jwt_payload.copy()
