@@ -60,15 +60,15 @@ class SuaMesaDAO:
 
 class SuaMesaDetalhePIPInqueritosDAO(
         RankingPercentageMixin, MetricsDetalheDocumentoOrgaoCPFDAO):
-    ranking_fields = ['variacao_documentos_distintos']
+    ranking_fields = [
+        'nr_documentos_distintos_atual',
+        'nr_aproveitamentos_atual',
+    ]
 
 
 class SuaMesaDetalhePIPPICSDAO(
         RankingMixin, MetricsDetalheDocumentoOrgaoCPFDAO):
-    ranking_fields = [
-        'nr_documentos_distintos_atual',
-        'nr_aproveitamentos_atual'
-    ]
+    ranking_fields = ['variacao_documentos_distintos']
 
 
 class SuaMesaDetalhePIPAISPDAO(RankingMixin, MetricsDetalheDocumentoOrgaoDAO):
