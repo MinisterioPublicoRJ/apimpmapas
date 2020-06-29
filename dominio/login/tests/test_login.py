@@ -22,7 +22,7 @@ class TestLogin(TestCase):
             "username": "username",
             "matricula": "12345",
         }
-        url = reverse("dominio:login")
+        url = reverse("dominio:login-integra")
 
         resp = self.client.post(url)
         expected_data = {
@@ -47,7 +47,7 @@ class TestLogin(TestCase):
             "username": "username",
             "matricula": "12345",
         }
-        url = reverse("dominio:login")
+        url = reverse("dominio:login-integra")
 
         make("dominio.Usuario", username="username")
 
@@ -76,7 +76,7 @@ class TestLogin(TestCase):
             "username": "username",
             "matricula": "12345",
         }
-        url = reverse("dominio:login")
+        url = reverse("dominio:login-integra")
 
         make("dominio.Usuario", username="username")
 

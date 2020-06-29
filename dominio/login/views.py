@@ -6,7 +6,8 @@ from .integra import authenticate_integra
 
 
 @csrf_exempt
-def login(request):
+def login_integra(request):
+    "View responsável pela autenticação vinda do Integra"
     response = authenticate_integra(request)
     usuario, created = Usuario.objects.get_or_create(
         username=response.get("username")

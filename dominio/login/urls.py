@@ -1,8 +1,8 @@
 from django.urls import path
 
-from .views import login
+from .views import login_integra
 
 
 urlpatterns = [
-    path('login/', login, name="login"),
+    path('login/', login_integra, name="login-integra"),
 ]
