@@ -185,3 +185,9 @@ class PromotronLoginServices(TestCase):
 
         with pytest.raises(UserHasNoValidOfficesError):
             services.build_login_response("username")
+
+    def test_nenhum_orgao_encontrado_no_mgp(self):
+        self.mock_oracle_access.side_effect = [(), ]
+
+        with pytest.raises(UserHasNoValidOfficesError):
+            services.build_login_response("username")

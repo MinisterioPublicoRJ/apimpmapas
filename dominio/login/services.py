@@ -2,7 +2,7 @@ import logging
 import jwt
 from django.conf import settings
 
-from dominio.exceptions import UserHasNoValidOfficesError
+from dominio import exceptions
 from dominio.models import Usuario
 from dominio.login import dao
 from login.jwtlogin import tipo_orgao
@@ -16,7 +16,11 @@ def build_login_response(username):
         username=username
     )
 
-    lista_orgaos = dao.ListaOrgaosDAO.get(login=username)
+    try:
+        lista_orgaos = dao.ListaOrgaosDAO.get(login=username)
+    except exceptions.APIEmptyResultError:
+        raise exceptions.UserHasNoValidOfficesError
+
     # Lotação especial
     lista_orgaos_pessoal = dao.ListaOrgaosPessoalDAO.get(
         login=username, accept_empty=True
@@ -28,7 +32,7 @@ def build_login_response(username):
     )
     if not orgaos_validos:
         logging.info("Nenhum órgão válido encontrado para '{username}'")
-        raise UserHasNoValidOfficesError
+        raise exceptions.UserHasNoValidOfficesError
 
     response = dict()
     response["orgao"] = orgaos_validos[0]["cdorgao"]
