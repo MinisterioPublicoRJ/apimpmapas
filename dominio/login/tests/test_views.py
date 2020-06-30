@@ -176,3 +176,19 @@ class TestLoginPromotron(TestCase):
             settings.SCA_CHECK,
         )
         self.assertEqual(resp.json(), service_response)
+
+    def test_login_sca_failed_permission_denied(self):
+        # Sca auth NOT-ok (!= 200)
+        self.mock_sca_login.return_value = mock.Mock(
+            auth=mock.Mock(status_code=400)
+        )
+
+        resp = self.client.post(self.url, data=self.data)
+
+        self.assertEqual(resp.status_code, 403)
+        self.mock_sca_login.assert_called_once_with(
+            self.username,
+            bytes(self.password, "utf-8"),
+            settings.SCA_AUTH,
+            settings.SCA_CHECK,
+        )
