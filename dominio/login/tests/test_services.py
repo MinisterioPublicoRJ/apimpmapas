@@ -1,11 +1,51 @@
 from unittest import mock
 
+import pytest
+from django.http import Http404
 from django.test import TestCase
 
 from dominio.login import services
 
 
 class PromotronLoginServices(TestCase):
+    def setUp(self):
+        self.oracle_access_patcher = mock.patch(
+            "dominio.login.dao.oracle_access"
+        )
+        self.mock_oracle_access = self.oracle_access_patcher.start()
+        self.mock_oracle_access.side_effect = [
+            (
+                (
+                    "098765",
+                    "12345",
+                    "123456789",
+                    "NOME FUNCIONARIO",
+                    "X",
+                    "4567",
+                    "PROMOTORIA INVESTIGAÇÃO PENAL",
+                    None,
+                    "RE",
+                ),
+                (
+                    "1234",
+                    "12345",
+                    "123456789",
+                    "NOME FUNCIONARIO",
+                    "X",
+                    "4567",
+                    "PROMOTORIA DIFERENTE",
+                    None,
+                    "RE",
+                ),
+            ),
+            (
+                ("1234", "PROMOTORIA TUTELA COLETIVA", None, "RE"),
+            ),  # result set do lista orgao pessoal
+        ]
+
+    def tearDown(self):
+        self.mock_oracle_access.stop()
+
     def test_classify_orgaos(self):
         """Um promotor pode estar lotado em mais de um órgao.
         Essa função irá dizer o tipo_orgao de cada uma deles"""
@@ -100,37 +140,7 @@ class PromotronLoginServices(TestCase):
         self.assertEqual(orgao, expected)
 
     @mock.patch("dominio.login.services.jwt.encode", return_value="auth-token")
-    @mock.patch("dominio.login.dao.oracle_access")
-    def test_build_login_response(self, _oracle_access, _jwt_encode):
-        _oracle_access.side_effect = [
-            (
-                (
-                    "098765",
-                    "12345",
-                    "123456789",
-                    "NOME FUNCIONARIO",
-                    "X",
-                    "4567",
-                    "PROMOTORIA INVESTIGAÇÃO PENAL",
-                    None,
-                    "RE",
-                ),
-                (
-                    "1234",
-                    "12345",
-                    "123456789",
-                    "NOME FUNCIONARIO",
-                    "X",
-                    "4567",
-                    "PROMOTORIA DIFERENTE",
-                    None,
-                    "RE",
-                ),
-            ),
-            (
-                ("1234", "PROMOTORIA TUTELA COLETIVA", None, "RE"),
-            ),  # result set do lista orgao pessoal
-        ]
+    def test_build_login_response(self, _jwt_encode):
         username = "username"
 
         response = services.build_login_response(username)
@@ -165,3 +175,13 @@ class PromotronLoginServices(TestCase):
                 self.assertEqual(
                     response[key], expected_response[key], key
                 )
+
+    @mock.patch("dominio.login.services.classifica_orgaos")
+    def test_nenhum_orgao_valido_encontrado(self, _classifica_orgaos):
+        # nenhum orgao valio
+        _classifica_orgaos.return_value = [
+            {"orgao": "ORGAO INVALIDO", "tipo": 0}
+        ]
+
+        with pytest.raises(Http404):
+            services.build_login_response("username")

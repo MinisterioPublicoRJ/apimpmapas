@@ -1,9 +1,14 @@
+import logging
 import jwt
 from django.conf import settings
+from django.http import Http404
 
 from dominio.models import Usuario
 from dominio.login import dao
 from login.jwtlogin import tipo_orgao
+
+
+login_logger = logging.getLogger(__name__)
 
 
 def build_login_response(username):
@@ -20,6 +25,10 @@ def build_login_response(username):
     orgaos_validos = filtra_orgaos_validos(
         classifica_orgaos(todos_orgaos)
     )
+    if not orgaos_validos:
+        msg = f"Nenhum órgão válido encontrado para '{username}'"
+        logging.info(msg)
+        raise Http404(msg)
 
     response = dict()
     response["orgao"] = orgaos_validos[0]["cdorgao"]
