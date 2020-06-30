@@ -12,7 +12,7 @@ from dominio.login.integra import authenticate_integra
 
 
 @pytest.mark.django_db(transaction=True)
-class TestLogin(TestCase):
+class TestLoginIntegra(TestCase):
     @mock.patch("dominio.models.RHFuncionario")
     @mock.patch("dominio.login.views.authenticate_integra")
     def test_correct_response(self, _auth_integra, _RhFuncionaio):
@@ -134,3 +134,45 @@ class AuthenticateIntegraTest(TestCase):
             algorithm='HS256',
         )
         self.assertEqual(resp_payload, expected_payload)
+
+
+@pytest.mark.django_db(transaction=True)
+class TestLoginPromotron(TestCase):
+    def setUp(self):
+        self.url = reverse("dominio:login-promotron")
+        self.username = "username"
+        self.password = "strongpassword"
+        self.data = {"username": self.username, "password": self.password}
+
+        self.build_response_patcher = mock.patch(
+            "dominio.login.views.services.build_login_response"
+        )
+        self.mock_build_response = self.build_response_patcher.start()
+
+        self.sca_login_patcher = mock.patch(
+            "dominio.login.views.login_sca.login"
+        )
+        self.mock_sca_login = self.sca_login_patcher.start()
+        # Sca auth ok (200)
+        self.mock_sca_login.return_value = mock.Mock(
+            auth=mock.Mock(status_code=200)
+        )
+
+    def tearDown(self):
+        self.sca_login_patcher.stop()
+        self.build_response_patcher.stop()
+
+    def test_login_return_data_from_rh_tables_first_login(self):
+        service_response = {"data": "service response"}
+        self.mock_build_response.return_value = service_response
+
+        resp = self.client.post(self.url, data=self.data)
+
+        self.assertEqual(resp.status_code, 200)
+        self.mock_sca_login.assert_called_once_with(
+            self.username,
+            bytes(self.password, "utf-8"),
+            settings.SCA_AUTH,
+            settings.SCA_CHECK,
+        )
+        self.assertEqual(resp.json(), service_response)
