@@ -147,11 +147,16 @@ class FinalizadosManager(models.Manager):
             andamento__pcao_dt_andamento__gte=date.today()
             - timedelta(days=30))
 
-        if regras_desarq:
-            max_set = finalizados.values('andamento__vista__documento__docu_dk').annotate(latest_andamento=Max('andamento__pcao_dt_andamento'))
-            q_statement = Q()
-            for pair in max_set:
-                q_statement |= (Q(andamento__vista__documento__docu_dk__exact=pair['andamento__vista__documento__docu_dk']) & Q(andamento__pcao_dt_andamento=pair['latest_andamento']))
-            return finalizados.filter(q_statement).exclude(stao_tppr_dk__in=regras_desarq)
+        #columns = ['andamento__vista__documento__docu_dk', 'andamento__pcao_dt_andamento', 'stao_tppr_dk']
+        #andamentos = finalizados.values(*columns)
+
+        # desarquivamentos = finalizados.filter(stao_tppr_dk__in=regras_desarq)
+
+        # if desarquivamentos.exists():
+        #     q_statement = Q()
+        #     for record in desarquivamentos:
+        #         q_statement |= (Q(andamento__vista__documento__docu_dk__exact=record['andamento__vista__documento__docu_dk']) & Q(andamento__pcao_dt_andamento__lte=record['andamento__pcao_dt_andamento']))
+        #     result = finalizados.exclude(q_statement).values('andamento__vista__documento__docu_dk').distinct()
+        #     return result
 
         return finalizados.values('andamento__vista__documento__docu_dk').distinct()
