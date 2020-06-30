@@ -1,9 +1,9 @@
 from unittest import mock
 
 import pytest
-from django.http import Http404
 from django.test import TestCase
 
+from dominio.exceptions import UserHasNoValidOfficesError
 from dominio.login import services
 
 
@@ -183,5 +183,5 @@ class PromotronLoginServices(TestCase):
             {"orgao": "ORGAO INVALIDO", "tipo": 0}
         ]
 
-        with pytest.raises(Http404):
+        with pytest.raises(UserHasNoValidOfficesError):
             services.build_login_response("username")

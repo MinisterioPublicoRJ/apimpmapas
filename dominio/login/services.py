@@ -1,8 +1,8 @@
 import logging
 import jwt
 from django.conf import settings
-from django.http import Http404
 
+from dominio.exceptions import UserHasNoValidOfficesError
 from dominio.models import Usuario
 from dominio.login import dao
 from login.jwtlogin import tipo_orgao
@@ -17,6 +17,7 @@ def build_login_response(username):
     )
 
     lista_orgaos = dao.ListaOrgaosDAO.get(login=username)
+    # Lotação especial
     lista_orgaos_pessoal = dao.ListaOrgaosPessoalDAO.get(
         login=username, accept_empty=True
     )
@@ -26,9 +27,8 @@ def build_login_response(username):
         classifica_orgaos(todos_orgaos)
     )
     if not orgaos_validos:
-        msg = f"Nenhum órgão válido encontrado para '{username}'"
-        logging.info(msg)
-        raise Http404(msg)
+        logging.info("Nenhum órgão válido encontrado para '{username}'")
+        raise UserHasNoValidOfficesError
 
     response = dict()
     response["orgao"] = orgaos_validos[0]["cdorgao"]
