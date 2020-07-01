@@ -9,7 +9,6 @@ from django.db.models import (
     Value,
     Sum,
     When,
-    Max,
 )
 from django.db.models.functions import Substr
 
@@ -155,12 +154,15 @@ class FinalizadosManager(models.Manager):
         # if desarquivamentos.exists():
         #     q_statement = Q()
         #     for record in desarquivamentos:
-        #         docu_dk_desarq = record['andamento__vista__documento__docu_dk']
+        #         docu_dk_desarq =\
+        #           record['andamento__vista__documento__docu_dk']
         #         dt_desarq = record['andamento__pcao_dt_andamento']
         #         q_statement |= (
-        #             Q(andamento__vista__documento__docu_dk__exact=docu_dk_desarq) & 
+        #             Q(andamento__vista__documento__docu_dk__exact=\
+        #               docu_dk_desarq) &
         #             Q(andamento__pcao_dt_andamento__lte=dt_desarq)
         #             )
         #     finalizados = finalizados.exclude(q_statement)
 
-        return finalizados.values('andamento__vista__documento__docu_dk').distinct()
+        return finalizados\
+            .values('andamento__vista__documento__docu_dk').distinct()
