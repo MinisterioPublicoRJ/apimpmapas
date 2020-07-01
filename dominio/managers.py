@@ -141,22 +141,26 @@ class FinalizadosManager(models.Manager):
             andamento__pcao_dt_cancelamento__isnull=True
         ).exclude(andamento__vista__documento__docu_tpst_dk=11)
 
-    def trinta_dias(self, orgao_id, regras, regras_desarq):
+    def trinta_dias(self, orgao_id, regras, regras_desarq=None):
         finalizados = self.no_orgao(orgao_id, regras)
         finalizados = finalizados.filter(
             andamento__pcao_dt_andamento__gte=date.today()
             - timedelta(days=30))
 
-        #columns = ['andamento__vista__documento__docu_dk', 'andamento__pcao_dt_andamento', 'stao_tppr_dk']
-        #andamentos = finalizados.values(*columns)
+        # A implementação dos desarquivamentos impactou muito a performance
+        # Como são poucos os casos de desarquivamento, foi decidido deixar
+        # o cálculo como está, sem considerá-los
 
         # desarquivamentos = finalizados.filter(stao_tppr_dk__in=regras_desarq)
-
         # if desarquivamentos.exists():
         #     q_statement = Q()
         #     for record in desarquivamentos:
-        #         q_statement |= (Q(andamento__vista__documento__docu_dk__exact=record['andamento__vista__documento__docu_dk']) & Q(andamento__pcao_dt_andamento__lte=record['andamento__pcao_dt_andamento']))
-        #     result = finalizados.exclude(q_statement).values('andamento__vista__documento__docu_dk').distinct()
-        #     return result
+        #         docu_dk_desarq = record['andamento__vista__documento__docu_dk']
+        #         dt_desarq = record['andamento__pcao_dt_andamento']
+        #         q_statement |= (
+        #             Q(andamento__vista__documento__docu_dk__exact=docu_dk_desarq) & 
+        #             Q(andamento__pcao_dt_andamento__lte=dt_desarq)
+        #             )
+        #     finalizados = finalizados.exclude(q_statement)
 
         return finalizados.values('andamento__vista__documento__docu_dk').distinct()

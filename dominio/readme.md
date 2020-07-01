@@ -146,6 +146,8 @@ Tipos aceitos:
 - pip_pics: Número de PICs ativas em uma PIP.
 - pip_aisp: Número de inquéritos e PICs ativos na AISP de uma PIP.
 - pip_finalizados: Número de documentos finalizados nos últimos 30 dias para PIPs.
+
+Obs.: Finalizados não consideram desarquivamentos!
 ```
 
 ```

@@ -93,14 +93,10 @@ def get_tutela_finalizados(orgao_id, request):
     regras_desarq = (6075, 1028, 6798, 7245, 6307, 1027, 7803, 6003, 7802,
                      7801, 6004, 6696)
 
-    regras = regras_ajuizamento + regras_tac + regras_arquiv + regras_desarq
+    regras = regras_ajuizamento + regras_tac + regras_arquiv # + regras_desarq
 
-    from time import perf_counter
-    t1 = perf_counter()
     res = SubAndamento.finalizados.trinta_dias(
-        orgao_id, regras, regras_desarq).count()
-    t2 = perf_counter()
-    print(t2-t1)
+        orgao_id, regras).count()
     return res
 
 
@@ -109,9 +105,11 @@ def get_pip_finalizados(orgao_id, request):
                      7871, 6343, 6340, 6342, 7745, 6346, 7915, 6272, 6253,
                      6392, 6377, 6378, 6359, 6362, 6361, 6436, 6524, 7737,
                      7811, 6625, 6718, 7834)
+
+    # Os mesmos desarquivamentos de Tutela servem para PIP
     regras_desarq = (6075, 1028, 6798, 7245, 6307, 1027, 7803, 6003, 7802,
                      7801, 6004, 6696)
-    regras = regras_arquiv + regras_desarq
+    regras = regras_arquiv # + regras_desarq
 
     return SubAndamento.finalizados.trinta_dias(
-        orgao_id, regras, regras_desarq).count()
+        orgao_id, regras).count()
