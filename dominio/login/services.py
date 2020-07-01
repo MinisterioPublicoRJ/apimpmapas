@@ -2,11 +2,12 @@ from collections import namedtuple
 
 import logging
 import jwt
+from cached_property import cached_property
 from django.conf import settings
 
-from dominio import exceptions
+from dominio.exceptions import APIEmptyResultError
 from dominio.models import Usuario
-from dominio.login import dao
+from dominio.login import dao, exceptions
 from login.jwtlogin import tipo_orgao
 
 
@@ -19,75 +20,99 @@ class PermissoesUsuarioPromotron:
         DaoWrapper(dao.ListaOrgaosDAO, {"accept_empty": False}),
         DaoWrapper(dao.ListaOrgaosPessoalDAO, {"accept_empty": True}),
     ]
+    user_info_fields = ["cpf", "matricula", "nome", "pess_dk", "sexo"]
 
-    @classmethod
-    def get_orgaos_lotados(cls, **kwargs):
+    def __init__(self, username):
+        self._username = username
+
+    @cached_property
+    def orgaos_lotados(self):
         lista_orgaos = []
-        for permissao in cls.permissoes_dao:
-            lista_orgaos.extend(
-                permissao.handler.get(**{**kwargs, **permissao.kwargs})
-            )
+        for permissao in self.permissoes_dao:
+            try:
+                orgaos = permissao.handler.get(
+                    login=self._username, **permissao.kwargs
+                )
+            except APIEmptyResultError:
+                raise exceptions.UserHasNoOfficeInformation
 
+            lista_orgaos.extend(orgaos)
+
+        lista_orgaos = self._classifica_orgaos(lista_orgaos)
         return lista_orgaos
+
+    @cached_property
+    def orgaos_validos(self):
+        lista_orgaos_validos = self._filtra_orgaos_invalidos(
+            self.orgaos_lotados
+        )
+        if not lista_orgaos_validos:
+            raise exceptions.UserHasNoValidOfficesError
+
+        return lista_orgaos_validos
+
+    @cached_property
+    def dados_usuario(self):
+        dados = {}
+        for orgao in self.orgaos_validos:
+            # Checa se retorno do banco possui todos os dados do usuário
+            if not set(self.user_info_fields) - set(orgao.keys()):
+                for field in self.user_info_fields:
+                    dados[field] = orgao[field]
+
+        if not dados:
+            raise exceptions.UserDetailsNotFoundError
+
+        return dados
+
+    @property
+    def orgao_selecionado(self):
+        "Até o momento o primeiro órgão válido é selecionado"
+        return self.orgaos_validos[0]
+
+    def _classifica_orgaos(self, lista_orgaos):
+        lista_orgaos_copy = lista_orgaos.copy()
+        for orgao in lista_orgaos_copy:
+            orgao["tipo"] = tipo_orgao(orgao["nm_org"])
+
+        return lista_orgaos_copy
+
+    def _filtra_orgaos_invalidos(self, lista_orgaos):
+        return [
+            orgao
+            for orgao in self._classifica_orgaos(lista_orgaos)
+            if orgao["tipo"] != 0
+        ]
 
 
 def build_login_response(username):
-    usuario, created = Usuario.objects.get_or_create(
-        username=username
-    )
+    usuario, created = Usuario.objects.get_or_create(username=username)
 
-    try:
-        lista_orgaos = PermissoesUsuarioPromotron.get_orgaos_lotados(
-            login=username
-        )
-    except exceptions.APIEmptyResultError:
-        raise exceptions.UserHasNoValidOfficesError
-
-    orgaos_validos = filtra_orgaos_validos(
-        classifica_orgaos(lista_orgaos)
-    )
-    if not orgaos_validos:
-        logging.info("Nenhum órgão válido encontrado para '{username}'")
-        raise exceptions.UserHasNoValidOfficesError
+    permissoes = PermissoesUsuarioPromotron(username=username)
 
     response = dict()
-    response["orgao"] = orgaos_validos[0]["cdorgao"]
+    # Informações do login
     response["username"] = usuario.username
     response["first_login"] = created
-    response["first_login_today"] = (
-        created or usuario.get_first_login_today()
-    )
-    response["sexo"] = lista_orgaos[0]["sexo"]
-    response["pess_dk"] = lista_orgaos[0]["pess_dk"]
-    response["cpf"] = lista_orgaos[0]["cpf"]
-    response["nome"] = lista_orgaos[0]["nome"]
-    response["tipo_orgao"] = orgaos_validos[0]["tipo"]
-    response["matricula"] = lista_orgaos[0]["matricula"]
+    response["first_login_today"] = created or usuario.get_first_login_today()
 
-    response["orgaos_validos"] = orgaos_validos
+    # Informações do usuário
+    response["sexo"] = permissoes.dados_usuario["sexo"]
+    response["pess_dk"] = permissoes.dados_usuario["pess_dk"]
+    response["cpf"] = permissoes.dados_usuario["cpf"]
+    response["nome"] = permissoes.dados_usuario["nome"]
+    response["matricula"] = permissoes.dados_usuario["matricula"]
+
+    # Informações do órgao seecionado
+    response["tipo_orgao"] = permissoes.orgao_selecionado["tipo"]
+    response["orgao"] = permissoes.orgao_selecionado["cdorgao"]
+    response["orgaos_validos"] = permissoes.orgaos_validos
 
     response["token"] = jwt.encode(
-        response,
-        settings.JWT_SECRET,
-        algorithm="HS256",
+        response, settings.JWT_SECRET, algorithm="HS256",
     )
 
     # Update last_login
     usuario.save()
 
     return response
-
-
-def classifica_orgaos(lista_orgaos):
-    return [
-        {
-            "orgao": orgao["nm_org"],
-            "tipo": tipo_orgao(orgao["nm_org"]),
-            "cdorgao": orgao["cdorgao"],
-        }
-        for orgao in lista_orgaos
-    ]
-
-
-def filtra_orgaos_validos(lista_orgaos):
-    return [orgao for orgao in lista_orgaos if orgao["tipo"] != 0]
