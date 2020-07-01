@@ -140,7 +140,8 @@ class TestSuaMesaFunctions(NoJWTTestCase, NoCacheTestCase, TestCase):
 
     @mock.patch('dominio.suamesa.dao_functions.SubAndamento')
     def test_get_tutela_finalizados(self, _SubAndamento):
-        regras_saidas = (6251, 6657, 6655, 6644, 6326)
+        regras_ajuizamento = (6251, )
+        regras_tac = (6655, 6326)
         regras_arquiv = (7912, 6548, 6326, 6681, 6678, 6645, 6682, 6680, 6679,
                          6644, 6668, 6666, 6665, 6669, 6667, 6664, 6655, 6662,
                          6659, 6658, 6663, 6661, 6660, 6657, 6670, 6676, 6674,
@@ -148,17 +149,13 @@ class TestSuaMesaFunctions(NoJWTTestCase, NoCacheTestCase, TestCase):
                          6591, 6339, 6553, 7871, 6343, 6340, 6342, 6021, 6334,
                          6331, 6022, 6020, 6593, 6332, 7872, 6336, 6333, 6335,
                          7745, 6346, 6345, 6015, 6016, 6325, 6327, 6328, 6329,
-                         6330, 6337, 6344, 6656, 6671, 7869, 7870, 6324)
+                         6330, 6337, 6344, 6656, 6671, 7869, 7870, 6324, 7834)
 
-        regras_finalizacoes = regras_saidas + regras_arquiv
+        regras = regras_ajuizamento + regras_tac + regras_arquiv
         manager_mock = mock.MagicMock()
-        values_mock = mock.MagicMock()
-        distinct_mock = mock.MagicMock()
 
         _SubAndamento.finalizados.trinta_dias.return_value = manager_mock
-        manager_mock.values.return_value = values_mock
-        values_mock.distinct.return_value = distinct_mock
-        distinct_mock.count.return_value = 1
+        manager_mock.count.return_value = 1
 
         orgao_id = 10
         mock_request = mock.MagicMock()
@@ -168,25 +165,21 @@ class TestSuaMesaFunctions(NoJWTTestCase, NoCacheTestCase, TestCase):
 
         self.assertEqual(output, 1)
         _SubAndamento.finalizados.trinta_dias.assert_called_once_with(
-            orgao_id, regras_finalizacoes
+            orgao_id, regras
         )
-        distinct_mock.count.assert_called_once_with()
+        manager_mock.count.assert_called_once_with()
 
     @mock.patch('dominio.suamesa.dao_functions.SubAndamento')
     def test_get_pip_finalizados(self, _SubAndamento):
         regras_arquiv = (6682, 6669, 6018, 6341, 6338, 6019, 6017, 6591, 6339,
                          7871, 6343, 6340, 6342, 7745, 6346, 7915, 6272, 6253,
                          6392, 6377, 6378, 6359, 6362, 6361, 6436, 6524, 7737,
-                         7811, 6625, 6718)
+                         7811, 6625, 6718, 7834)
 
         manager_mock = mock.MagicMock()
-        values_mock = mock.MagicMock()
-        distinct_mock = mock.MagicMock()
 
         _SubAndamento.finalizados.trinta_dias.return_value = manager_mock
-        manager_mock.values.return_value = values_mock
-        values_mock.distinct.return_value = distinct_mock
-        distinct_mock.count.return_value = 1
+        manager_mock.count.return_value = 1
 
         orgao_id = 10
         mock_request = mock.MagicMock()
@@ -198,4 +191,4 @@ class TestSuaMesaFunctions(NoJWTTestCase, NoCacheTestCase, TestCase):
         _SubAndamento.finalizados.trinta_dias.assert_called_once_with(
             orgao_id, regras_arquiv
         )
-        distinct_mock.count.assert_called_once_with()
+        manager_mock.count.assert_called_once_with()
