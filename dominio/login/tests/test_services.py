@@ -1,14 +1,24 @@
+from datetime import date
 from unittest import mock
 
 import pytest
 from django.test import TestCase
+from freezegun import freeze_time
+from model_bakery import baker
 
 from dominio.exceptions import UserHasNoValidOfficesError
 from dominio.login import services
+from dominio.models import Usuario
 
 
 class PromotronLoginServices(TestCase):
     def setUp(self):
+        self.username = "username"
+
+        self.jwt_patcher = mock.patch(
+            "dominio.login.services.jwt.encode", return_value="auth-token"
+        )
+        self.jwt_mock = self.jwt_patcher.start()
         self.oracle_access_patcher = mock.patch(
             "dominio.login.dao.oracle_access"
         )
@@ -44,7 +54,8 @@ class PromotronLoginServices(TestCase):
         ]
 
     def tearDown(self):
-        self.mock_oracle_access.stop()
+        self.oracle_access_patcher.stop()
+        self.jwt_patcher.stop()
 
     def test_classify_orgaos(self):
         """Um promotor pode estar lotado em mais de um órgao.
@@ -139,13 +150,10 @@ class PromotronLoginServices(TestCase):
 
         self.assertEqual(orgao, expected)
 
-    @mock.patch("dominio.login.services.jwt.encode", return_value="auth-token")
-    def test_build_login_response(self, _jwt_encode):
-        username = "username"
-
-        response = services.build_login_response(username)
+    def test_build_login_response(self):
+        response = services.build_login_response(self.username)
         expected_response = {
-            "username": username,
+            "username": self.username,
             "cpf": "123456789",
             "orgao": "098765",
             "pess_dk": "4567",
@@ -191,3 +199,46 @@ class PromotronLoginServices(TestCase):
 
         with pytest.raises(UserHasNoValidOfficesError):
             services.build_login_response("username")
+
+    def test_update_user_first_login_today(self):
+        with freeze_time("2020-1-1"):  # date of user creation in DB
+            user_db = baker.make(Usuario, username=self.username)
+
+
+        with freeze_time("2020-7-1"):  # date of login
+            response = services.build_login_response(self.username)
+
+        expected_response = {
+            "username": self.username,
+            "cpf": "123456789",
+            "orgao": "098765",
+            "pess_dk": "4567",
+            "nome": "NOME FUNCIONARIO",
+            "tipo_orgao": 2,
+            "matricula": "12345",
+            "first_login": False,
+            "first_login_today": True,
+            "sexo": "X",
+            "token": "auth-token",
+            "orgaos_validos": [
+                {
+                    "orgao": "PROMOTORIA INVESTIGAÇÃO PENAL",
+                    "tipo": 2,
+                    "cdorgao": "098765",
+                },
+                {
+                    "orgao": "PROMOTORIA TUTELA COLETIVA",
+                    "tipo": 1,
+                    "cdorgao": "1234",
+                },
+            ],
+        }
+
+        for key in response.keys():
+            with self.subTest():
+                self.assertEqual(
+                    response[key], expected_response[key], key
+                )
+
+        user_db.refresh_from_db(using="default")
+        self.assertEqual(user_db.last_login, date(2020, 7, 1))

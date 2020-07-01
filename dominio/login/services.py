@@ -56,6 +56,9 @@ def build_login_response(username):
         algorithm="HS256",
     )
 
+    # Update last_login
+    usuario.save()
+
     return response
 
 
