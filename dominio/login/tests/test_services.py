@@ -11,7 +11,7 @@ from dominio.login import services
 from dominio.models import Usuario
 
 
-class PromotronLoginServices(TestCase):
+class PromotronBuildLoginResponse(TestCase):
     def setUp(self):
         self.TEST_DATABASE_NAME = "default"
         self.username = "username"
@@ -83,6 +83,75 @@ class PromotronLoginServices(TestCase):
         self.oracle_access_patcher.stop()
         self.jwt_patcher.stop()
 
+    def test_build_login_response(self):
+        response = services.build_login_response(self.username)
+
+        for key in response.keys():
+            with self.subTest():
+                self.assertEqual(
+                    response[key], self.expected_response[key], key
+                )
+
+    @mock.patch("dominio.login.services.classifica_orgaos")
+    def test_nenhum_orgao_valido_encontrado(self, _classifica_orgaos):
+        # nenhum orgao valio
+        _classifica_orgaos.return_value = [
+            {"orgao": "ORGAO INVALIDO", "tipo": 0}
+        ]
+
+        with pytest.raises(UserHasNoValidOfficesError):
+            services.build_login_response("username")
+
+    def test_nenhum_orgao_encontrado_no_mgp(self):
+        self.mock_oracle_access.side_effect = [(), ]
+
+        with pytest.raises(UserHasNoValidOfficesError):
+            services.build_login_response("username")
+
+    def test_update_user_first_login_today(self):
+        with freeze_time("2020-1-1"):  # date of user creation in DB
+            user_db = baker.make(Usuario, username=self.username)
+
+
+        with freeze_time("2020-7-1"):  # date of login
+            response = services.build_login_response(self.username)
+
+        self.expected_response["first_login"] = False
+        self.expected_response["first_login_today"] = True
+
+
+        for key in response.keys():
+            with self.subTest():
+                self.assertEqual(
+                    response[key], self.expected_response[key], key
+                )
+
+        user_db.refresh_from_db(using=self.TEST_DATABASE_NAME)
+        self.assertEqual(user_db.last_login, date(2020, 7, 1))
+
+    def test_NOT_first_login_today(self):
+        with freeze_time("2020-1-1"):  # date of user creation in DB
+            user_db = baker.make(Usuario, username=self.username)
+
+
+        with freeze_time("2020-1-1"):  # date of login
+            response = services.build_login_response(self.username)
+
+        self.expected_response["first_login"] = False
+        self.expected_response["first_login_today"] = False
+
+
+        for key in response.keys():
+            with self.subTest():
+                self.assertEqual(
+                    response[key], self.expected_response[key], key
+                )
+
+        user_db.refresh_from_db(using=self.TEST_DATABASE_NAME)
+        self.assertEqual(user_db.last_login, date(2020, 1, 1))
+
+
+class PromotronPermissoesUsuario(TestCase):
     def test_classify_orgaos(self):
         """Um promotor pode estar lotado em mais de um órgao.
         Essa função irá dizer o tipo_orgao de cada uma deles"""
@@ -176,48 +245,3 @@ class PromotronLoginServices(TestCase):
 
         self.assertEqual(orgao, expected)
 
-    def test_build_login_response(self):
-        response = services.build_login_response(self.username)
-
-        for key in response.keys():
-            with self.subTest():
-                self.assertEqual(
-                    response[key], self.expected_response[key], key
-                )
-
-    @mock.patch("dominio.login.services.classifica_orgaos")
-    def test_nenhum_orgao_valido_encontrado(self, _classifica_orgaos):
-        # nenhum orgao valio
-        _classifica_orgaos.return_value = [
-            {"orgao": "ORGAO INVALIDO", "tipo": 0}
-        ]
-
-        with pytest.raises(UserHasNoValidOfficesError):
-            services.build_login_response("username")
-
-    def test_nenhum_orgao_encontrado_no_mgp(self):
-        self.mock_oracle_access.side_effect = [(), ]
-
-        with pytest.raises(UserHasNoValidOfficesError):
-            services.build_login_response("username")
-
-    def test_update_user_first_login_today(self):
-        with freeze_time("2020-1-1"):  # date of user creation in DB
-            user_db = baker.make(Usuario, username=self.username)
-
-
-        with freeze_time("2020-7-1"):  # date of login
-            response = services.build_login_response(self.username)
-
-        self.expected_response["first_login"] = False
-        self.expected_response["first_login_today"] = True
-
-
-        for key in response.keys():
-            with self.subTest():
-                self.assertEqual(
-                    response[key], self.expected_response[key], key
-                )
-
-        user_db.refresh_from_db(using=self.TEST_DATABASE_NAME)
-        self.assertEqual(user_db.last_login, date(2020, 7, 1))
