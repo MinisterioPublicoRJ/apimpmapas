@@ -78,11 +78,7 @@ class PermissoesUsuarioPromotron:
         return lista_orgaos_copy
 
     def _filtra_orgaos_invalidos(self, lista_orgaos):
-        return [
-            orgao
-            for orgao in self._classifica_orgaos(lista_orgaos)
-            if orgao["tipo"] != 0
-        ]
+        return [orgao for orgao in lista_orgaos if orgao["tipo"] != 0]
 
 
 def build_login_response(username):
