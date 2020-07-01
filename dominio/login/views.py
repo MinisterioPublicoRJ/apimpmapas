@@ -27,9 +27,7 @@ def login_integra(request):
 
 
 class LoginPromotronView(APIView):
-    def post(self, request, *args, **kwargs):
-        username = request.POST.get("username", "")
-        password = bytes(request.POST.get("password", ""), "utf-8")
+    def auth_sca(self, username, password):
         sca_resp = login_sca.login(
             username,
             password,
@@ -40,5 +38,13 @@ class LoginPromotronView(APIView):
         # TODO: maybe move this validation somewhere else.
         if sca_resp.auth.status_code != 200:
             raise PermissionDenied("Credenciais não encontradas")
+
+        return sca_resp
+
+    def post(self, request, *args, **kwargs):
+        username = request.POST.get("username", "")
+        password = bytes(request.POST.get("password", ""), "utf-8")
+
+        _ = self.auth_sca(username, password)
 
         return Response(data=services.build_login_response(username))
