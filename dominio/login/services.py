@@ -1,3 +1,5 @@
+from collections import namedtuple
+
 import logging
 import jwt
 from django.conf import settings
@@ -11,24 +13,38 @@ from login.jwtlogin import tipo_orgao
 login_logger = logging.getLogger(__name__)
 
 
+class PermissoesUsuarioPromotron:
+    DaoWrapper = namedtuple("PermissaoDao", ["handler", "kwargs"])
+    permissoes_dao = [
+        DaoWrapper(dao.ListaOrgaosDAO, {"accept_empty": False}),
+        DaoWrapper(dao.ListaOrgaosPessoalDAO, {"accept_empty": True}),
+    ]
+
+    @classmethod
+    def get_orgaos_lotados(cls, **kwargs):
+        lista_orgaos = []
+        for permissao in cls.permissoes_dao:
+            lista_orgaos.extend(
+                permissao.handler.get(**{**kwargs, **permissao.kwargs})
+            )
+
+        return lista_orgaos
+
+
 def build_login_response(username):
     usuario, created = Usuario.objects.get_or_create(
         username=username
     )
 
     try:
-        lista_orgaos = dao.ListaOrgaosDAO.get(login=username)
+        lista_orgaos = PermissoesUsuarioPromotron.get_orgaos_lotados(
+            login=username
+        )
     except exceptions.APIEmptyResultError:
         raise exceptions.UserHasNoValidOfficesError
 
-    # Lotação especial
-    lista_orgaos_pessoal = dao.ListaOrgaosPessoalDAO.get(
-        login=username, accept_empty=True
-    )
-    todos_orgaos = lista_orgaos + lista_orgaos_pessoal
-
     orgaos_validos = filtra_orgaos_validos(
-        classifica_orgaos(todos_orgaos)
+        classifica_orgaos(lista_orgaos)
     )
     if not orgaos_validos:
         logging.info("Nenhum órgão válido encontrado para '{username}'")

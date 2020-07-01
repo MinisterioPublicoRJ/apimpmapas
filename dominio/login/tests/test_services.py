@@ -6,7 +6,7 @@ from django.test import TestCase
 from freezegun import freeze_time
 from model_bakery import baker
 
-from dominio.exceptions import UserHasNoValidOfficesError
+from dominio.exceptions import APIEmptyResultError, UserHasNoValidOfficesError
 from dominio.login import services
 from dominio.models import Usuario
 
@@ -119,7 +119,6 @@ class PromotronBuildLoginResponse(TestCase):
         self.expected_response["first_login"] = False
         self.expected_response["first_login_today"] = True
 
-
         for key in response.keys():
             with self.subTest():
                 self.assertEqual(
@@ -140,7 +139,6 @@ class PromotronBuildLoginResponse(TestCase):
         self.expected_response["first_login"] = False
         self.expected_response["first_login_today"] = False
 
-
         for key in response.keys():
             with self.subTest():
                 self.assertEqual(
@@ -152,6 +150,107 @@ class PromotronBuildLoginResponse(TestCase):
 
 
 class PromotronPermissoesUsuario(TestCase):
+    def setUp(self):
+        self.username = "username"
+        self.oracle_access_patcher = mock.patch(
+            "dominio.login.dao.oracle_access"
+        )
+        self.mock_oracle_access = self.oracle_access_patcher.start()
+        self.oracle_return_lista_orgao = (
+                (
+                    "098765",
+                    "12345",
+                    "123456789",
+                    "NOME FUNCIONARIO",
+                    "X",
+                    "4567",
+                    "PROMOTORIA INVESTIGAÇÃO PENAL",
+                    None,
+                    "RE",
+                ),
+                (
+                    "1234",
+                    "12345",
+                    "123456789",
+                    "NOME FUNCIONARIO",
+                    "X",
+                    "4567",
+                    "PROMOTORIA DIFERENTE",
+                    None,
+                    "RE",
+                ),
+            )
+        self.oracle_return_lista_orgao_pessoal = (
+            (("1234", "PROMOTORIA TUTELA COLETIVA", None, "RE"),)
+        )
+        self.mock_oracle_access.side_effect = [
+            self.oracle_return_lista_orgao,
+            self.oracle_return_lista_orgao_pessoal,
+        ]
+        self.expected = [
+                {
+                    "cdorgao": "098765",
+                    "matricula": "12345",
+                    "cpf": "123456789",
+                    "nome": "NOME FUNCIONARIO",
+                    "sexo": "X",
+                    "pess_dk": "4567",
+                    "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
+                    "grupo": None,
+                    "atrib": "RE",
+                },
+                {
+                    "cdorgao": "1234",
+                    "matricula": "12345",
+                    "cpf": "123456789",
+                    "nome": "NOME FUNCIONARIO",
+                    "sexo": "X",
+                    "pess_dk": "4567",
+                    "nm_org": "PROMOTORIA DIFERENTE",
+                    "grupo": None,
+                    "atrib": "RE",
+                },
+                {
+                    "cdorgao": "1234",
+                    "nm_org": "PROMOTORIA TUTELA COLETIVA",
+                    "grupo": None,
+                    "atrib": "RE",
+                },
+        ]
+
+    def tearDown(self):
+        self.oracle_access_patcher.stop()
+
+    def test_retorna_todos_os_orgaos_do_usuario(self):
+        lista_orgaos = services.PermissoesUsuarioPromotron.get_orgaos_lotados(
+            login=self.username
+        )
+
+        self.assertEqual(lista_orgaos, self.expected)
+
+    def test_ListOrgaoDao_NAO_pode_estar_vazio(self):
+        self.mock_oracle_access.side_effect = [
+            [],
+            self.oracle_return_lista_orgao_pessoal,
+        ]
+
+        with pytest.raises(APIEmptyResultError):
+            services.PermissoesUsuarioPromotron.get_orgaos_lotados(
+                login=self.username
+            )
+
+    def test_ListOrgaoPessoalDao_pode_estar_vazio(self):
+        self.mock_oracle_access.side_effect = [
+            self.oracle_return_lista_orgao,
+            [],
+        ]
+        lista_orgaos = services.PermissoesUsuarioPromotron.get_orgaos_lotados(
+            login=self.username
+        )
+
+        self.expected.pop(-1)  # remove resposta vazia
+        self.assertEqual(lista_orgaos, self.expected)
+
     def test_classify_orgaos(self):
         """Um promotor pode estar lotado em mais de um órgao.
         Essa função irá dizer o tipo_orgao de cada uma deles"""
