@@ -13,6 +13,7 @@ from dominio.models import Usuario
 
 class PromotronLoginServices(TestCase):
     def setUp(self):
+        self.TEST_DATABASE_NAME = "default"
         self.username = "username"
 
         self.jwt_patcher = mock.patch(
@@ -52,6 +53,31 @@ class PromotronLoginServices(TestCase):
                 ("1234", "PROMOTORIA TUTELA COLETIVA", None, "RE"),
             ),  # result set do lista orgao pessoal
         ]
+        self.expected_response = {
+            "username": self.username,
+            "cpf": "123456789",
+            "orgao": "098765",
+            "pess_dk": "4567",
+            "nome": "NOME FUNCIONARIO",
+            "tipo_orgao": 2,
+            "matricula": "12345",
+            "first_login": True,
+            "first_login_today": True,
+            "sexo": "X",
+            "token": "auth-token",
+            "orgaos_validos": [
+                {
+                    "orgao": "PROMOTORIA INVESTIGAÇÃO PENAL",
+                    "tipo": 2,
+                    "cdorgao": "098765",
+                },
+                {
+                    "orgao": "PROMOTORIA TUTELA COLETIVA",
+                    "tipo": 1,
+                    "cdorgao": "1234",
+                },
+            ],
+        }
 
     def tearDown(self):
         self.oracle_access_patcher.stop()
@@ -152,36 +178,11 @@ class PromotronLoginServices(TestCase):
 
     def test_build_login_response(self):
         response = services.build_login_response(self.username)
-        expected_response = {
-            "username": self.username,
-            "cpf": "123456789",
-            "orgao": "098765",
-            "pess_dk": "4567",
-            "nome": "NOME FUNCIONARIO",
-            "tipo_orgao": 2,
-            "matricula": "12345",
-            "first_login": True,
-            "first_login_today": True,
-            "sexo": "X",
-            "token": "auth-token",
-            "orgaos_validos": [
-                {
-                    "orgao": "PROMOTORIA INVESTIGAÇÃO PENAL",
-                    "tipo": 2,
-                    "cdorgao": "098765",
-                },
-                {
-                    "orgao": "PROMOTORIA TUTELA COLETIVA",
-                    "tipo": 1,
-                    "cdorgao": "1234",
-                },
-            ],
-        }
 
         for key in response.keys():
             with self.subTest():
                 self.assertEqual(
-                    response[key], expected_response[key], key
+                    response[key], self.expected_response[key], key
                 )
 
     @mock.patch("dominio.login.services.classifica_orgaos")
@@ -208,37 +209,15 @@ class PromotronLoginServices(TestCase):
         with freeze_time("2020-7-1"):  # date of login
             response = services.build_login_response(self.username)
 
-        expected_response = {
-            "username": self.username,
-            "cpf": "123456789",
-            "orgao": "098765",
-            "pess_dk": "4567",
-            "nome": "NOME FUNCIONARIO",
-            "tipo_orgao": 2,
-            "matricula": "12345",
-            "first_login": False,
-            "first_login_today": True,
-            "sexo": "X",
-            "token": "auth-token",
-            "orgaos_validos": [
-                {
-                    "orgao": "PROMOTORIA INVESTIGAÇÃO PENAL",
-                    "tipo": 2,
-                    "cdorgao": "098765",
-                },
-                {
-                    "orgao": "PROMOTORIA TUTELA COLETIVA",
-                    "tipo": 1,
-                    "cdorgao": "1234",
-                },
-            ],
-        }
+        self.expected_response["first_login"] = False
+        self.expected_response["first_login_today"] = True
+
 
         for key in response.keys():
             with self.subTest():
                 self.assertEqual(
-                    response[key], expected_response[key], key
+                    response[key], self.expected_response[key], key
                 )
 
-        user_db.refresh_from_db(using="default")
+        user_db.refresh_from_db(using=self.TEST_DATABASE_NAME)
         self.assertEqual(user_db.last_login, date(2020, 7, 1))
