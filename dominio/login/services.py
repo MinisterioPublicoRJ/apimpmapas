@@ -81,6 +81,24 @@ class PermissoesUsuarioPromotron:
         return [orgao for orgao in lista_orgaos if orgao["tipo"] != 0]
 
 
+class PermissaoEspecialPromotron:
+    pass
+
+
+def permissoes_router(info):
+    #TODO: se número de permissoes crescrer utilizar estratégia mais SOLID
+    cls_permissoes = PermissoesUsuarioPromotron
+    if any(
+        [
+            info["permissions"].get(role, False)
+            for role in settings.DOMINIO_ESPECIAL_ROLES
+        ]
+    ):
+        cls_permissoes = PermissaoEspecialPromotron
+
+    return cls_permissoes
+
+
 def build_login_response(username):
     usuario, created = Usuario.objects.get_or_create(username=username)
 

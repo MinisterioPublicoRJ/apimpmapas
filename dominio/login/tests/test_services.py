@@ -2,7 +2,7 @@ from datetime import date
 from unittest import mock
 
 import pytest
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from freezegun import freeze_time
 from model_bakery import baker
 
@@ -318,3 +318,35 @@ class PromotronPermissoesUsuario(TestCase):
         ]
         with pytest.raises(exceptions.UserHasNoValidOfficesError):
             self.permissoes.orgaos_validos
+
+
+class TestPermissoesRouter(TestCase):
+    "Define qual controle de permissoes será usado"
+    def setUp(self):
+        self.json_master_1 = {
+            "permissions": {"ROLE_qualquer": True,
+                            "ROLE_master": True},  # possui ROLE especial
+        }
+        self.json_master_2 = {
+            "permissions": {"ROLE_qualquer": True,
+                            "ROLE_especial": True},  # possui ROLE especial
+        }
+        self.json_regular = {
+            "permissions": {"ROLE_qualquer": True}, # não possuei ROLE especial
+        }
+
+    @override_settings(DOMINIO_ESPECIAL_ROLES=["ROLE_especial", "ROLE_master"])
+    def test_role_router(self):
+        ClsPermissaoEspecial_1 = services.permissoes_router(self.json_master_1)
+        ClsPermissaoEspecial_2 = services.permissoes_router(self.json_master_2)
+        ClsPermissaoRegular = services.permissoes_router(self.json_regular)
+
+        self.assertEqual(
+            ClsPermissaoEspecial_1, services.PermissaoEspecialPromotron
+        )
+        self.assertEqual(
+            ClsPermissaoEspecial_2, services.PermissaoEspecialPromotron
+        )
+        self.assertEqual(
+            ClsPermissaoRegular, services.PermissoesUsuarioPromotron
+        )
