@@ -29,8 +29,4 @@ urlpatterns = [
     path('lupa/', include('lupa.urls', namespace='lupa')),
     path('dominio/', include('dominio.urls', namespace='dominio')),
     path('proxies/', include('proxies.urls', namespace='proxies')),
-    path(
-        'desaparecidos/',
-        include('desaparecidos.urls', namespace='desaparecidos')
-    ),
 ]
