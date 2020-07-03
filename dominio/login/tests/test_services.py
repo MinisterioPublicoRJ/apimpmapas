@@ -86,13 +86,17 @@ class PromotronBuildLoginResponse(TestCase):
                 },
             ],
         }
+        self.username = "username"
+        self.permissoes = services.PermissoesUsuarioPromotron(
+            username=self.username
+        )
 
     def tearDown(self):
         self.oracle_access_patcher.stop()
         self.jwt_patcher.stop()
 
     def test_build_login_response(self):
-        response = services.build_login_response(self.username)
+        response = services.build_login_response(self.permissoes)
 
         for key in response.keys():
             with self.subTest():
@@ -106,14 +110,14 @@ class PromotronBuildLoginResponse(TestCase):
         ]
 
         with pytest.raises(exceptions.UserHasNoOfficeInformation):
-            services.build_login_response("username")
+            services.build_login_response(self.permissoes)
 
     def test_update_user_first_login_today(self):
         with freeze_time("2020-1-1"):  # date of user creation in DB
             user_db = baker.make(Usuario, username=self.username)
 
         with freeze_time("2020-7-1"):  # date of login
-            response = services.build_login_response(self.username)
+            response = services.build_login_response(self.permissoes)
 
         self.expected_response["first_login"] = False
         self.expected_response["first_login_today"] = True
@@ -132,7 +136,7 @@ class PromotronBuildLoginResponse(TestCase):
             user_db = baker.make(Usuario, username=self.username)
 
         with freeze_time("2020-1-1"):  # date of login
-            response = services.build_login_response(self.username)
+            response = services.build_login_response(self.permissoes)
 
         self.expected_response["first_login"] = False
         self.expected_response["first_login_today"] = False
@@ -324,29 +328,38 @@ class TestPermissoesRouter(TestCase):
     "Define qual controle de permissoes será usado"
     def setUp(self):
         self.json_master_1 = {
+            "userDetails": {"login": "username"},
             "permissions": {"ROLE_qualquer": True,
                             "ROLE_master": True},  # possui ROLE especial
         }
         self.json_master_2 = {
+            "userDetails": {"login": "username"},
             "permissions": {"ROLE_qualquer": True,
                             "ROLE_especial": True},  # possui ROLE especial
         }
         self.json_regular = {
+            "userDetails": {"login": "username"},
             "permissions": {"ROLE_qualquer": True}, # não possuei ROLE especial
         }
 
     @override_settings(DOMINIO_ESPECIAL_ROLES=["ROLE_especial", "ROLE_master"])
     def test_role_router(self):
-        ClsPermissaoEspecial_1 = services.permissoes_router(self.json_master_1)
-        ClsPermissaoEspecial_2 = services.permissoes_router(self.json_master_2)
-        ClsPermissaoRegular = services.permissoes_router(self.json_regular)
+        permissao_especial_1 = services.permissoes_router(self.json_master_1)
+        permissao_especial_2 = services.permissoes_router(self.json_master_2)
+        permissao_regular = services.permissoes_router(self.json_regular)
 
-        self.assertEqual(
-            ClsPermissaoEspecial_1, services.PermissaoEspecialPromotron
+        self.assertTrue(
+            isinstance(permissao_especial_1, services.PermissaoEspecialPromotron)
         )
-        self.assertEqual(
-            ClsPermissaoEspecial_2, services.PermissaoEspecialPromotron
+        self.assertTrue(
+            isinstance(permissao_especial_2, services.PermissaoEspecialPromotron)
         )
-        self.assertEqual(
-            ClsPermissaoRegular, services.PermissoesUsuarioPromotron
+        self.assertTrue(
+            isinstance(permissao_regular, services.PermissoesUsuarioPromotron)
         )
+
+    def test_set_username_to_lower(self):
+        self.json_regular["userDetails"]["info"] = "USERNAME"
+        permissao = services.permissoes_router(self.json_regular)
+
+        self.assertEqual(permissao.username, "username")

@@ -147,14 +147,19 @@ class TestLoginPromotron(TestCase):
         )
         self.mock_build_response = self.build_response_patcher.start()
 
+        self.json_sca_info = {
+            "userDetails": {"login": "username"},
+            "permissions": {"ROLE_regular": True}
+        }
         self.sca_login_patcher = mock.patch(
             "dominio.login.views.login_sca.login"
         )
         self.mock_sca_login = self.sca_login_patcher.start()
         # Sca auth ok (200)
-        self.mock_sca_login.return_value = mock.Mock(
-            auth=mock.Mock(status_code=200)
-        )
+        sca_resp_mock = mock.Mock()
+        sca_resp_mock.auth = mock.Mock(status_code=200)
+        sca_resp_mock.info.json = mock.Mock(return_value=self.json_sca_info)
+        self.mock_sca_login.return_value = sca_resp_mock
 
     def tearDown(self):
         self.sca_login_patcher.stop()

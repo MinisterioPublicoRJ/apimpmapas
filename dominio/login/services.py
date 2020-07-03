@@ -25,6 +25,10 @@ class PermissoesUsuarioPromotron:
     def __init__(self, username):
         self._username = username
 
+    @property
+    def username(self):
+        return self._username
+
     @cached_property
     def orgaos_lotados(self):
         lista_orgaos = []
@@ -82,10 +86,12 @@ class PermissoesUsuarioPromotron:
 
 
 class PermissaoEspecialPromotron:
-    pass
+    def __init__(self, username):
+        self._username = username
 
 
 def permissoes_router(info):
+    username = info["userDetails"]["login"].lower()
     #TODO: se número de permissoes crescrer utilizar estratégia mais SOLID
     cls_permissoes = PermissoesUsuarioPromotron
     if any(
@@ -96,13 +102,13 @@ def permissoes_router(info):
     ):
         cls_permissoes = PermissaoEspecialPromotron
 
-    return cls_permissoes
+    return cls_permissoes(username)
 
 
-def build_login_response(username):
-    usuario, created = Usuario.objects.get_or_create(username=username)
-
-    permissoes = PermissoesUsuarioPromotron(username=username)
+def build_login_response(permissoes):
+    usuario, created = Usuario.objects.get_or_create(
+        username=permissoes.username
+    )
 
     response = dict()
     # Informações do login

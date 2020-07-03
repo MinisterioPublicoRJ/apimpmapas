@@ -45,6 +45,7 @@ class LoginPromotronView(APIView):
         username = request.POST.get("username", "")
         password = bytes(request.POST.get("password", ""), "utf-8")
 
-        _ = self.auth_sca(username, password)
+        sca_resp = self.auth_sca(username, password)
+        permissoes = services.permissoes_router(sca_resp.info.json())
 
-        return Response(data=services.build_login_response(username))
+        return Response(data=services.build_login_response(permissoes))
