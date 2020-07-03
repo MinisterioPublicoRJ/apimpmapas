@@ -14,12 +14,8 @@ from login.jwtlogin import tipo_orgao
 login_logger = logging.getLogger(__name__)
 
 
-class PermissoesUsuarioPromotron:
-    DaoWrapper = namedtuple("PermissaoDao", ["handler", "kwargs"])
-    permissoes_dao = [
-        DaoWrapper(dao.ListaOrgaosDAO, {"accept_empty": False}),
-        DaoWrapper(dao.ListaOrgaosPessoalDAO, {"accept_empty": True}),
-    ]
+# deveria ser abstrata?
+class PermissaoUsuario:
     user_info_fields = ["cpf", "matricula", "nome", "pess_dk", "sexo"]
 
     def __init__(self, username):
@@ -55,6 +51,26 @@ class PermissoesUsuarioPromotron:
 
         return lista_orgaos_validos
 
+    @property
+    def orgao_selecionado(self):
+        "Até o momento o primeiro órgão válido é selecionado"
+        return self.orgaos_validos[0]
+
+    def _classifica_orgaos(self, lista_orgaos):
+        lista_orgaos_copy = lista_orgaos.copy()
+        for orgao in lista_orgaos_copy:
+            orgao["tipo"] = tipo_orgao(orgao["nm_org"])
+
+        return lista_orgaos_copy
+
+
+class PermissoesUsuarioPromotron(PermissaoUsuario):
+    DaoWrapper = namedtuple("PermissaoDao", ["handler", "kwargs"])
+    permissoes_dao = [
+        DaoWrapper(dao.ListaOrgaosDAO, {"accept_empty": False}),
+        DaoWrapper(dao.ListaOrgaosPessoalDAO, {"accept_empty": True}),
+    ]
+
     @cached_property
     def dados_usuario(self):
         dados = {}
@@ -69,23 +85,11 @@ class PermissoesUsuarioPromotron:
 
         return dados
 
-    @property
-    def orgao_selecionado(self):
-        "Até o momento o primeiro órgão válido é selecionado"
-        return self.orgaos_validos[0]
-
-    def _classifica_orgaos(self, lista_orgaos):
-        lista_orgaos_copy = lista_orgaos.copy()
-        for orgao in lista_orgaos_copy:
-            orgao["tipo"] = tipo_orgao(orgao["nm_org"])
-
-        return lista_orgaos_copy
-
     def _filtra_orgaos_invalidos(self, lista_orgaos):
         return [orgao for orgao in lista_orgaos if orgao["tipo"] != 0]
 
 
-class PermissaoEspecialPromotron:
+class PermissaoEspecialPromotron(PermissaoUsuario):
     def __init__(self, username):
         self._username = username
 
