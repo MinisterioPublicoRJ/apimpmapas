@@ -1,9 +1,8 @@
 from unittest import mock
 
+from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
-
-from desaparecidos import settings as d_settings
 
 
 class Desaparecidos(TestCase):
@@ -18,9 +17,9 @@ class Desaparecidos(TestCase):
         resp = self.client.get(url)
 
         _client.assert_called_once_with(
-            d_settings.DESAPARECIDOS_DB_USER,
-            d_settings.DESAPARECIDOS_DB_PWD,
-            d_settings.DESAPARECIDOS_DB_HOST
+            settings.DESAPARECIDOS_DB_USER,
+            settings.DESAPARECIDOS_DB_PWD,
+            settings.DESAPARECIDOS_DB_HOST
         )
         _rank.assert_called_once_with("cursor", "1234")
         self.assertEqual(resp.status_code, 200)
@@ -36,9 +35,9 @@ class Desaparecidos(TestCase):
         resp = self.client.get(url)
 
         _client.assert_called_once_with(
-            d_settings.DESAPARECIDOS_DB_USER,
-            d_settings.DESAPARECIDOS_DB_PWD,
-            d_settings.DESAPARECIDOS_DB_HOST
+            settings.DESAPARECIDOS_DB_USER,
+            settings.DESAPARECIDOS_DB_PWD,
+            settings.DESAPARECIDOS_DB_HOST
         )
         _rank.assert_called_once_with("cursor", "xxxx")
         self.assertEqual(resp.status_code, 404)
