@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     'login',
     'mprj_plus',
     'nested_admin',
-#    'desaparecidos',
+    'desaparecidos',
     'proxies',
 ]
 
