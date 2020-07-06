@@ -32,6 +32,7 @@ class PIPPrincipaisInvestigadosListaSerializer(serializers.Serializer):
     nm_orgao = serializers.CharField()
     etiqueta = serializers.CharField()
     assuntos = serializers.ListField(serializers.CharField())
+    fase_documento = serializers.CharField()
 
 
 class PIPIndicadoresSucessoParser(serializers.Serializer):
