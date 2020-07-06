@@ -254,6 +254,8 @@ class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
     query_file = "pip_principais_investigados_lista.sql"
     columns = [
         "representante_dk",
+        "nm_investigado",
+        "tipo_personagem",
         "orgao_id",
         "documento_nr_mp",
         "documento_dt_cadastro",
