@@ -81,7 +81,7 @@ class PermissaoUsuario:
         return [orgao for orgao in lista_orgaos if orgao["tipo"] != 0]
 
 
-class PermissoesUsuarioPromotron(PermissaoUsuario):
+class PermissoesUsuarioRegular(PermissaoUsuario):
     DaoWrapper = namedtuple("PermissaoDao", ["handler", "kwargs"])
     permissoes_dao = [
         DaoWrapper(dao.ListaOrgaosDAO, {"accept_empty": False}),
@@ -89,7 +89,7 @@ class PermissoesUsuarioPromotron(PermissaoUsuario):
     ]
 
 
-class PermissaoEspecialPromotron(PermissaoUsuario):
+class PermissoesUsuarioAdmin(PermissaoUsuario):
     DaoWrapper = namedtuple("PermissaoDao", ["handler", "kwargs"])
     permissoes_dao = [
         DaoWrapper(dao.ListaTodosOrgaosDAO, {"accept_empty": False}),
@@ -115,14 +115,14 @@ class PermissaoEspecialPromotron(PermissaoUsuario):
 def permissoes_router(info):
     username = info["userDetails"]["login"].lower()
     # TODO: se número de permissoes crescrer utilizar estratégia mais SOLID
-    cls_permissoes = PermissoesUsuarioPromotron
+    cls_permissoes = PermissoesUsuarioRegular
     if any(
         [
             info["permissions"].get(role, False)
             for role in settings.DOMINIO_ESPECIAL_ROLES
         ]
     ):
-        cls_permissoes = PermissaoEspecialPromotron
+        cls_permissoes = PermissoesUsuarioAdmin
 
     return cls_permissoes(username)
 

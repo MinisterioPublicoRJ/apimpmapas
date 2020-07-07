@@ -26,7 +26,7 @@ def login_integra(request):
     return JsonResponse(response)
 
 
-class LoginPromotronView(APIView):
+class LoginView(APIView):
     def auth_sca(self, username, password):
         sca_resp = login_sca.login(
             username,

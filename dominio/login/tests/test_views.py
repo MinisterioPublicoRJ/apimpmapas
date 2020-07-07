@@ -135,7 +135,7 @@ class AuthenticateIntegraTest(TestCase):
 
 
 @pytest.mark.django_db(transaction=True)
-class TestLoginPromotron(TestCase):
+class TestLogin(TestCase):
     def setUp(self):
         self.url = reverse("dominio:login-promotron")
         self.username = "username"

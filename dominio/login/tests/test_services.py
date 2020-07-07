@@ -10,7 +10,7 @@ from dominio.login import services, exceptions
 from dominio.models import Usuario
 
 
-class PromotronBuildLoginResponse(TestCase):
+class TestBuildLoginResponse(TestCase):
     def setUp(self):
         self.TEST_DATABASE_NAME = "default"
         self.username = "username"
@@ -73,7 +73,7 @@ class PromotronBuildLoginResponse(TestCase):
             ],
         }
         self.username = "username"
-        self.permissoes = services.PermissoesUsuarioPromotron(
+        self.permissoes = services.PermissoesUsuarioRegular(
             username=self.username
         )
 
@@ -138,7 +138,7 @@ class PromotronBuildLoginResponse(TestCase):
         self.assertEqual(user_db.last_login, date(2020, 1, 1))
 
 
-class PromotronPermissoesUsuario(TestCase):
+class TestPermissoesUsuarioRegular(TestCase):
     def setUp(self):
         self.username = "username"
         self.oracle_access_patcher = mock.patch(
@@ -192,7 +192,7 @@ class PromotronPermissoesUsuario(TestCase):
                 "tipo": 1,
             },
         ]
-        self.permissoes = services.PermissoesUsuarioPromotron(
+        self.permissoes = services.PermissoesUsuarioRegular(
             username=self.username
         )
 
@@ -294,7 +294,7 @@ class TestRetrieveDadosUsuario(TestCase):
             ("12345", "123456789", "NOME FUNCIONARIO", "X", "4567"),
         )
         self.mock_oracle_access.return_value = self.oracle_return_dados_usuario
-        self.permissoes = services.PermissoesUsuarioPromotron(
+        self.permissoes = services.PermissoesUsuarioRegular(
             username=self.username
         )
 
@@ -336,13 +336,13 @@ class TestPermissoesRouter(TestCase):
         permissao_regular = services.permissoes_router(self.json_regular)
 
         self.assertTrue(
-            isinstance(permissao_especial_1, services.PermissaoEspecialPromotron)
+            isinstance(permissao_especial_1, services.PermissoesUsuarioAdmin)
         )
         self.assertTrue(
-            isinstance(permissao_especial_2, services.PermissaoEspecialPromotron)
+            isinstance(permissao_especial_2, services.PermissoesUsuarioAdmin)
         )
         self.assertTrue(
-            isinstance(permissao_regular, services.PermissoesUsuarioPromotron)
+            isinstance(permissao_regular, services.PermissoesUsuarioRegular)
         )
 
     def test_set_username_to_lower(self):
@@ -352,7 +352,7 @@ class TestPermissoesRouter(TestCase):
         self.assertEqual(permissao.username, "username")
 
 
-class PromotronPermissoesUsuarioEspecial(TestCase):
+class TesPermissoesUsuarioAdmin(TestCase):
     def setUp(self):
         self.username = "username"
         self.oracle_access_patcher = mock.patch(
@@ -427,7 +427,7 @@ class PromotronPermissoesUsuarioEspecial(TestCase):
                 "tipo": 1,
             },
         ]
-        self.permissoes = services.PermissaoEspecialPromotron(
+        self.permissoes = services.PermissoesUsuarioAdmin(
             username=self.username
         )
 

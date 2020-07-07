@@ -7,7 +7,7 @@ urlpatterns = [
     path('login/', views.login_integra, name="login-integra"),
     path(
         "login-promotron/",
-        views.LoginPromotronView.as_view(),
+        views.LoginView.as_view(),
         name="login-promotron"
     ),
 ]
