@@ -29,7 +29,7 @@ class TestBuildLoginResponse(TestCase):
         self.mock_oracle_access.side_effect = [
             self.oracle_return_dados_usuario,
             (
-                ( "098765", "PROMOTORIA INVESTIGAÇÃO PENAL"),
+                ("098765", "PROMOTORIA INVESTIGAÇÃO PENAL"),
                 ("1234", "PROMOTORIA DIFERENTE"),
             ),
             (
@@ -65,7 +65,6 @@ class TestBuildLoginResponse(TestCase):
                     "pess_dk": "4567",
                     "nome": "NOME FUNCIONARIO",
                     "sexo": "X",
-                    "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
                     "nm_org": "PROMOTORIA TUTELA COLETIVA",
                     "tipo": 1,
                     "cdorgao": "1234",
@@ -261,7 +260,7 @@ class TestPermissoesUsuarioRegular(TestCase):
         # não pode ser usado pra dados do usuário.
         # Resposta da query ListaOrgaoPessoal não traz informações do usuário
         self.mock_oracle_access.side_effect = [
-            (), # Dados do usuário
+            (),  # Dados do usuário
         ]
         with pytest.raises(exceptions.UserDetailsNotFoundError):
             self.permissoes.dados_usuario
@@ -313,20 +312,27 @@ class TestRetrieveDadosUsuario(TestCase):
 
 class TestPermissoesRouter(TestCase):
     "Define qual controle de permissoes será usado"
+
     def setUp(self):
         self.json_master_1 = {
             "userDetails": {"login": "username"},
-            "permissions": {"ROLE_qualquer": True,
-                            "ROLE_master": True},  # possui ROLE especial
+            "permissions": {
+                "ROLE_qualquer": True,
+                "ROLE_master": True,
+            },  # possui ROLE especial
         }
         self.json_master_2 = {
             "userDetails": {"login": "username"},
-            "permissions": {"ROLE_qualquer": True,
-                            "ROLE_especial": True},  # possui ROLE especial
+            "permissions": {
+                "ROLE_qualquer": True,
+                "ROLE_especial": True,
+            },  # possui ROLE especial
         }
         self.json_regular = {
             "userDetails": {"login": "username"},
-            "permissions": {"ROLE_qualquer": True}, # não possuei ROLE especial
+            "permissions": {
+                "ROLE_qualquer": True
+            },  # não possuei ROLE especial
         }
 
     @override_settings(DOMINIO_ESPECIAL_ROLES=["ROLE_especial", "ROLE_master"])
@@ -370,7 +376,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "cpf 1",
                 "nome 1",
                 "X",
-                "pess_dk 1"
+                "pess_dk 1",
             ),
             (
                 "cdorgao 2",
@@ -379,7 +385,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "cpf 2",
                 "nome 2",
                 "X",
-                "pess_dk 2"
+                "pess_dk 2",
             ),
             (
                 "cdorgao 3",
@@ -388,7 +394,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "cpf 3",
                 "nome 3",
                 "X",
-                "pess_dk 3"
+                "pess_dk 3",
             ),
         )
         self.mock_oracle_access.side_effect = [

@@ -30,7 +30,15 @@ class ListaOrgaosPessoalDAO(GenericDAO):
 class ListaTodosOrgaosDAO(GenericDAO):
     QUERIES_DIR = settings.BASE_DIR.child("dominio", "login", "queries")
     query_file = "lista_todos_orgaos.sql"
-    columns = ["cdorgao", "nm_org", "matricula", "cpf", "nome", "sexo", "pess_dk"]
+    columns = [
+        "cdorgao",
+        "nm_org",
+        "matricula",
+        "cpf",
+        "nome",
+        "sexo",
+        "pess_dk",
+    ]
     serializer = serializers.ListaTodosOrgaosSerializer
 
     @classmethod
