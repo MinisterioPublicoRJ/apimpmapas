@@ -23,33 +23,17 @@ class PromotronBuildLoginResponse(TestCase):
             "dominio.login.dao.oracle_access"
         )
         self.mock_oracle_access = self.oracle_access_patcher.start()
+        self.oracle_return_dados_usuario = (
+            ("12345", "123456789", "NOME FUNCIONARIO", "X", "4567"),
+        )
         self.mock_oracle_access.side_effect = [
+            self.oracle_return_dados_usuario,
             (
-                (
-                    "098765",
-                    "12345",
-                    "123456789",
-                    "NOME FUNCIONARIO",
-                    "X",
-                    "4567",
-                    "PROMOTORIA INVESTIGAÇÃO PENAL",
-                    None,
-                    "RE",
-                ),
-                (
-                    "1234",
-                    "12345",
-                    "123456789",
-                    "NOME FUNCIONARIO",
-                    "X",
-                    "4567",
-                    "PROMOTORIA DIFERENTE",
-                    None,
-                    "RE",
-                ),
+                ( "098765", "PROMOTORIA INVESTIGAÇÃO PENAL"),
+                ("1234", "PROMOTORIA DIFERENTE"),
             ),
             (
-                ("1234", "PROMOTORIA TUTELA COLETIVA", None, "RE"),
+                ("1234", "PROMOTORIA TUTELA COLETIVA"),
             ),  # result set do lista orgao pessoal
         ]
         self.expected_response = {
@@ -73,15 +57,17 @@ class PromotronBuildLoginResponse(TestCase):
                     "sexo": "X",
                     "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
                     "tipo": 2,
-                    "grupo": None,
-                    "atrib": "RE",
                     "cdorgao": "098765",
                 },
                 {
+                    "cpf": "123456789",
+                    "matricula": "12345",
+                    "pess_dk": "4567",
+                    "nome": "NOME FUNCIONARIO",
+                    "sexo": "X",
+                    "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
                     "nm_org": "PROMOTORIA TUTELA COLETIVA",
                     "tipo": 1,
-                    "grupo": None,
-                    "atrib": "RE",
                     "cdorgao": "1234",
                 },
             ],
@@ -106,6 +92,7 @@ class PromotronBuildLoginResponse(TestCase):
 
     def test_nenhum_orgao_encontrado_no_mgp(self):
         self.mock_oracle_access.side_effect = [
+            self.oracle_return_dados_usuario,
             (),
         ]
 
@@ -158,67 +145,50 @@ class PromotronPermissoesUsuario(TestCase):
             "dominio.login.dao.oracle_access"
         )
         self.mock_oracle_access = self.oracle_access_patcher.start()
+        self.oracle_return_dados_usuario = (
+            ("12345", "123456789", "NOME FUNCIONARIO", "X", "4567"),
+        )
         self.oracle_return_lista_orgao = (
-            (
-                "098765",
-                "12345",
-                "123456789",
-                "NOME FUNCIONARIO",
-                "X",
-                "4567",
-                "PROMOTORIA INVESTIGAÇÃO PENAL",
-                None,
-                "RE",
-            ),
-            (
-                "1234",
-                "12345",
-                "123456789",
-                "NOME FUNCIONARIO",
-                "X",
-                "4567",
-                "PROMOTORIA DIFERENTE",
-                None,
-                "RE",
-            ),
+            ("098765", "PROMOTORIA INVESTIGAÇÃO PENAL"),
+            ("1234", "PROMOTORIA DIFERENTE"),
         )
         self.oracle_return_lista_orgao_pessoal = (
-            ("1234", "PROMOTORIA TUTELA COLETIVA", None, "RE"),
+            ("9999", "PROMOTORIA TUTELA COLETIVA"),
         )
         self.mock_oracle_access.side_effect = [
             self.oracle_return_lista_orgao,
             self.oracle_return_lista_orgao_pessoal,
+            self.oracle_return_dados_usuario,
         ]
         self.expected = [
             {
-                "cdorgao": "098765",
-                "matricula": "12345",
                 "cpf": "123456789",
-                "nome": "NOME FUNCIONARIO",
-                "sexo": "X",
                 "pess_dk": "4567",
+                "nome": "NOME FUNCIONARIO",
+                "matricula": "12345",
+                "sexo": "X",
+                "cdorgao": "098765",
                 "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
-                "grupo": None,
-                "atrib": "RE",
                 "tipo": 2,
             },
             {
-                "cdorgao": "1234",
-                "matricula": "12345",
                 "cpf": "123456789",
-                "nome": "NOME FUNCIONARIO",
-                "sexo": "X",
                 "pess_dk": "4567",
+                "nome": "NOME FUNCIONARIO",
+                "matricula": "12345",
+                "sexo": "X",
+                "cdorgao": "1234",
                 "nm_org": "PROMOTORIA DIFERENTE",
-                "grupo": None,
-                "atrib": "RE",
                 "tipo": 0,
             },
             {
-                "cdorgao": "1234",
+                "cpf": "123456789",
+                "pess_dk": "4567",
+                "nome": "NOME FUNCIONARIO",
+                "matricula": "12345",
+                "sexo": "X",
+                "cdorgao": "9999",
                 "nm_org": "PROMOTORIA TUTELA COLETIVA",
-                "grupo": None,
-                "atrib": "RE",
                 "tipo": 1,
             },
         ]
@@ -252,6 +222,7 @@ class PromotronPermissoesUsuario(TestCase):
         self.mock_oracle_access.side_effect = [
             self.oracle_return_lista_orgao,
             [],
+            self.oracle_return_dados_usuario,
         ]
         lista_orgaos = self.permissoes.orgaos_lotados
 
@@ -285,25 +256,12 @@ class PromotronPermissoesUsuario(TestCase):
 
         self.assertEqual(tipos_promotorias, expected)
 
-    def test_organiza_dados_do_usuario(self):
-        dados = self.permissoes.dados_usuario
-        expected = {
-            "cpf": "123456789",
-            "pess_dk": "4567",
-            "nome": "NOME FUNCIONARIO",
-            "matricula": "12345",
-            "sexo": "X",
-        }
-
-        self.assertEqual(dados, expected)
-
     def test_erro_se_resposta_do_banco_nao_conter_dados_do_usuario(self):
         # Resposa da query ListaOrgao não possui órgão válido, portanto
         # não pode ser usado pra dados do usuário.
         # Resposta da query ListaOrgaoPessoal não traz informações do usuário
         self.mock_oracle_access.side_effect = [
-            (self.oracle_return_lista_orgao[1],),
-            self.oracle_return_lista_orgao_pessoal,
+            (), # Dados do usuário
         ]
         with pytest.raises(exceptions.UserDetailsNotFoundError):
             self.permissoes.dados_usuario
@@ -319,9 +277,38 @@ class PromotronPermissoesUsuario(TestCase):
         self.mock_oracle_access.side_effect = [
             (self.oracle_return_lista_orgao[1],),  # Apenas órgão inválido
             [],
+            self.oracle_return_dados_usuario,
         ]
         with pytest.raises(exceptions.UserHasNoValidOfficesError):
             self.permissoes.orgaos_validos
+
+
+class TestRetrieveDadosUsuario(TestCase):
+    def setUp(self):
+        self.username = "username"
+        self.oracle_access_patcher = mock.patch(
+            "dominio.login.dao.oracle_access"
+        )
+        self.mock_oracle_access = self.oracle_access_patcher.start()
+        self.oracle_return_dados_usuario = (
+            ("12345", "123456789", "NOME FUNCIONARIO", "X", "4567"),
+        )
+        self.mock_oracle_access.return_value = self.oracle_return_dados_usuario
+        self.permissoes = services.PermissoesUsuarioPromotron(
+            username=self.username
+        )
+
+    def test_organiza_dados_do_usuario(self):
+        dados = self.permissoes.dados_usuario
+        expected = {
+            "cpf": "123456789",
+            "pess_dk": "4567",
+            "nome": "NOME FUNCIONARIO",
+            "matricula": "12345",
+            "sexo": "X",
+        }
+
+        self.assertEqual(dados, expected)
 
 
 class TestPermissoesRouter(TestCase):

@@ -1,13 +1,6 @@
 select
 	h.cdorgao as cdorgao,
-    f.cdmatricula as matricula,
-    rhf.CPF as cpf,
-    rhf.NMFUNCIONARIO as nome,
-    rhf.SEXO as sexo,
-    rhf.PESF_PESS_DK as pess_dk,
-	o.ORGI_NM_ORGAO as nm_org,
-	grp.GRPF_NM_GRUPO_PREF AS grupo,
-	CDMOTIVOINI as atrib
+	o.ORGI_NM_ORGAO as nm_org
 from hist_func h
 	join MPRJ_VW_FUNCIONARIO f on f.cdmatricula = h.cdmatricula
 	join RH_FUNCIONARIO rhf on rhf.CDMATRICULA = h.cdmatricula
@@ -22,3 +15,5 @@ where rhf.E_MAIL1 = LOWER(TRIM(:login))                           -- Matrícula 
 				lower(h.obs) not like '%exclusivamente%'          -- as palavras 'exclusivamente' e 'especificamente'
 				and lower(h.obs) not like '%especificamente%'
 			))) or (f.CDTIPFUNC <> 1))                            -- Ou que não seja MP_ATIVO
+
+GROUP BY h.cdorgao, o.ORGI_NM_ORGAO

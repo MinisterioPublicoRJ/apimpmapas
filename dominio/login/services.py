@@ -16,8 +16,6 @@ login_logger = logging.getLogger(__name__)
 
 # deveria ser abstrata?
 class PermissaoUsuario:
-    user_info_fields = ["cpf", "matricula", "nome", "pess_dk", "sexo"]
-
     def __init__(self, username):
         self._username = username
 
@@ -39,7 +37,7 @@ class PermissaoUsuario:
             lista_orgaos.extend(orgaos)
 
         lista_orgaos = self._classifica_orgaos(lista_orgaos)
-        return lista_orgaos
+        return self._preenche_dados_usuario(lista_orgaos)
 
     @cached_property
     def orgaos_validos(self):
@@ -63,6 +61,13 @@ class PermissaoUsuario:
 
         return lista_orgaos_copy
 
+    def _preenche_dados_usuario(self, orgaos):
+        orgaos_copy = orgaos.copy()
+        for orgao in orgaos_copy:
+            orgao.update(self.dados_usuario)
+
+        return orgaos_copy
+
 
 class PermissoesUsuarioPromotron(PermissaoUsuario):
     DaoWrapper = namedtuple("PermissaoDao", ["handler", "kwargs"])
@@ -73,14 +78,9 @@ class PermissoesUsuarioPromotron(PermissaoUsuario):
 
     @cached_property
     def dados_usuario(self):
-        dados = {}
-        for orgao in self.orgaos_validos:
-            # Checa se retorno do banco possui todos os dados do usuário
-            if not set(self.user_info_fields) - set(orgao.keys()):
-                for field in self.user_info_fields:
-                    dados[field] = orgao[field]
-
-        if not dados:
+        try:
+            dados = dao.DadosUsuarioDAO.get(login=self.username)
+        except APIEmptyResultError:
             raise exceptions.UserDetailsNotFoundError
 
         return dados
@@ -96,7 +96,7 @@ class PermissaoEspecialPromotron(PermissaoUsuario):
 
 def permissoes_router(info):
     username = info["userDetails"]["login"].lower()
-    #TODO: se número de permissoes crescrer utilizar estratégia mais SOLID
+    # TODO: se número de permissoes crescrer utilizar estratégia mais SOLID
     cls_permissoes = PermissoesUsuarioPromotron
     if any(
         [
