@@ -24,7 +24,7 @@ class Dao(TestCase):
         self.assertEqual(formatted_query, expected_query)
 
     @mock.patch("desaparecidos.dao.q_rank")
-    @mock.patch("desaparecidos.dao.format_query",
+    @mock.patch('desaparecidos.dao.format_query',
                 return_value="formatted query")
     def test_rank_query(self, _format_query, _query):
         cursor_mock = mock.MagicMock()
@@ -40,27 +40,58 @@ class Dao(TestCase):
 
     def test_serialize_to_json(self):
         oracle_resp = [
-            ('id 1',
-             'id 2',
-             datetime(1941, 4, 27, 0, 0),
-             0.01,
-             0,
-             0,
-             0,
-             0.01),
-            ('id 3',
-             'id 4',
-             datetime(1972, 4, 27, 0, 0),
-             0.01,
-             0,
-             0,
-             0,
-             0.01)
+            (
+                1,
+                datetime(2017, 4, 27, 0, 0),
+                "foto b64",
+                74,
+                "COR",
+                "altura",
+                "bairro 1",
+                "cidade 1",
+                "uf 1",
+                'id 1',
+                'id 2',
+                datetime(1941, 4, 27, 0, 0),
+                0.01,
+                0,
+                0,
+                0,
+                0.01
+            ),
+            (
+                2,
+                datetime(2010, 4, 27, 0, 0),
+                "foto b64",
+                32,
+                "COR",
+                "altura",
+                "bairro 2",
+                "cidade 2",
+                "uf 2",
+                'id 3',
+                'id 4',
+                datetime(1972, 4, 27, 0, 0),
+                0.01,
+                0,
+                0,
+                0,
+                0.01
+            ),
         ]
 
         resp_json = serialize(oracle_resp)
         expected = [
             {
+                "snca_dk_cand": 1,
+                "data_fato_cand": "2017-04-27T00:00:00",
+                "foto_cand": "foto b64",
+                "idade_cand": 74,
+                "cor_pele_cand": "COR",
+                "altura_cand": "altura",
+                "bairro_cand": "bairro 1",
+                "cidade_cand": "cidade 1",
+                "uf_cand": "uf 1",
                 "busca_id_sinalid": "id 1",
                 "candidato_id_sinalid": "id 2",
                 "data_nascimento": "1941-04-27T00:00:00",
@@ -72,6 +103,15 @@ class Dao(TestCase):
             },
 
             {
+                "snca_dk_cand": 2,
+                "data_fato_cand": "2010-04-27T00:00:00",
+                "foto_cand": "foto b64",
+                "idade_cand": 32,
+                "cor_pele_cand": "COR",
+                "altura_cand": "altura",
+                "bairro_cand": "bairro 2",
+                "cidade_cand": "cidade 2",
+                "uf_cand": "uf 2",
                 "busca_id_sinalid": "id 3",
                 "candidato_id_sinalid": "id 4",
                 "data_nascimento": "1972-04-27T00:00:00",
