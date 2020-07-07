@@ -54,6 +54,15 @@ class PermissaoUsuario:
         "Até o momento o primeiro órgão válido é selecionado"
         return self.orgaos_validos[0]
 
+    @cached_property
+    def dados_usuario(self):
+        try:
+            dados = dao.DadosUsuarioDAO.get(login=self.username)
+        except APIEmptyResultError:
+            raise exceptions.UserDetailsNotFoundError
+
+        return dados
+
     def _classifica_orgaos(self, lista_orgaos):
         lista_orgaos_copy = lista_orgaos.copy()
         for orgao in lista_orgaos_copy:
@@ -68,6 +77,9 @@ class PermissaoUsuario:
 
         return orgaos_copy
 
+    def _filtra_orgaos_invalidos(self, lista_orgaos):
+        return [orgao for orgao in lista_orgaos if orgao["tipo"] != 0]
+
 
 class PermissoesUsuarioPromotron(PermissaoUsuario):
     DaoWrapper = namedtuple("PermissaoDao", ["handler", "kwargs"])
@@ -76,22 +88,28 @@ class PermissoesUsuarioPromotron(PermissaoUsuario):
         DaoWrapper(dao.ListaOrgaosPessoalDAO, {"accept_empty": True}),
     ]
 
-    @cached_property
-    def dados_usuario(self):
-        try:
-            dados = dao.DadosUsuarioDAO.get(login=self.username)
-        except APIEmptyResultError:
-            raise exceptions.UserDetailsNotFoundError
-
-        return dados
-
-    def _filtra_orgaos_invalidos(self, lista_orgaos):
-        return [orgao for orgao in lista_orgaos if orgao["tipo"] != 0]
-
 
 class PermissaoEspecialPromotron(PermissaoUsuario):
+    DaoWrapper = namedtuple("PermissaoDao", ["handler", "kwargs"])
+    permissoes_dao = [
+        DaoWrapper(dao.ListaTodosOrgaosDAO, {"accept_empty": False}),
+    ]
+
     def __init__(self, username):
         self._username = username
+
+    # Refatorar para não repetir este método
+    @cached_property
+    def orgaos_lotados(self):
+        lista_orgaos = []
+        for permissao in self.permissoes_dao:
+            lista_orgaos.extend(permissao.handler.get(**permissao.kwargs))
+
+        lista_orgaos = self._classifica_orgaos(lista_orgaos)
+        return self._preenche_dados_usuario(lista_orgaos)
+
+    def _preenche_dados_usuario(self, orgaos):
+        return orgaos
 
 
 def permissoes_router(info):

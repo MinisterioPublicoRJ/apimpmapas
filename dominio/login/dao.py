@@ -27,6 +27,17 @@ class ListaOrgaosPessoalDAO(GenericDAO):
         return oracle_access(cls.query(), kwargs)
 
 
+class ListaTodosOrgaosDAO(GenericDAO):
+    QUERIES_DIR = settings.BASE_DIR.child("dominio", "login", "queries")
+    query_file = "lista_todos_orgaos.sql"
+    columns = ["cdorgao", "nm_org", "matricula", "cpf", "nome", "sexo", "pess_dk"]
+    serializer = serializers.ListaTodosOrgaosSerializer
+
+    @classmethod
+    def execute(cls, **kwargs):
+        return oracle_access(cls.query(), kwargs)
+
+
 class DadosUsuarioDAO(SingleDataObjectDAO):
     QUERIES_DIR = settings.BASE_DIR.child("dominio", "login", "queries")
     query_file = "dados_usuario.sql"

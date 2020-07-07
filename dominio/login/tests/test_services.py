@@ -350,3 +350,88 @@ class TestPermissoesRouter(TestCase):
         permissao = services.permissoes_router(self.json_regular)
 
         self.assertEqual(permissao.username, "username")
+
+
+class PromotronPermissoesUsuarioEspecial(TestCase):
+    def setUp(self):
+        self.username = "username"
+        self.oracle_access_patcher = mock.patch(
+            "dominio.login.dao.oracle_access"
+        )
+        self.mock_oracle_access = self.oracle_access_patcher.start()
+        self.oracle_return_dados_usuario = (
+            ("12345", "123456789", "NOME FUNCIONARIO", "X", "4567"),
+        )
+        self.oracle_return_lista_todos_orgaos = (
+            (
+                "cdorgao 1",
+                "PROMOTORIA INVESTIGAÇÃO PENAL",
+                "matricula 1",
+                "cpf 1",
+                "nome 1",
+                "X",
+                "pess_dk 1"
+            ),
+            (
+                "cdorgao 2",
+                "PROMOTORIA DIFERENTE",
+                "matricula 2",
+                "cpf 2",
+                "nome 2",
+                "X",
+                "pess_dk 2"
+            ),
+            (
+                "cdorgao 3",
+                "PROMOTORIA TUTELA COLETIVA",
+                "matricula 3",
+                "cpf 3",
+                "nome 3",
+                "X",
+                "pess_dk 3"
+            ),
+        )
+        self.mock_oracle_access.side_effect = [
+            self.oracle_return_lista_todos_orgaos,
+            self.oracle_return_dados_usuario,
+        ]
+        self.expected = [
+            {
+                "cpf": "cpf 1",
+                "pess_dk": "pess_dk 1",
+                "nome": "nome 1",
+                "matricula": "matricula 1",
+                "sexo": "X",
+                "cdorgao": "cdorgao 1",
+                "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
+                "tipo": 2,
+            },
+            {
+                "cpf": "cpf 2",
+                "pess_dk": "pess_dk 2",
+                "nome": "nome 2",
+                "matricula": "matricula 2",
+                "sexo": "X",
+                "cdorgao": "cdorgao 2",
+                "nm_org": "PROMOTORIA DIFERENTE",
+                "tipo": 0,
+            },
+            {
+                "cpf": "cpf 3",
+                "pess_dk": "pess_dk 3",
+                "nome": "nome 3",
+                "matricula": "matricula 3",
+                "sexo": "X",
+                "cdorgao": "cdorgao 3",
+                "nm_org": "PROMOTORIA TUTELA COLETIVA",
+                "tipo": 1,
+            },
+        ]
+        self.permissoes = services.PermissaoEspecialPromotron(
+            username=self.username
+        )
+
+    def test_retorna_todos_orgaos_lotados(self):
+        orgaos = self.permissoes.orgaos_lotados
+
+        self.assertEqual(orgaos, self.expected)
