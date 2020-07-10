@@ -13,6 +13,7 @@ def login(request):
     )
     response["first_login"] = created
     response["first_login_today"] = created or usuario.get_first_login_today()
+    response["sexo"] = usuario.get_gender(response["matricula"])
     usuario.save()
 
     return JsonResponse(response)

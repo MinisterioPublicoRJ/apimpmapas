@@ -159,6 +159,45 @@ Vary: Accept
 }
 ```
 
+### Sua Mesa Detalhes Integrado
+```
+GET /dominio/suamesa/documentos-detalhe/<str:orgao_id>?tipo=tipo_de_dado&cpf=1234&n=3&intervalo=30
+
+CPF (opcional) - depende do tipo de dado requisitado (ver lista abaixo).
+n (opcional) - Número de promotorias para retornar no Top N. Default: 3.
+intervalo (opcional) - Intervalo de tempo para olhar, caso disponível. Default: 30.
+
+Tipos aceitos:
+- tutela_investigacoes: Detalhe de investigações em curso de uma tutela.
+- tutela_processos: Detalhe de processos em juízo de uma tutela.
+- pip_inqueritos: Detalhe de inquéritos da PIP. (Requer CPF)
+- pip_pics: Detalhe de PICs da PIP. (Requer CPF)
+- pip_aisp: Detalhe de inquéritos e PICs da AISP de uma PIP.
+```
+
+```
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "metrics": {
+        'dado1': 1234,
+        'dado2': 1234,
+    },
+    "rankings": [
+        {
+            'ranking_fieldname': 'nome',
+            'data': [{'nm_orgao': 'Orgao1', 'valor': 10}, {'nm_orgao': 'Orgao2', 'valor': 5}, ...]
+        }
+    ],
+    "mapData: {}
+}
+
+O atributo 'valor' dos rankings pode vir como 'valor_percentual', caso seja relativo a uma porcentagem.
+```
+
 ### Vistas Abertas
 (Será substituído pelo Sua Mesa Integrado!)
 ```
@@ -754,15 +793,21 @@ Allow: GET, HEAD, OPTIONS
 Content-Type: application/json
 Vary: Accept
 
-{'taxa_resolutivdade': 0.42857142857142855,
- 'ranking': [{'assunto': 'Roubo',
-   'count': 10,
-   'total': 72,
-   'perc': 0.1388888888888889},
-  {'assunto': 'Roubo Majorado', 'count': 9, 'total': 72, 'perc': 0.125},
-  {'assunto': 'Estelionato',
-   'count': 6,
-   'total': 72,
-   'perc': 0.08333333333333333}],
- 'others': {'count': 47, 'perc': 0.6527777777777778}}
+[
+    {
+       "orgao_id":12345,
+       "indice":0.342684993409904,
+       "tipo":"p_finalizacoes"
+     },
+     {
+       "orgao_id":12345,
+       "indice":0.3333333333333333,
+       "tipo":"p_resolutividade"
+      },
+      {
+       "orgao_id":12345,
+       "indice":0.139710035774807,
+       "tipo":"p_elucidacoes"
+      }
+]
 ```

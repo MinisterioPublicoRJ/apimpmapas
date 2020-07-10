@@ -20,6 +20,14 @@ class Usuario(models.Model):
     def get_first_login_today(self):
         return not self.last_login == date.today()
 
+    def get_gender(self, cdmatricula):
+        try:
+            sexo = RHFuncionario.objects.get(cdmatricula=cdmatricula).sexo
+        except RHFuncionario.DoesNotExist:
+            sexo = None
+
+        return sexo
+
 
 class Documento(models.Model):
     objects = models.Manager()
@@ -133,6 +141,15 @@ class PessoaFisica(models.Model):
 
     class Meta:
         db_table = 'MCPR_PESSOA_FISICA'
+        managed = False
+
+
+class RHFuncionario(models.Model):
+    cdmatricula = models.CharField(primary_key=True, max_length=100)
+    sexo = models.CharField(max_length=1, null=True)
+
+    class Meta:
+        db_table = "RH_FUNCIONARIO"
         managed = False
 
 

@@ -3,12 +3,12 @@ from django.conf import settings
 
 
 def get_jwt_from_post(request):
-    token_part = request.POST['jwt']
+    token_part = request.POST.get('jwt', '')
     return token_part
 
 
 def get_jwt_from_get(request):
-    token_part = request.GET['jwt']
+    token_part = request.GET.get('jwt', '')
     return token_part
 
 

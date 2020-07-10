@@ -6,7 +6,8 @@ from django.conf import settings
 
 from dominio.exceptions import APIEmptyResultError
 from dominio.dao import (
-    GenericDAO
+    GenericDAO,
+    SingleDataObjectDAO,
 )
 
 QUERIES_DIR = settings.BASE_DIR.child("dominio", "tests", "queries")
@@ -112,3 +113,17 @@ class TestGenericDAO:
 
         _execute.assert_called_once_with(orgao_id=orgao_id)
         _serialize.assert_not_called()
+
+
+class TestSingleDataObjectDAO:
+    @mock.patch("dominio.dao.SingleDataObjectDAO.columns",
+                new_callable=mock.PropertyMock)
+    def test_serialize(self, _columns):
+        _columns.return_value = ["col1", "col2", "col3"]
+        result_set = [
+            ("1", "2", "3")
+        ]
+        ser_data = SingleDataObjectDAO.serialize(result_set)
+        expected_data = {"col1": "1", "col2": "2", "col3": "3"}
+
+        assert ser_data == expected_data
