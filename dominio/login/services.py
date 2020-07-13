@@ -145,14 +145,14 @@ def build_login_response(permissoes):
     response["nome"] = permissoes.dados_usuario["nome"]
     response["matricula"] = permissoes.dados_usuario["matricula"]
 
+    response["token"] = jwt.encode(
+        response, settings.JWT_SECRET, algorithm="HS256",
+    )
+
     # Informações do órgao seecionado
     response["tipo_orgao"] = permissoes.orgao_selecionado["tipo"]
     response["orgao"] = permissoes.orgao_selecionado["cdorgao"]
     response["orgaos_validos"] = permissoes.orgaos_validos
-
-    response["token"] = jwt.encode(
-        response, settings.JWT_SECRET, algorithm="HS256",
-    )
 
     # Update last_login
     usuario.save()
