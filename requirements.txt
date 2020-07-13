@@ -1,5 +1,6 @@
 Django>=2.2
 Markdown
+cached-property==1.5.1
 celery==4.3.0
 cx_Oracle==7.3
 dj-database-url
