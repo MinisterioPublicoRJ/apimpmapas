@@ -82,6 +82,7 @@ class PermissaoUsuario:
 
 
 class PermissoesUsuarioRegular(PermissaoUsuario):
+    type = "regular"
     DaoWrapper = namedtuple("PermissaoDao", ["handler", "kwargs"])
     permissoes_dao = [
         DaoWrapper(dao.ListaOrgaosDAO, {"accept_empty": False}),
@@ -90,6 +91,7 @@ class PermissoesUsuarioRegular(PermissaoUsuario):
 
 
 class PermissoesUsuarioAdmin(PermissaoUsuario):
+    type = "admin"
     DaoWrapper = namedtuple("PermissaoDao", ["handler", "kwargs"])
     permissoes_dao = [
         DaoWrapper(dao.ListaTodosOrgaosDAO, {"accept_empty": False}),
@@ -137,6 +139,7 @@ def build_login_response(permissoes):
     response["username"] = usuario.username
     response["first_login"] = created
     response["first_login_today"] = created or usuario.get_first_login_today()
+    response["tipo_permissao"] = permissoes.type
 
     # Informações do usuário
     response["sexo"] = permissoes.dados_usuario["sexo"]

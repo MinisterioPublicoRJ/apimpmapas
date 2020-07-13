@@ -48,6 +48,7 @@ class TestBuildLoginResponse(TestCase):
             "first_login_today": True,
             "sexo": "X",
             "token": "auth-token",
+            "tipo_permissao": "regular",
             "orgaos_validos": [
                 {
                     "cpf": "123456789",
