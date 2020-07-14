@@ -12,6 +12,7 @@ from login.jwtlogin import tipo_orgao
 
 
 login_logger = logging.getLogger(__name__)
+DAO_WRAPPER = namedtuple("PermissaoDao", ["handler", "kwargs"])
 
 
 # deveria ser abstrata?
@@ -37,7 +38,7 @@ class PermissaoUsuario:
             lista_orgaos.extend(orgaos)
 
         lista_orgaos = self._classifica_orgaos(lista_orgaos)
-        return self._preenche_dados_usuario(lista_orgaos)
+        return lista_orgaos
 
     @cached_property
     def orgaos_validos(self):
@@ -70,48 +71,42 @@ class PermissaoUsuario:
 
         return lista_orgaos_copy
 
-    def _preenche_dados_usuario(self, orgaos):
-        orgaos_copy = orgaos.copy()
-        for orgao in orgaos_copy:
-            orgao.update(self.dados_usuario)
-
-        return orgaos_copy
-
     def _filtra_orgaos_invalidos(self, lista_orgaos):
         return [orgao for orgao in lista_orgaos if orgao["tipo"] != 0]
 
 
 class PermissoesUsuarioRegular(PermissaoUsuario):
     type = "regular"
-    DaoWrapper = namedtuple("PermissaoDao", ["handler", "kwargs"])
     permissoes_dao = [
-        DaoWrapper(dao.ListaOrgaosDAO, {"accept_empty": False}),
-        DaoWrapper(dao.ListaOrgaosPessoalDAO, {"accept_empty": True}),
+        DAO_WRAPPER(dao.ListaOrgaosDAO, {"accept_empty": False}),
+        DAO_WRAPPER(dao.ListaOrgaosPessoalDAO, {"accept_empty": True}),
     ]
 
 
 class PermissoesUsuarioAdmin(PermissaoUsuario):
     type = "admin"
-    DaoWrapper = namedtuple("PermissaoDao", ["handler", "kwargs"])
     permissoes_dao = [
-        DaoWrapper(dao.ListaTodosOrgaosDAO, {"accept_empty": False}),
+        DAO_WRAPPER(dao.ListaOrgaosDAO, {"accept_empty": True}),
+        DAO_WRAPPER(dao.ListaOrgaosPessoalDAO, {"accept_empty": True}),
     ]
 
     def __init__(self, username):
         self._username = username
 
-    # Refatorar para não repetir este método
     @cached_property
-    def orgaos_lotados(self):
-        lista_orgaos = []
-        for permissao in self.permissoes_dao:
-            lista_orgaos.extend(permissao.handler.get(**permissao.kwargs))
+    def todos_orgaos(self):
+        lista_orgaos = dao.ListaTodosOrgaosDAO.get()
+        return self._classifica_orgaos(lista_orgaos)
 
-        lista_orgaos = self._classifica_orgaos(lista_orgaos)
-        return self._preenche_dados_usuario(lista_orgaos)
-
-    def _preenche_dados_usuario(self, orgaos):
-        return orgaos
+    @property
+    def orgaos_validos(self):
+        orgaos = list(
+            {
+                orgao["cdorgao"]: orgao
+                for orgao in self.orgaos_lotados + self.todos_orgaos
+            }.values()
+        )
+        return self._filtra_orgaos_invalidos(orgaos)
 
 
 def permissoes_router(info):
