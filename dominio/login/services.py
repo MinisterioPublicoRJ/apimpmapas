@@ -100,13 +100,12 @@ class PermissoesUsuarioAdmin(PermissaoUsuario):
 
     @property
     def orgaos_validos(self):
-        orgaos = list(
-            {
-                orgao["cdorgao"]: orgao
-                for orgao in self.orgaos_lotados + self.todos_orgaos
-            }.values()
-        )
-        return self._filtra_orgaos_invalidos(orgaos)
+        return self._filtra_orgaos_invalidos(self.todos_orgaos)
+
+    @property
+    def orgao_selecionado(self):
+        lotados_validos = self._filtra_orgaos_invalidos(self.orgaos_lotados)
+        return lotados_validos[0] if lotados_validos else self.orgaos_validos[0]
 
 
 def permissoes_router(info):

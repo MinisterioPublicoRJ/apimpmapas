@@ -514,47 +514,14 @@ class TesPermissoesUsuarioAdmin(TestCase):
 
     def test_retorna_todos_orgaos_validos(self):
         self.mock_oracle_access.side_effect = [
-            self.oracle_return_lista_orgaos_lotados,
-            (),
             self.oracle_return_lista_todos_orgaos,
         ]
         orgaos = self.permissoes.orgaos_validos
-        expected = [
-            {
-                "cpf": "cpf 1",
-                "pess_dk": "pess_dk 1",
-                "nome": "nome 1",
-                "matricula": "matricula 1",
-                "sexo": "X",
-                "cdorgao": "cdorgao 1",
-                "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
-                "tipo": 2,
-            },
-            {
-                "cpf": "cpf 3",
-                "pess_dk": "pess_dk 3",
-                "nome": "nome 3",
-                "matricula": "matricula 3",
-                "sexo": "X",
-                "cdorgao": "cdorgao 3",
-                "nm_org": "PROMOTORIA TUTELA COLETIVA",
-                "tipo": 1,
-            },
-            {
-                "cpf": "cpf 5",
-                "pess_dk": "pess_dk 5",
-                "nome": "nome 5",
-                "matricula": "matricula 5",
-                "sexo": "X",
-                "cdorgao": "cdorgao 5",
-                "nm_org": "PROMOTORIA TUTELA COLETIVA",
-                "tipo": 1,
-            },
-        ]
+        self.expected.pop(1)
 
-        self.assertCountEqual(orgaos, expected)
+        self.assertCountEqual(orgaos, self.expected)
 
-    def test_orgao_selecionado_permissao_admin(self):
+    def test_orgao_selecionado_permissao_admin_seleciona_lotado(self):
         "Deve tentar selecionar primeiro um orgao lotado valido"
         self.mock_oracle_access.side_effect = [
             self.oracle_return_lista_orgaos_lotados,
@@ -575,3 +542,23 @@ class TesPermissoesUsuarioAdmin(TestCase):
         orgao_selecionado = self.permissoes.orgao_selecionado
 
         self.assertEqual(orgao_selecionado, expected)
+
+    def test_orgao_selecionado_permissao_admin_seleciona_primeiro_lista(self):
+        "Deve tentar selecionar primeiro um orgao lotado valido"
+        self.mock_oracle_access.side_effect = [
+            ((
+                "cdorgao 2",
+                "PROMOTORIA DIFERENTE",
+                "matricula 2",
+                "cpf 2",
+                "nome 2",
+                "X",
+                "pess_dk 2",
+            ),),
+            (),
+            self.oracle_return_lista_todos_orgaos,
+        ]
+
+        orgao_selecionado = self.permissoes.orgao_selecionado
+
+        self.assertEqual(orgao_selecionado, self.expected[0])
