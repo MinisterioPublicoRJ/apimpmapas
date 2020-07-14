@@ -1,136 +1,113 @@
-## Resumo Do Dia
+# Resumo Do Dia
 
 O primeiro componente é o Resumo do Dia. Nele, são realizados cálculos para formar frases relativas ao status do dia atual.
 
 ![title](figuras/resumo_do_dia.png)
 
-### Frase de Resolutividade
+Cada frase corresponde a uma View no Backend (ou seja, cada frase pode ser considerada um sub-componente), de forma que cada uma delas terá sua própria seção.
 
-Esta frase indica, a porcentagem de promotorias de mesma atribuição que tiveram menos saídas do que a promotoria sendo analisada, nos últimos 30 dias correntes. Para explicar melhor:
+## Frase de Resolutividade
 
-<b>Mesma atribuição</b>:
+### User Manual
 
-O conceito de atribuição segue o que foi definido no arquivo README.md; na prática, para os tipos de promotorias definidos, isso quer dizer:
+Esta frase indica a porcentagem de promotorias de mesma atribuição que tiveram menos saídas do que a promotoria sendo analisada, nos últimos 30 dias correntes.
 
-- Tutelas Coletivas: a atribuição diz respeito ao pacote de atribuição no qual a Tutela está inserida (Consumidor, Cidadania, etc).
-- PIPs: a atribuição diz respeito a todas as PIPs Territoriais.
+O conceito de <b>atribuição</b> segue o que foi definido no arquivo README.md. <font color="orange">++Ideal é não repetir informação, mas ter como referenciar facilmente.</font>
 
-<b>Saídas</b>: <br>
-São os andamentos finalizadores considerados como resolutivos. Os andamentos definidos no momento são:
+Já <b>saídas</b> são os andamentos finalizadores considerados como resolutivos. Os andamentos definidos para este fim são os presentes na tabela auxiliar TB_REGRA_NEGOCIO_SAIDA. <font color="orange">++ Se eu conseguir fazer uma referência ou um hyperlink para a seção desta tabela auxiliar seria ótimo. Procurar se tem como.</font>
 
-- Tutelas Coletivas:
+Utilizando as regras, o cálculo é feito então contabilizando:
 
-| tppr_dk | hierarquia |
-| :- | :- |
-| 6657 | MEMBRO > Arquivamento > Com remessa ao Conselho Superior > Parcial (Tutela coletiva) > Sem TAC > Resolução da questão |
-| 6655 | MEMBRO > Arquivamento > Com remessa ao Conselho Superior > Parcial (Tutela coletiva) > Com TAC |
-| 6644 | MEMBRO > Arquivamento > Com remessa ao Conselho Superior > Integral sem TAC (Tutela coletiva) > Resolução da questão |
-| 6326 | MEMBRO > Arquivamento > Com remessa ao Conselho Superior > Integral com TAC |
-| 6251 | MEMBRO > Ajuizamento de Ação > Petição Inicial |
-
-- PIPs:
-
-| tppr_dk | hierarquia |
-| - | :- |
-| 7922 | MEMBRO > Manifestação > Pela extinção da punibilidade > Em razão do cumprimento do Acordo de Não Persecução Penal |
-| 7915 | MEMBRO > Acordo de Não Persecução Penal > Oferecimento de acordo |
-| 7883 | MEMBRO > Acordo de Não Persecução Penal > Celebração de acordo |
-| 7868 | MEMBRO > Colaboração Premiada |
-| 7912 | MEMBRO > Arquivamento > Com Remessa ao PRE/PGE |
-| 7897 | MEMBRO > Decisão Artigo 28 CPP / 397 CPPM > Confirmação Parcial > Arquivamento |
-| 7928 | MEMBRO > Ciência > Homologação de Acordo de Não Persecução Penal |
-| 7871 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Morte do Agente |
-| 7917 | MEMBRO > Acordo de Não Persecução Penal > Pedido de homologação de acordo |
-| 7914 | MEMBRO > Acordo de Não Persecução Penal |
-| 7827 | MEMBRO > Despacho > Acordo Extrajudicial |
-| 7745 | MEMBRO > Arquivamento > De notícia de fato ou procedimento de atribuição originária do PGJ |
-| 6591 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Falta de condições para o regular exercício do direito de ação |
-| 1201 | Oferecimento de denúncia |
-| 1202 | Oferecimento de denúncia com pedido de prisão |
-| 6017 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Extinção da Punibilidade por Outros Fundamentos |
-| 6018 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Ausência/Insuficiência de Provas (Falta de Suporte Fático Probatório) |
-| 6020 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Parcial > Extinção da Punibilidade por Outros Fundamentos |
-| 6252 | MEMBRO > Ajuizamento de Ação > Denúncia |
-| 6253 | MEMBRO > Ajuizamento de Ação > Denúncia > Escrita |
-| 6254 | MEMBRO > Ajuizamento de Ação > Denúncia > Oral |
-| 6343 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Pagamento de Débito Tributário |
-| 6346 | MEMBRO > Arquivamento > Sem remessa ao Conselho Superior/Câmara > Integral |
-| 6350 | MEMBRO > Homologação de Arquivamento |
-| 6359 | MEMBRO > Decisão Artigo 28 CPP / 397 CPPM > Confirmação Integral > Arquivamento |
-| 6361 | MEMBRO > Proposta de transação penal |
-| 6362 | MEMBRO > Proposta de suspensão condicional do processo |
-| 6338 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Desconhecimento do Autor |
-| 6339 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Inexistência de Crime |
-| 6340 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Prescrição |
-| 6341 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Decadência |
-| 6342 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Retratação Lei Maria da Penha |
-| 6391 | MEMBRO > Ciência > Suspensão do processo - Art. 366 CPP |
-| 6392 | MEMBRO > Ciência > Arquivamento |
-| 6549 | MEMBRO > Arquivamento > Com remessa ao Centro de Apoio Operacional das Promotorias Eleitorais  CAO Eleitoral (EN 30-CSMP) |
-| 6593 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Parcial > Falta de condições para o exercício do direito de ação |
-
-Utilizando estas regras, o cálculo é feito então contabilizando: 
 - Os andamentos com data (pcao_dt_andamento) nos últimos 30 dias;
 - Que não foram cancelados;
 - Cujos documentos não foram cancelados;
-- E Que sejam dos tipos definidos acima. 
+- E que sejam dos tipos definidos na tabela TB_REGRA_NEGOCIO_SAIDA para o pacote do órgão em questão.
 
 Esta contagem é então utilizada para fazer um ranking com promotorias dentro da mesma atribuição, e saber a porcentagem de promotorias que tem contagem menor do que a promotoria que está sendo analisada.
 
-As regras de andamentos finalizadores estão definidas na tabela <b>exadata_aux(_dev).tb_regra_negocio_saida</b> e podem ser modificadas caso uma mudança de regra de negócio ocorra. Esses andamentos são associados a cada pacote de atribuição, de forma que é possível ter regras para tutelas coletivas de cidadania, e regras diferentes para consumidor, por exemplo.
+### Estrutura do Código
 
-O script de cálculo pode ser encontrado em <b>scripts-bda/robo_promotoria/src/tabela_saida.py</b> e a tabela final é <b>exadata_aux(_dev).tb_saida</b> <br>
-E a view no backend que utiliza a tabela gerada está em <b>apimpmapas/dominio/tutela/views.py -> SaidasView</b>
+Script criação BDA -> Tabela -> View Backend -> Front
+
+O script de cálculo pode ser encontrado em `scripts-bda/robo_promotoria/src/tabela_saida.py`.
+A tabela final gerada se chama `{schema_exadata_aux}.tb_saida`.
+A view no backend que utiliza a tabela gerada é a `SaidasView` localizada em `apimpmapas/dominio/tutela/views.py`.
 
 <font color="green">!! Apesar da frase dizer últimos 30 dias, parece que o script de criação da tabela atualmente considera últimos 60 dias.</font>
 
-### Frase de Acervo
+### Dependências
+
+* `{schema_exadata_aux}.atualizacao_pj_pacote`
+* `{schema_exadata_aux}.tb_regra_negocio_saida`
+* Tabelas do `{schema_exadata}`
+
+### Troubleshooting
+
+* A tabela está sendo gerada com dados? Se sim, ela possui dados para a promotoria que apresenta erro? 
+* Se a tabela estiver sem dados, ou sem dados para aquela promotoria, o problema pode ser na geração da tabela no BDA, ou dos dados usados para gerá-las. Caso haja dados e eles não estejam aparecendo corretamente, pode ser um problema no backend.
+* Caso a tabela esteja com problemas, a promotoria sendo analisada tem pacote de atribuição definido na tabela `{schema_exadata_aux}.atualizacao_pj_pacote`?
+* Caso ela possua pacote de atribuição, existem regras de saídas definidas para o pacote dela na tabela `{schema_exadata_aux}.tb_regra_negocio_saida`?
+* Caso o erro não seja na tabela, a View no backend está retornando os dados corretamente para esta ou outras promotorias?
+
+## Frase de Acervo
+
+### User Manual
 
 Esta frase pega o número de documentos ativos de determinadas classes para as promotorias dentro da mesma atribuição (no dia em que está sendo visto), e em seguida calcula um limite superior e inferior a partir do qual um dado volume não seria mais regular. Compara-se então o acervo da promotoria com estes limites para definir se ela está com um volume considerado regular ou não.
 
-As classes de documentos utilizadas no momento são:
+Como no caso da Frase de Resolutividade, as regras das classes de documentos têm uma tabela própria, estando localizadas na tabela auxiliar TB_REGRA_NEGOCIO_INVESTIGACAO.
 
-- Tutelas Coletivas:
+### Estrutura do Código
 
+Script criação BDA -> Tabela -> View Backend -> Front
 
-| cldc_dk | hierarquia |
-| :- | :- |
-| 395 | EXTRAJUDICIAIS > PROCEDIMENTOS DO MP > Procedimento Preparatório |
-| 392 | EXTRAJUDICIAIS > PROCEDIMENTOS DO MP > Inquérito Civil |
+O script de cálculo pode ser encontrado em `scripts-bda/robo_promotoria/src/tabela_distribuicao.py`.
+A tabela final gerada se chama `{schema_exadata_aux}.tb_distribuicao`.
+A view no backend que utiliza a tabela gerada é a `OutliersView` localizada em `apimpmapas/dominio/tutela/views.py`.
 
-- PIPs:
+### Dependências
 
+* `{schema_exadata_aux}.tb_acervo`
+* `{schema_exadata_aux}.tb_regra_negocio_investigacao`
 
-| cldc_dk | hierarquia |
-| :- | :- |
-| 3 | PROCESSO MILITAR > PROCESSO CRIMINAL > Procedimentos Investigatórios > Inquérito Policial Militar |
-| 494 | PROCESSO CRIMINAL > Procedimentos Investigatórios > Inquérito Policial |
-| 590 | PROCESSO CRIMINAL > Procedimentos Investigatórios > Procedimento Investigatório Criminal (PIC-MP) |
+### Troubleshooting
 
-Como no caso da frase de resolutividade, as regras das classes de documentos têm uma tabela própria, em <b>exadata_aux(_dev).tb_regra_negocio_investigacao</b>, e as classes a serem consideradas podem ser modificadas de uma atribuição a outra.
+* A tabela está sendo gerada com dados? Se sim, ela possui dados para a promotoria que apresenta erro?
+* Se a tabela estiver sem dados, ou sem dados para aquela promotoria, o problema pode ser na geração da tabela no BDA, ou dos dados usados para gerá-las. Caso haja dados e eles não estejam aparecendo corretamente, pode ser um problema no backend.
+* Se o problema estiver na geração da tabela, a promotoria sendo analisada tem acervo definido na tabela `{schema_exadata_aux}.tb_acervo`?
+* Caso tenha acervo definido, este acervo está associado a algum pacote de atribuição, ou está como `NULL`? Se estiver `NULL`, verificar se a promotoria possui pacote definido na tabela `{schema_exadata_aux}.atualizacao_pj_pacote`.
+* Caso os dados em `{schema_exadata_aux}.tb_acervo` estejam OK, existem regras de investigação definidas para o pacote dela na tabela `{schema_exadata_aux}.tb_regra_negocio_investigacao`?
+* Caso o problema não seja na tabela, a View do backend está retornando dados para outras promotorias?
 
-O script de cálculo para essa frase pode ser encontrado em <b>scripts-bda/robo_promotoria/src/tabela_distribuicao.py</b> e a tabela final é <b>exadata_aux(_dev).tb_distribuicao</b><br>
-A view no backend é a <b>apimpmapas/dominio/tutela/views.py -> OutliersView</b>
+## Frase de Entradas
 
-### Frase de Entradas
+### User Manual
 
-A última frase é relativa ao número de vistas abertas em um determinado dia, e indica se o número de vistas em um determinado dia está dentro ou fora do padrão. A ideia é muito parecida com a Frase de Acervo, mas ao invés de comparar acervo em relação à promotoria, comparam-se vistas abertas em relação ao histórico do promotor naquela promotoria.<br>
+A última frase é relativa ao número de vistas abertas em um determinado dia, e indica se o número de vistas em um determinado dia está dentro ou fora do padrão. A ideia é muito parecida com a Frase de Acervo, mas ao invés de comparar acervo em relação a outras promotorias da mesma atribuição, comparam-se vistas abertas em relação ao histórico do promotor naquela promotoria.<br>
 
 <font color="green">!! Queremos comparar sempre dentro do mesmo CPF? Ou queremos comparar com o órgão inteiro?</font>
 
 O cálculo é feito pegando as vistas que foram abertas em cada dia, nos últimos 60 dias, excluindo sábados e domingos. Também não são consideradas as vistas relativas a documentos cancelados. Com isso, é possível calcular a partir de quantas vistas (ou de quão poucas vistas) um dia é muito diferente dos outros. Limites superior e inferior, como do caso do acervo.
+<font color="orange">++ Explicação pode melhorar, talvez com um desenho?</font>
 
-Diferente das outras frases do Resumo do Dia, a Frase de Entradas não possui tabela de regras, já que todas as vistas são consideradas, independente da classe do documento ao qual elas se referem. <br>
-O script de cálculo para essa frase pode ser encontrado em <b>scripts-bda/robo_promotoria/src/tabela_dist_entradas.py</b> e a tabela final é <b>exadata_aux(_dev).tb_dist_entradas</b> <br>
-A view no backend é a <b>apimpmapas/dominio/tutela/views.py -> EntradasView</b>
+Diferente das outras frases do Resumo do Dia, a Frase de Entradas não possui tabela de regras, já que todas as vistas são consideradas, independente da classe do documento ao qual elas se referem.
 
-## Troubleshooting
+### Estrutura do Código
 
-Caso alguma das frases apareça com valores estranhos, ou não apareça quando deveria aparecer, alguns pontos podem ser verificados rapidamente para encontrar possíveis erros:
+Script criação BDA -> Tabela -> View Backend -> Front
 
-- A promotoria sendo analisada tem pacote de atribuição definido na tabela exadata_aux(_dev).atualizacao_pj_pacote?
-- Caso ela possua pacote de atribuição, existem regras de saídas definidas para o pacote dela na tabela tb_regra_negocio_saida e/ou tb_regra_negocio_investigacao (caso o problema seja na frase de resolutividade ou de acervo)?
-- Se as regras estiverem definidas, verifique se a tabela gerada tem dados para aquela promotoria (ou promotoria e CPF, no caso da Frase de Entradas). Se a tabela estiver sem dados para aquela promotoria, o problema pode ser na geração da tabela no BDA, ou dos dados usados para gerá-las. Caso haja dados e eles não estejam aparecendo corretamente, pode ser um problema no backend.
+O script de cálculo pode ser encontrado em `scripts-bda/robo_promotoria/src/tabela_dist_entradas.py`.
+A tabela final gerada se chama `{schema_exadata_aux}.tb_dist_entradas`.
+A view no backend que utiliza a tabela gerada é a `EntradasView` localizada em `apimpmapas/dominio/tutela/views.py`.
 
-A partir dessas perguntas, deve ficar mais fácil identificar a fonte do problema e analisá-lo.
+### Dependências
+
+* Tabelas do `{schema_exadata}`.
+
+### Troubleshooting
+
+* A tabela está sendo gerada com dados? Se sim, ela possui dados para a promotoria que apresenta erro?
+* Se a tabela estiver sem dados, ou sem dados para aquela promotoria, o problema pode ser na geração da tabela no BDA, ou dos dados usados para gerá-las. Caso haja dados e eles não estejam aparecendo corretamente, pode ser um problema no backend.
+* Se o problema estiver na geração da tabela, o promotor sendo analisado teve vistas abertas na promotoria selecionado nos últimos 60 dias? Caso sim, pode ser um bug no script de geração da tabela.
+* Caso o problema não seja na tabela, a View do backend está retornando dados para outras promotorias?
 
