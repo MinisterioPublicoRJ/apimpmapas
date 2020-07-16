@@ -1,6 +1,3 @@
-from datetime import datetime, timedelta
-
-import jwt
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from rest_framework import serializers
@@ -40,10 +37,7 @@ class SCAJWTTokenSerializer(TokenObtainPairSerializer):
 class SCAJWTRefreshTokenSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
         refresh = SCARefreshToken(attrs["refresh"])
-        if (
-            not settings.PROXIES_PLACAS_ROLE
-            in refresh.payload["roles"]
-        ):
+        if settings.PROXIES_PLACAS_ROLE not in refresh.payload["roles"]:
             raise serializers.ValidationError(
                 "Token não possui ROLE para esse endpoint"
             )
