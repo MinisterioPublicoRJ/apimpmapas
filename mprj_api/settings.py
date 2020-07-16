@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+from datetime import timedelta
+
 from decouple import config, Csv
 from dj_database_url import parse as db_url
 from unipath import Path
@@ -292,3 +294,9 @@ DESAPARECIDOS_CACHE_TIMEOUT = config(
     cast=int,
     default=86400
 )
+PROXIES_PLACAS_ROLE = config("PROXIES_PLACAS_ROLE")
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+}
