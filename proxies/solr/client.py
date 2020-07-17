@@ -7,11 +7,13 @@ class SolrClient:
         self._client = pysolr.SolrCloud(zookeeper, collection, timeout=300)
 
     def search(self, query, start, rows):
-        return self._client.search(query, start=start, rows=rows)
+        return self._client.search(query, start=start, rows=rows).raw_response[
+            "response"
+        ]
 
 
 def create_solr_client():
     return SolrClient(
         pysolr.ZooKeeper(settings.ZOOKEEPER_SERVER),
-        collection=settings.PLACAS_SOLR_COLLECTION
+        collection=settings.PLACAS_SOLR_COLLECTION,
     )
