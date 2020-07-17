@@ -112,7 +112,7 @@ class PIPRadarPerformanceView(JWTAuthMixin, CacheMixin, APIView):
 
 
 class PIPPrincipaisInvestigadosView(
-        JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
+        JWTAuthMixin, PaginatorMixin, APIView):
     cache_config = "PIP_PRINCIPAIS_INVESTIGADOS_CACHE_TIMEOUT"
     PRINCIPAIS_INVESTIGADOS_SIZE = 20
 

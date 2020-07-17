@@ -391,24 +391,30 @@ class TestPIPPrincipaisInvestigadosListaDAO:
         result_set = [
             (
                 16,
+                "Nome",
+                "Tipo",
                 29933850,
                 "123456",
                 datetime(2020, 4, 22, 13, 36, 6, 668000),
                 "Classe",
                 "5ª PROMOTORIA DE JUSTIÇA",
                 "Etiqueta",
-                "Assunto 1 --- Assunto 2"
+                "Assunto 1 --- Assunto 2",
+                "FaseDoc"
             ),
         ]
         ser_data = PIPPrincipaisInvestigadosListaDAO.serialize(result_set)
         expected_data = [{
             "representante_dk": 16,
+            "nm_investigado": "Nome",
+            "tipo_personagem": "Tipo",
             "orgao_id": 29933850,
             "documento_nr_mp": "123456",
             "documento_dt_cadastro": '2020-04-22T13:36:06.668000Z',
             "documento_classe": "Classe",
             "nm_orgao": "5ª Promotoria de Justiça",
             "etiqueta": "Etiqueta",
-            "assuntos": ["Assunto 1", "Assunto 2"]
+            "assuntos": ["Assunto 1", "Assunto 2"],
+            "fase_documento": "FaseDoc"
         }]
         assert ser_data == expected_data

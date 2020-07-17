@@ -1,6 +1,7 @@
 from functools import lru_cache
 
 from django.conf import settings
+from django.core.cache import cache
 
 from dominio.db_connectors import get_hbase_table
 from dominio.exceptions import APIEmptyResultError
@@ -158,6 +159,7 @@ class PIPPrincipaisInvestigadosDAO(GenericPIPDAO):
     ]
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
     serializer = PIPPrincipaisInvestigadosSerializer
+    cache_prefix = 'PIP_PRINCIPAIS_INVESTIGADOS'
 
     @classmethod
     @lru_cache(maxsize=None)
@@ -215,12 +217,25 @@ class PIPPrincipaisInvestigadosDAO(GenericPIPDAO):
             data["flags:is_removed"] = True
             hbase.put(*hbase_encode_row(row))
 
+        # Flags precisam estar atualizadas no próximo GET
+        cache_key = '{}_FLAGS_{}_{}'.format(cls.cache_prefix, orgao_id, cpf)
+        cache.delete(cache_key)
+
         return {"status": "Success!"}
 
     @classmethod
     def get(cls, orgao_id, cpf):
-        hbase_flags = cls.get_hbase_flags(orgao_id, cpf)
-        data = super().get(orgao_id=int(orgao_id))
+        cache_key = '{}_FLAGS_{}_{}'.format(cls.cache_prefix, orgao_id, cpf)
+        hbase_flags = cache.get(cache_key, default=None)
+        if not hbase_flags:
+            hbase_flags = cls.get_hbase_flags(orgao_id, cpf)
+            cache.set(cache_key, hbase_flags, timeout=settings.CACHE_TIMEOUT)
+
+        cache_key = '{}_DATA_{}'.format(cls.cache_prefix, orgao_id)
+        data = cache.get(cache_key, default=None)
+        if not data:
+            data = super().get(orgao_id=int(orgao_id))
+            cache.set(cache_key, data, timeout=settings.CACHE_TIMEOUT)
 
         # Flags e dados precisam estar juntos para o front
         for row in data:
