@@ -6,13 +6,13 @@ from rest_framework_simplejwt.serializers import (
     TokenRefreshSerializer,
 )
 
-from login.sca import authenticate
+from login.sca import authenticate as sca_authenticate
 from proxies.login.tokens import SCARefreshToken
 
 
 class SCAJWTTokenSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
-        sca_auth = authenticate(
+        sca_auth = sca_authenticate(
             attrs["username"],
             attrs["password"],
             roles=(settings.PROXIES_PLACAS_ROLE,),
@@ -21,7 +21,6 @@ class SCAJWTTokenSerializer(TokenObtainPairSerializer):
             raise PermissionDenied
 
         refresh = SCARefreshToken()
-        refresh.set_roles()
 
         data = {}
         data["refresh"] = str(refresh)
