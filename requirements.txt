@@ -17,9 +17,11 @@ git+https://github.com/MinisterioPublicoRJ/login-sca
 gunicorn==19.9.0
 happybase==1.2.0
 impyla
+kazoo==2.8.0
 newrelic==5.4.0.132
 psycopg2-binary
 pyjwt
+pysolr==3.9.0
 python-decouple
 redis
 requests
