@@ -1,6 +1,8 @@
 from unittest import mock
 
+import pytest
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
 from django.test import TestCase
 
 from proxies.login import serializers
@@ -12,6 +14,7 @@ class TestSerializers(TestCase):
             "proxies.login.serializers.sca_authenticate"
         )
         self.sca_auth_mock = self.sca_auth_patcher.start()
+        self.sca_auth_mock.return_value = {"logged_in": True}
         self.token_patcher = mock.patch(
             "proxies.login.serializers.SCARefreshToken"
         )
@@ -42,3 +45,8 @@ class TestSerializers(TestCase):
         }
 
         self.assertEqual(self.ser.validated_data,  expected)
+
+    def test_sca_permission_denied(self):
+        self.sca_auth_mock.return_value = {"logged_in": False}
+        with pytest.raises(PermissionDenied):
+            self.ser.is_valid()
