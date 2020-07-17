@@ -1,6 +1,8 @@
+from django.core.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 
+from proxies.login.tokens import TokenDoesNotHaveRoleException
 from proxies.solr.client import create_solr_client
 from proxies.solr.serializers import SolrPlacasSerializer
 
@@ -13,10 +15,13 @@ class SolrPlacasView(GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         ser = self.get_serializer_class()(data=request.GET)
-        if ser.is_valid(raise_exception=True):
-            data = self.get_data(
-                ser.validated_data["query"],
-                ser.validated_data["start"],
-                ser.validated_data["rows"],
-            )
-            return Response(data=data)
+        try:
+            ser.is_valid(raise_exception=True)
+        except TokenDoesNotHaveRoleException:
+            raise PermissionDenied
+        data = self.get_data(
+            ser.validated_data["query"],
+            ser.validated_data["start"],
+            ser.validated_data["rows"],
+        )
+        return Response(data=data)

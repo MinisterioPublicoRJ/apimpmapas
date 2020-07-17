@@ -42,3 +42,17 @@ class TestSolrPlacasViews(TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, self.data)
+
+    def test_solr_placas_invalid_role(self):
+        self.token = str(AccessToken())
+        resp = self.client.get(
+            self.url,
+            {
+                "jwt": self.token,
+                "query": self.query,
+                "start": self.start,
+                "rows": self.rows,
+            }
+        )
+
+        self.assertEqual(resp.status_code, 403)
