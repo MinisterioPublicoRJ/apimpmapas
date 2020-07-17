@@ -1,9 +1,10 @@
 from unittest import mock
 
+from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import AccessToken
 
 
 class TestSolrPlacasViews(TestCase):
@@ -17,7 +18,9 @@ class TestSolrPlacasViews(TestCase):
         self.solr_client_mock.search.return_value = self.data
         self.create_solr_client_mock.return_value = self.solr_client_mock
 
-        self.token = str(RefreshToken().access_token)
+        access_token = AccessToken()
+        access_token.payload["roles"] = (settings.PROXIES_PLACAS_ROLE,)
+        self.token = str(access_token)
         self.url = reverse("proxies:solr-placas")
         self.query = "select * from dual"
         self.start = 1

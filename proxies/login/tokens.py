@@ -1,13 +1,13 @@
 from django.conf import settings
 
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
 
 class TokenDoesNotHaveRoleException(Exception):
     pass
 
 
-class SCARefreshToken(RefreshToken):
+class SCAAccessTokenMixin:
     def __init__(self, token=None, verify=True):
         super().__init__(token=token, verify=verify)
         if not token:
@@ -21,3 +21,11 @@ class SCARefreshToken(RefreshToken):
     def verify_role(self):
         if settings.PROXIES_PLACAS_ROLE not in self.payload.get("roles", []):
             raise TokenDoesNotHaveRoleException
+
+
+class SCAAccessToken(SCAAccessTokenMixin, AccessToken):
+    pass
+
+
+class SCARefreshToken(SCAAccessTokenMixin, RefreshToken):
+    pass
