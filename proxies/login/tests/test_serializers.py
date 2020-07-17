@@ -4,6 +4,7 @@ import pytest
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.test import TestCase
+from rest_framework import serializers as drf_serializers
 
 from proxies.login import serializers
 
@@ -72,3 +73,9 @@ class TestRefreshTokenSerializers(TestCase):
         self.assertTrue(is_valid)
         self.assertEqual(self.ser.validated_data["access"], "access token")
         self.token_mock.assert_called_once_with(self.data["refresh"])
+
+    def test_invalid_role(self):
+        self.token_mock.return_value = mock.Mock(payload={})
+
+        with pytest.raises(drf_serializers.ValidationError):
+            self.ser.is_valid(raise_exception=True)

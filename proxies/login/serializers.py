@@ -31,7 +31,8 @@ class SCAJWTTokenSerializer(TokenObtainPairSerializer):
 class SCAJWTRefreshTokenSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
         refresh = SCARefreshToken(attrs["refresh"])
-        if settings.PROXIES_PLACAS_ROLE not in refresh.payload["roles"]:
+        roles = refresh.payload.get("roles", [])
+        if settings.PROXIES_PLACAS_ROLE not in roles:
             raise serializers.ValidationError(
                 "Token não possui ROLE para esse endpoint"
             )
