@@ -10,5 +10,6 @@ class SolrPlacasSerializer(serializers.Serializer):
     rows = serializers.IntegerField()
 
     def validate(self, attrs):
-        token = SCAAccessToken(attrs["jwt"])
+        token_obj = SCAAccessToken(attrs["jwt"])
+        attrs.update(token_obj.payload)
         return attrs
