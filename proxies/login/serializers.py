@@ -7,7 +7,7 @@ from rest_framework_simplejwt.serializers import (
 )
 
 from login.sca import authenticate as sca_authenticate
-from proxies.login.tokens import SCARefreshToken
+from proxies.login.tokens import SCARefreshToken, TokenDoesNotHaveRoleException
 
 
 class SCAJWTTokenSerializer(TokenObtainPairSerializer):
@@ -30,9 +30,9 @@ class SCAJWTTokenSerializer(TokenObtainPairSerializer):
 
 class SCAJWTRefreshTokenSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
-        refresh = SCARefreshToken(attrs["refresh"])
-        roles = refresh.payload.get("roles", [])
-        if settings.PROXIES_PLACAS_ROLE not in roles:
+        try:
+            refresh = SCARefreshToken(attrs["refresh"])
+        except TokenDoesNotHaveRoleException:
             raise serializers.ValidationError(
                 "Token não possui ROLE para esse endpoint"
             )

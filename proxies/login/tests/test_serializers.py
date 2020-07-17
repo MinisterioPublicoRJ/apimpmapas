@@ -7,6 +7,7 @@ from django.test import TestCase
 from rest_framework import serializers as drf_serializers
 
 from proxies.login import serializers
+from proxies.login.tokens import TokenDoesNotHaveRoleException
 
 
 class TestAccessTokenSerializers(TestCase):
@@ -75,7 +76,7 @@ class TestRefreshTokenSerializers(TestCase):
         self.token_mock.assert_called_once_with(self.data["refresh"])
 
     def test_invalid_role(self):
-        self.token_mock.return_value = mock.Mock(payload={})
+        self.token_mock.side_effect = TokenDoesNotHaveRoleException
 
         with pytest.raises(drf_serializers.ValidationError):
             self.ser.is_valid(raise_exception=True)
