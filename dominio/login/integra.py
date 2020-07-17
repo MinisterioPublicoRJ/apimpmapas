@@ -10,6 +10,7 @@ login_logger = logging.getLogger(__name__)
 
 def authenticate_integra(request):
     token_part = get_jwt_from_post(request)
+    login_logger.error(token_part)
     payload = jwt.decode(token_part, verify=False)
     login_logger.info(
         f"Login efetuado pelo órgão ->"
