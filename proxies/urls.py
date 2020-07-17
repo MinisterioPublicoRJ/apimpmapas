@@ -9,6 +9,6 @@ app_name = "proxies"
 urlpatterns = [
     path("token/", SCAJSONWebTokenAPIView.as_view()),
     path("token-refresh/", SCAJSONWebRefreshTokenAPIView.as_view()),
-    path("solr", include("proxies.solr.urls")),
+    path("solr/", include("proxies.solr.urls")),
     path("", include("proxies.detran.urls")),
 ]

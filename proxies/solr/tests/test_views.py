@@ -20,8 +20,10 @@ class TestSolrPlacasViews(TestCase):
 
         access_token = AccessToken()
         access_token.payload["roles"] = (settings.PROXIES_PLACAS_ROLE,)
+        access_token.payload["username"] = "username"
         self.token = str(access_token)
         self.url = reverse("proxies:solr-placas")
+
         self.query = "select * from dual"
         self.start = 1
         self.rows = 10

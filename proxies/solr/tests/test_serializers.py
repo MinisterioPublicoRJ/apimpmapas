@@ -1,7 +1,10 @@
+from unittest import mock
+
 import pytest
 from django.conf import settings
 from django.test import TestCase
 from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.exceptions import TokenError
 
 from proxies.login.tokens import TokenDoesNotHaveRoleException
 from proxies.solr.serializers import SolrPlacasSerializer
@@ -45,3 +48,11 @@ class TestSolrPlacas(TestCase):
 
         with pytest.raises(TokenDoesNotHaveRoleException):
             ser.is_valid()
+
+    @mock.patch("proxies.solr.serializers.SCAAccessToken")
+    def test_invalid_token(self, _SCAAccessToken):
+        _SCAAccessToken.side_effect = TokenError
+
+        ser = SolrPlacasSerializer(data=self.data)
+
+        self.assertFalse(ser.is_valid())

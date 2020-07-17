@@ -22,7 +22,8 @@ class SCAAccessTokenMixin:
         self.payload["roles"] = (settings.PROXIES_PLACAS_ROLE,)
 
     def set_username(self):
-        self.payload["username"] = self._username
+        if self._username:
+            self.payload["username"] = self._username
 
     def verify_role(self):
         if settings.PROXIES_PLACAS_ROLE not in self.payload.get("roles", []):
