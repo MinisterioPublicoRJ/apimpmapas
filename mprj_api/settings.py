@@ -300,3 +300,7 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
+
+#SOLR
+ZOOKEEPER_SERVER = config("ZOOKEEPER_SERVER", default="zookeeper")
+PLACAS_SOLR_COLLECTION = config("PLACAS_SOLR_COLLECTION", default="placas")
