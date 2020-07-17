@@ -5,14 +5,9 @@ from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer,
     TokenRefreshSerializer,
 )
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from login.sca import authenticate
-
-
-class SCARefreshToken(RefreshToken):
-    def set_roles(self):
-        self.payload["roles"] = (settings.PROXIES_PLACAS_ROLE,)
+from proxies.login.tokens import SCARefreshToken
 
 
 class SCAJWTTokenSerializer(TokenObtainPairSerializer):

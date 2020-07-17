@@ -232,3 +232,5 @@ DESAPARECIDOS_CACHE_TIMEOUT = config(
     cast=int,
     default=86400
 )
+
+PROXIES_PLACAS_ROLE = config("PROXIES_PLACAS_ROLE", cast=Csv(), default="role,")
