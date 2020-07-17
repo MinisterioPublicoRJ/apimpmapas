@@ -20,7 +20,7 @@ class SCAJWTTokenSerializer(TokenObtainPairSerializer):
         if not sca_auth["logged_in"]:
             raise PermissionDenied
 
-        refresh = SCARefreshToken()
+        refresh = SCARefreshToken(username=attrs["username"])
 
         data = {}
         data["refresh"] = str(refresh)
@@ -31,7 +31,7 @@ class SCAJWTTokenSerializer(TokenObtainPairSerializer):
 class SCAJWTRefreshTokenSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
         try:
-            refresh = SCARefreshToken(attrs["refresh"])
+            refresh = SCARefreshToken(token=attrs["refresh"])
         except TokenDoesNotHaveRoleException:
             raise serializers.ValidationError(
                 "Token não possui ROLE para esse endpoint"

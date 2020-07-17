@@ -8,15 +8,21 @@ class TokenDoesNotHaveRoleException(Exception):
 
 
 class SCAAccessTokenMixin:
-    def __init__(self, token=None, verify=True):
+    def __init__(self, username=None, token=None, verify=True):
+        self._username = username
+
         super().__init__(token=token, verify=verify)
         if not token:
             self.set_roles()
+            self.set_username()
         else:
             self.verify_role()
 
     def set_roles(self):
         self.payload["roles"] = (settings.PROXIES_PLACAS_ROLE,)
+
+    def set_username(self):
+        self.payload["username"] = self._username
 
     def verify_role(self):
         if settings.PROXIES_PLACAS_ROLE not in self.payload.get("roles", []):

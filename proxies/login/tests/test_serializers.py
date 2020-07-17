@@ -73,7 +73,7 @@ class TestRefreshTokenSerializers(TestCase):
 
         self.assertTrue(is_valid)
         self.assertEqual(self.ser.validated_data["access"], "access token")
-        self.token_mock.assert_called_once_with(self.data["refresh"])
+        self.token_mock.assert_called_once_with(token=self.data["refresh"])
 
     def test_invalid_role(self):
         self.token_mock.side_effect = TokenDoesNotHaveRoleException
