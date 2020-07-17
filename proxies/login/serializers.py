@@ -36,5 +36,4 @@ class SCAJWTRefreshTokenSerializer(TokenRefreshSerializer):
                 "Token não possui ROLE para esse endpoint"
             )
 
-        refresh.set_roles()
         return {"access": str(refresh.access_token)}

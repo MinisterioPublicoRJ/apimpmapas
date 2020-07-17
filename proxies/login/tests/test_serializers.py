@@ -27,8 +27,8 @@ class TestAccessTokenSerializers(TestCase):
         self.ser = serializers.SCAJWTTokenSerializer(data=self.data)
 
     def tearDown(self):
-        self.sca_auth_mock.stop()
-        self.token_mock.stop()
+        self.sca_auth_patcher.stop()
+        self.token_patcher.stop()
 
     def test_obtain_pair_token_happy_path(self):
         is_valid = self.ser.is_valid()
@@ -50,3 +50,25 @@ class TestAccessTokenSerializers(TestCase):
         self.sca_auth_mock.return_value = {"logged_in": False}
         with pytest.raises(PermissionDenied):
             self.ser.is_valid()
+
+
+class TestRefreshTokenSerializers(TestCase):
+    def setUp(self):
+        self.data = {"refresh": "refresh"}
+        self.ser = serializers.SCAJWTRefreshTokenSerializer(data=self.data)
+        self.token_patcher = mock.patch(
+            "proxies.login.serializers.SCARefreshToken"
+        )
+        self.token_mock = self.token_patcher.start()
+        token_obj = mock.Mock(
+            access_token="access token",
+            payload={"roles": (settings.PROXIES_PLACAS_ROLE,)},
+        )
+        self.token_mock.return_value = token_obj
+
+    def test_refresh_token_happy_path(self):
+        is_valid = self.ser.is_valid()
+
+        self.assertTrue(is_valid)
+        self.assertEqual(self.ser.validated_data["access"], "access token")
+        self.token_mock.assert_called_once_with(self.data["refresh"])
