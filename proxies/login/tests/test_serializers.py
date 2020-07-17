@@ -8,7 +8,7 @@ from django.test import TestCase
 from proxies.login import serializers
 
 
-class TestSerializers(TestCase):
+class TestAccessTokenSerializers(TestCase):
     def setUp(self):
         self.sca_auth_patcher = mock.patch(
             "proxies.login.serializers.sca_authenticate"
