@@ -192,7 +192,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 CACHE_TIMEOUT = config("CACHE_TIMEOUT", default=300, cast=int)
 
-JWT_SECRET = SECRET_KEY + str(datetime.now())
+JWT_SECRET = SECRET_KEY
 
 #HBASE
 HBASE_SERVER = config("HBASE_SERVER")
