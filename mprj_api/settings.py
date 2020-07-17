@@ -229,6 +229,11 @@ LOGGING = {
             'filename': BASE_DIR.child("dominio_login.log"),
             'formatter': 'verbose',
         },
+        'file_proxies': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR.child("proxies.log"),
+            'formatter': 'verbose',
+        },
     },
     'loggers': {
         'django': {
@@ -238,7 +243,7 @@ LOGGING = {
         'proxies': {
             'level': config("PROXIES_LOG_LEVEL", default="INFO"),
             'formatter': 'verbose',
-            'handlers': ['console'],
+            'handlers': ['console', 'file_proxies'],
             'propagate': True,
         },
         'dominio.login': {

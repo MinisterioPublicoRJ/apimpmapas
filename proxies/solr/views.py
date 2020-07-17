@@ -1,3 +1,5 @@
+import logging
+
 from django.core.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
@@ -5,6 +7,9 @@ from rest_framework.generics import GenericAPIView
 from proxies.login.tokens import TokenDoesNotHaveRoleException
 from proxies.solr.client import create_solr_client
 from proxies.solr.serializers import SolrPlacasSerializer
+
+
+logger = logging.getLogger(__name__)
 
 
 class SolrPlacasView(GenericAPIView):
@@ -23,5 +28,8 @@ class SolrPlacasView(GenericAPIView):
             ser.validated_data["query"],
             ser.validated_data["start"],
             ser.validated_data["rows"],
+        )
+        logger.info(
+            f"Consulta de 'placas' feita por {ser.validated_data['username']}"
         )
         return Response(data=data)
