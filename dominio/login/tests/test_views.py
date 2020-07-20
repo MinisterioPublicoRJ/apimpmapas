@@ -6,6 +6,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.test import TestCase
 from freezegun import freeze_time
+from jwt.exceptions import DecodeError
 from model_bakery.baker import make
 
 from dominio.login.integra import authenticate_integra
@@ -93,6 +94,17 @@ class TestLoginIntegra(TestCase):
 
         self.assertEqual(resp.status_code, 200)
         _auth_integra.assert_called()
+        self.assertEqual(resp.json(), expected_data)
+
+    @mock.patch("dominio.login.views.authenticate_integra")
+    def test_jwt_decode_error(self, _auth_integra):
+        _auth_integra.side_effect = DecodeError
+        url = reverse("dominio:login-integra")
+
+        resp = self.client.post(url)
+        expected_data = {"erro": "Token inválido"}
+
+        self.assertEqual(resp.status_code, 400)
         self.assertEqual(resp.json(), expected_data)
 
 

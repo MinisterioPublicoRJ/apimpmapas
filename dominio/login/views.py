@@ -1,3 +1,4 @@
+import jwt
 import login_sca
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
@@ -5,6 +6,7 @@ from django.http import JsonResponse
 from dominio.models import Usuario
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
+from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 
 from .integra import authenticate_integra
@@ -14,7 +16,13 @@ from dominio.login import services
 @csrf_exempt
 def login_integra(request):
     "View responsável pela autenticação vinda do Integra"
-    response = authenticate_integra(request)
+    try:
+        response = authenticate_integra(request)
+    except jwt.exceptions.DecodeError:
+        return JsonResponse(
+            {"erro": "Token inválido"}, status=HTTP_400_BAD_REQUEST
+        )
+
     usuario, created = Usuario.objects.get_or_create(
         username=response.get("username")
     )
