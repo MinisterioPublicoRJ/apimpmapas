@@ -72,9 +72,9 @@ class Dao(TestCase):
         INNER JOIN
                 SILD_VITIMA VTMA
         ON (VTMA.VTMA_DK = SNCA2.SNCA_VTMA_DK AND
-                (VTMA.VTMA_CPF IS NULL OR
-                 VTMA.VTMA_NM_VITIMA IS NULL AND
-                 VTMA.VTMA_DT_NASCIMENTO IS NULL))
+                ((VTMA.VTMA_CPF IS NULL AND VTMA.VTMA_NM_VITIMA IS NULL) OR
+                (VTMA.VTMA_CPF IS NULL AND VTMA.VTMA_DT_NASCIMENTO IS NULL))
+          )
         """
 
         self.assertEqual(
