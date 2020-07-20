@@ -27,14 +27,14 @@ class Dao(TestCase):
     def test_format_query_filter_keep_ds(self):
         query = """
             SELECT * FROM table WHERE id_sinalid = '{{ id_sinalid }}'
-            WHERE  {{ filter }}
+            WHERE{{ filter }}
         """
 
         id_sinalid = "1234DS"
         formatted_query = format_query(query, id_sinalid)
         expected_query = """
             SELECT * FROM table WHERE id_sinalid = '1234DS'
-            WHERE  
+            WHERE
         SELECT
             SNCA1.SNCA_DK
         FROM
@@ -53,14 +53,14 @@ class Dao(TestCase):
     def test_format_query_filter_remove_ds(self):
         query = """
             SELECT * FROM table WHERE id_sinalid = '{{ id_sinalid }}'
-            WHERE  {{ filter }}
+            WHERE{{ filter }}
         """
 
         id_sinalid = "1234IM"
         formatted_query = format_query(query, id_sinalid)
         expected_query = """
             SELECT * FROM table WHERE id_sinalid = '1234IM'
-            WHERE  
+            WHERE
         SELECT
             SNCA2.SNCA_DK
         FROM
