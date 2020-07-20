@@ -30,10 +30,10 @@ class Dao(TestCase):
             WHERE{{ filter }}
         """
 
-        id_sinalid = "1234DS"
+        id_sinalid = "1234IM"
         formatted_query = format_query(query, id_sinalid)
         expected_query = """
-            SELECT * FROM table WHERE id_sinalid = '1234DS'
+            SELECT * FROM table WHERE id_sinalid = '1234IM'
             WHERE
         SELECT
             SNCA1.SNCA_DK
@@ -56,10 +56,10 @@ class Dao(TestCase):
             WHERE{{ filter }}
         """
 
-        id_sinalid = "1234IM"
+        id_sinalid = "1234DS"
         formatted_query = format_query(query, id_sinalid)
         expected_query = """
-            SELECT * FROM table WHERE id_sinalid = '1234IM'
+            SELECT * FROM table WHERE id_sinalid = '1234DS'
             WHERE
         SELECT
             SNCA2.SNCA_DK

@@ -39,7 +39,7 @@ def format_query(query, id_sinalid):
                  VTMA.VTMA_NM_VITIMA IS NULL AND
                  VTMA.VTMA_DT_NASCIMENTO IS NULL))
     """
-    table_filter = keep_DS if "DS" in id_sinalid else remove_DS
+    table_filter = remove_DS if "DS" in id_sinalid else keep_DS
     return query.replace("{{ id_sinalid }}", id_sinalid).replace(
         "{{ filter }}", table_filter
     )
