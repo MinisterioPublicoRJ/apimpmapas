@@ -1,5 +1,6 @@
 from datetime import datetime
 from unittest import TestCase, mock
+from textwrap import dedent
 
 from desaparecidos.dao import (
     format_query,
@@ -22,6 +23,64 @@ class Dao(TestCase):
         """
 
         self.assertEqual(formatted_query, expected_query)
+
+    def test_format_query_filter_keep_ds(self):
+        query = """
+            SELECT * FROM table WHERE id_sinalid = '{{ id_sinalid }}'
+            WHERE  {{ filter }}
+        """
+
+        id_sinalid = "1234DS"
+        formatted_query = format_query(query, id_sinalid)
+        expected_query = """
+            SELECT * FROM table WHERE id_sinalid = '1234DS'
+            WHERE  
+        SELECT
+            SNCA1.SNCA_DK
+        FROM
+            SILD_DESAPARECIMENTO SDES
+        INNER JOIN
+            SILD_SINDICANCIA SNCA1
+        ON (SNCA1.SNCA_DK = SDES.SDES_SNCA_DK AND
+            SNCA1.SNCA_SISI_DK IN (1,3))
+        """
+
+        self.assertEqual(
+            dedent(formatted_query).strip(),
+            dedent(expected_query).strip()
+        )
+
+    def test_format_query_filter_remove_ds(self):
+        query = """
+            SELECT * FROM table WHERE id_sinalid = '{{ id_sinalid }}'
+            WHERE  {{ filter }}
+        """
+
+        id_sinalid = "1234IM"
+        formatted_query = format_query(query, id_sinalid)
+        expected_query = """
+            SELECT * FROM table WHERE id_sinalid = '1234IM'
+            WHERE  
+        SELECT
+            SNCA2.SNCA_DK
+        FROM
+                SILD_INDICA_DESAPARECIMENTO SIDS
+        INNER JOIN
+                SILD_SINDICANCIA SNCA2
+        ON (SNCA2.SNCA_DK = SIDS.SIDS_SNCA_DK AND
+            SNCA2.SNCA_SISI_DK IN (1,3,4))
+        INNER JOIN
+                SILD_VITIMA VTMA
+        ON (VTMA.VTMA_DK = SNCA2.SNCA_VTMA_DK AND
+                (VTMA.VTMA_CPF IS NULL AND
+                 VTMA.VTMA_NM_VITIMA IS NULL AND
+                 VTMA.VTMA_DT_NASCIMENTO IS NULL))
+        """
+
+        self.assertEqual(
+            dedent(formatted_query).strip(),
+            dedent(expected_query).strip()
+        )
 
     @mock.patch("desaparecidos.dao.q_rank")
     @mock.patch('desaparecidos.dao.format_query',
