@@ -13,7 +13,6 @@ def client(db_username, db_pwd, db_host):
 
 
 def format_query(query, id_sinalid):
-    # TODO: Adicionar teste para essa troca de filtros
     keep_DS = """
         SELECT
             SNCA1.SNCA_DK
@@ -36,9 +35,9 @@ def format_query(query, id_sinalid):
         INNER JOIN
                 SILD_VITIMA VTMA
         ON (VTMA.VTMA_DK = SNCA2.SNCA_VTMA_DK AND
-                (VTMA.VTMA_CPF IS NULL AND
-                 VTMA.VTMA_NM_VITIMA IS NULL AND
-                 VTMA.VTMA_DT_NASCIMENTO IS NULL))
+                ((VTMA.VTMA_CPF IS NULL AND VTMA.VTMA_NM_VITIMA IS NULL) OR
+                (VTMA.VTMA_CPF IS NULL AND VTMA.VTMA_DT_NASCIMENTO IS NULL))
+          )
     """
     table_filter = remove_DS if "DS" in id_sinalid else keep_DS
     return query.replace("{{ id_sinalid }}", id_sinalid).replace(
