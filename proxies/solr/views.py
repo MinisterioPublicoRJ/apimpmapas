@@ -3,6 +3,7 @@ import logging
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 
+from proxies.login.permissions import SCARolePermission
 from proxies.solr.client import create_solr_client
 from proxies.solr.serializers import SolrPlacasSerializer
 
@@ -12,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 class SolrPlacasView(GenericAPIView):
     serializer_class = SolrPlacasSerializer
+    permission_classes = (SCARolePermission,)
 
     def get_data(self, query, start, rows):
         return create_solr_client().search(query, start, rows)

@@ -1,4 +1,7 @@
+import jwt
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from login.sca import authenticate as sca_authenticate
@@ -24,3 +27,19 @@ class SCATokenSerializer(TokenObtainPairSerializer):
         data["refresh"] = str(refresh)
         data["access"] = str(refresh.access_token)
         return data
+
+
+class SCAPermissionSerializer(serializers.Serializer):
+    token = serializers.CharField()
+
+    def validate(self, attrs):
+        try:
+            payload = jwt.decode(
+                attrs["token"],
+                settings.JWT_SECRET,
+                algorithm="HS256"
+            )
+        except jwt.exceptions.InvalidTokenError:
+            raise serializers.ValidationError("Token Inválido")
+
+        return {"payload": payload}
