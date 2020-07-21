@@ -3,6 +3,7 @@ from unittest import mock
 import pytest
 from django.core.exceptions import PermissionDenied
 from django.test import TestCase
+from rest_framework_simplejwt.tokens import AccessToken
 
 from proxies.login import serializers
 
@@ -52,3 +53,19 @@ class TestAccessTokenSerializers(TestCase):
         self.sca_auth_mock.return_value = {"logged_in": False}
         with pytest.raises(PermissionDenied):
             self.ser.is_valid()
+
+
+class TestSCAPermissionSerializer(TestCase):
+    def test_correct_response(self):
+        data = {"token": str(AccessToken())}
+        ser = serializers.SCAPermissionSerializer(data=data)
+        is_valid = ser.is_valid()
+
+        self.assertTrue(is_valid)
+
+    def test_invalid_token(self):
+        data = {"token": "invalid token"}
+        ser = serializers.SCAPermissionSerializer(data=data)
+        is_valid = ser.is_valid()
+
+        self.assertFalse(is_valid)

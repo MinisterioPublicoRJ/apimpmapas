@@ -1,6 +1,6 @@
-import jwt
 from django.core.exceptions import PermissionDenied
 from rest_framework import serializers
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import AccessToken
 
@@ -36,7 +36,7 @@ class SCAPermissionSerializer(serializers.Serializer):
         try:
             token_obj = AccessToken(token=attrs["token"])
             payload = token_obj.payload
-        except jwt.exceptions.InvalidTokenError:
-            raise serializers.ValidationError("Token Inválido")
+        except TokenError as e:
+            raise serializers.ValidationError("{!r}".format(e))
 
         return {"payload": payload}
