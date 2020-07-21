@@ -1,42 +1,13 @@
 from unittest import TestCase
 
-import pytest
-from django.conf import settings
-from rest_framework_simplejwt.tokens import RefreshToken
-
-from proxies.login.tokens import SCARefreshToken, TokenDoesNotHaveRoleException
+from proxies.login.tokens import SCAAccessToken
 
 
 class TestRefreshToken(TestCase):
-    def test_add_roles_to_payload(self):
-        refresh = SCARefreshToken(username="username")
+    def test_add_username_and_roles_to_payload(self):
+        username = "username"
+        roles = ["role_1", "role_2"]
+        refresh = SCAAccessToken(username=username, roles=roles)
 
-        self.assertEqual(
-            refresh.payload["roles"],
-            (settings.PROXIES_PLACAS_ROLE,),
-        )
-        self.assertEqual(
-            refresh.payload["username"],
-            "username"
-        )
-
-    def test_verify_valid_role(self):
-        token_obj = RefreshToken()
-        token_obj.payload["roles"] = (settings.PROXIES_PLACAS_ROLE,)
-        token = str(token_obj)
-
-        SCARefreshToken(token=token)
-
-    def test_verify_invalid_role(self):
-        token_obj = RefreshToken()
-        token_obj.payload["roles"] = ("anoter role",)
-        token = str(token_obj)
-
-        with pytest.raises(TokenDoesNotHaveRoleException):
-            SCARefreshToken(token=token)
-
-    def test_verify_no_role(self):
-        token = str(RefreshToken())
-
-        with pytest.raises(TokenDoesNotHaveRoleException):
-            SCARefreshToken(token=token)
+        self.assertEqual(refresh.payload["roles"], roles)
+        self.assertEqual(refresh.payload["username"], username)
