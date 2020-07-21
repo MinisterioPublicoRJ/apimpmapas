@@ -149,7 +149,8 @@ class TestSuaMesaFunctions(NoJWTTestCase, NoCacheTestCase, TestCase):
                          6591, 6339, 6553, 7871, 6343, 6340, 6342, 6021, 6334,
                          6331, 6022, 6020, 6593, 6332, 7872, 6336, 6333, 6335,
                          7745, 6346, 6345, 6015, 6016, 6325, 6327, 6328, 6329,
-                         6330, 6337, 6344, 6656, 6671, 7869, 7870, 6324, 7834)
+                         6330, 6337, 6344, 6656, 6671, 7869, 7870, 6324, 7834,
+                         7737, 6350)
 
         regras = regras_ajuizamento + regras_tac + regras_arquiv
         manager_mock = mock.MagicMock()
@@ -174,7 +175,7 @@ class TestSuaMesaFunctions(NoJWTTestCase, NoCacheTestCase, TestCase):
         regras_arquiv = (6682, 6669, 6018, 6341, 6338, 6019, 6017, 6591, 6339,
                          7871, 6343, 6340, 6342, 7745, 6346, 7915, 6272, 6253,
                          6392, 6377, 6378, 6359, 6362, 6361, 6436, 6524, 7737,
-                         7811, 6625, 6718, 7834)
+                         7811, 6625, 6718, 7834, 6350)
 
         manager_mock = mock.MagicMock()
 
