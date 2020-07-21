@@ -8,8 +8,8 @@ class SolrPlacasSerializer(serializers.Serializer):
     placa = serializers.CharField()
     dt_inicio = serializers.DateTimeField(format=dt_format)
     dt_fim = serializers.DateTimeField(format=dt_format)
-    start = serializers.IntegerField()
-    rows = serializers.IntegerField()
+    start = serializers.IntegerField(min_value=0)
+    rows = serializers.IntegerField(min_value=1)
 
     def validate(self, attrs):
         if attrs["rows"] > settings.PLACAS_SOLR_MAX_ROWS:
