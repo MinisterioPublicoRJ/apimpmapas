@@ -24,7 +24,14 @@ class SolrPlacasView(GenericAPIView):
         try:
             data = create_solr_client().search(query, start, rows)
         except SolrError as e:
-            logger.error("{!r}".format(e))
+            logger.error(
+                "query={query} - params:{start} | {rows}: {e!r}".format(
+                    query=query,
+                    start=start,
+                    rows=rows,
+                    e=e
+                )
+            )
             raise ServiceUnavailable
 
         return data
