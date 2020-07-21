@@ -24,7 +24,9 @@ class TestSolrPlacasViews(TestCase):
         self.token = str(access_token)
         self.url = reverse("proxies:solr-placas")
 
-        self.query = "select * from dual"
+        self.dt_inicio = "2020-01-01T20:00:00"
+        self.dt_fim = "2020-01-02T20:00:00"
+        self.placa = "XXX1000"
         self.start = 1
         self.rows = 10
 
@@ -36,7 +38,9 @@ class TestSolrPlacasViews(TestCase):
             self.url,
             {
                 "token": self.token,
-                "query": self.query,
+                "placa": self.placa,
+                "dt_inicio": self.dt_inicio,
+                "dt_fim": self.dt_inicio,
                 "start": self.start,
                 "rows": self.rows,
             }
@@ -53,9 +57,6 @@ class TestSolrPlacasViews(TestCase):
             self.url,
             {
                 "token": token,
-                "query": self.query,
-                "start": self.start,
-                "rows": self.rows,
             }
         )
 
@@ -67,9 +68,6 @@ class TestSolrPlacasViews(TestCase):
             self.url,
             {
                 "token": token,
-                "query": self.query,
-                "start": self.start,
-                "rows": self.rows,
             }
         )
 
