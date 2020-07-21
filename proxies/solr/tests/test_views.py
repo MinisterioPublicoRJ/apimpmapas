@@ -3,7 +3,7 @@ from unittest import mock
 from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
-
+from pysolr import SolrError
 from rest_framework_simplejwt.tokens import AccessToken
 
 
@@ -72,3 +72,19 @@ class TestSolrPlacasViews(TestCase):
         )
 
         self.assertEqual(resp.status_code, 403)
+
+    def test_solr_client_error(self):
+        self.solr_client_mock.search.side_effect = SolrError
+        resp = self.client.get(
+            self.url,
+            {
+                "token": self.token,
+                "placa": self.placa,
+                "dt_inicio": self.dt_inicio,
+                "dt_fim": self.dt_inicio,
+                "start": self.start,
+                "rows": self.rows,
+            }
+        )
+
+        self.assertEqual(resp.status_code, 503)

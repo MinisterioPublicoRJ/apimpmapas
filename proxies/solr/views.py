@@ -7,6 +7,9 @@ from rest_framework.generics import GenericAPIView
 from proxies.login.permissions import SCARolePermission
 from proxies.solr.client import create_solr_client
 from proxies.solr.serializers import SolrPlacasSerializer
+from pysolr import SolrError
+
+from proxies.solr.exceptions import ServiceUnavailable
 
 
 logger = logging.getLogger(__name__)
@@ -18,7 +21,13 @@ class SolrPlacasView(GenericAPIView):
     permission_roles = (settings.PROXIES_PLACAS_ROLE,)
 
     def get_data(self, query, start, rows):
-        return create_solr_client().search(query, start, rows)
+        try:
+            data = create_solr_client().search(query, start, rows)
+        except SolrError as e:
+            logger.error("{!r}".format(e))
+            raise ServiceUnavailable
+
+        return data
 
     def get(self, request, *args, **kwargs):
         ser = self.get_serializer_class()(data=request.GET)
