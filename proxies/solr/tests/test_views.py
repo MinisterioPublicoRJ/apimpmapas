@@ -35,7 +35,7 @@ class TestSolrPlacasViews(TestCase):
         resp = self.client.get(
             self.url,
             {
-                "jwt": self.token,
+                "token": self.token,
                 "query": self.query,
                 "start": self.start,
                 "rows": self.rows,
@@ -46,11 +46,27 @@ class TestSolrPlacasViews(TestCase):
         self.assertEqual(resp.data, self.data)
 
     def test_solr_placas_invalid_role(self):
-        self.token = str(AccessToken())
+        token_obj = AccessToken()
+        token_obj.payload["roles"] = ["wrong_ROLE"]
+        token = str(token_obj)
         resp = self.client.get(
             self.url,
             {
-                "jwt": self.token,
+                "token": token,
+                "query": self.query,
+                "start": self.start,
+                "rows": self.rows,
+            }
+        )
+
+        self.assertEqual(resp.status_code, 403)
+
+    def test_solr_placas_no_role(self):
+        token = str(AccessToken())
+        resp = self.client.get(
+            self.url,
+            {
+                "token": token,
                 "query": self.query,
                 "start": self.start,
                 "rows": self.rows,

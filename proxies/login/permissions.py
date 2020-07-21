@@ -15,4 +15,8 @@ class SCARolePermission(permissions.BasePermission):
         if not payload_roles:
             return False
 
-        return len(set(payload_roles) & set(view.permission_roles)) > 0
+        has_role = len(set(payload_roles) & set(view.permission_roles)) > 0
+        if has_role:
+            request.sca_username = payload["username"]
+
+        return has_role

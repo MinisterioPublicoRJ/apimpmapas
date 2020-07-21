@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 
@@ -14,6 +15,7 @@ logger = logging.getLogger(__name__)
 class SolrPlacasView(GenericAPIView):
     serializer_class = SolrPlacasSerializer
     permission_classes = (SCARolePermission,)
+    permission_roles = (settings.PROXIES_PLACAS_ROLE,)
 
     def get_data(self, query, start, rows):
         return create_solr_client().search(query, start, rows)
@@ -27,6 +29,6 @@ class SolrPlacasView(GenericAPIView):
             ser.validated_data["rows"],
         )
         logger.info(
-            f"Consulta de 'placas' feita por {ser.validated_data['username']}"
+            f"Consulta de 'placas' feita por {request.sca_username}"
         )
         return Response(data=data)
