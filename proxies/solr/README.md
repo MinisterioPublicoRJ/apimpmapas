@@ -23,7 +23,7 @@ curl -d "username=sca_username"\
 
 ```
 curl -d "refresh=<refresh-token>"\
-      -X POST "proxies/refresh-token/"
+      -X POST "proxies/token-refresh/"
 ```
 
 ### Resposta
