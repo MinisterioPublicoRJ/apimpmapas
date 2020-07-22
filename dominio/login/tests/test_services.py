@@ -29,11 +29,35 @@ class TestBuildLoginResponse(TestCase):
         self.mock_oracle_access.side_effect = [
             self.oracle_return_dados_usuario,
             (
-                ("098765", "PROMOTORIA INVESTIGAÇÃO PENAL"),
-                ("1234", "PROMOTORIA DIFERENTE"),
+                (
+                    "098765",
+                    "PROMOTORIA INVESTIGAÇÃO PENAL",
+                    "MATRICULA 1",
+                    "CPF 1",
+                    "NOME 1",
+                    "X",
+                    "PESS_DK 1",
+                ),
+                (
+                    "1234",
+                    "PROMOTORIA DIFERENTE",
+                    "MATRICULA 2",
+                    "CPF 2",
+                    "NOME 2",
+                    "X",
+                    "PESS_DK 2",
+                ),
             ),
             (
-                ("1234", "PROMOTORIA TUTELA COLETIVA"),
+                (
+                    "1234",
+                    "PROMOTORIA TUTELA COLETIVA",
+                    "MATRICULA 3",
+                    "CPF 3",
+                    "NOME 3",
+                    "X",
+                    "PESS_DK 3",
+                ),
             ),  # result set do lista orgao pessoal
         ]
         self.expected_response = {
@@ -48,22 +72,23 @@ class TestBuildLoginResponse(TestCase):
             "first_login_today": True,
             "sexo": "X",
             "token": "auth-token",
+            "tipo_permissao": "regular",
             "orgaos_validos": [
                 {
-                    "cpf": "123456789",
-                    "matricula": "12345",
-                    "pess_dk": "4567",
-                    "nome": "NOME FUNCIONARIO",
+                    "cpf": "CPF 1",
+                    "matricula": "MATRICULA 1",
+                    "pess_dk": "PESS_DK 1",
+                    "nome": "NOME 1",
                     "sexo": "X",
                     "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
                     "tipo": 2,
                     "cdorgao": "098765",
                 },
                 {
-                    "cpf": "123456789",
-                    "matricula": "12345",
-                    "pess_dk": "4567",
-                    "nome": "NOME FUNCIONARIO",
+                    "cpf": "CPF 3",
+                    "matricula": "MATRICULA 3",
+                    "pess_dk": "PESS_DK 3",
+                    "nome": "NOME 3",
                     "sexo": "X",
                     "nm_org": "PROMOTORIA TUTELA COLETIVA",
                     "tipo": 1,
@@ -148,11 +173,36 @@ class TestPermissoesUsuarioRegular(TestCase):
             ("12345", "123456789", "NOME FUNCIONARIO", "X", "4567"),
         )
         self.oracle_return_lista_orgao = (
-            ("098765", "PROMOTORIA INVESTIGAÇÃO PENAL"),
-            ("1234", "PROMOTORIA DIFERENTE"),
+            (
+                "098765",
+                "PROMOTORIA INVESTIGAÇÃO PENAL",
+                "MATRICULA 1",
+                "CPF 1",
+                "NOME 1",
+                "X",
+                "PESS_DK 1",
+
+            ),
+            (
+                "1234",
+                "PROMOTORIA DIFERENTE",
+                "MATRICULA 2",
+                "CPF 2",
+                "NOME 2",
+                "X",
+                "PESS_DK 2",
+            ),
         )
         self.oracle_return_lista_orgao_pessoal = (
-            ("9999", "PROMOTORIA TUTELA COLETIVA"),
+            (
+                "9999",
+                "PROMOTORIA TUTELA COLETIVA",
+                "MATRICULA 3",
+                "CPF 3",
+                "NOME 3",
+                "X",
+                "PESS_DK 3",
+            ),
         )
         self.mock_oracle_access.side_effect = [
             self.oracle_return_lista_orgao,
@@ -161,30 +211,30 @@ class TestPermissoesUsuarioRegular(TestCase):
         ]
         self.expected = [
             {
-                "cpf": "123456789",
-                "pess_dk": "4567",
-                "nome": "NOME FUNCIONARIO",
-                "matricula": "12345",
+                "cpf": "CPF 1",
+                "pess_dk": "PESS_DK 1",
+                "nome": "NOME 1",
+                "matricula": "MATRICULA 1",
                 "sexo": "X",
                 "cdorgao": "098765",
                 "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
                 "tipo": 2,
             },
             {
-                "cpf": "123456789",
-                "pess_dk": "4567",
-                "nome": "NOME FUNCIONARIO",
-                "matricula": "12345",
+                "cpf": "CPF 2",
+                "pess_dk": "PESS_DK 2",
+                "nome": "NOME 2",
+                "matricula": "MATRICULA 2",
                 "sexo": "X",
                 "cdorgao": "1234",
                 "nm_org": "PROMOTORIA DIFERENTE",
                 "tipo": 0,
             },
             {
-                "cpf": "123456789",
-                "pess_dk": "4567",
-                "nome": "NOME FUNCIONARIO",
-                "matricula": "12345",
+                "cpf": "CPF 3",
+                "pess_dk": "PESS_DK 3",
+                "nome": "NOME 3",
+                "matricula": "MATRICULA 3",
                 "sexo": "X",
                 "cdorgao": "9999",
                 "nm_org": "PROMOTORIA TUTELA COLETIVA",
@@ -397,6 +447,26 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "pess_dk 3",
             ),
         )
+        self.oracle_return_lista_orgaos_lotados = (
+            (
+                "cdorgao 2",
+                "PROMOTORIA DIFERENTE",
+                "matricula 2",
+                "cpf 2",
+                "nome 2",
+                "X",
+                "pess_dk 2",
+            ),
+            (
+                "cdorgao 5",
+                "PROMOTORIA TUTELA COLETIVA",
+                "matricula 5",
+                "cpf 5",
+                "nome 5",
+                "X",
+                "pess_dk 5",
+            ),
+        )
         self.mock_oracle_access.side_effect = [
             self.oracle_return_lista_todos_orgaos,
             self.oracle_return_dados_usuario,
@@ -437,7 +507,58 @@ class TesPermissoesUsuarioAdmin(TestCase):
             username=self.username
         )
 
-    def test_retorna_todos_orgaos_lotados(self):
-        orgaos = self.permissoes.orgaos_lotados
+    def test_retorna_todos_orgaos(self):
+        orgaos = self.permissoes.todos_orgaos
 
         self.assertEqual(orgaos, self.expected)
+
+    def test_retorna_todos_orgaos_validos(self):
+        self.mock_oracle_access.side_effect = [
+            self.oracle_return_lista_todos_orgaos,
+        ]
+        orgaos = self.permissoes.orgaos_validos
+        self.expected.pop(1)
+
+        self.assertCountEqual(orgaos, self.expected)
+
+    def test_orgao_selecionado_permissao_admin_seleciona_lotado(self):
+        "Deve tentar selecionar primeiro um orgao lotado valido"
+        self.mock_oracle_access.side_effect = [
+            self.oracle_return_lista_orgaos_lotados,
+            (),
+            self.oracle_return_lista_todos_orgaos,
+        ]
+        expected = {
+                "cpf": "cpf 5",
+                "pess_dk": "pess_dk 5",
+                "nome": "nome 5",
+                "matricula": "matricula 5",
+                "sexo": "X",
+                "cdorgao": "cdorgao 5",
+                "nm_org": "PROMOTORIA TUTELA COLETIVA",
+                "tipo": 1,
+            }
+
+        orgao_selecionado = self.permissoes.orgao_selecionado
+
+        self.assertEqual(orgao_selecionado, expected)
+
+    def test_orgao_selecionado_permissao_admin_seleciona_primeiro_lista(self):
+        "Deve tentar selecionar primeiro um orgao lotado valido"
+        self.mock_oracle_access.side_effect = [
+            ((
+                "cdorgao 2",
+                "PROMOTORIA DIFERENTE",
+                "matricula 2",
+                "cpf 2",
+                "nome 2",
+                "X",
+                "pess_dk 2",
+            ),),
+            (),
+            self.oracle_return_lista_todos_orgaos,
+        ]
+
+        orgao_selecionado = self.permissoes.orgao_selecionado
+
+        self.assertEqual(orgao_selecionado, self.expected[0])

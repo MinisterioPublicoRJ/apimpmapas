@@ -65,6 +65,15 @@ class TestJWTLogin(TestCase):
         self.assertEqual(tipo_orgao_3, 0)
         self.assertEqual(tipo_orgao_4, 0)
 
+    def test_tipo_orgao_CAO(self):
+        nome_orgao_cao = (
+            "CENTRO DE APOIO OPERACIONAL DAS PROMOTORIAS"
+            " DE JUSTIÇA DE TUTELA COLETIVA"
+        )
+        tipo_do_orgao = tipo_orgao(nome_orgao_cao)
+
+        self.assertEqual(tipo_do_orgao, 0)
+
     @mock.patch('login.jwtlogin.jwt.decode', return_value="payload")
     @mock.patch('login.jwtlogin.get_jwt_from_get', return_value="TOKEN")
     def test_unpack_jwt(self, _get_jwt, _decode):

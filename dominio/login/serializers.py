@@ -4,11 +4,6 @@ from rest_framework import serializers
 class ListaOrgaosSerializer(serializers.Serializer):
     cdorgao = serializers.CharField()
     nm_org = serializers.CharField()
-
-
-class ListaTodosOrgaosSerializer(serializers.Serializer):
-    cdorgao = serializers.CharField()
-    nm_org = serializers.CharField()
     matricula = serializers.CharField()
     cpf = serializers.CharField()
     nome = serializers.CharField()
