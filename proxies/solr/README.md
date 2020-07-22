@@ -36,7 +36,7 @@ curl -d "refresh=<refresh-token>"\
 
 ### Chamada
 #### Argumentos:
- - **jwt**: token de acesso com ROLE necessária;
+ - **token**: token de acesso com ROLE necessária;
  - **dt_inicio**: Inicio do período de busca (ex.: 2020-01-01T12:00:00);
  - **dt_fim**: Fim do período de busca (ex.: 2020-01-01T12:00:00);
  - **placa**:
