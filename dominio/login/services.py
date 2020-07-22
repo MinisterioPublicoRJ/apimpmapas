@@ -105,7 +105,9 @@ class PermissoesUsuarioAdmin(PermissaoUsuario):
     @property
     def orgao_selecionado(self):
         lotados_validos = self._filtra_orgaos_invalidos(self.orgaos_lotados)
-        return lotados_validos[0] if lotados_validos else self.orgaos_validos[0]
+        return (
+            lotados_validos[0] if lotados_validos else self.orgaos_validos[0]
+        )
 
 
 def permissoes_router(info):
