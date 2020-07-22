@@ -192,7 +192,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 CACHE_TIMEOUT = config("CACHE_TIMEOUT", default=300, cast=int)
 
-JWT_SECRET = SECRET_KEY + str(datetime.now())
+JWT_SECRET = SECRET_KEY
 
 #HBASE
 HBASE_SERVER = config("HBASE_SERVER")
@@ -232,3 +232,9 @@ DESAPARECIDOS_CACHE_TIMEOUT = config(
     cast=int,
     default=86400
 )
+
+PROXIES_PLACAS_ROLE = config("PROXIES_PLACAS_ROLE", default="role")
+
+ZOOKEEPER_SERVER = config("ZOOKEEPER_SERVER", default="zookeeper")
+PLACAS_SOLR_COLLECTION = config("PLACAS_SOLR_COLLECTION", default="placas")
+PLACAS_SOLR_MAX_ROWS = config("PLACAS_SOLR_MAX_ROWS", cast=int, default=1_000)

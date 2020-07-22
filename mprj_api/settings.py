@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+from datetime import timedelta
+
 from decouple import config, Csv
 from dj_database_url import parse as db_url
 from unipath import Path
@@ -227,6 +229,11 @@ LOGGING = {
             'filename': BASE_DIR.child("dominio_login.log"),
             'formatter': 'verbose',
         },
+        'file_proxies': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR.child("proxies.log"),
+            'formatter': 'verbose',
+        },
     },
     'loggers': {
         'django': {
@@ -236,7 +243,7 @@ LOGGING = {
         'proxies': {
             'level': config("PROXIES_LOG_LEVEL", default="INFO"),
             'formatter': 'verbose',
-            'handlers': ['console'],
+            'handlers': ['console', 'file_proxies'],
             'propagate': True,
         },
         'dominio.login': {
@@ -292,3 +299,16 @@ DESAPARECIDOS_CACHE_TIMEOUT = config(
     cast=int,
     default=86400
 )
+PROXIES_PLACAS_ROLE = config("PROXIES_PLACAS_ROLE", default="role")
+
+ACCESS_TOKEN_LIFETIME = config("ACCESS_TOKEN_LIFETIME", cast=int, default=5)
+REFRESH_TOKEN_LIFETIME = config("REFRESH_TOKEN_LIFETIME", cast=int, default=1)
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=ACCESS_TOKEN_LIFETIME),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=REFRESH_TOKEN_LIFETIME),
+}
+
+#SOLR
+ZOOKEEPER_SERVER = config("ZOOKEEPER_SERVER", default="zookeeper")
+PLACAS_SOLR_COLLECTION = config("PLACAS_SOLR_COLLECTION", default="placas")
+PLACAS_SOLR_MAX_ROWS = config("PLACAS_SOLR_MAX_ROWS", cast=int, default=1_000)
