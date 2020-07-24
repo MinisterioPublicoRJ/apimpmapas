@@ -148,9 +148,9 @@ def build_login_response(permissoes):
         response, settings.JWT_SECRET, algorithm="HS256",
     )
 
-    # Informações do órgao seecionado
-    response["tipo_orgao"] = permissoes.orgao_selecionado["tipo"]
-    response["orgao"] = permissoes.orgao_selecionado["cdorgao"]
+    # Informações dos órgãos
+    response["orgao_selecionado"] = permissoes.orgao_selecionado
+    response["orgaos_lotados"] = permissoes.orgaos_lotados
     response["orgaos_validos"] = permissoes.orgaos_validos
 
     # Update last_login
