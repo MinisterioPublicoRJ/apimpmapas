@@ -1,0 +1,285 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Resumo Do Dia &#8212; Promotron  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Documentação Promotron" href="README.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="resumo-do-dia">
+<h1>Resumo Do Dia<a class="headerlink" href="#resumo-do-dia" title="Permalink to this headline">¶</a></h1>
+<p>Testando se consiga referenciar a seção Seções do arquivo README.rst: <a class="reference internal" href="README.html#sections-test"><span class="std std-ref">Seções</span></a></p>
+<p>O primeiro componente é o Resumo do Dia. Nele, são realizados cálculos para formar frases relativas ao status do dia atual.</p>
+<img alt="_images/resumo_do_dia.png" src="_images/resumo_do_dia.png" />
+<p>Cada frase corresponde a uma View no Backend (ou seja, cada frase pode ser considerada um sub-componente), de forma que cada uma delas terá sua própria seção.</p>
+</div>
+<div class="section" id="frase-de-resolutividade">
+<h1>Frase de Resolutividade<a class="headerlink" href="#frase-de-resolutividade" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="user-manual">
+<h2>User Manual<a class="headerlink" href="#user-manual" title="Permalink to this headline">¶</a></h2>
+<p>Esta frase indica a porcentagem de promotorias de mesma atribuição que tiveram menos saídas do que a promotoria sendo analisada, nos últimos 30 dias correntes.</p>
+<p>O conceito de &lt;b&gt;atribuição&lt;/b&gt; segue o que foi definido no arquivo README.md. &lt;font color=”orange”&gt;++Ideal é não repetir informação, mas ter como referenciar facilmente.&lt;/font&gt;</p>
+<p>Já &lt;b&gt;saídas&lt;/b&gt; são os andamentos finalizadores considerados como resolutivos. Os andamentos definidos para este fim são os presentes na tabela auxiliar TB_REGRA_NEGOCIO_SAIDA. &lt;font color=”orange”&gt;++ Se eu conseguir fazer uma referência ou um hyperlink para a seção desta tabela auxiliar seria ótimo. Procurar se tem como.&lt;/font&gt;</p>
+<p>Utilizando as regras, o cálculo é feito então contabilizando:</p>
+<ul class="simple">
+<li><p>Os andamentos com data (pcao_dt_andamento) nos últimos 30 dias;</p></li>
+<li><p>Que não foram cancelados;</p></li>
+<li><p>Cujos documentos não foram cancelados;</p></li>
+<li><p>E que sejam dos tipos definidos na tabela TB_REGRA_NEGOCIO_SAIDA para o pacote do órgão em questão.</p></li>
+</ul>
+<p>Esta contagem é então utilizada para fazer um ranking com promotorias dentro da mesma atribuição, e saber a porcentagem de promotorias que tem contagem menor do que a promotoria que está sendo analisada.</p>
+</div>
+<div class="section" id="estrutura-do-codigo">
+<h2>Estrutura do Código<a class="headerlink" href="#estrutura-do-codigo" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-JSON notranslate"><div class="highlight"><pre><span></span>GET /dominio/saidas/&lt;id_orgao&gt;
+
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    &quot;saidas&quot;: 2,
+    &quot;id_orgao&quot;: &lt;int:id_orgao&gt;,
+    &quot;cod_pct&quot;: 26,
+    &quot;percent_rank&quot;: 0.8888888888888888,
+    &quot;dt_calculo&quot;: &quot;2020-02-11T16:27:09.273000Z&quot;
+}
+</pre></div>
+</div>
+<p>Script criação BDA -&gt; Tabela -&gt; View Backend -&gt; Front</p>
+<p>O script de cálculo pode ser encontrado em <cite>scripts-bda/robo_promotoria/src/tabela_saida.py</cite>.
+A tabela final gerada se chama <cite>{schema_exadata_aux}.tb_saida</cite>.
+A view no backend que utiliza a tabela gerada é a <cite>SaidasView</cite> localizada em <cite>apimpmapas/dominio/tutela/views.py</cite>.</p>
+<p>&lt;font color=”green”&gt;!! Apesar da frase dizer últimos 30 dias, parece que o script de criação da tabela atualmente considera últimos 60 dias.&lt;/font&gt;</p>
+</div>
+<div class="section" id="dependencias">
+<h2>Dependências<a class="headerlink" href="#dependencias" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><cite>{schema_exadata_aux}.atualizacao_pj_pacote</cite></p></li>
+<li><p><cite>{schema_exadata_aux}.tb_regra_negocio_saida</cite></p></li>
+<li><p>Tabelas do <cite>{schema_exadata}</cite></p></li>
+</ul>
+</div>
+<div class="section" id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>A tabela está sendo gerada com dados? Se sim, ela possui dados para a promotoria que apresenta erro?</p></li>
+<li><p>Se a tabela estiver sem dados, ou sem dados para aquela promotoria, o problema pode ser na geração da tabela no BDA, ou dos dados usados para gerá-las. Caso haja dados e eles não estejam aparecendo corretamente, pode ser um problema no backend.</p></li>
+<li><p>Caso a tabela esteja com problemas, a promotoria sendo analisada tem pacote de atribuição definido na tabela <cite>{schema_exadata_aux}.atualizacao_pj_pacote</cite>?</p></li>
+<li><p>Caso ela possua pacote de atribuição, existem regras de saídas definidas para o pacote dela na tabela <cite>{schema_exadata_aux}.tb_regra_negocio_saida</cite>?</p></li>
+<li><p>Caso o erro não seja na tabela, a View no backend está retornando os dados corretamente para esta ou outras promotorias?</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="frase-de-acervo">
+<h1>Frase de Acervo<a class="headerlink" href="#frase-de-acervo" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2>User Manual<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>Esta frase pega o número de documentos ativos de determinadas classes para as promotorias dentro da mesma atribuição (no dia em que está sendo visto), e em seguida calcula um limite superior e inferior a partir do qual um dado volume não seria mais regular. Compara-se então o acervo da promotoria com estes limites para definir se ela está com um volume considerado regular ou não.</p>
+<p>Como no caso da Frase de Resolutividade, as regras das classes de documentos têm uma tabela própria, estando localizadas na tabela auxiliar TB_REGRA_NEGOCIO_INVESTIGACAO.</p>
+</div>
+<div class="section" id="id2">
+<h2>Estrutura do Código<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-JSON notranslate"><div class="highlight"><pre><span></span>GET dominio/outliers/&lt;id_orgao&gt;
+
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    &quot;cod_orgao&quot;: &lt;int:id_orgao&gt;,
+    &quot;acervo_qtd&quot;: 10,
+    &quot;cod_atribuicao&quot;: &lt;int:cod_atribuicao&gt;,
+    &quot;minimo&quot;: 112,
+    &quot;maximo&quot;: 290,
+    &quot;media&quot;: 171.4,
+    &quot;primeiro_quartil&quot;: 140.25,
+    &quot;mediana&quot;: 153.5,
+    &quot;terceiro_quartil&quot;: 182.5,
+    &quot;iqr&quot;: 42.25,
+    &quot;lout&quot;: 76.875,
+    &quot;hout&quot;: 245.875,
+    &quot;dt_inclusao&quot;: &quot;2020-03-20 14:28:35&quot;
+}
+</pre></div>
+</div>
+<p>Script criação BDA -&gt; Tabela -&gt; View Backend -&gt; Front</p>
+<p>O script de cálculo pode ser encontrado em <cite>scripts-bda/robo_promotoria/src/tabela_distribuicao.py</cite>.
+A tabela final gerada se chama <cite>{schema_exadata_aux}.tb_distribuicao</cite>.
+A view no backend que utiliza a tabela gerada é a <cite>OutliersView</cite> localizada em <cite>apimpmapas/dominio/tutela/views.py</cite>.</p>
+</div>
+<div class="section" id="id3">
+<h2>Dependências<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><cite>{schema_exadata_aux}.tb_acervo</cite></p></li>
+<li><p><cite>{schema_exadata_aux}.tb_regra_negocio_investigacao</cite></p></li>
+</ul>
+</div>
+<div class="section" id="id4">
+<h2>Troubleshooting<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>A tabela está sendo gerada com dados? Se sim, ela possui dados para a promotoria que apresenta erro?</p></li>
+<li><p>Se a tabela estiver sem dados, ou sem dados para aquela promotoria, o problema pode ser na geração da tabela no BDA, ou dos dados usados para gerá-las. Caso haja dados e eles não estejam aparecendo corretamente, pode ser um problema no backend.</p></li>
+<li><p>Se o problema estiver na geração da tabela, a promotoria sendo analisada tem acervo definido na tabela <cite>{schema_exadata_aux}.tb_acervo</cite>?</p></li>
+<li><p>Caso tenha acervo definido, este acervo está associado a algum pacote de atribuição, ou está como <cite>NULL</cite>? Se estiver <cite>NULL</cite>, verificar se a promotoria possui pacote definido na tabela <cite>{schema_exadata_aux}.atualizacao_pj_pacote</cite>.</p></li>
+<li><p>Caso os dados em <cite>{schema_exadata_aux}.tb_acervo</cite> estejam OK, existem regras de investigação definidas para o pacote dela na tabela <cite>{schema_exadata_aux}.tb_regra_negocio_investigacao</cite>?</p></li>
+<li><p>Caso o problema não seja na tabela, a View do backend está retornando dados para outras promotorias?</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="frase-de-entradas">
+<h1>Frase de Entradas<a class="headerlink" href="#frase-de-entradas" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id5">
+<h2>User Manual<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<p>A última frase é relativa ao número de vistas abertas em um determinado dia, e indica se o número de vistas em um determinado dia está dentro ou fora do padrão. A ideia é muito parecida com a [Frase de Acervo](#frase-de-acervo) (!! Teste de link), mas ao invés de comparar acervo em relação a outras promotorias da mesma atribuição, comparam-se vistas abertas em relação ao histórico do promotor naquela promotoria.&lt;br&gt;</p>
+<p>&lt;font color=”green”&gt;!! Queremos comparar sempre dentro do mesmo CPF? Ou queremos comparar com o órgão inteiro?&lt;/font&gt;</p>
+<p>O cálculo é feito pegando as vistas que foram abertas em cada dia, nos últimos 60 dias, excluindo sábados e domingos. Também não são consideradas as vistas relativas a documentos cancelados. Com isso, é possível calcular a partir de quantas vistas (ou de quão poucas vistas) um dia é muito diferente dos outros. Limites superior e inferior, como do caso do acervo.
+&lt;font color=”orange”&gt;++ Explicação pode melhorar, talvez com um desenho?&lt;/font&gt;</p>
+<p>Diferente das outras frases do Resumo do Dia, a Frase de Entradas não possui tabela de regras, já que todas as vistas são consideradas, independente da classe do documento ao qual elas se referem.</p>
+</div>
+<div class="section" id="id6">
+<h2>Estrutura do Código<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<p>Script criação BDA -&gt; Tabela -&gt; View Backend -&gt; Front</p>
+<p>O script de cálculo pode ser encontrado em <cite>scripts-bda/robo_promotoria/src/tabela_dist_entradas.py</cite>.
+A tabela final gerada se chama <cite>{schema_exadata_aux}.tb_dist_entradas</cite>.
+A view no backend que utiliza a tabela gerada é a <cite>EntradasView</cite> localizada em <cite>apimpmapas/dominio/tutela/views.py</cite>.</p>
+</div>
+<div class="section" id="id7">
+<h2>Dependências<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Tabelas do <cite>{schema_exadata}</cite>.</p></li>
+</ul>
+</div>
+<div class="section" id="id8">
+<h2>Troubleshooting<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>A tabela está sendo gerada com dados? Se sim, ela possui dados para a promotoria que apresenta erro?</p></li>
+<li><p>Se a tabela estiver sem dados, ou sem dados para aquela promotoria, o problema pode ser na geração da tabela no BDA, ou dos dados usados para gerá-las. Caso haja dados e eles não estejam aparecendo corretamente, pode ser um problema no backend.</p></li>
+<li><p>Se o problema estiver na geração da tabela, o promotor sendo analisado teve vistas abertas na promotoria selecionado nos últimos 60 dias? Caso sim, pode ser um bug no script de geração da tabela.</p></li>
+<li><p>Caso o problema não seja na tabela, a View do backend está retornando dados para outras promotorias?</p></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Promotron</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="README.html">Documentação Promotron</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README.html#aspectos-iniciais">Aspectos Iniciais</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README.html#atribuicao">Atribuição</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README.html#ciclo-de-geracao">Ciclo de geração</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README.html#secoes">Seções</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Resumo Do Dia</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#frase-de-resolutividade">Frase de Resolutividade</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#user-manual">User Manual</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#estrutura-do-codigo">Estrutura do Código</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dependencias">Dependências</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#frase-de-acervo">Frase de Acervo</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">User Manual</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">Estrutura do Código</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">Dependências</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">Troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#frase-de-entradas">Frase de Entradas</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id5">User Manual</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">Estrutura do Código</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id7">Dependências</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id8">Troubleshooting</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="README.html" title="previous chapter">Documentação Promotron</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, MPRJ.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/ResumoDoDia.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
