@@ -13,6 +13,7 @@ from rest_framework.views import APIView
 from .integra import authenticate_integra
 from dominio.login.arcgis import ARCGIS_TOKEN_CACHE_KEY
 from dominio.login import services
+from dominio.mixins import JWTAuthMixin
 
 
 @csrf_exempt
@@ -61,7 +62,7 @@ class LoginView(APIView):
         return Response(data=services.build_login_response(permissoes))
 
 
-class ArcGisTokenView(APIView):
+class ArcGisTokenView(JWTAuthMixin, APIView):
     def get(self, request, *args, **kwargs):
         token_data = cache.get(ARCGIS_TOKEN_CACHE_KEY)
         return Response(data=token_data)

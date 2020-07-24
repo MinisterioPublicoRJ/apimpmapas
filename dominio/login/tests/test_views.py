@@ -1,6 +1,7 @@
 from datetime import date
 from unittest import mock
 
+import jwt
 import pytest
 from django.conf import settings
 from django.urls import reverse
@@ -212,6 +213,11 @@ class TestLogin(TestCase):
 
 class TestArcGisTokenView(TestCase):
     def setUp(self):
+        self.view_token = jwt.encode(
+            {},
+            settings.JWT_SECRET,
+            algorithm="HS256"
+        )
         self.url = reverse("dominio:token-arcgis")
         self.cache_patcher = mock.patch("dominio.login.views.cache")
         self.cache_mock = self.cache_patcher.start()
@@ -226,8 +232,8 @@ class TestArcGisTokenView(TestCase):
         self.cache_patcher.stop()
 
     def test_correct_response(self):
-        resp = self.client.get(self.url)
+        resp = self.client.get(self.url, {"jwt": self.view_token})
 
-        self.cache_mock.get.assert_called_once_with(ARCGIS_TOKEN_CACHE_KEY)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, self.token_data)
+        self.cache_mock.get.assert_called_once_with(ARCGIS_TOKEN_CACHE_KEY)
