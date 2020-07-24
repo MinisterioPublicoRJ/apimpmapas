@@ -20,4 +20,5 @@ def get_token():
         data=payload,
         verify=False
     )
+    # TODO: raise exception if token is not returned
     return resp.json()
