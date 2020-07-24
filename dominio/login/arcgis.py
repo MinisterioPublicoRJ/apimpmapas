@@ -2,6 +2,9 @@ import requests
 from django.conf import settings
 
 
+ARCGIS_TOKEN_CACHE_KEY = "arcgis_token_key"
+
+
 def get_token():
     payload = {
         "username": settings.ARCGIS_TOKEN_USERNAME,

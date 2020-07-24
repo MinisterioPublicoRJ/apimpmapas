@@ -322,3 +322,10 @@ ARCGIS_TOKEN_CLIENT = config("ARCGIS_TOKEN_CLIENT")
 ARCGIS_TOKEN_FORMAT = config("ARCGIS_TOKEN_FORMAT", default="json")
 ARCGIS_TOKEN_IP = config("ARCGIS_TOKEN_IP")
 ARCGIS_TOKEN_REFERER = config("ARCGIS_TOKEN_REFERER")
+
+CELERY_BEAT_SCHEDULE = {
+    "renew-arcgis-token": {
+        "task": "dominio.login.tasks.renew_arcgis_token",
+        "schedule": timedelta(minutes=ARCGIS_TOKEN_EXPIRATION-10)
+    }
+}
