@@ -7,4 +7,5 @@ model-bakery==1.1.0
 pytest==5.4.3
 pytest-cov
 pytest-django
+requests-mock==1.8.0
 tox
