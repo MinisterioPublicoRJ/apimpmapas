@@ -9,6 +9,7 @@ from freezegun import freeze_time
 from jwt.exceptions import DecodeError
 from model_bakery.baker import make
 
+from dominio.login.arcgis import ARCGIS_TOKEN_CACHE_KEY
 from dominio.login.integra import authenticate_integra
 
 
@@ -207,3 +208,26 @@ class TestLogin(TestCase):
             settings.SCA_AUTH,
             settings.SCA_CHECK,
         )
+
+
+class TestArcGisTokenView(TestCase):
+    def setUp(self):
+        self.url = reverse("dominio:token-arcgis")
+        self.cache_patcher = mock.patch("dominio.login.views.cache")
+        self.cache_mock = self.cache_patcher.start()
+        self.token_data = {
+            "token": "token",
+            "expiration": 1000,
+            "ssl": True,
+        }
+        self.cache_mock.get.return_value = self.token_data
+
+    def tearDown(self):
+        self.cache_patcher.stop()
+
+    def test_correct_response(self):
+        resp = self.client.get(self.url)
+
+        self.cache_mock.get.assert_called_once_with(ARCGIS_TOKEN_CACHE_KEY)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, self.token_data)

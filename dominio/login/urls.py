@@ -10,4 +10,5 @@ urlpatterns = [
         views.LoginView.as_view(),
         name="login-promotron"
     ),
+    path("token-arcgis", views.ArcGisTokenView.as_view(), name="token-arcgis"),
 ]

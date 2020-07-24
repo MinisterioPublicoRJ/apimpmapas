@@ -1,6 +1,7 @@
 import jwt
 import login_sca
 from django.conf import settings
+from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from dominio.models import Usuario
@@ -10,6 +11,7 @@ from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 
 from .integra import authenticate_integra
+from dominio.login.arcgis import ARCGIS_TOKEN_CACHE_KEY
 from dominio.login import services
 
 
@@ -57,3 +59,9 @@ class LoginView(APIView):
         permissoes = services.permissoes_router(sca_resp.info.json())
 
         return Response(data=services.build_login_response(permissoes))
+
+
+class ArcGisTokenView(APIView):
+    def get(self, request, *args, **kwargs):
+        token_data = cache.get(ARCGIS_TOKEN_CACHE_KEY)
+        return Response(data=token_data)
