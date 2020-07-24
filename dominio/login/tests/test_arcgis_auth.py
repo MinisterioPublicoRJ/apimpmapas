@@ -4,7 +4,7 @@ import requests_mock
 from django.conf import settings
 from django.test import TestCase
 
-from dominio.login.arcgis import Client
+from dominio.login.arcgis import get_token
 
 
 class TestAuthArcGis(TestCase):
@@ -19,7 +19,7 @@ class TestAuthArcGis(TestCase):
                 settings.ARCGIS_TOKEN_ENDPOINT,
                 json=response_json
             )
-            resp = Client.get_token()
+            resp = get_token()
 
         expected_payload = (
             f"username={settings.ARCGIS_TOKEN_USERNAME}&"
