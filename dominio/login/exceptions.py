@@ -17,3 +17,9 @@ class UserHasNoOfficeInformation(APIException):
     status_code = 404
     default_detail = "Não foram encontrados órgãos para este usuário"
     default_code = "no_office_found"
+
+
+class ArcGisTokenNotFound(APIException):
+    status_code = 404
+    default_detail = "Token do ArcGis não foi encontrado"
+    default_code = "no_arcgis_token"

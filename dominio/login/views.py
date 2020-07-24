@@ -3,7 +3,7 @@ import login_sca
 from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
-from django.http import Http404, JsonResponse
+from django.http import JsonResponse
 from dominio.models import Usuario
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 
 from .integra import authenticate_integra
 from dominio.login.arcgis import ARCGIS_TOKEN_CACHE_KEY
+from dominio.login.exceptions import ArcGisTokenNotFound
 from dominio.login import services
 from dominio.mixins import JWTAuthMixin
 
@@ -66,6 +67,6 @@ class ArcGisTokenView(JWTAuthMixin, APIView):
     def get(self, request, *args, **kwargs):
         token_data = cache.get(ARCGIS_TOKEN_CACHE_KEY)
         if not token_data:
-            raise Http404("Nenhum token encontrado")
+            raise ArcGisTokenNotFound
 
         return Response(data=token_data)
