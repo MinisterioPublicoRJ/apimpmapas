@@ -5,6 +5,10 @@ from django.conf import settings
 ARCGIS_TOKEN_CACHE_KEY = "arcgis_token_key"
 
 
+class NoTokenException(Exception):
+    pass
+
+
 def get_token():
     payload = {
         "username": settings.ARCGIS_TOKEN_USERNAME,
@@ -20,5 +24,10 @@ def get_token():
         data=payload,
         verify=False
     )
-    # TODO: raise exception if token is not returned
-    return resp.json()
+    resp.raise_for_status()
+    resp_json = resp.json()
+
+    if "token" not in resp_json:
+        raise NoTokenException
+
+    return resp_json

@@ -1,10 +1,13 @@
 import urllib.parse
 
+import pytest
 import requests_mock
 from django.conf import settings
 from django.test import TestCase
+from requests import HTTPError
 
-from dominio.login.arcgis import get_token
+
+from dominio.login.arcgis import NoTokenException, get_token
 
 
 class TestAuthArcGis(TestCase):
@@ -44,3 +47,29 @@ class TestAuthArcGis(TestCase):
             expected_payload,
             urllib.parse.unquote(post_request.body)
         )
+
+    def test_not_200_response(self):
+        with requests_mock.Mocker() as mocked_request:
+            mocked_request.post(
+                settings.ARCGIS_TOKEN_ENDPOINT,
+                status_code=400
+            )
+            with pytest.raises(HTTPError):
+                get_token()
+
+    def test_no_token_in_response(self):
+        json_response = {
+            "error": {
+                "code": 400,
+                "message": "Unable to generate token.",
+                "details": [""]
+            }
+        }
+        with requests_mock.Mocker() as mocked_request:
+            mocked_request.post(
+                settings.ARCGIS_TOKEN_ENDPOINT,
+                status_code=200,
+                json=json_response
+            )
+            with pytest.raises(NoTokenException):
+                get_token()
