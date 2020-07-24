@@ -237,3 +237,9 @@ class TestArcGisTokenView(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, self.token_data)
         self.cache_mock.get.assert_called_once_with(ARCGIS_TOKEN_CACHE_KEY)
+
+    def test_no_token_in_cache(self):
+        self.cache_mock.get.return_value = None
+        resp = self.client.get(self.url, {"jwt": self.view_token})
+
+        self.assertEqual(resp.status_code, 404)
