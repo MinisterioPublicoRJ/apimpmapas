@@ -10,8 +10,11 @@ Welcome to Promotron's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   README.rst
+   Introducao.rst
+   KnowHowMGP.rst
+   TabelasAuxiliares.rst
    ResumoDoDia.rst
+   SuaMesa.rst
 
 
 
