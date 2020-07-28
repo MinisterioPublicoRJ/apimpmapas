@@ -70,6 +70,8 @@ diferentes. Mas isso não é de forma alguma um padrão, já que muitas
 vezes o ``docu_tppr_dk`` pode indicar algo completamente diferente, ou
 mesmo ter valor ``NULL``.
 
+.. _know-how-mgp-mcpr-historico-fase-doc:
+
 MCPR_HISTORICO_FASE_DOC
 -----------------------
 
@@ -237,3 +239,30 @@ Liga no ``docu_fsdc_dk`` da tabela ``MCPR_DOCUMENTO``.
 +---------+--------------+
 | 2       | Finalizado   |
 +---------+--------------+
+
+MCPR_TP_ANDAMENTO
+-----------------
+
+MCPR_CLASSE_DOCTO_MP
+--------------------
+
+MCPR_PERSONAGEM
+---------------
+
+MCPR_PESSOA
+-----------
+
+MCPR_PESSOA_FISICA
+------------------
+
+MCPR_PESSOA_JURIDICA
+--------------------
+
+MCPR_ASSUNTO
+------------
+
+MCPR_ASSUNTO_DOCUMENTO
+----------------------
+
+RH_FUNCIONARIO
+--------------

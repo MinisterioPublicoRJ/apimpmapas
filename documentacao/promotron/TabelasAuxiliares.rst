@@ -30,7 +30,20 @@ A criação destas tabelas se encontra em
 TB_ACERVO
 ---------
 
-Criação de tabela de acervo precisa ser documentada.
+O objetivo desta tabela é guardar o histórico de documentos ativos em cada promotoria. Em teoria, este seria o papel da tabela :ref:`know-how-mgp-mcpr-historico-fase-doc`. No entanto, esta tabela parece apresentar algumas inconsistências. Por conta disso, foi decidido no início do projeto adotar uma postura de manter um histórico do acervo à parte, para que ele possa ser utilizado em cálculos que levam em conta a variação do acervo ao longo do tempo.
+
+Ela possui as seguintes colunas:
+
+-  ``cod_orgao`` (int): o código numérico do órgão.
+-  ``cod_atribuicao`` (int): o código numérico do pacote de atribuição.
+-  ``acervo`` (int): quantidade de acervo daquele determinado tipo.
+-  ``tipo_acervo`` (int): a classe do documento - equivale ao ``cldc_dk`` do documento.
+-  ``dt_inclusao`` (timestamp): a data de cálculo do acervo ativo.
+-  ``dt_partition`` (string): a data em formato 'DDMMYYYY' usada para particionar os resultados da tabela.
+
+São considerados apenas os documentos Em Andamento, e que não foram cancelados. O órgão em questão não precisa ter pacote de atribuição definido para que seu acervo seja guardado. Neste caso, o campo ``cod_atribuicao`` terá valor ``NULL``.
+
+Os resultados desta tabela são guardados por partição (definida pelo campo ``dt_partition``), assim, ao longo de um mesmo dia, os resultados serão sobrescritos para aquele dia, mantendo o resto do histórico intacto.
 
 .. _tabelas-auxiliares-atualizacao-pj-pacote:
 

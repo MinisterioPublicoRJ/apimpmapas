@@ -852,6 +852,8 @@ Endpoint:
        "nr_documentos": 1
    }
 
+Nome da View: `SuaMesaView`_. 
+
 O Sua Mesa Caixinhas é organizado em uma estrutura de Factory, por meio
 de um DAO (Data Access Object). Isso quer dizer que as requisições são
 feitas para um único endpoint/View, que se encarregará de repassá-la
@@ -870,7 +872,7 @@ Django). Isso quer dizer que, além dos cálculos serem realizados em
 tempo real, não há processos adicionais sendo realizados no BDA para
 este componente (criação ou uso de tabelas, por exemplo).
 
-As queries ao Oracle estão todas definidas no script managers.py, e se
+As queries ao Oracle estão todas definidas nos `Managers`_, e se
 encarregam apenas de receber os parâmetros necessários para um
 determinado cálculo.
 
@@ -879,7 +881,10 @@ Isso é útil para evitar a repetição de certos processamentos.
 Por exemplo, os tipos de dados de Investigações (Tutela), Inquéritos
 (PIP) e PICs (PIP) são essencialmente os mesmos - buscar documentos
 ativos de certas classes. Por isso, os 3 fazem uso da mesma query
-definida no managers.py (documentos.investigacoes.em_curso).
+definida nos `Managers`_ (InvestigacoesManager.em_curso).
+
+.. _SuaMesaView: https://github.com/MinisterioPublicoRJ/apimpmapas/blob/develop/dominio/suamesa/views.py
+.. _Managers: https://github.com/MinisterioPublicoRJ/apimpmapas/blob/develop/dominio/managers.py
 
 Dependências
 ~~~~~~~~~~~~
@@ -971,7 +976,7 @@ Detalhe Investigações (Tutela)
 
    title
 
-!! Tem um bug no ranking, não está mostrando reduções, e sim aumentos!
+!! Tem um bug no ranking ao que parece, não está mostrando reduções, e sim aumentos!
 
 Este detalhe mostra simplesmente a variação do acervo de investigações
 de um Tutela Coletiva. A janela de comparação é o mês corrente x o mês
@@ -1390,15 +1395,127 @@ de procedimentos.
 Estrutura do Código
 ~~~~~~~~~~~~~~~~~~~
 
-Endpoint:
+Processo BDA
+************
+
+Há 3 tabelas ligadas a este componente no BDA, separadas em dois processos:
+
+-  TB_DETALHE_PROCESSO
+-  TB_DETALHE_DOCUMENTOS_ORGAO
+-  TB_DETALHE_DOCUMENTOS_ORGAO_CPF
 
 ::
 
-   GET /dominio/suamesa/documentos-detalhe/<str:orgao_id>?tipo=tipo_de_dado&cpf=1234&n=3&intervalo=30
+   Nome da Tabela: TB_DETALHE_PROCESSO
+   Colunas: 
+      orgao_id (int)
+      nm_orgao (string)
+      cod_pct (int)
+      nr_acoes_12_meses_anterior (int)
+      nr_acoes_12_meses_atual (int)
+      nr_acoes_ultimos_60_dias (int)
+      nr_acoes_ultimos_30_dias (int)
+      variacao_12_meses (double)
+
+Esta tabela é calculada levando-se em conta os andamentos de Ajuizamento de Ação, como definido na tabela do `Detalhe Processos (Tutela) <#detalhe-processos-tutela>`__, que aconteceram nos intervalos de tempo especificados, e que não tenham sido cancelados.
+
+Além disso, o documento relativo ao andamento não pode ter sido cancelado, e o órgão sendo analisado precisa ter um pacote de atribuição definido na tabela :ref:`tabelas-auxiliares-atualizacao-pj-pacote`.
+
+A tabela resultante é usada para o `Detalhe Processos (Tutela) <#detalhe-processos-tutela>`__.
+
+URL do Script: https://github.com/MinisterioPublicoRJ/scripts-bda/blob/master/robo_promotoria/src/tabela_detalhe_processo.py.
+
+::
+
+   Nome da Tabela: TB_DETALHE_DOCUMENTOS_ORGAO
+   Colunas: 
+      tipo_detalhe (string)
+      intervalo (string)
+      orgi_nm_orgao (string)
+      cod_pct (int)
+      vist_orgi_orga_dk (int)
+      nr_documentos_distintos_atual (int)
+      nr_aberturas_vista_atual (int)
+      nr_aproveitamentos_atual (int)
+      nr_instaurados_atual (int)
+      acervo_inicio (int)
+      acervo_fim (int)
+      variacao_acervo (double)
+      nr_documentos_distintos_anterior (int)
+      nr_aberturas_vista_anterior (int)
+      nr_aproveitamentos_anterior (int)
+      nr_instaurados_anterior (int)
+      variacao_documentos_distintos (double)
+      variacao_aberturas_vista (double)
+      variacao_aproveitamentos (double)
+      variacao_instaurados (double)
+
+::
+
+   Nome da Tabela: TB_DETALHE_DOCUMENTOS_ORGAO_CPF
+   Colunas: 
+      tipo_detalhe (string)
+      intervalo (string)
+      vist_orgi_orga_dk (int)
+      pesf_cpf (string)
+      nr_documentos_distintos_atual (int)
+      nr_aberturas_vista_atual (int)
+      nr_aproveitamentos_atual (int)
+      nr_instaurados_atual (int)
+      nr_documentos_distintos_anterior (int)
+      nr_aberturas_vista_anterior (int)
+      nr_aproveitamentos_anterior (int)
+      nr_instaurados_anterior (int)
+      variacao_documentos_distintos (double)
+      variacao_aberturas_vista (double)
+      variacao_aproveitamentos (double)
+      variacao_instaurados (double)
+
+Estas duas tabelas são construídas agregando detalhes sobre documentos em dois níveis: nível de órgão; e nível de órgão e CPF.
+
+O script de criação destas tabelas possui duas partes:
+
+- `Script Auxiliar do Detalhe Documentos`_: Este script define uma função que, dado uma série de parâmetros (como lista de classes de documentos, códigos de pacotes, nome da regra, data de início e fim do intervalo,...), irá realizar o cálculo dos valores para os campos definidos.
+- `Script Principal do Detalhe Documentos`_: Aqui, serão definidas os tipos de detalhe e as regras correspondentes, fazendo-se chamadas para a função definida no Script Auxiliar para realizar os cálculos. Ao final disto, os resultados são agregados e salvos nas tabelas respectivas.
+
+O script de criação permite definir vários conjuntos de regras (identificados pelo campo ``tipo_detalhe``), podendo ser calculados em vários intervalos de tempo desejados (identificados pelo campo ``intervalo``). Atualmente, apenas o intervalo de ``mes`` é calculado, levando em consideração o mês corrente x mês anterior até o mesmo dia do mês. O ``tipo_detalhe`` corresponde aos tipos de detalhe definidos anteriormente:
+
+- ``pip_pics``: Regras para `Detalhe PICs (PIP) <#detalhe-pics-pip>`__.
+- ``pip_inqueritos``: Regras para `Detalhe Inquéritos (PIP) <#detalhe-inqueritos-pip>`__.
+- ``tutela_investigacoes``: Regras para `Detalhe Investigações (Tutela) <#detalhe-investigacoes-tutela>`__.
+
+Os cálculos para o `Detalhe AISPs (PIP) <#detalhe-aisps-pip>`__ são derivados de ``pip_pics`` e ``pip_inqueritos`` e serão explicados melhor na seção relativa ao Backend.
+
+Cada ``tipo_detalhe`` deve definir as classes de documentos consideradas, além de, opcionalmente, os tipos de andamentos considerados como aproveitamentos. Além disso, deverão ser passados os códigos dos pacotes para os quais essa regra será calculada.
+
+A fim de tornar o cálculo mais rápido, o Script Auxiliar também disponibiliza uma função ``setup_table_cache`` que irá cachear o resultado das tabelas do Exadata, para que ela não precise ser recalculada a cada nova chamada de função.
+
+Para o cálculo, são consideradas as vistas abertas dentro do intervalo de tempo considerado, e cujo documento não tenha sido cancelado. Os andamentos serão considerados para o cálculo dos aproveitamentos, porém, por se juntarem às vistas por meio de um LEFT JOIN, não é necessário que uma vista possua andamento associado para que ela seja levada em conta.
+
+Alguns outros detalhes:
+
+Quanto ao número de instaurações: a data de cadastro de um documento (``docu_dt_cadastro``) é utilizada para calcular o número de instaurações. Caso a data de cadastro esteja no mês corrente, ela é contada nas instaurações atuais. Caso esteja no mês anterior até a mesma data, é contada nas instaurações anteriores. Caso não esteja em nenhum destes casos, ela não é contada.
+
+Para separar as vistas em período atual ou anterior, olha-se a data de abertura da vista. Caso a abertura tenha sido no mês corrente, ela é contada no período atual. Caso contrário, ela é contada no período anterior. As vistas que se encontram fora destes dois intervalos são filtradas por meio de uma cláusula ``WHERE`` de forma que teremos sempre apenas um caso ou outro.
+
+URL do Script: https://github.com/MinisterioPublicoRJ/scripts-bda/blob/develop/robo_promotoria/src/tabela_detalhe_documento.py.
+
+URL do Script Auxiliar: https://github.com/MinisterioPublicoRJ/scripts-bda/blob/develop/robo_promotoria/src/detalhe_documento/utils_detalhes.py.
+
+.. _`Script Principal do Detalhe Documentos`: https://github.com/MinisterioPublicoRJ/scripts-bda/blob/develop/robo_promotoria/src/tabela_detalhe_documento.py
+
+.. _`Script Auxiliar do Detalhe Documentos`: https://github.com/MinisterioPublicoRJ/scripts-bda/blob/develop/robo_promotoria/src/detalhe_documento/utils_detalhes.py
+
+View Backend
+************
+
+::
+
+   GET /dominio/suamesa/documentos-detalhe/<str:orgao_id>?tipo=tipo_de_dado&cpf=1234&n=3&intervalo=mes
 
    CPF (opcional) - depende do tipo de dado requisitado (ver lista abaixo).
    n (opcional) - Número de promotorias para retornar no Top N. Default: 3.
-   intervalo (opcional) - Intervalo de tempo para olhar, caso disponível. Default: 30.
+   intervalo (opcional) - Intervalo de tempo para olhar, caso disponível. Default: mes.
 
    Tipos aceitos:
    - tutela_investigacoes: Detalhe de investigações em curso de uma tutela.
@@ -1430,13 +1547,50 @@ Endpoint:
 
    O atributo 'valor' dos rankings pode vir como 'valor_percentual', caso seja relativo a uma porcentagem.
 
-Processo no BDA cria essas tabelas:
+Nome da View: `SuaMesaDetalheView`_.
 
--  tb_detalhe_processo
--  tb_detalhe_documentos_orgao
--  tb_detalhe_documentos_orgao_cpf
+Para o SuaMesaDetalhe, de forma parecida com as Caixinhas do Sua Mesa, também é utilizada uma estrutura de Factory por meio de um DAO. Ou seja, a View receberá o request vindo do Front, irá repassá-lo a um DAO, que decidirá como realizar o cálculo para obter o dado correspondente.
 
-Elas são usadas para alimentar o backend.
+Diferentemente das Caixinhas, no entanto, o DAO não faz chamadas a funções, mas sim a um conjunto de DAOs, que irão definir como este cálculo é feito.
+
+_type_switcher = {
+        'pip_inqueritos': SuaMesaDetalhePIPInqueritosDAO,
+        'pip_pics': SuaMesaDetalhePIPPICSDAO,
+        'pip_aisp': SuaMesaDetalhePIPAISPDAO,
+        'tutela_investigacoes': SuaMesaDetalheTutelaInvestigacoesDAO,
+        'tutela_processos': SuaMesaDetalheTutelaProcessosDAO,
+    }
+
+Cada um destes DAOs é uma classe construída a partir de duas outras:
+
+- Um DAO Metrics, que irá buscar os dados para construir as frases de cada detalhe.
+- Um Ranking Mixin, que irá buscar os dados para construir os rankings de cada detalhe.
+
+Para tornar a explicação mais clara, é melhor analisá-los separadamente, para então entender como funcionam em conjunto.
+
+DAO Metrics
+...........
+
+As classes definidas aqui têm como objetivo buscar os dados relativos às frases que serão montadas nos detalhes.
+
+A classe principal é MetricsDataObjectDAO, que herda de :ref:`singledataobjectdao`. Além das funcionalidades herdadas, também recebe um parâmetro ``required_parameters`` que definirá os parâmetros obrigatórios que devem estar no request recebido, e uma função ``check_required_parameters`` para fazer essa verificação.
+
+Sua função ``get`` irá simplesmente checar e extrair estes parâmetros do request, chamar a função get do :ref:`singledataobjectdao`, e retornar o resultado no formato:
+
+{'metrics': data}
+
+Duas classes auxiliares também estão definidas: MetricsDetalheDocumentoOrgaoDAO e MetricsDetalheDocumentoOrgaoCPFDAO. Elas basicamente herdam de MetricsDataObjectDAO setando a query e colunas para buscarem os dados (e serializarem) nas tabelas TB_DETALHE_DOCUMENTOS_ORGAO e TB_DETALHE_DOCUMENTOS_ORGAO_CPF respectivamente. Além disso, no caso de MetricsDetalheDocumentoOrgaoCPFDAO, o parâmetro obrigatório ``cpf`` também é adicionado ao ``required_parameters``.
+
+Definido no dominio.suamesa.dao_metrics (https://github.com/MinisterioPublicoRJ/apimpmapas/blob/develop/dominio/suamesa/dao_metrics.py).
+
+Ranking Mixin
+.............
+
+
+
+Definido no dominio.suamesa.dao_rankings (https://github.com/MinisterioPublicoRJ/apimpmapas/blob/develop/dominio/suamesa/dao_rankings.py)
+
+.. _SuaMesaDetalheView: https://github.com/MinisterioPublicoRJ/apimpmapas/blob/develop/dominio/suamesa/views.py
 
 Explicar a estrutura de DAO Factory, explicar a separação dos DAOs entre
 DAO Metrics para a construção das frases de cima, e DAO Ranking para a
