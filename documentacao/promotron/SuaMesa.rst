@@ -1569,9 +1569,9 @@ Cada um destes DAOs é uma classe construída a partir de duas outras:
 Para tornar a explicação mais clara, é melhor analisá-los separadamente, para então entender como funcionam em conjunto.
 
 DAO Metrics
-...........
+^^^^^^^^^^^
 
-As classes definidas aqui têm como objetivo buscar os dados relativos às frases que serão montadas nos detalhes.
+Definidas no dominio.suamesa.dao_metrics (https://github.com/MinisterioPublicoRJ/apimpmapas/blob/develop/dominio/suamesa/dao_metrics.py), as classes aqui têm como objetivo buscar os dados relativos às frases que serão montadas nos detalhes.
 
 A classe principal é MetricsDataObjectDAO, que herda de :ref:`singledataobjectdao`. Além das funcionalidades herdadas, também recebe um parâmetro ``required_parameters`` que definirá os parâmetros obrigatórios que devem estar no request recebido, e uma função ``check_required_parameters`` para fazer essa verificação.
 
@@ -1581,30 +1581,79 @@ Sua função ``get`` irá simplesmente checar e extrair estes parâmetros do req
 
 Duas classes auxiliares também estão definidas: MetricsDetalheDocumentoOrgaoDAO e MetricsDetalheDocumentoOrgaoCPFDAO. Elas basicamente herdam de MetricsDataObjectDAO setando a query e colunas para buscarem os dados (e serializarem) nas tabelas TB_DETALHE_DOCUMENTOS_ORGAO e TB_DETALHE_DOCUMENTOS_ORGAO_CPF respectivamente. Além disso, no caso de MetricsDetalheDocumentoOrgaoCPFDAO, o parâmetro obrigatório ``cpf`` também é adicionado ao ``required_parameters``.
 
-Definido no dominio.suamesa.dao_metrics (https://github.com/MinisterioPublicoRJ/apimpmapas/blob/develop/dominio/suamesa/dao_metrics.py).
 
 Ranking Mixin
-.............
+^^^^^^^^^^^^^
+
+Definidas no dominio.suamesa.dao_rankings (https://github.com/MinisterioPublicoRJ/apimpmapas/blob/develop/dominio/suamesa/dao_rankings.py), o objetivo destas classes é de facilitar a busca e cálculos de dados de rankings de promotorias.
+
+A classe RankingDAO, que herda de :ref:`genericdao`, irá retornar uma lista de objetos, cada um com duas informações: nome da promotoria, e um valor. Esta lista é buscada por meio de uma query SQL (definida, por exemplo, em `ranking_documento_orgao.sql`_). Como esta query permite definir o campo da tabela que será utilizado para fazer o ranking, o RankingDAO modifica algumas funções do :ref:`genericdao` para permitir esta mudança.
+
+Nota: É importante perceber que, o campo a ser utilizado no ranking (``nm_campo`` na query) tem de ser inserido diretamente na query, sem aspas. Por conta disso, é utilizado o ``str.format()`` do Python. Porém, uma chamada ao ``str.format()`` também é feita antes da inserção do ``nm_campo`` para inserir o ``schema`` das tabelas, e esta etapa requer um valor para o atributo ``nm_campo`` neste momento. Por isso a classe recebe valor ``"nm_campo": "{nm_campo}"`` em ``table_namespaces``, para que o ``str.format()`` funcione corretamente, mas permitindo inserir o ``nm_campo`` (através da variável ``ranking_fieldname``) posteriormente.
+
+Esta classe também formata o nome da promotoria na etapa de serialização. Outras duas classes auxiliares, RankingFloatDAO e RankingPercentageDAO permitem serializar corretamente valores em float e indicar se um valor é referente a um percentual.
+
+Existe também um Mixin definido, o RankingMixin, que irá utilizar o RankingDAO para integrar os dados de rankings com outros dados. Basicamente, o RankingMixin define dois atributos: ``ranking_fields`` e ``ranking_dao``, que permitem, respectivamente, buscar o ranking de promotorias referente a múltiplos campos, e escolher o DAO que será utilizado para a busca dos dados (default: RankingDAO).
+
+Definir estes campos permite criar DAOs para rankings específicos, além de poder executá-lo para diferentes campos dinamicamente.
+
+Com estes atributos definidos, o RankingMixin nada mais faz do que utilizar um ``super().get()`` para buscar os dados principais (por ser um Mixin, ele é feito para estender a funcionalidade de outra classe), e em seguida executa o RankingDAO para cada um dos campos definidos em ``ranking_fields``, juntando os resultados com o resultado do ``super().get()`` da superclasse.
+
+Também são definidos Mixins auxiliares para tratar de rankings com floats e percentuais, RankingFloatMixin e RankingPercentageMixin.
+
+DAOs dos Detalhes
+^^^^^^^^^^^^^^^^^
+
+Com essas informações em mãos, agora podemos analisar as classes definidas para uso no SuaMesaDetalheFactoryDAO.
+
+SuaMesaDetalhePIPInqueritosDAO
+   Utiliza o RankingMixin e o MetricsDetalheDocumentoOrgaoCPFDAO para buscar os dados e ranking relativos aos inquéritos das PIPs. Esse detalhe possui dois rankings, usando dois campos diferentes (``nr_documentos_distintos_atual`` e ``nr_aproveitamentos_atual``), que são definidos especificamente para esta classe.
+
+SuaMesaDetalhePIPPICSDAO
+   Mesmo caso dos inquéritos, porém aqui, há apenas um campo que é usado para o ranking, ``variacao_documentos_distintos``, e este campo representa uma porcentagem, de forma que o RankingMixin é substituído pelo RankingPercentageMixin.
+
+SuaMesaDetalheTutelaInvestigacoesDAO
+   Exatamente o mesmo caso de PICs da PIP.
+
+SuaMesaDetalhePIPAISPDAO
+   Neste caso, tanto a query padrão definida para o Metrics, quanto a query padrão do Ranking são insuficientes para pegar os dados de AISP. Por conta disso, é criado um RankingAISPDAO que define a query correta. Além disso, a query para o Metrics também é dada como atributo da classe, e as modificações de nomes de coluna e ``ranking_dao`` a ser utilizados no DAOMetrics e no RankingMixin são definidos.
+
+SuaMesaDetalheTutelaProcessosDAO
+   Mesma caso das AISPs de PIP, por se tratar de um detalhe que foge do padrão, queries específicas são construídas num .sql separado, e subsequentemente passadas nos atributos da classe, com as devidas modificações necessárias.
 
 
+Para tornar o fluxo dos detalhes mais compreensível, vamos pensar em um exemplo:
 
-Definido no dominio.suamesa.dao_rankings (https://github.com/MinisterioPublicoRJ/apimpmapas/blob/develop/dominio/suamesa/dao_rankings.py)
+Digamos que um usuário queira ver o detalhe de inquéritos da PIP. Neste caso ele irá fazer um request para o endpoint de detalhes, passando ``tipo_detalhe=pip_inqueritos``. O endpoint receberá o request com os parâmetros (órgão que está requisitando, cpf do promotor, número de promotorias para mostrar no ranking...) e irá repassá-lo para o SuaMesaDetalheFactoryDAO.
+
+O SuaMesaDetalheFactoryDAO, por meio de seu ``_type_switcher``, irá verificar que o DAO usado para buscar os detalhes de inquéritos da PIP é o SuaMesaDetalhePIPInqueritosDAO, chamando seu método ``get``.
+
+O SuaMesaDetalhePIPInqueritosDAO herda de RankingMixin e MetricsDetalheDocumentoOrgaoCPFDAO. Como os dois possuem um método ``get``, ele irá chamar o do primeiro da lista, ou seja, RankingMixin. No entanto, RankingMixin executará um ``super().get()``, ou seja, o método ``get`` de MetricsDetalheDocumentoOrgaoCPFDAO.
+
+Como nenhum atributo referente aos Metrics foi sobrescrito pelo SuaMesaDetalhePIPInqueritosDAO, ele irá realizar o comportamento padrão do MetricsDetalheDocumentoOrgaoCPFDAO, verificando que o ``cpf`` foi dado no request, e em seguida executando a query `detalhe_documento_orgao_cpf.sql`_ para buscar os dados com os parâmetros dados na tabela do BDA. Esse resultado agora retornará ao RankingMixin.
+
+Com os dados de Metrics em mãos, o RankingMixin irá agora repassar os parâmetros do request para o RankingDAO (já que o atributo de classe ``ranking_dao`` é o padrão), calculando 2 rankings, um para cada campo definido no atributo ``ranking_fields`` de SuaMesaDetalhePIPInqueritosDAO.
+
+Os resultados de Metrics e Ranking são então agregados, e enviados de volta como resposta.
+
+++ Esse fluxo pode ser otimizado e simplificado em algumas partes. Mas a vantagem é que ele permite incorporar novos dados a um conjunto de dados principal, e facilmente definir as queries para busca desses dados.
+++ Pode ser interessante modificar o RankingMixin para que ele se torne mais geral, e não apenas voltado para o Ranking. Algo a se considerar.
+
 
 .. _SuaMesaDetalheView: https://github.com/MinisterioPublicoRJ/apimpmapas/blob/develop/dominio/suamesa/views.py
 
-Explicar a estrutura de DAO Factory, explicar a separação dos DAOs entre
-DAO Metrics para a construção das frases de cima, e DAO Ranking para a
-construção dos rankings. E explicitar a peculiaridade de certos casos,
-como Tutela Processos e AISPs.
+.. _`ranking_documento_orgao.sql`: https://github.com/MinisterioPublicoRJ/apimpmapas/blob/develop/dominio/suamesa/queries/ranking_documento_orgao.sql
+
+.. _`detalhe_documento_orgao_cpf.sql`: https://github.com/MinisterioPublicoRJ/apimpmapas/blob/develop/dominio/suamesa/queries/detalhe_documento_orgao_cpf.sql
 
 .. _dependências-1:
 
 Dependências
 ~~~~~~~~~~~~
 
--  tb_pip_aisp
--  tb_acervo
--  atualizacao_pj_pacote
+-  :ref:`tabelas-auxiliares-tb-pip-aisps`
+-  :ref:`tabelas-auxiliares-tb-acervo`
+-  :ref:`tabelas-auxiliares-atualizacao-pj-pacote`
 -  tabelas do exadata
 
 .. _troubleshooting-1:
@@ -1612,7 +1661,125 @@ Dependências
 Troubleshooting
 ~~~~~~~~~~~~~~~
 
+- Verificar se os dados estão chegando.
+- Se os dados estiverem vindo vazios, verificar se, para o órgão sendo verificado, há dados na tabela referente ao tipo_detalhe escolhido: TB_DETALHE_DOCUMENTOS_ORGAO, TB_DETALHE_DOCUMENTOS_ORGAO_CPF ou TB_DETALHE_PROCESSO.
+- Se as tabelas estiverem sem dados para aquele órgão, o problema estará na geração da tabela no BDA, em cujo caso a resolução dependerá do tipo de detalhe sendo visualizado, mas alguns pontos a serem respondidos são:
+-- O órgão possui código de pacote definido na tabela auxiliar :ref:`tabelas-auxiliares-atualizacao-pj-pacote`?
+-- Se for uma PIP, ela tem AISP definida em :ref:`tabelas-auxiliares-tb-pip-aisps`?
+-- Se o problema for na quantidade de acervo vindo zerada, a tabela :ref:`tabelas-auxiliares-tb-acervo` possui dados para o órgão?
+-- O código do pacote do órgão está sendo incluido no tipo_detalhe que está sendo visualizado? (tutela_investigacoes, por exemplo, só está definido para órgãos de pacotes 20 a 33, e não funcionará para órgãos de outros pacotes)
+- Se as tabelas estiverem corretas, o erro provavelmente estará no backend. Neste caso, é preciso verificar se o problema está nos dados de Metrics usados para a frase, ou nos dados de Ranking:
+-- Caso o problema seja no Ranking, o tipo de Mixin correto está sendo usado? (Usar um Mixin dedicado para números inteiros com um valor percentual irá retornar tudo como zero, por exemplo).
+-- Os campos corretos estão sendo definidos no ranking_fields?
+-- Se o problema for em Metrics, os parâmetros estão sendo enviados corretamente? A query correta está sendo definida no DAO do detalhe analisado?
+
+
 Sua Mesa Detalhe Vistas Abertas
 -------------------------------
 
-É composto por dois endpoints separados dos outros!
+User Manual
+~~~~~~~~~~~
+
+O detalhe de vistas abertas mostra o número de vistas que estão abertas naquela órgão para aquele promotor, em três períodos de tempo diferentes:
+
+- Até 20 dias (não-inclusivo);
+- Entre 20 e 30 dias (inclusivo);
+- Há mais do que 30 dias.
+
+Isso permite ter uma ideia do volume de vistas que ainda não foram tratadas, e o tempo que está levando para analisá-las.
+
+Uma vista é considerada aberta quando sua data de fechamento é ``NULL`` ou maior do que a data atual.
+
+Além disso, uma lista com informações dos documentos que possuem vista aberta são fornecidas, como o número do MPRJ, o número externo, a data do último andamento, e a classe do documento.
+
+A lista é relativa ao período de tempo que estiver selecionado, dos 3 disponíveis.
+
+Estrutura do Código
+~~~~~~~~~~~~~~~~~~~
+
+Processo BDA
+************
+
+Este componente olha exclusivamente para os dados do Oracle, em tempo real, de forma que não há processos associados no BDA.
+
+View Backend
+************
+
+É composto por dois endpoints separados: SuaMesaVistasListaView e SuaMesaDetalheView.
+
+SuaMesaVistasListaView
+^^^^^^^^^^^^^^^^^^^^^^
+
+::
+
+   GET /dominio/suamesa/lista/vistas/<id_orgao>/<cpf>/<abertura>?page=<int>
+
+   valores possíveis para abertura: ate_vinte, vinte_trinta, trinta_mais
+
+   page: default=1
+   page_size (elementos por página): 20
+
+   HTTP 200 OK
+   Allow: GET, HEAD, OPTIONS
+   Content-Type: application/json
+   Vary: Accept
+
+
+   [
+      {
+         "numero_mprj": "1234567890",
+         "numero_externo": "0987654321",
+         "dt_abertura": "2020-01-01",
+         "classe": "CLASSE 1"
+      },
+      {
+         "numero_mprj": "0987654321",
+         "numero_externo": "1234567890",
+         "dt_abertura": "2020-01-01",
+         "classe": "CLASSE 2"
+      }
+   ]
+
+
+Esta view busca a lista de vistas abertas, com o intervalo de tempo passado desde a abertura determinado (``ate_vinte``, ``vinte_trinta`` ou ``trinta_mais``).
+
+Para determinar os intervalos, contamos o número de dias entre o dia de hoje e a data de abertura da vista. Chamemos este número de ``n``.
+
+Caso :math:`n >= 0 E n < 20`, ele será contado no grupo de ``ate_vinte``.
+Caso :math:`n >= 20 E n <= 30`, ele será contado no grupo de ``vinte_trinta``.
+Caso :math:`n > 30`, ele será contado no grupo de ``trinta_mais``.
+
+Nota: Em alguns casos, um documento pode ter vista aberta no futuro (o que resultaria em um ``n`` negativo). Estes casos não serão contados em nenhuma lista.
+
+Este cálculo é feito pelo método ``abertas_por_data`` dos `Managers`_.
+
+SuaMesaDetalheView
+^^^^^^^^^^^^^^^^^^
+
+::
+
+   GET /dominio/suamesa/detalhe/vistas/<id_orgao>/<cpf>
+
+   HTTP 200 OK
+   Allow: GET, HEAD, OPTIONS
+   Content-Type: application/json
+   Vary: Accept
+
+   {
+      "soma_ate_vinte": 0,
+      "soma_vinte_trinta": 0,
+      "soma_trinta_mais": 1
+   }
+
+Esta view é responsável por buscar a contagem de vistas abertas por período. Basicamente, este cálculo é feito usando o método ``agg_abertas_por_data`` dos `Managers`_, que irá utilizar o mesmo cálculo de listas do SuaMesaVistasListaView, e simplesmente fazer a contagem agregada por período de tempo.
+
+
+Dependências
+~~~~~~~~~~~~
+
+- Dados do Oracle
+
+Troubleshooting
+~~~~~~~~~~~~~~~
+
+Este componente verifica os dados diretamente no Oracle. Assim, quaisquer problemas que possam surgir estarão ligados ou aos dados do MGP, ou a algum bug no código da View que precisará ser verificado melhor. Por isso, é difícil fornecer passos de Troubleshooting específicos para este componente.
