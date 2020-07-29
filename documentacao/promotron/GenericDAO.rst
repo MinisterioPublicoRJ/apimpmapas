@@ -1,7 +1,7 @@
 .. _GenericDAO:
 
 GenericDAO
-----------
+==========
 
 Classe utilizada para pegar uma query (definida em um arquivo .sql), executá-la no Impala, e retornar o resultado serializado (por meio, opcionalmente, de um Serializer).
 

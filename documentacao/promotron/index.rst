@@ -13,8 +13,10 @@ Welcome to Promotron's documentation!
    Introducao.rst
    KnowHowMGP.rst
    TabelasAuxiliares.rst
+   GenericDAO.rst
    ResumoDoDia.rst
    SuaMesa.rst
+   RadarDePerformance.rst
 
 
 
