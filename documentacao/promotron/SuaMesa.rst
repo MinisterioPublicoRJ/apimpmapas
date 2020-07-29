@@ -1,6 +1,8 @@
 Sua Mesa
 ========
 
+.. contents:: :local:
+
 .. figure:: figuras/sua_mesa.png
    :alt: SuaMesaFigura
 
@@ -50,7 +52,7 @@ definidas (formando, assim 8 tipos de Caixinhas diferentes). São estas:
 As regras para cada uma destas caixinhas são as seguintes:
 
 Vistas Abertas
-^^^^^^^^^^^^^^
+**************
 
 Correspondem às vistas abertas para o órgão e CPF selecionados, e onde a
 data de fechamento seja maior do que a data atual ou nula.
@@ -72,7 +74,7 @@ Essa Caixinha serve para qualquer tipo de órgão, sendo usada tanto para
 Tutelas quanto PIPs.
 
 Investigações (Tutela)
-^^^^^^^^^^^^^^^^^^^^^^
+**********************
 
 Esta Caixinha é para uso apenas de Tutela Coletiva. Ela busca os
 documentos em andamento, e que não foram cancelados, das seguintes
@@ -117,7 +119,7 @@ classes:
 +-----------------------------------+-----------------------------------+
 
 Processos (Tutela)
-^^^^^^^^^^^^^^^^^^
+******************
 
 Esta Caixinha é para uso apenas de Tutela Coletiva. Ela busca os
 documentos em andamento, e que não foram cancelados, das seguintes
@@ -221,7 +223,7 @@ registrado no banco, e o número externo do TJ seja encontrado na posição
 correta, ele é contabilizado.
 
 Finalizados (Tutela)
-^^^^^^^^^^^^^^^^^^^^
+********************
 
 Esta Caixinha é para uso apenas de Tutelas.
 
@@ -613,7 +615,7 @@ seguintes:
 +-----------------------------------+-----------------------------------+
 
 Inquéritos (PIP)
-^^^^^^^^^^^^^^^^
+****************
 
 Esta Caixinha é para uso apenas de PIPs. Ela busca os documentos em
 andamento, e que não foram cancelados, das seguintes classes:
@@ -632,7 +634,7 @@ andamento, e que não foram cancelados, das seguintes classes:
 +-----------------------------------+-----------------------------------+
 
 PICs (PIP)
-^^^^^^^^^^
+**********
 
 Esta Caixinha é para uso apenas de PIPs. Ela busca os documentos em
 andamento, e que não foram cancelados, das seguintes classes:
@@ -646,7 +648,7 @@ andamento, e que não foram cancelados, das seguintes classes:
 +-----------------------------------+-----------------------------------+
 
 AISPs (PIP)
-^^^^^^^^^^^
+***********
 
 Esta Caixinha é para uso apenas de PIPs. Ela busca os documentos em
 andamento, e que não foram cancelados, para todas as promotorias
@@ -671,7 +673,7 @@ classes:
 +-----------------------------------+-----------------------------------+
 
 Finalizados (PIP)
-^^^^^^^^^^^^^^^^^
+*****************
 
 Esta Caixinha é para uso apenas de PIPs.
 
@@ -823,7 +825,16 @@ seguintes:
 Estrutura do Código
 ~~~~~~~~~~~~~~~~~~~
 
-Endpoint:
+Processo BDA
+************
+
+Estes dados são buscados diretamente no Oracle (por meio da ORM do
+Django). Isso quer dizer que, além dos cálculos serem realizados em
+tempo real, não há processos adicionais sendo realizados no BDA para
+este componente (criação ou uso de tabelas, por exemplo).
+
+View Backend
+************
 
 ::
 
@@ -866,11 +877,6 @@ requisitado.
 
 As regras de negócio explicadas na seção User Manual estão contidas
 dentro destas funções correspondentes a cada tipo de dado.
-
-Estes dados são buscados diretamente no Oracle (por meio da ORM do
-Django). Isso quer dizer que, além dos cálculos serem realizados em
-tempo real, não há processos adicionais sendo realizados no BDA para
-este componente (criação ou uso de tabelas, por exemplo).
 
 As queries ao Oracle estão todas definidas nos `Managers`_, e se
 encarregam apenas de receber os parâmetros necessários para um
@@ -969,7 +975,7 @@ Dito isso, existem 5 tipos de detalhe definidos neste componente:
 Vamos falar sobre eles individualmente.
 
 Detalhe Investigações (Tutela)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+******************************
 
 .. figure:: figuras/sua_mesa_detalhe_investigacoes.png
    :alt: title
@@ -1028,7 +1034,7 @@ repeti-las aqui:
 +-----------------------------------+-----------------------------------+
 
 Detalhe Processos (Tutela)
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+**************************
 
 .. figure:: figuras/sua_mesa_detalhe_processos.png
    :alt: title
@@ -1054,7 +1060,7 @@ deve ter um pacote de atribuição definido na tabela
 ``ATUALIZACAO_PJ_PACOTE``.
 
 Detalhe Inquéritos (PIP)
-^^^^^^^^^^^^^^^^^^^^^^^^
+************************
 
 .. figure:: figuras/sua_mesa_detalhe_inqueritos_pip.png
    :alt: title
@@ -1339,7 +1345,7 @@ Além disso, também há as regras usadas para definir aproveitamentos:
 +-----------------------------------+-----------------------------------+
 
 Detalhe PICs (PIP)
-^^^^^^^^^^^^^^^^^^
+******************
 
 O detalhe das PICs é muito parecido com o detalhe dos inquéritos, com um
 dado sobre número de instaurações a mais. Ou seja, ele possuirá os
@@ -1374,7 +1380,7 @@ Os andamentos definidos como aproveitamentos são os mesmos do Detalhe
 Inquéritos acima.
 
 Detalhe AISPs (PIP)
-^^^^^^^^^^^^^^^^^^^
+*******************
 
 .. figure:: figuras/sua_mesa_detalhe_aisp_pip.png
    :alt: title
@@ -1740,6 +1746,7 @@ SuaMesaVistasListaView
       }
    ]
 
+Nome da View: `SuaMesaVistasListaView`_.
 
 Esta view busca a lista de vistas abertas, com o intervalo de tempo passado desde a abertura determinado (``ate_vinte``, ``vinte_trinta`` ou ``trinta_mais``).
 
@@ -1752,6 +1759,8 @@ Caso :math:`n > 30`, ele será contado no grupo de ``trinta_mais``.
 Nota: Em alguns casos, um documento pode ter vista aberta no futuro (o que resultaria em um ``n`` negativo). Estes casos não serão contados em nenhuma lista.
 
 Este cálculo é feito pelo método ``abertas_por_data`` dos `Managers`_.
+
+.. _SuaMesaVistasListaView: https://github.com/MinisterioPublicoRJ/apimpmapas/blob/develop/dominio/tutela/views.py
 
 SuaMesaDetalheView
 ^^^^^^^^^^^^^^^^^^
@@ -1771,8 +1780,11 @@ SuaMesaDetalheView
       "soma_trinta_mais": 1
    }
 
+Nome da View: `SuaMesaDetalheView`_. 
+
 Esta view é responsável por buscar a contagem de vistas abertas por período. Basicamente, este cálculo é feito usando o método ``agg_abertas_por_data`` dos `Managers`_, que irá utilizar o mesmo cálculo de listas do SuaMesaVistasListaView, e simplesmente fazer a contagem agregada por período de tempo.
 
+.. _SuaMesaDetalheView: https://github.com/MinisterioPublicoRJ/apimpmapas/blob/develop/dominio/tutela/views.py
 
 Dependências
 ~~~~~~~~~~~~

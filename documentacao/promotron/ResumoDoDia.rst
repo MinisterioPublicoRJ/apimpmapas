@@ -1,6 +1,8 @@
 Resumo Do Dia
 =============
 
+.. contents:: :local:
+
 O primeiro componente é o Resumo do Dia. Nele, são realizados cálculos
 para formar frases relativas ao status do dia atual.
 

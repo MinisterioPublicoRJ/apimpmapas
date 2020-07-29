@@ -3,6 +3,8 @@
 Tabelas auxiliares
 ==================
 
+.. contents:: :local:
+
 Algumas tabelas foram geradas para auxiliar em alguns dos cálculos. Elas
 se encontram no schema ``EXADATA_AUX`` ou ``EXADATA_AUX_DEV``. Para
 referenciar o uso destes schemas auxiliares será usada a notação
@@ -17,7 +19,7 @@ Estas tabelas são tabelas criadas para auxiliar a encontrar as seguintes
 hierarquias:
 
 -  Classe de Documento: MMPS_CLASSE_DOCTO
--  TIpo de Andamento: MMPS_TP_ANDAMENTO
+-  Tipo de Andamento: MMPS_TP_ANDAMENTO
 -  Assunto do Documento: MMPS_ASSUNTO_DOCTO
 
 Um ``SELECT`` em qualquer uma delas será auto-explicativo, e servem
