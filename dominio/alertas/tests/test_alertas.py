@@ -138,3 +138,42 @@ class AlertaResumoTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, alertas_expected)
+
+
+class AlertaComprasTest(NoJWTTestCase, NoCacheTestCase, TestCase):
+
+    def test_alert_compras(self):
+        orgao_id = '0000000'
+
+        expected_output = [
+            {
+                'sigla': 'COMP',
+                'contrato': '2020001923',
+                'iditem': 58818,
+                'contrato_iditem': '2020001923-58818',
+                'item': (
+                    'MASCARA CIRURGICA DESCARTAVEL - MATERIAL MASCARA: T'
+                    'ECIDO NAO TECIDO, QUANTIDADE CAMADA: 3, CLIP NASAL: METAL'
+                    'ICO, FORMATO: SIMPLES (RETANGULAR), MATERIAL VISOR: N/A, '
+                    'GRAMATURA: 30 G/MÃ‚Â², FILTRO: N/D, FIXACAO: AMARRAS, COR'
+                    ': N/D')
+            },
+            {
+                'sigla': 'COMP',
+                'contrato': '2020101010',
+                'iditem': 12345,
+                'contrato_iditem': '2020101010-12345',
+                'item': 'LUVA COMESTIVEL DE TESTE'
+
+            }
+        ]
+
+        url = reverse(
+            'dominio:compras_alertas',
+            args=(orgao_id,)
+        )
+        resp = self.client.get(url)
+        print(resp.data)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, expected_output)

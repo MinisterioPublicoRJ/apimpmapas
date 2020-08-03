@@ -3,6 +3,7 @@ from rest_framework.response import Response
 
 from dominio.mixins import CacheMixin, PaginatorMixin, JWTAuthMixin
 from dominio.models import Alerta
+from dominio.alertas.dao import AlertaComprasDAO
 
 from .serializers import AlertasListaSerializer, AlertasResumoSerializer
 
@@ -38,3 +39,13 @@ class ResumoAlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
         alertas_resumo = AlertasResumoSerializer(data, many=True)
 
         return Response(data=alertas_resumo.data)
+
+
+class AlertasComprasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
+    cache_config = 'ALERTAS_COMPRAS_CACHE_TIMEOUT'
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get("orgao_id"))
+
+        data = AlertaComprasDAO.get(orgao_id=orgao_id)
+        return Response(data=data)

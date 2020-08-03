@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import AlertasView, ResumoAlertasView
+from .views import AlertasView, ResumoAlertasView, AlertasComprasView
 
 
 urlpatterns = [
@@ -9,5 +9,10 @@ urlpatterns = [
         'list/<str:orgao_id>',
         ResumoAlertasView.as_view(),
         name='resumo_alertas'
+    ),
+    path(
+        'compras/<str:orgao_id>',
+        AlertasComprasView.as_view(),
+        name='compras_alertas'
     ),
 ]
