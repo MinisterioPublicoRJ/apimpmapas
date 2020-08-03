@@ -42,7 +42,12 @@ def get_hbase_table(table_name, server=None, timeout=None):
     hbase_timeout = timeout or settings.PROMOTRON_HBASE_TIMEOUT
 
     try:
-        connection = HBaseConnection(hbase_server, timeout=hbase_timeout)
+        connection = HBaseConnection(
+            hbase_server,
+            timeout=hbase_timeout,
+            transport="framed",
+            protocol="compact",
+        )
         return connection.table(table_name)
     except Exception as e:
         logger.error("Error getting table from hbase: " + str(e))
