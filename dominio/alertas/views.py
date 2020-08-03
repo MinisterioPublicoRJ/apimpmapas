@@ -5,7 +5,7 @@ from dominio.mixins import CacheMixin, PaginatorMixin, JWTAuthMixin
 from dominio.models import Alerta
 from dominio.alertas.dao import AlertaComprasDAO
 
-from .serializers import AlertasListaSerializer, AlertasResumoSerializer, AlertasComprasSerializer
+from .serializers import AlertasListaSerializer, AlertasResumoSerializer
 
 
 class AlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):

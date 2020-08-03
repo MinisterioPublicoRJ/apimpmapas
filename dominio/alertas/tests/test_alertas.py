@@ -151,11 +151,12 @@ class AlertaComprasTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'contrato': '2020001923',
                 'iditem': 58818,
                 'contrato_iditem': '2020001923-58818',
-                'item': ('MASCARA CIRURGICA DESCARTAVEL - MATERIAL MASCARA: '
-                'TECIDO NAO TECIDO, QUANTIDADE CAMADA: 3, CLIP NASAL: METALIC'
-                'O, FORMATO: SIMPLES (RETANGULAR), MATERIAL VISOR: N/A, '
-                'GRAMATURA: 30 G/MÃ‚Â², FILTRO: N/D, FIXACAO: AMARRAS, COR:'
-                ' N/D')
+                'item': (
+                    'MASCARA CIRURGICA DESCARTAVEL - MATERIAL MASCARA: T'
+                    'ECIDO NAO TECIDO, QUANTIDADE CAMADA: 3, CLIP NASAL: METAL'
+                    'ICO, FORMATO: SIMPLES (RETANGULAR), MATERIAL VISOR: N/A, '
+                    'GRAMATURA: 30 G/MÃ‚Â², FILTRO: N/D, FIXACAO: AMARRAS, COR'
+                    ': N/D')
             },
             {
                 'sigla': 'COMP',
