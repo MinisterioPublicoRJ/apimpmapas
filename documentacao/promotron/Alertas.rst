@@ -96,7 +96,7 @@ DT2I
 ^^^^
 
 
-.. _Jobs: https://github.com/MinisterioPublicoRJ/alertas/blob/develop/alertas/src/alertas/jobs.py
+.. _Jobs: https://github.com/MinisterioPublicoRJ/alertas/blob/develop/src/alertas/jobs.py
 .. _AlertaGATE: https://github.com/MinisterioPublicoRJ/alertas/blob/optimization/alertas/src/alertas/alerta_gate.py
 
 View Backend
