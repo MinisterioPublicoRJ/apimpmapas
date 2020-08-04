@@ -45,7 +45,6 @@ class AlertasComprasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
     cache_config = 'ALERTAS_COMPRAS_CACHE_TIMEOUT'
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get("orgao_id"))
-
-        data = AlertaComprasDAO.get(orgao_id=orgao_id)
+        id_orgao = int(kwargs.get("orgao_id"))
+        data = AlertaComprasDAO.get(id_orgao=id_orgao, accept_empty=True)
         return Response(data=data)
