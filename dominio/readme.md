@@ -483,6 +483,31 @@ GET /dominio/alertas/<id_orgao>?tipo_alerta=MVVD
 ]
 ```
 
+## Alertas de Compras fora do padrão
+
+```
+GET /dominio/alertas/compras/<id_orgao>
+```
+
+```
+[
+    {
+        "sigla":"COMP",
+        "contrato":"123456",
+        "iditem":100000,
+        "contrato_iditem":"123456",
+        "item":"REAGENTE PREPARADO"
+    },
+    {
+        "sigla":"COMP",
+        "contrato":"89076",
+        "iditem":200000,
+        "contrato_iditem":"123456",
+        "item":"LUVAS DESCARTÁVEIS"
+    },
+]
+```
+
 ## Resumo dos Alertas
 
 ```
