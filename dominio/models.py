@@ -243,6 +243,7 @@ class Alerta:
 
     @classmethod
     def validos_por_orgao(cls, orgao_id, tipo_alerta=None):
+        # TODO: mover esse método para os DAOs
         parameters = {
             'orgao_id': orgao_id,
         }
