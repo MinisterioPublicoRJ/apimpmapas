@@ -1,14 +1,47 @@
 from django.conf import settings
 
 from dominio.dao import GenericDAO
-from dominio.alertas.serializers import AlertasComprasSerializer
+from dominio.alertas import serializers
 
 
-class GenericAlertasDAO(GenericDAO):
+class AlertasDAO(GenericDAO):
     QUERIES_DIR = settings.BASE_DIR.child("dominio", "alertas", "queries")
 
 
-class AlertaComprasDAO(GenericAlertasDAO):
+class ResumoAlertasDAO:
+    """
+    Classe principal do Resumo dos Alertas.
+    Esta classe executa todos os outros DAOs de resumo de alertas
+    que herdam dela.
+    """
+    columns = ["sigla", "descricao", "orgao", "count"]
+    serializer = serializers.AlertasResumoSerializer
+
+    @classmethod
+    def get_all(cls, id_orgao):
+        resumo = []
+        for ResumoDAOClass in cls.__subclasses__():
+            resumo.extend(
+                ResumoDAOClass.get(id_orgao=id_orgao, accept_empty=True)
+            )
+
+        return resumo
+
+
+class ResumoAlertasMGPDAO(ResumoAlertasDAO, AlertasDAO):
+    query_file = "resumo_alertas_mgp.sql"
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
+
+
+class ResumoAlertasComprasDAO(ResumoAlertasDAO, AlertasDAO):
+    query_file = "resumo_alertas_compras.sql"
+    table_namespaces = {
+        "schema": settings.TABLE_NAMESPACE,
+        "schema_alertas_compras": settings.SCHEMA_ALERTAS,
+    }
+
+
+class AlertaComprasDAO(AlertasDAO):
     query_file = "alerta_compras.sql"
     columns = [
         "sigla",
@@ -17,19 +50,8 @@ class AlertaComprasDAO(GenericAlertasDAO):
         "contrato_iditem",
         "item"
     ]
-    serializer = AlertasComprasSerializer
-    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
-
-    # Para fazer executando a query simplesmente deletar esse metodo override
-    @classmethod
-    def execute(cls, **kwargs):
-        dummy_result = [
-            ('COMP', '2020001923', '58818', '2020001923-58818',
-             ('MASCARA CIRURGICA DESCARTAVEL - MATERIAL MASCARA: TECIDO NAO T'
-              'ECIDO, QUANTIDADE CAMADA: 3, CLIP NASAL: METALICO, FORMATO: SIM'
-              'PLES (RETANGULAR), MATERIAL VISOR: N/A, GRAMATURA: 30 G/MÃ‚Â², '
-              'FILTRO: N/D, FIXACAO: AMARRAS, COR: N/D')
-             ),
-            ('COMP', '2020101010', '12345', '2020101010-12345',
-             'LUVA COMESTIVEL DE TESTE')]
-        return dummy_result
+    serializer = serializers.AlertasComprasSerializer
+    table_namespaces = {
+        "schema": settings.TABLE_NAMESPACE,
+        "schema_alertas_compras": settings.SCHEMA_ALERTAS,
+    }

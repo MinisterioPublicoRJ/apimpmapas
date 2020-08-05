@@ -113,6 +113,8 @@ EXADATA_NAMESPACE = config("EXADATA_NAMESPACE")
 IMPALA_HOST = config('IMPALA_HOST')
 IMPALA_PORT = config('IMPALA_PORT', cast=int)
 
+SCHEMA_ALERTAS = config("SCHEMA_ALERTAS")
+
 PG_HOST = config('PG_HOST')
 PG_BASE = config('PG_BASE')
 PG_USER = config('PG_USER')

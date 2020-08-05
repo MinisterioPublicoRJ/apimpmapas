@@ -4,6 +4,7 @@ from unittest import mock
 from django.test import TestCase
 from django.urls import reverse
 
+from dominio.alertas import dao
 from dominio.tests.testconf import NoJWTTestCase, NoCacheTestCase
 
 
@@ -106,29 +107,46 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
 class AlertaResumoTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
-    @mock.patch('dominio.alertas.views.Alerta')
-    def test_alert_resumo(self, _Alerta):
-        orgao_id = '0000000'
+    @mock.patch.object(dao.ResumoAlertasMGPDAO, "execute")
+    @mock.patch.object(dao.ResumoAlertasComprasDAO, "execute")
+    def test_alert_resumo(self, _execute_compras_dao, _execute_mgp_dao):
+        orgao_id = '12345'
 
-        alertas_return = [
-            {
-                'sigla': 'mock',
-                'descricao': 'mock',
-                'orgao': int(orgao_id),
-                'count': 10
-            },
+        _execute_compras_dao.return_value = [
+            ("Compras 1", "mock 1", int(orgao_id), 10),
+            ("Compras 2", "mock 2", int(orgao_id), 11),
+        ]
+        _execute_mgp_dao.return_value = [
+            ("MGP 1", "mock 3", int(orgao_id), 12),
+            ("MGP 2", "mock 4", int(orgao_id), 13),
         ]
 
         alertas_expected = [
             {
-                'sigla': 'mock',
-                'descricao': 'mock',
-                'orgao': 0,
-                'count': 10
-            }
+                'sigla': 'MGP 1',
+                'descricao': 'mock 3',
+                'orgao': 12345,
+                'count': 12,
+            },
+            {
+                'sigla': 'MGP 2',
+                'descricao': 'mock 4',
+                'orgao': 12345,
+                'count': 13,
+            },
+            {
+                'sigla': 'Compras 1',
+                'descricao': 'mock 1',
+                'orgao': 12345,
+                'count': 10,
+            },
+            {
+                'sigla': 'Compras 2',
+                'descricao': 'mock 2',
+                'orgao': 12345,
+                'count': 11
+            },
         ]
-
-        _Alerta.resumo_por_orgao.return_value = alertas_return
 
         url = reverse(
             'dominio:resumo_alertas',
@@ -142,28 +160,28 @@ class AlertaResumoTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
 class AlertaComprasTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
-    def test_alert_compras(self):
+    @mock.patch.object(dao.AlertaComprasDAO, "execute")
+    def test_alert_compras(self, _execute):
+        return_alerta = [
+            ('COMP', 'Contrato 1', '98765', 'Contrato ID 1', 'ITEM 1'),
+            ('COMP', 'Contrato 2', '12345', 'Contrato ID 2', 'ITEM 2'),
+        ]
+        _execute.return_value = return_alerta
         orgao_id = '0000000'
-
         expected_output = [
             {
                 'sigla': 'COMP',
-                'contrato': '2020001923',
-                'iditem': 58818,
-                'contrato_iditem': '2020001923-58818',
-                'item': (
-                    'MASCARA CIRURGICA DESCARTAVEL - MATERIAL MASCARA: T'
-                    'ECIDO NAO TECIDO, QUANTIDADE CAMADA: 3, CLIP NASAL: METAL'
-                    'ICO, FORMATO: SIMPLES (RETANGULAR), MATERIAL VISOR: N/A, '
-                    'GRAMATURA: 30 G/MÃ‚Â², FILTRO: N/D, FIXACAO: AMARRAS, COR'
-                    ': N/D')
+                'contrato': 'Contrato 1',
+                'iditem': 98765,
+                'contrato_iditem': 'Contrato ID 1',
+                'item': 'ITEM 1'
             },
             {
                 'sigla': 'COMP',
-                'contrato': '2020101010',
+                'contrato': 'Contrato 2',
                 'iditem': 12345,
-                'contrato_iditem': '2020101010-12345',
-                'item': 'LUVA COMESTIVEL DE TESTE'
+                'contrato_iditem': 'Contrato ID 2',
+                'item': 'ITEM 2'
 
             }
         ]
@@ -173,7 +191,6 @@ class AlertaComprasTest(NoJWTTestCase, NoCacheTestCase, TestCase):
             args=(orgao_id,)
         )
         resp = self.client.get(url)
-        print(resp.data)
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, expected_output)
