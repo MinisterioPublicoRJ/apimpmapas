@@ -3,9 +3,9 @@ from rest_framework.response import Response
 
 from dominio.mixins import CacheMixin, PaginatorMixin, JWTAuthMixin
 from dominio.models import Alerta
-from dominio.alertas.dao import AlertaComprasDAO
+from dominio.alertas.dao import AlertaComprasDAO, ResumoAlertasMGPDAO
 
-from .serializers import AlertasListaSerializer, AlertasResumoSerializer
+from .serializers import AlertasListaSerializer
 
 
 class AlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
@@ -35,10 +35,9 @@ class ResumoAlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
 
-        data = Alerta.resumo_por_orgao(orgao_id)
-        alertas_resumo = AlertasResumoSerializer(data, many=True)
+        alertas_resumo = ResumoAlertasMGPDAO.get(orgao_id=orgao_id)
 
-        return Response(data=alertas_resumo.data)
+        return Response(data=alertas_resumo)
 
 
 class AlertasComprasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):

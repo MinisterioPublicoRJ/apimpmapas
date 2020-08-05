@@ -4,7 +4,7 @@ from unittest import mock
 from django.test import TestCase
 from django.urls import reverse
 
-from dominio.alertas.dao import AlertaComprasDAO
+from dominio.alertas import dao
 from dominio.tests.testconf import NoJWTTestCase, NoCacheTestCase
 
 
@@ -107,29 +107,29 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
 class AlertaResumoTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
-    @mock.patch('dominio.alertas.views.Alerta')
-    def test_alert_resumo(self, _Alerta):
-        orgao_id = '0000000'
+    @mock.patch.object(dao.ResumoAlertasMGPDAO, "execute")
+    def test_alert_resumo(self, _execute):
+        orgao_id = '12345'
 
-        alertas_return = [
-            {
-                'sigla': 'mock',
-                'descricao': 'mock',
-                'orgao': int(orgao_id),
-                'count': 10
-            },
+        _execute.return_value = [
+            ("mock 1", "mock 1", int(orgao_id), 10),
+            ("mock 2", "mock 2", int(orgao_id), 11),
         ]
 
         alertas_expected = [
             {
-                'sigla': 'mock',
-                'descricao': 'mock',
-                'orgao': 0,
+                'sigla': 'mock 1',
+                'descricao': 'mock 1',
+                'orgao': 12345,
                 'count': 10
-            }
+            },
+            {
+                'sigla': 'mock 2',
+                'descricao': 'mock 2',
+                'orgao': 12345,
+                'count': 11
+            },
         ]
-
-        _Alerta.resumo_por_orgao.return_value = alertas_return
 
         url = reverse(
             'dominio:resumo_alertas',
@@ -143,7 +143,7 @@ class AlertaResumoTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
 class AlertaComprasTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
-    @mock.patch.object(AlertaComprasDAO, "execute")
+    @mock.patch.object(dao.AlertaComprasDAO, "execute")
     def test_alert_compras(self, _execute):
         return_alerta = [
             ('COMP', 'Contrato 1', '98765', 'Contrato ID 1', 'ITEM 1'),

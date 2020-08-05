@@ -136,30 +136,3 @@ class TestAlertaModels(TestCase):
             {"orgao_id": orgao_id, "tipo_alerta": tipo_alerta},
         )
         self.assertEqual(resp, expected_resp)
-
-    @mock.patch("dominio.models.run_query")
-    def test_resumo(self, _run_query):
-        orgao_id = 12345
-        _run_query.return_value = [
-            (
-                'data 1',
-                'data 2',
-                int(orgao_id),
-                1,
-            )
-        ]
-        resp = Alerta.resumo_por_orgao(orgao_id)
-        expected_resp = [
-            {
-                'sigla': 'data 1',
-                'descricao': 'data 2',
-                'orgao': 12345,
-                'count': 1
-            }
-        ]
-
-        _run_query.assert_called_once_with(
-            Alerta.query_resumo.format(schema=settings.TABLE_NAMESPACE),
-            {"orgao_id": orgao_id},
-        )
-        self.assertEqual(resp, expected_resp)
