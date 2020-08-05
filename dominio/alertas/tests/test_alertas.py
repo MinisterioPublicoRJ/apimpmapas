@@ -108,23 +108,40 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 class AlertaResumoTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
     @mock.patch.object(dao.ResumoAlertasMGPDAO, "execute")
-    def test_alert_resumo(self, _execute):
+    @mock.patch.object(dao.ResumoAlertasComprasDAO, "execute")
+    def test_alert_resumo(self, _execute_compras_dao, _execute_mgp_dao):
         orgao_id = '12345'
 
-        _execute.return_value = [
-            ("mock 1", "mock 1", int(orgao_id), 10),
-            ("mock 2", "mock 2", int(orgao_id), 11),
+        _execute_compras_dao.return_value = [
+            ("Compras 1", "mock 1", int(orgao_id), 10),
+            ("Compras 2", "mock 2", int(orgao_id), 11),
+        ]
+        _execute_mgp_dao.return_value = [
+            ("MGP 1", "mock 3", int(orgao_id), 12),
+            ("MGP 2", "mock 4", int(orgao_id), 13),
         ]
 
         alertas_expected = [
             {
-                'sigla': 'mock 1',
-                'descricao': 'mock 1',
+                'sigla': 'MGP 1',
+                'descricao': 'mock 3',
                 'orgao': 12345,
-                'count': 10
+                'count': 12,
             },
             {
-                'sigla': 'mock 2',
+                'sigla': 'MGP 2',
+                'descricao': 'mock 4',
+                'orgao': 12345,
+                'count': 13,
+            },
+            {
+                'sigla': 'Compras 1',
+                'descricao': 'mock 1',
+                'orgao': 12345,
+                'count': 10,
+            },
+            {
+                'sigla': 'Compras 2',
                 'descricao': 'mock 2',
                 'orgao': 12345,
                 'count': 11

@@ -14,7 +14,7 @@ SELECT
 FROM {schema}.mmps_alertas alrt
 WHERE alrt.dt_partition in
     (select dt_partition FROM last_session)
-    AND alrt.alrt_orgi_orga_dk = :orgao_id
+    AND alrt.alrt_orgi_orga_dk = :id_orgao
 GROUP BY
     alrt.alrt_sigla,
     alrt.alrt_descricao,
