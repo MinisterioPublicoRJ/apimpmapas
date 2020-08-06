@@ -368,6 +368,14 @@ class TestPermissoesUsuarioRegular(TestCase):
 
         self.assertEqual(tipos_promotorias, expected)
 
+    def test_filtra_pip_invalida(self):
+        self.pip_validos_mock.return_value = (("another id",),)
+
+        lista_orgaos = self.permissoes.orgaos_validos
+        self.expected = [self.expected[2]]
+
+        self.assertEqual(lista_orgaos, self.expected)
+
     def test_erro_se_resposta_do_banco_nao_conter_dados_do_usuario(self):
         # Resposa da query ListaOrgao não possui órgão válido, portanto
         # não pode ser usado pra dados do usuário.
@@ -616,6 +624,14 @@ class TesPermissoesUsuarioAdmin(TestCase):
         self.expected.pop(-1)  # Removido pelo filtro pip_validas
 
         self.assertCountEqual(orgaos, self.expected)
+
+    def test_filtra_pip_invalida(self):
+        self.pip_validos_mock.return_value = (("cdorgao 4",),)
+
+        lista_orgaos = self.permissoes.orgaos_validos
+        self.expected = self.expected[2:4]
+
+        self.assertEqual(lista_orgaos, self.expected)
 
     def test_orgao_selecionado_permissao_admin_seleciona_lotado(self):
         "Deve tentar selecionar primeiro um orgao lotado valido"
