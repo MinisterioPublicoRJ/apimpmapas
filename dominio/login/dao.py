@@ -48,6 +48,14 @@ class ListaTodosOrgaosDAO(GenericDAO):
         return oracle_access(cls.query(), kwargs)
 
 
+class PIPValidasDAO(GenericDAO):
+    QUERIES_DIR = settings.BASE_DIR.child("dominio", "login", "queries")
+    query_file = "pip_validas.sql"
+    columns = ["id_orgao"]
+    serializer = serializers.PIPValidasSerializer
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
+
+
 class DadosUsuarioDAO(SingleDataObjectDAO):
     QUERIES_DIR = settings.BASE_DIR.child("dominio", "login", "queries")
     query_file = "dados_usuario.sql"

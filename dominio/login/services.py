@@ -72,7 +72,15 @@ class PermissaoUsuario:
         return lista_orgaos_copy
 
     def _filtra_orgaos_invalidos(self, lista_orgaos):
-        return [orgao for orgao in lista_orgaos if orgao["tipo"] != 0]
+        validos = [orgao for orgao in lista_orgaos if orgao["tipo"] != 0]
+        return [
+            orgao for orgao in validos if "TUTELA" in orgao["nm_org"]
+            or orgao["cdorgao"] in self.pip_validas
+        ]
+
+    @cached_property
+    def pip_validas(self):
+        return [r["id_orgao"] for r in dao.PIPValidasDAO.get()]
 
 
 class PermissoesUsuarioRegular(PermissaoUsuario):

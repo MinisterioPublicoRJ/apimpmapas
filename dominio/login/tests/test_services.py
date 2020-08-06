@@ -7,6 +7,7 @@ from freezegun import freeze_time
 from model_bakery import baker
 
 from dominio.login import services, exceptions
+from dominio.login.dao import PIPValidasDAO
 from dominio.models import Usuario
 
 
@@ -14,6 +15,14 @@ class TestBuildLoginResponse(TestCase):
     def setUp(self):
         self.TEST_DATABASE_NAME = "default"
         self.username = "username"
+
+        self.pip_validos_dao_patcher = mock.patch.object(
+            PIPValidasDAO,
+            "execute"
+        )
+        self.pip_validos_mock = self.pip_validos_dao_patcher.start()
+        # ids de pips validas
+        self.pip_validos_mock.return_value = (("098765",),)
 
         self.jwt_patcher = mock.patch(
             "dominio.login.services.jwt.encode", return_value="auth-token"
@@ -145,6 +154,7 @@ class TestBuildLoginResponse(TestCase):
         )
 
     def tearDown(self):
+        self.pip_validos_dao_patcher.stop()
         self.oracle_access_patcher.stop()
         self.jwt_patcher.stop()
 
@@ -208,6 +218,15 @@ class TestBuildLoginResponse(TestCase):
 class TestPermissoesUsuarioRegular(TestCase):
     def setUp(self):
         self.username = "username"
+
+        self.pip_validos_dao_patcher = mock.patch.object(
+            PIPValidasDAO,
+            "execute"
+        )
+        self.pip_validos_mock = self.pip_validos_dao_patcher.start()
+        # ids de pips validas
+        self.pip_validos_mock.return_value = (("098765",),)
+
         self.oracle_access_patcher = mock.patch(
             "dominio.login.dao.oracle_access"
         )
@@ -290,6 +309,7 @@ class TestPermissoesUsuarioRegular(TestCase):
 
     def tearDown(self):
         self.oracle_access_patcher.stop()
+        self.pip_validos_dao_patcher.stop()
 
     def test_retorna_orgaos_de_usuario(self):
         self.assertEqual(self.permissoes.orgaos_lotados, self.expected)
@@ -347,6 +367,14 @@ class TestPermissoesUsuarioRegular(TestCase):
         expected.pop(1)  # Remove órgão inválido (tipo = 0)
 
         self.assertEqual(tipos_promotorias, expected)
+
+    def test_filtra_pip_invalida(self):
+        self.pip_validos_mock.return_value = (("another id",),)
+
+        lista_orgaos = self.permissoes.orgaos_validos
+        self.expected = [self.expected[2]]
+
+        self.assertEqual(lista_orgaos, self.expected)
 
     def test_erro_se_resposta_do_banco_nao_conter_dados_do_usuario(self):
         # Resposa da query ListaOrgao não possui órgão válido, portanto
@@ -454,6 +482,14 @@ class TestPermissoesRouter(TestCase):
 class TesPermissoesUsuarioAdmin(TestCase):
     def setUp(self):
         self.username = "username"
+        self.pip_validos_dao_patcher = mock.patch.object(
+            PIPValidasDAO,
+            "execute"
+        )
+        self.pip_validos_mock = self.pip_validos_dao_patcher.start()
+        # ids de pips validas
+        self.pip_validos_mock.return_value = (("cdorgao 1",),)
+
         self.oracle_access_patcher = mock.patch(
             "dominio.login.dao.oracle_access"
         )
@@ -488,6 +524,16 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "nome 3",
                 "X",
                 "pess_dk 3",
+            ),
+            # Essa PIP deve ser removida por não estar na lista pip_validas
+            (
+                "cdorgao 4",
+                "PROMOTORIA INVESTIGAÇÃO PENAL",
+                "matricula 4",
+                "cpf 4",
+                "nome 4",
+                "X",
+                "pess_dk 4",
             ),
         )
         self.oracle_return_lista_orgaos_lotados = (
@@ -545,10 +591,24 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "nm_org": "PROMOTORIA TUTELA COLETIVA",
                 "tipo": 1,
             },
+            {
+                "cpf": "cpf 4",
+                "pess_dk": "pess_dk 4",
+                "nome": "nome 4",
+                "matricula": "matricula 4",
+                "sexo": "X",
+                "cdorgao": "cdorgao 4",
+                "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
+                "tipo": 2,
+            },
         ]
         self.permissoes = services.PermissoesUsuarioAdmin(
             username=self.username
         )
+
+    def tearDown(self):
+        self.pip_validos_dao_patcher.stop()
+        self.oracle_access_patcher.stop()
 
     def test_retorna_todos_orgaos(self):
         orgaos = self.permissoes.todos_orgaos
@@ -560,9 +620,18 @@ class TesPermissoesUsuarioAdmin(TestCase):
             self.oracle_return_lista_todos_orgaos,
         ]
         orgaos = self.permissoes.orgaos_validos
-        self.expected.pop(1)
+        self.expected.pop(1)  # Removido pelo filtro tipo_orgao
+        self.expected.pop(-1)  # Removido pelo filtro pip_validas
 
         self.assertCountEqual(orgaos, self.expected)
+
+    def test_filtra_pip_invalida(self):
+        self.pip_validos_mock.return_value = (("cdorgao 4",),)
+
+        lista_orgaos = self.permissoes.orgaos_validos
+        self.expected = self.expected[2:4]
+
+        self.assertEqual(lista_orgaos, self.expected)
 
     def test_orgao_selecionado_permissao_admin_seleciona_lotado(self):
         "Deve tentar selecionar primeiro um orgao lotado valido"

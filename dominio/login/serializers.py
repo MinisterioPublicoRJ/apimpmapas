@@ -11,6 +11,10 @@ class ListaOrgaosSerializer(serializers.Serializer):
     pess_dk = serializers.CharField()
 
 
+class PIPValidasSerializer(serializers.Serializer):
+    id_orgao = serializers.CharField()
+
+
 class DadosUsuarioSerializer(serializers.Serializer):
     matricula = serializers.CharField()
     cpf = serializers.CharField()
