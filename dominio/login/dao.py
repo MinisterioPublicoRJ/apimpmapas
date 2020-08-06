@@ -53,6 +53,7 @@ class PIPValidasDAO(GenericDAO):
     query_file = "pip_validas.sql"
     columns = ["id_orgao"]
     serializer = serializers.PIPValidasSerializer
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
 
 
 class DadosUsuarioDAO(SingleDataObjectDAO):
