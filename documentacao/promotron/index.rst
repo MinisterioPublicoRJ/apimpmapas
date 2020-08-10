@@ -17,6 +17,7 @@ Welcome to Promotron's documentation!
    ResumoDoDia.rst
    SuaMesa.rst
    RadarDePerformance.rst
+   Alertas.rst
 
 
 

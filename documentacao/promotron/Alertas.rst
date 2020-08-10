@@ -67,6 +67,15 @@ AlertaGate_
 
 !! Parece ter um bug. São pegos os ITs que tem vista mais recente do que ele, e o min(dt_it), ao invés de max. Também não é filtrada a max(vist_dt_abertura_vista), sendo consideradas todas.
 
+Bug foi consertado! Explicar melhor o funcionamento. Mas basicamente:
+- Pega max(dt_abertura_vista) pra cada documento
+- Pega as datas de IT do GATE pra cada documento
+- Filtra para pegar só as ITs que ocorreram depois da max(dt_abertura_vista)
+- Também consideram as ITs de documentos que não tiveram vista aberta ainda
+- Se tiver mais de uma IT no documento nessa condição, considera a mais antiga
+
+Assim, se tiver ITs mais recentes do que a última vista (ou doc sem vista), o alerta será ativado para aquele documento.
+
 
 IC1A
 ^^^^
@@ -94,6 +103,23 @@ NF30
 
 DT2I
 ^^^^
+
+PRCR
+^^^^
+
+- se data do fato não existir ou for maior que data de cadastro usa data de cadastro
+- se pena for nula desconsidera
+- se alguma pena no documento for de assunto multiplicador multiplica tudo pelo fator
+- se o cara tiver menos de 21 ou >= 70 na data do fato ou data atual divide tempo de prescrição por 2 (usando os mesmos tipos de personagens que definimos pros investigados da PIP)
+- data inicial de prescrição com a hierarquia de: 
+    - se for abuso de menor e o menor tiver menos de 18 anos na data do fato (ou data de cadastro nas condições do primeiro ponto), usa a data de 18 anos como data inicial
+    - se tiver acordo de não persecução penal e tiver rescisão, usa a data do andamento de rescisão do ANPP
+    - senão, usa data do fato (ou data de cadastro nas condições lá)
+- data final de prescrição = data inicial + tempo de prescrição
+- O alerta, por enquanto, é ativado apenas uma vez por documento (não por assunto), e é usada a data final de prescrição mais antiga dos assuntos (então se eu tenho um documento com duas prescrições, uma em 2018 e outra em 2019, ele vai ativar uma única vez, indicando que o trigger do alerta já tem 720 dias - referente à prescrição de 2018 que é a mais antiga)
+
+Ah, e claro, os tipos de personagem pra identificar os menores é aquilo que eu te mandei no outro dia: Adolescente, Adolescente Carente, Adolescente/Criança em Situação de Risco, Autor do Fato/Vítima, Menor, Vítima.
+Esses 6 tipos. Em alguns casos a gente pode acabar considerando o autor do fato como vítima, mas se ele não tiver menos de 18 anos não vai fazer diferença na data inicial de prescrição. E se tiver, bom, é uma possível prescrição, então não acho que pode dar problema
 
 
 .. _Jobs: https://github.com/MinisterioPublicoRJ/alertas/blob/develop/src/alertas/jobs.py
