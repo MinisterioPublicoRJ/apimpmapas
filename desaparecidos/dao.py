@@ -62,6 +62,7 @@ def serialize(result_set, limit=None):
         "snca_dk_cand",
         "data_fato_cand",
         "foto_cand",
+        "alvo_dt_fato",
         "idade_cand",
         "cor_pele_cand",
         "altura_cand",
