@@ -8,7 +8,15 @@ from lupa.db_connectors import oracle_access
 class ListaOrgaosDAO(GenericDAO):
     QUERIES_DIR = settings.BASE_DIR.child("dominio", "login", "queries")
     query_file = "lista_orgaos.sql"
-    columns = ["cdorgao", "nm_org"]
+    columns = [
+        "cdorgao",
+        "nm_org",
+        "matricula",
+        "cpf",
+        "nome",
+        "sexo",
+        "pess_dk",
+    ]
     serializer = serializers.ListaOrgaosSerializer
 
     @classmethod
@@ -16,15 +24,9 @@ class ListaOrgaosDAO(GenericDAO):
         return oracle_access(cls.query(), kwargs)
 
 
-class ListaOrgaosPessoalDAO(GenericDAO):
-    QUERIES_DIR = settings.BASE_DIR.child("dominio", "login", "queries")
+class ListaOrgaosPessoalDAO(ListaOrgaosDAO):
     query_file = "lista_orgaos_pessoal.sql"
-    columns = ["cdorgao", "nm_org"]
     serializer = serializers.ListaOrgaosSerializer
-
-    @classmethod
-    def execute(cls, **kwargs):
-        return oracle_access(cls.query(), kwargs)
 
 
 class ListaTodosOrgaosDAO(GenericDAO):
@@ -39,11 +41,19 @@ class ListaTodosOrgaosDAO(GenericDAO):
         "sexo",
         "pess_dk",
     ]
-    serializer = serializers.ListaTodosOrgaosSerializer
+    serializer = serializers.ListaOrgaosSerializer
 
     @classmethod
     def execute(cls, **kwargs):
         return oracle_access(cls.query(), kwargs)
+
+
+class PIPValidasDAO(GenericDAO):
+    QUERIES_DIR = settings.BASE_DIR.child("dominio", "login", "queries")
+    query_file = "pip_validas.sql"
+    columns = ["id_orgao"]
+    serializer = serializers.PIPValidasSerializer
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
 
 
 class DadosUsuarioDAO(SingleDataObjectDAO):

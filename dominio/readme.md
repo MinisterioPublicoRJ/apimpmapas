@@ -146,6 +146,8 @@ Tipos aceitos:
 - pip_pics: Número de PICs ativas em uma PIP.
 - pip_aisp: Número de inquéritos e PICs ativos na AISP de uma PIP.
 - pip_finalizados: Número de documentos finalizados nos últimos 30 dias para PIPs.
+
+Obs.: Finalizados não consideram desarquivamentos!
 ```
 
 ```
@@ -478,6 +480,31 @@ GET /dominio/alertas/<id_orgao>?tipo_alerta=MVVD
         "classe_hier": "CLASSE|HIERARQUIA",
         "dias_passados": -1
     }
+]
+```
+
+## Alertas de Compras fora do padrão
+
+```
+GET /dominio/alertas/compras/<id_orgao>
+```
+
+```
+[
+    {
+        "sigla":"COMP",
+        "contrato":"123456",
+        "iditem":100000,
+        "contrato_iditem":"123456",
+        "item":"REAGENTE PREPARADO"
+    },
+    {
+        "sigla":"COMP",
+        "contrato":"89076",
+        "iditem":200000,
+        "contrato_iditem":"123456",
+        "item":"LUVAS DESCARTÁVEIS"
+    },
 ]
 ```
 

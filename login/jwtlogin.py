@@ -13,12 +13,13 @@ def get_jwt_from_get(request):
 
 
 def tipo_orgao(nome_orgao):
+    tutela_deny_list = ["idoso", "infância", "centro de apoio operacional"]
     nome_orgao = nome_orgao.lower()
     if "investigação penal" in nome_orgao:
         orgao = 2
     elif (
         "tutela" in nome_orgao
-        and not ("idoso" in nome_orgao or "infância" in nome_orgao)
+        and not any(deny in nome_orgao for deny in tutela_deny_list)
     ):
         orgao = 1
     else:

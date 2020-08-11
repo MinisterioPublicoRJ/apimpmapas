@@ -20,3 +20,11 @@ class AlertasResumoSerializer(serializers.Serializer):
     descricao = serializers.CharField()
     orgao = serializers.IntegerField()
     count = serializers.IntegerField()
+
+
+class AlertasComprasSerializer(serializers.Serializer):
+    sigla = serializers.CharField()
+    contrato = serializers.CharField()  # Talvez integer? Muito grande?
+    iditem = serializers.IntegerField()
+    contrato_iditem = serializers.CharField()
+    item = serializers.CharField()

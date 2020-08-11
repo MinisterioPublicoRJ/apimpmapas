@@ -3,10 +3,12 @@ from rest_framework.response import Response
 
 from dominio.mixins import CacheMixin, PaginatorMixin, JWTAuthMixin
 from dominio.models import Alerta
+from dominio.alertas import dao
 
-from .serializers import AlertasListaSerializer, AlertasResumoSerializer
+from .serializers import AlertasListaSerializer
 
 
+# TODO: criar um endpoint unificado?
 class AlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
     cache_config = 'ALERTAS_CACHE_TIMEOUT'
     # TODO: Mover constante para um lugar decente
@@ -34,7 +36,15 @@ class ResumoAlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get("orgao_id"))
 
-        data = Alerta.resumo_por_orgao(orgao_id)
-        alertas_resumo = AlertasResumoSerializer(data, many=True)
+        alertas_resumo = dao.ResumoAlertasDAO.get_all(id_orgao=orgao_id)
 
-        return Response(data=alertas_resumo.data)
+        return Response(data=alertas_resumo)
+
+
+class AlertasComprasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
+    cache_config = 'ALERTAS_COMPRAS_CACHE_TIMEOUT'
+
+    def get(self, request, *args, **kwargs):
+        id_orgao = int(kwargs.get("orgao_id"))
+        data = dao.AlertaComprasDAO.get(id_orgao=id_orgao, accept_empty=True)
+        return Response(data=data)
