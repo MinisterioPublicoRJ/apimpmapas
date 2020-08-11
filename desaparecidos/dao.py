@@ -63,7 +63,7 @@ def serialize(result_set, limit=None):
         "data_fato_cand",
         "foto_cand",
         "alvo_dt_fato",
-        "idade_cand",
+        "idade_movel_cand",
         "cor_pele_cand",
         "altura_cand",
         "bairro_cand",
