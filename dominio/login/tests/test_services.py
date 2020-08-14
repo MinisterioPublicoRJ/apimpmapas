@@ -29,7 +29,7 @@ class TestBuildLoginResponse(TestCase):
             "execute"
         )
         self.pip_cisps_mock = self.pip_cisps_dao_patcher.start()
-        self.pip_cisps_mock.return_value = [("098765", "1,2,3"),]
+        self.pip_cisps_mock.return_value = [("098765", "1,2,3"), ]
 
         self.jwt_patcher = mock.patch(
             "dominio.login.services.jwt.encode", return_value="auth-token"
@@ -246,7 +246,7 @@ class TestPermissoesUsuarioRegular(TestCase):
             "execute"
         )
         self.pip_cisps_mock = self.pip_cisps_dao_patcher.start()
-        self.pip_cisps_mock.return_value = [("098765", "1,2,3"),]
+        self.pip_cisps_mock.return_value = [("098765", "1,2,3"), ]
 
         self.oracle_access_patcher = mock.patch(
             "dominio.login.dao.oracle_access"
@@ -545,7 +545,10 @@ class TesPermissoesUsuarioAdmin(TestCase):
             "execute"
         )
         self.pip_cisps_mock = self.pip_cisps_dao_patcher.start()
-        self.pip_cisps_mock.return_value = [("cdorgao 1", "1,2,3"), ("cdorgao 4", "1,2,3")]
+        self.pip_cisps_mock.return_value = [
+            ("cdorgao 1", "1,2,3"),
+            ("cdorgao 4", "1,2,3")
+        ]
 
         self.oracle_access_patcher = mock.patch(
             "dominio.login.dao.oracle_access"
