@@ -21,3 +21,8 @@ class DadosUsuarioSerializer(serializers.Serializer):
     nome = serializers.CharField()
     sexo = serializers.CharField()
     pess_dk = serializers.CharField()
+
+
+class DPsPIPSerializer(serializers.Serializer):
+    id_orgao = serializers.CharField()
+    dps = serializers.CharField()

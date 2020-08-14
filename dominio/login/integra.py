@@ -3,6 +3,7 @@ import jwt
 from django.conf import settings
 
 from login.jwtlogin import get_jwt_from_post, tipo_orgao
+from dominio.login.dao import DPsPIPDAO
 
 
 login_logger = logging.getLogger(__name__)
@@ -26,6 +27,8 @@ def authenticate_integra(request):
     nome_orgao = payload['scaUser']['nomeOrgaoUsuario']
     matricula = payload["scaUser"]["matricula"]
 
+    dps = DPsPIPDAO.get(accept_empty=True, orgao=int(orgao)).get('dps', '')
+
     payload = {
         'username': user_name,
         'cpf': cpf,
@@ -34,6 +37,7 @@ def authenticate_integra(request):
         'nome': nome_usuario,
         'tipo_orgao': tipo_orgao(nome_orgao),
         'matricula': matricula,
+        'dps': dps
     }
 
     token = jwt.encode(

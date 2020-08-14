@@ -38,6 +38,7 @@ class PermissaoUsuario:
             lista_orgaos.extend(orgaos)
 
         lista_orgaos = self._classifica_orgaos(lista_orgaos)
+        lista_orgaos = self._adiciona_cisps(lista_orgaos)
         return lista_orgaos
 
     @cached_property
@@ -78,9 +79,24 @@ class PermissaoUsuario:
             or orgao["cdorgao"] in self.pip_validas
         ]
 
+    def _adiciona_cisps(self, lista_orgaos):
+        lista_orgaos_copy = lista_orgaos.copy()
+        for orgao in lista_orgaos_copy:
+            orgao["dps"] = self._get_cisps_from_orgao(orgao["cdorgao"])
+
+        return lista_orgaos_copy
+
     @cached_property
     def pip_validas(self):
         return [r["id_orgao"] for r in dao.PIPValidasDAO.get()]
+
+    @cached_property
+    def pip_cisps(self):
+        lista_cisps = dao.ListaDPsPIPsDAO.get()
+        return {d['id_orgao']: d['dps'] for d in lista_cisps}
+
+    def _get_cisps_from_orgao(self, id_orgao):
+        return self.pip_cisps.get(id_orgao, '')
 
 
 class PermissoesUsuarioRegular(PermissaoUsuario):
@@ -104,7 +120,8 @@ class PermissoesUsuarioAdmin(PermissaoUsuario):
     @cached_property
     def todos_orgaos(self):
         lista_orgaos = dao.ListaTodosOrgaosDAO.get()
-        return self._classifica_orgaos(lista_orgaos)
+        lista_orgaos = self._classifica_orgaos(lista_orgaos)
+        return self._adiciona_cisps(lista_orgaos)
 
     @property
     def orgaos_validos(self):
