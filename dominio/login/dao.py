@@ -66,3 +66,19 @@ class DadosUsuarioDAO(SingleDataObjectDAO):
     @classmethod
     def execute(cls, **kwargs):
         return oracle_access(cls.query(), kwargs)
+
+
+class DPsPIPDAO(SingleDataObjectDAO):
+    QUERIES_DIR = settings.BASE_DIR.child("dominio", "login", "queries")
+    query_file = "get_dps_orgao.sql"
+    columns = ["id_orgao", "dps"]
+    serializer = serializers.DPsPIPSerializer
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
+
+
+class ListaDPsPIPsDAO(GenericDAO):
+    QUERIES_DIR = settings.BASE_DIR.child("dominio", "login", "queries")
+    query_file = "get_lista_dps.sql"
+    columns = ["id_orgao", "dps"]
+    serializer = serializers.DPsPIPSerializer
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}

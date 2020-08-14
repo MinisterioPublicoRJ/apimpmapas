@@ -7,7 +7,7 @@ from freezegun import freeze_time
 from model_bakery import baker
 
 from dominio.login import services, exceptions
-from dominio.login.dao import PIPValidasDAO
+from dominio.login.dao import PIPValidasDAO, ListaDPsPIPsDAO
 from dominio.models import Usuario
 
 
@@ -23,6 +23,13 @@ class TestBuildLoginResponse(TestCase):
         self.pip_validos_mock = self.pip_validos_dao_patcher.start()
         # ids de pips validas
         self.pip_validos_mock.return_value = (("098765",),)
+
+        self.pip_cisps_dao_patcher = mock.patch.object(
+            ListaDPsPIPsDAO,
+            "execute"
+        )
+        self.pip_cisps_mock = self.pip_cisps_dao_patcher.start()
+        self.pip_cisps_mock.return_value = [("098765", "1,2,3"),]
 
         self.jwt_patcher = mock.patch(
             "dominio.login.services.jwt.encode", return_value="auth-token"
@@ -92,6 +99,7 @@ class TestBuildLoginResponse(TestCase):
                 "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
                 "tipo": 2,
                 "cdorgao": "098765",
+                "dps": "1,2,3"
             },
             "orgaos_lotados": [
                 {
@@ -103,6 +111,7 @@ class TestBuildLoginResponse(TestCase):
                     "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
                     "tipo": 2,
                     "cdorgao": "098765",
+                    "dps": "1,2,3"
                 },
                 {
                     "cpf": "CPF 2",
@@ -113,6 +122,7 @@ class TestBuildLoginResponse(TestCase):
                     "nm_org": "PROMOTORIA DIFERENTE",
                     "tipo": 0,
                     "cdorgao": "1234",
+                    "dps": ""
                 },
                 {
                     "cpf": "CPF 3",
@@ -123,6 +133,7 @@ class TestBuildLoginResponse(TestCase):
                     "nm_org": "PROMOTORIA TUTELA COLETIVA",
                     "tipo": 1,
                     "cdorgao": "1234",
+                    "dps": ""
                 },
             ],
             "orgaos_validos": [
@@ -135,6 +146,7 @@ class TestBuildLoginResponse(TestCase):
                     "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
                     "tipo": 2,
                     "cdorgao": "098765",
+                    "dps": "1,2,3"
                 },
                 {
                     "cpf": "CPF 3",
@@ -145,6 +157,7 @@ class TestBuildLoginResponse(TestCase):
                     "nm_org": "PROMOTORIA TUTELA COLETIVA",
                     "tipo": 1,
                     "cdorgao": "1234",
+                    "dps": ""
                 },
             ],
         }
@@ -155,6 +168,7 @@ class TestBuildLoginResponse(TestCase):
 
     def tearDown(self):
         self.pip_validos_dao_patcher.stop()
+        self.pip_cisps_dao_patcher.stop()
         self.oracle_access_patcher.stop()
         self.jwt_patcher.stop()
 
@@ -227,6 +241,13 @@ class TestPermissoesUsuarioRegular(TestCase):
         # ids de pips validas
         self.pip_validos_mock.return_value = (("098765",),)
 
+        self.pip_cisps_dao_patcher = mock.patch.object(
+            ListaDPsPIPsDAO,
+            "execute"
+        )
+        self.pip_cisps_mock = self.pip_cisps_dao_patcher.start()
+        self.pip_cisps_mock.return_value = [("098765", "1,2,3"),]
+
         self.oracle_access_patcher = mock.patch(
             "dominio.login.dao.oracle_access"
         )
@@ -281,6 +302,7 @@ class TestPermissoesUsuarioRegular(TestCase):
                 "cdorgao": "098765",
                 "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
                 "tipo": 2,
+                "dps": "1,2,3"
             },
             {
                 "cpf": "CPF 2",
@@ -291,6 +313,7 @@ class TestPermissoesUsuarioRegular(TestCase):
                 "cdorgao": "1234",
                 "nm_org": "PROMOTORIA DIFERENTE",
                 "tipo": 0,
+                "dps": ""
             },
             {
                 "cpf": "CPF 3",
@@ -301,6 +324,7 @@ class TestPermissoesUsuarioRegular(TestCase):
                 "cdorgao": "9999",
                 "nm_org": "PROMOTORIA TUTELA COLETIVA",
                 "tipo": 1,
+                "dps": ""
             },
         ]
         self.permissoes = services.PermissoesUsuarioRegular(
@@ -310,6 +334,7 @@ class TestPermissoesUsuarioRegular(TestCase):
     def tearDown(self):
         self.oracle_access_patcher.stop()
         self.pip_validos_dao_patcher.stop()
+        self.pip_cisps_dao_patcher.stop()
 
     def test_retorna_orgaos_de_usuario(self):
         self.assertEqual(self.permissoes.orgaos_lotados, self.expected)
@@ -367,6 +392,31 @@ class TestPermissoesUsuarioRegular(TestCase):
         expected.pop(1)  # Remove órgão inválido (tipo = 0)
 
         self.assertEqual(tipos_promotorias, expected)
+
+    def test_adiciona_cisps(self):
+        lista_orgaos = self.expected.copy()
+        del lista_orgaos[0]['dps']
+        del lista_orgaos[1]['dps']
+        del lista_orgaos[2]['dps']
+        cisps_promotorias = self.permissoes._adiciona_cisps(lista_orgaos)
+
+        self.assertEqual(cisps_promotorias, self.expected)
+
+    def test_pip_cisps(self):
+        response = self.permissoes.pip_cisps()
+        expected = {"098765": "1,2,3"}
+        self.assertEqual(response, expected)
+
+    def test_get_cisps_from_orgao(self):
+        id_orgao = "098765"
+        expected = "1,2,3"
+        response = self.permissoes._get_cisps_from_orgao(id_orgao)
+        self.assertEqual(response, expected)
+
+        id_orgao = "1234"
+        expected = ""
+        response = self.permissoes._get_cisps_from_orgao(id_orgao)
+        self.assertEqual(response, expected)
 
     def test_filtra_pip_invalida(self):
         self.pip_validos_mock.return_value = (("another id",),)
@@ -490,6 +540,13 @@ class TesPermissoesUsuarioAdmin(TestCase):
         # ids de pips validas
         self.pip_validos_mock.return_value = (("cdorgao 1",),)
 
+        self.pip_cisps_dao_patcher = mock.patch.object(
+            ListaDPsPIPsDAO,
+            "execute"
+        )
+        self.pip_cisps_mock = self.pip_cisps_dao_patcher.start()
+        self.pip_cisps_mock.return_value = [("cdorgao 1", "1,2,3"), ("cdorgao 4", "1,2,3")]
+
         self.oracle_access_patcher = mock.patch(
             "dominio.login.dao.oracle_access"
         )
@@ -570,6 +627,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "cdorgao": "cdorgao 1",
                 "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
                 "tipo": 2,
+                "dps": "1,2,3"
             },
             {
                 "cpf": "cpf 2",
@@ -580,6 +638,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "cdorgao": "cdorgao 2",
                 "nm_org": "PROMOTORIA DIFERENTE",
                 "tipo": 0,
+                "dps": ""
             },
             {
                 "cpf": "cpf 3",
@@ -590,6 +649,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "cdorgao": "cdorgao 3",
                 "nm_org": "PROMOTORIA TUTELA COLETIVA",
                 "tipo": 1,
+                "dps": ""
             },
             {
                 "cpf": "cpf 4",
@@ -600,6 +660,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "cdorgao": "cdorgao 4",
                 "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
                 "tipo": 2,
+                "dps": "1,2,3"
             },
         ]
         self.permissoes = services.PermissoesUsuarioAdmin(
@@ -609,6 +670,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
     def tearDown(self):
         self.pip_validos_dao_patcher.stop()
         self.oracle_access_patcher.stop()
+        self.pip_cisps_dao_patcher.stop()
 
     def test_retorna_todos_orgaos(self):
         orgaos = self.permissoes.todos_orgaos
@@ -649,6 +711,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "cdorgao": "cdorgao 5",
                 "nm_org": "PROMOTORIA TUTELA COLETIVA",
                 "tipo": 1,
+                "dps": ""
             }
 
         orgao_selecionado = self.permissoes.orgao_selecionado

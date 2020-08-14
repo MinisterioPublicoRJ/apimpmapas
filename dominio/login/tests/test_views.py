@@ -10,6 +10,7 @@ from jwt.exceptions import DecodeError
 from model_bakery.baker import make
 
 from dominio.login.integra import authenticate_integra
+from dominio.login.dao import DPsPIPDAO
 
 
 @pytest.mark.django_db(transaction=True)
@@ -109,12 +110,14 @@ class TestLoginIntegra(TestCase):
 
 
 class AuthenticateIntegraTest(TestCase):
+    @mock.patch.object(DPsPIPDAO, "get")
     @mock.patch(
         "dominio.login.integra.jwt.encode", return_value=b"encode_token"
     )
     @mock.patch("dominio.login.integra.jwt.decode")
     @mock.patch("dominio.login.integra.get_jwt_from_post")
-    def test_authenticate_integra(self, _get_jwt, _decode, _encode):
+    def test_authenticate_integra(self, _get_jwt, _decode, _encode, _get_dps):
+        _get_dps.return_value = {"dps": "12,15"}
         _decode.return_value = {
             "user_name": "user_name",
             "scaUser": {
@@ -134,6 +137,7 @@ class AuthenticateIntegraTest(TestCase):
             "nome": "nome",
             "tipo_orgao": 1,
             "matricula": "12345",
+            "dps": "12,15"
         }
         resp_payload = authenticate_integra("request")
         expected_payload = jwt_payload.copy()
