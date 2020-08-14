@@ -403,7 +403,7 @@ class TestPermissoesUsuarioRegular(TestCase):
         self.assertEqual(cisps_promotorias, self.expected)
 
     def test_pip_cisps(self):
-        response = self.permissoes.pip_cisps()
+        response = self.permissoes.pip_cisps
         expected = {"098765": "1,2,3"}
         self.assertEqual(response, expected)
 
