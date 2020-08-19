@@ -55,9 +55,21 @@ class CacheMixin:
 
 
 class JWTAuthMixin:
+    def authorize_user_in_orgao(self, token_payload, *args, **kwargs):
+        is_admin = token_payload.get("tipo_permissao", "regular") == "admin"
+        orgaos = (
+            token_payload.get("ids_orgaos_lotados_validos", [])
+            + [token_payload.get("orgao")]
+        )
+        return is_admin or kwargs.get("orgao_id") in orgaos
+
     def dispatch(self, request, *args, **kwargs):
         try:
-            unpack_jwt(request)
-            return super().dispatch(request, *args, **kwargs)
+            token_payload = unpack_jwt(request)
+            if self.authorize_user_in_orgao(token_payload, *args, **kwargs):
+                return super().dispatch(request, *args, **kwargs)
+            else:
+                return HttpResponseForbidden()
+
         except (InvalidSignatureError, DecodeError):
             return HttpResponseForbidden()
