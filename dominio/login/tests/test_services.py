@@ -89,6 +89,7 @@ class TestBuildLoginResponse(TestCase):
             "sexo": "X",
             "token": "auth-token",
             "tipo_permissao": "regular",
+            "ids_orgaos_lotados_validos": ["098765", "1234"],
             "orgao_selecionado":
             {
                 "cpf": "CPF 1",

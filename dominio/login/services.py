@@ -175,6 +175,9 @@ def build_login_response(permissoes):
     response["cpf"] = permissoes.dados_usuario["cpf"]
     response["nome"] = permissoes.dados_usuario["nome"]
     response["matricula"] = permissoes.dados_usuario["matricula"]
+    response["ids_orgaos_lotados_validos"] = (
+        permissoes.ids_orgaos_lotados_validos
+    )
 
     response["token"] = jwt.encode(
         response, settings.JWT_SECRET, algorithm="HS256",
