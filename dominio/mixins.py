@@ -58,6 +58,7 @@ class JWTAuthMixin:
     orgao_url_kwarg = "orgao_id"
 
     def authorize_user_in_orgao(self, token_payload, *args, **kwargs):
+        # TODO: nos deveríamos aceitar POST de um admin para qualquer órgão?
         is_admin = token_payload.get("tipo_permissao", "regular") == "admin"
         orgaos = (
             token_payload.get("ids_orgaos_lotados_validos", [])
