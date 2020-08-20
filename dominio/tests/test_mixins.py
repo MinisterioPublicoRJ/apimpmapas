@@ -1,11 +1,14 @@
-from unittest import mock, TestCase
+from unittest import mock
 
+import jwt
 from django.conf import settings
 from django.core.paginator import EmptyPage
 from django.http import HttpResponseForbidden
+from django.test import RequestFactory, TestCase
 from jwt import DecodeError
 
 from dominio.mixins import CacheMixin, JWTAuthMixin, PaginatorMixin
+from dominio.tests import helpers
 
 
 class TestMixins(TestCase):
@@ -144,3 +147,152 @@ class TestJWTMixin(TestCase):
 
         _unpack_jwt.assert_called_once_with('request')
         self.assertTrue(isinstance(handler, HttpResponseForbidden))
+
+
+class TestJWTAuthMixinValidateRequestOrgao(TestCase):
+    def test_jwt_admin_with_same_orgao_in_request(self):
+        id_orgao = "12345"
+        jwt_payload = {
+            "tipo_permissao": "admin",
+            "ids_orgaos_lotados_validos": [id_orgao],
+        }
+        token = jwt.encode(
+            jwt_payload,
+            settings.JWT_SECRET,
+            algorithm="HS256"
+        ).decode()
+
+        request = RequestFactory().get(f"/fake?jwt={token}")
+        response = helpers.SecureView.as_view()(request, orgao_id=id_orgao)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_jwt_admin_with_different_orgao_in_request(self):
+        id_orgao_request = "12345"
+        id_orgao_token = "65432"
+        jwt_payload = {
+            "tipo_permissao": "admin",
+            "ids_orgaos_lotados_validos": [id_orgao_token],
+        }
+        token = jwt.encode(
+            jwt_payload,
+            settings.JWT_SECRET,
+            algorithm="HS256"
+        ).decode()
+
+        request = RequestFactory().get(f"/fake?jwt={token}")
+        response = helpers.SecureView.as_view()(
+            request, orgao_id=id_orgao_request
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_jwt_regular_with_same_orgao_in_request(self):
+        id_orgao = "12345"
+        jwt_payload = {
+            "tipo_permissao": "regular",
+            "ids_orgaos_lotados_validos": [id_orgao],
+        }
+        token = jwt.encode(
+            jwt_payload,
+            settings.JWT_SECRET,
+            algorithm="HS256"
+        ).decode()
+
+        request = RequestFactory().get(f"/fake?jwt={token}")
+        response = helpers.SecureView.as_view()(request, orgao_id=id_orgao)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_jwt_regular_with_different_orgao_in_request(self):
+        id_orgao_request = "12345"
+        id_orgao_token = "65432"
+        jwt_payload = {
+            "tipo_permissao": "regular",
+            "ids_orgaos_lotados_validos": [id_orgao_token],
+        }
+        token = jwt.encode(
+            jwt_payload,
+            settings.JWT_SECRET,
+            algorithm="HS256"
+        ).decode()
+
+        request = RequestFactory().get(f"/fake?jwt={token}")
+        response = helpers.SecureView.as_view()(
+            request,
+            orgao_id=id_orgao_request
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_jwt_integra_with_same_orgao_in_request(self):
+        id_orgao = "12345"
+        jwt_payload = {
+            "orgao": id_orgao,
+        }
+        token = jwt.encode(
+            jwt_payload,
+            settings.JWT_SECRET,
+            algorithm="HS256"
+        ).decode()
+
+        request = RequestFactory().get(f"/fake?jwt={token}")
+        response = helpers.SecureView.as_view()(request, orgao_id=id_orgao)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_jwt_integra_with_different_orgao_in_request(self):
+        id_orgao_request = "12345"
+        id_orgao_token = "65432"
+        jwt_payload = {
+            "orgao": id_orgao_token,
+        }
+        token = jwt.encode(
+            jwt_payload,
+            settings.JWT_SECRET,
+            algorithm="HS256"
+        ).decode()
+
+        request = RequestFactory().get(f"/fake?jwt={token}")
+        response = helpers.SecureView.as_view()(
+            request,
+            orgao_id=id_orgao_request
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_authorize_orgao_in_POST_request_success(self):
+        id_orgao = "12345"
+        jwt_payload = {
+            "orgao": id_orgao,
+        }
+        token = jwt.encode(
+            jwt_payload,
+            settings.JWT_SECRET,
+            algorithm="HS256"
+        ).decode()
+
+        request = RequestFactory().post(f"/fake?jwt={token}")
+        response = helpers.SecureView.as_view()(request, orgao_id=id_orgao)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_authorize_orgao_in_POST_request_forbidden(self):
+        id_orgao_request = "12345"
+        id_orgao_token = "65432"
+        jwt_payload = {
+            "orgao": id_orgao_token,
+        }
+        token = jwt.encode(
+            jwt_payload,
+            settings.JWT_SECRET,
+            algorithm="HS256"
+        ).decode()
+
+        request = RequestFactory().post(f"/fake?jwt={token}")
+        response = helpers.SecureView.as_view()(
+            request,
+            orgao_id=id_orgao_request
+        )
+
+        self.assertEqual(response.status_code, 403)
