@@ -15,7 +15,7 @@ class AlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
     # ALERTAS_SIZE = 25
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get("orgao_id"))
+        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
         # page = int(request.GET.get("page", 1))
         tipo_alerta = request.GET.get("tipo_alerta", None)
 
@@ -34,7 +34,7 @@ class ResumoAlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
     cache_config = 'ALERTAS_CACHE_TIMEOUT'
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get("orgao_id"))
+        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
 
         alertas_resumo = dao.ResumoAlertasDAO.get_all(id_orgao=orgao_id)
 
@@ -45,6 +45,6 @@ class AlertasComprasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
     cache_config = 'ALERTAS_COMPRAS_CACHE_TIMEOUT'
 
     def get(self, request, *args, **kwargs):
-        id_orgao = int(kwargs.get("orgao_id"))
+        id_orgao = int(kwargs.get(self.orgao_url_kwarg))
         data = dao.AlertaComprasDAO.get(id_orgao=id_orgao, accept_empty=True)
         return Response(data=data)

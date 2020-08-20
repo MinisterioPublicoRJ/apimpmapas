@@ -17,7 +17,7 @@ class PIPDetalheAproveitamentosView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = "PIP_DETALHEAPROVEITAMENTOS_CACHE_TIMEOUT"
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(self.kwargs["orgao_id"])
+        orgao_id = int(self.kwargs.get(self.orgao_url_kwarg))
 
         data = PIPDetalheAproveitamentosDAO.get(orgao_id=orgao_id)
         return Response(data)
@@ -27,7 +27,7 @@ class PIPVistasAbertasMensalView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = "PIP_VISTASABERTASMENSAL_CACHE_TIMEOUT"
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get("orgao_id"))
+        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
         cpf = kwargs.get("cpf")
 
         aberturas = Vista.vistas.aberturas_30_dias_PIP(orgao_id, cpf)
@@ -49,7 +49,7 @@ class PIPSuaMesaInvestigacoesAISPView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = "PIP_SUAMESAINVESTIGACOESAISP_CACHE_TIMEOUT"
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get("orgao_id"))
+        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
 
         _, orgaos_same_aisp = get_orgaos_same_aisps(orgao_id)
 
@@ -66,7 +66,7 @@ class PIPIndicadoresDeSucessoView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = "PIP_INDICADORES_SUCESSO_CACHE_TIMEOUT"
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get("orgao_id"))
+        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
         data = PIPIndicadoresDeSucessoDAO.get(orgao_id=orgao_id)
         return Response(data=data)
 
@@ -76,7 +76,7 @@ class PIPSuaMesaInqueritosView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = "PIP_SUAMESAINQUERITOS_CACHE_TIMEOUT"
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get("orgao_id"))
+        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
 
         doc_count = Documento.investigacoes.em_curso(
             orgao_id, [3, 494]
@@ -92,7 +92,7 @@ class PIPSuaMesaPICsView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = "PIP_SUAMESAPICS_CACHE_TIMEOUT"
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get("orgao_id"))
+        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
 
         doc_count = Documento.investigacoes.em_curso(
             orgao_id, [590]
@@ -107,7 +107,7 @@ class PIPRadarPerformanceView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = "PIP_RADAR_PERFORMANCE_CACHE_TIMEOUT"
 
     def get(self, *args, **kwargs):
-        orgao_id = int(kwargs.get("orgao_id"))
+        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
         return Response(data=PIPRadarPerformanceDAO.get(orgao_id=orgao_id))
 
 
@@ -117,7 +117,7 @@ class PIPPrincipaisInvestigadosView(
     PRINCIPAIS_INVESTIGADOS_SIZE = 20
 
     def get(self, request, *args, **kwargs):
-        orgao_id = kwargs.get("orgao_id")
+        orgao_id = kwargs.get(self.orgao_url_kwarg)
         cpf = kwargs.get("cpf")
         page = int(request.GET.get("page", 1))
 
@@ -132,7 +132,7 @@ class PIPPrincipaisInvestigadosView(
         return Response(page_data)
 
     def post(self, request, *args, **kwargs):
-        orgao_id = kwargs.get("orgao_id")
+        orgao_id = kwargs.get(self.orgao_url_kwarg)
         cpf = kwargs.get("cpf")
 
         # TODO: Verificar que o post foi feito pelo mesmo orgao
