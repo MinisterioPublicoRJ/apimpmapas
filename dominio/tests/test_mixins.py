@@ -260,3 +260,39 @@ class TestJWTAuthMixinValidateRequestOrgao(TestCase):
         )
 
         self.assertEqual(response.status_code, 403)
+
+    def test_authorize_orgao_in_POST_request_success(self):
+        id_orgao = "12345"
+        jwt_payload = {
+            "orgao": id_orgao,
+        }
+        token = jwt.encode(
+            jwt_payload,
+            settings.JWT_SECRET,
+            algorithm="HS256"
+        ).decode()
+
+        request = RequestFactory().post(f"/fake?jwt={token}")
+        response = helpers.SecureView.as_view()(request, orgao_id=id_orgao)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_authorize_orgao_in_POST_request_forbidden(self):
+        id_orgao_request = "12345"
+        id_orgao_token = "65432"
+        jwt_payload = {
+            "orgao": id_orgao_token,
+        }
+        token = jwt.encode(
+            jwt_payload,
+            settings.JWT_SECRET,
+            algorithm="HS256"
+        ).decode()
+
+        request = RequestFactory().post(f"/fake?jwt={token}")
+        response = helpers.SecureView.as_view()(
+            request,
+            orgao_id=id_orgao_request
+        )
+
+        self.assertEqual(response.status_code, 403)
