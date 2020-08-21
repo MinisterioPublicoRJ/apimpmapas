@@ -1,3 +1,5 @@
+from itertools import product
+
 from django.conf import settings
 
 from dominio.suamesa.serializers import (
@@ -72,10 +74,15 @@ class RankingMixin:
         }
 
         data = []
+        # ranking_dao pode ser uma lista, um dao para cada ranking_field
+        if not isinstance(cls.ranking_dao, list):
+            ranking_list = product(cls.ranking_fields, [cls.ranking_dao])
+        else:
+            ranking_list = zip(cls.ranking_fields, cls.ranking_dao)
 
-        for fieldname in cls.ranking_fields:
-            ranking_dao = cls.ranking_dao(fieldname)
-            response = ranking_dao.get(accept_empty=accept_empty, **kwargs)
+        for fieldname, ranking_dao in ranking_list:
+            dao = ranking_dao(fieldname)
+            response = dao.get(accept_empty=accept_empty, **kwargs)
             if response:
                 data.append({'ranking_fieldname': fieldname, 'data': response})
 
