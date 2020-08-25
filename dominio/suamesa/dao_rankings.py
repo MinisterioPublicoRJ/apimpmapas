@@ -75,6 +75,8 @@ class RankingMixin:
 
         data = []
         # ranking_dao pode ser uma lista, um dao para cada ranking_field
+        # Caso tenha mais fields do que DAOs, o zip irá excluir um desses
+        # fields. O componente no front atualmente só pega os 2 primeiros
         if not isinstance(cls.ranking_dao, list):
             ranking_list = product(cls.ranking_fields, [cls.ranking_dao])
         else:
