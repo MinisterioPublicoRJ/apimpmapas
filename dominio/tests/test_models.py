@@ -71,7 +71,7 @@ class TestAlertaModels(TestCase):
                 'data 7',
                 int(orgao_id),
                 'data 8',
-                -1,
+                'COMP',
             )
         ]
         resp = Alerta.validos_por_orgao(orgao_id)
@@ -87,7 +87,7 @@ class TestAlertaModels(TestCase):
                 'classe_hier': 'data 7',
                 'dias_passados': 12345,
                 'descricao': 'data 8',
-                'sigla': -1}
+                'sigla': 'COMP'}
         ]
 
         _run_query.assert_called_once_with(
@@ -112,8 +112,21 @@ class TestAlertaModels(TestCase):
                 'data 7',
                 int(orgao_id),
                 'data 8',
-                -1,
-            )
+                'DORD',
+            ),
+            (
+                'data 1',
+                'data 2',
+                0,
+                'data 3',
+                'data 4',
+                'data 5',
+                'data 6',
+                'data 7',
+                int(orgao_id),
+                'data 8',
+                'COMP',
+            ),
         ]
         resp = Alerta.validos_por_orgao(orgao_id, tipo_alerta)
         expected_resp = [
@@ -128,7 +141,21 @@ class TestAlertaModels(TestCase):
                 'classe_hier': 'data 7',
                 'dias_passados': 12345,
                 'descricao': 'data 8',
-                'sigla': -1}
+                'sigla': 'COMP'
+            },
+            {
+                'doc_dk': 'data 1',
+                'num_doc': 'data 2',
+                'num_ext': 0,
+                'etiqueta': 'data 3',
+                'classe_doc': 'data 4',
+                'data_alerta': 'data 5',
+                'orgao': 'data 6',
+                'classe_hier': 'data 7',
+                'dias_passados': 12345,
+                'descricao': 'data 8',
+                'sigla': 'DORD'
+            }
         ]
 
         _run_query.assert_called_once_with(
