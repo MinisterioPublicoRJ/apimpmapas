@@ -10,6 +10,7 @@ from .managers import (
     ProcessosManager,
     FinalizadosManager,
 )
+from dominio.alertas.helper import ordem as alrt_ordem
 
 
 class Usuario(models.Model):
@@ -271,4 +272,13 @@ class Alerta:
             }
             dataset.append(dict_row)
 
-        return dataset
+        return cls.ordena_resumo(resumo)
+
+    @classmethod
+    def ordena_resumo(cls, resumo):
+        return [
+            res_alerta
+            for sigla in alrt_ordem
+            for res_alerta in resumo
+            if res_alerta['sigla'] == sigla
+        ]
