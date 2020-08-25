@@ -272,7 +272,7 @@ class Alerta:
             }
             dataset.append(dict_row)
 
-        return cls.ordena_resumo(resumo)
+        return cls.ordena_resumo(dataset)
 
     @classmethod
     def ordena_resumo(cls, resumo):
