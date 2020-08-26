@@ -117,6 +117,7 @@ class TestPIPRadarPerformance:
                 "3ª PROMOTORIA DE JUSTIÇA",
                 "4ª PROMOTORIA DE JUSTIÇa",
                 "5ª PROMOTORIA DE JUSTIÇA",
+                200,
             ),
         ]
         ser_data = PIPRadarPerformanceDAO.serialize(result_set)
@@ -155,6 +156,7 @@ class TestPIPRadarPerformance:
             "nm_max_acordos": "3ª Promotoria de Justiça",
             "nm_max_arquivamentos": "4ª Promotoria de Justiça",
             "nm_max_abeturas_vista": "5ª Promotoria de Justiça",
+            "cod_pct": 200,
         }
         assert ser_data == expected_data
 
