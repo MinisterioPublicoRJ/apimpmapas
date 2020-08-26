@@ -12,13 +12,14 @@ def get_aisps():
     (codigo_pip, codigo_aisp, nome_aisp)
     """
     query = """
-        SELECT pip_codigo, aisp_codigo, aisp_nome, cod_pct 
+        SELECT pip_codigo, aisp_codigo, aisp_nome, cod_pct
         FROM {namespace}.tb_pip_aisp
         JOIN {namespace}.atualizacao_pj_pacote ON pip_codigo = id_orgao
     """.format(
         namespace=settings.TABLE_NAMESPACE
     )
     return run_query(query)
+
 
 def get_orgaos_same_aisps(orgao_id):
     """Retorna os órgãos que pertencem às mesmas AISPs de orgao_id, por AISP.
