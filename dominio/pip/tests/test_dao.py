@@ -32,13 +32,13 @@ class TestPIPDetalheAproveitamentosDAO:
             (5, "TC 5", 40, 30, 0.75, 30),
         ]
         _run_query_aisps.return_value = [
-            (1, 1, "AISP1"),
-            (1, 2, "AISP2"),
-            (2, 1, "AISP1"),
-            (2, 2, "AISP2"),
-            (3, 3, "AISP3"),
-            (4, 3, "AISP3"),
-            (5, 3, "AISP3"),
+            (1, 1, "AISP1", 200),
+            (1, 2, "AISP2", 200),
+            (2, 1, "AISP1", 200),
+            (2, 2, "AISP2", 200),
+            (3, 3, "AISP3", 200),
+            (4, 3, "AISP3", 200),
+            (5, 3, "AISP3", 200),
         ]
 
         get_aisps.cache_clear()

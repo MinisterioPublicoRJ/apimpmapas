@@ -11,11 +11,14 @@ def get_aisps():
     """Retorna as AISPs de cada PIP, na seguinte ordem:
     (codigo_pip, codigo_aisp, nome_aisp)
     """
-    query = "SELECT * FROM {namespace}.tb_pip_aisp".format(
+    query = """
+        SELECT pip_codigo, aisp_codigo, aisp_nome, cod_pct 
+        FROM {namespace}.tb_pip_aisp
+        JOIN {namespace}.atualizacao_pj_pacote ON pip_codigo = id_orgao
+    """.format(
         namespace=settings.TABLE_NAMESPACE
     )
     return run_query(query)
-
 
 def get_orgaos_same_aisps(orgao_id):
     """Retorna os órgãos que pertencem às mesmas AISPs de orgao_id, por AISP.
@@ -27,8 +30,11 @@ def get_orgaos_same_aisps(orgao_id):
         list(dict) -- Lista de dicionários contendo o número da AISP e .
     """
     data = get_aisps()
+    cod_pct_current_orgao = [x[3] for x in data if x[0] == orgao_id][0]
     aisps_current_orgao = set(x[1] for x in data if x[0] == orgao_id)
-    orgaos_same_aisps = set(x[0] for x in data if x[1] in aisps_current_orgao)
+    orgaos_same_aisps = set(
+        x[0] for x in data
+        if x[1] in aisps_current_orgao and x[3] == cod_pct_current_orgao)
 
     return aisps_current_orgao, orgaos_same_aisps
 
