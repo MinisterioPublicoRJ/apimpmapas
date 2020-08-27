@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -12,5 +13,9 @@ class ItGateView(JWTAuthMixin, CacheMixin, APIView):
         it_gate_id = int(kwargs.get("it_gate_id"))
 
         data = ItGateDAO.get(it_gate_id, request)
-        status = 404 if "erro" in data else 200
-        return Response(data=data, status=status)
+        if 'erro' in data:
+            return Response(data=data, status=404)
+        else:
+            response = HttpResponse(data, content_type='application/pdf')
+            response['Content-Disposition'] = 'inline; filename="report.pdf"'
+            return response

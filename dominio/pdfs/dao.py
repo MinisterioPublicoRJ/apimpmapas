@@ -4,14 +4,11 @@ from database.db_connect import Oracle_DB
 
 
 class ItGateDAO:
-    def serialize(self, result_set):
-        return result_set
-
-    def get(self, it_gate_id, request):
+    def get(self, it_gate_id):
         cursor = Oracle_DB.connect(
-            settings.DESAPARECIDOS_DB_USER,
-            settings.DESAPARECIDOS_DB_PWD,
-            settings.DESAPARECIDOS_DB_HOST
+            settings.ORA_USER,
+            settings.ORA_PASS,
+            settings.ORA_HOST
         )
         query = '''
             SELECT itcn_arquivo
@@ -21,7 +18,7 @@ class ItGateDAO:
         bindings = {'it_id': it_gate_id}
         result_set = Oracle_DB.execute(cursor, query, bindings=bindings)
         return (
-            self.serialize(result_set)
+            result_set
             if result_set
             else {"erro": "IT GATE não encontrada"}
         )
