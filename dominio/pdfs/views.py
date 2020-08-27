@@ -2,11 +2,11 @@ from django.http import HttpResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from dominio.mixins import CacheMixin, JWTAuthMixin
+from dominio.mixins import CacheMixin, JWTAuthAllMixin
 from dominio.pdfs.dao import ItGateDAO
 
 
-class ItGateView(JWTAuthMixin, CacheMixin, APIView):
+class ItGateView(JWTAuthAllMixin, CacheMixin, APIView):
     cache_config = 'GATE_IT_CACHE_TIMEOUT'
 
     def get(self, request, *args, **kwargs):
