@@ -10,6 +10,10 @@ FROM (
     JOIN {schema}.tb_pip_aisp ON pip_codigo = vist_orgi_orga_dk
     WHERE tipo_detalhe IN ('pip_inqueritos', 'pip_pics')
     AND intervalo = :intervalo
+    AND cod_pct IN (
+        SELECT cod_pct
+        FROM {schema}.atualizacao_pj_pacote
+        WHERE id_orgao = :orgao_id)
     GROUP BY aisp_nome
     ) t
 GROUP BY pmax

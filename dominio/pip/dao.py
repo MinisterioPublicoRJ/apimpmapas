@@ -127,6 +127,7 @@ class PIPRadarPerformanceDAO(GenericPIPDAO):
         "nm_max_acordos",
         "nm_max_arquivamentos",
         "nm_max_abeturas_vista",
+        "cod_pct"
     ]
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
 

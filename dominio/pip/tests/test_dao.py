@@ -32,13 +32,13 @@ class TestPIPDetalheAproveitamentosDAO:
             (5, "TC 5", 40, 30, 0.75, 30),
         ]
         _run_query_aisps.return_value = [
-            (1, 1, "AISP1"),
-            (1, 2, "AISP2"),
-            (2, 1, "AISP1"),
-            (2, 2, "AISP2"),
-            (3, 3, "AISP3"),
-            (4, 3, "AISP3"),
-            (5, 3, "AISP3"),
+            (1, 1, "AISP1", 200),
+            (1, 2, "AISP2", 200),
+            (2, 1, "AISP1", 200),
+            (2, 2, "AISP2", 200),
+            (3, 3, "AISP3", 200),
+            (4, 3, "AISP3", 200),
+            (5, 3, "AISP3", 200),
         ]
 
         get_aisps.cache_clear()
@@ -117,6 +117,7 @@ class TestPIPRadarPerformance:
                 "3ª PROMOTORIA DE JUSTIÇA",
                 "4ª PROMOTORIA DE JUSTIÇa",
                 "5ª PROMOTORIA DE JUSTIÇA",
+                200,
             ),
         ]
         ser_data = PIPRadarPerformanceDAO.serialize(result_set)
@@ -155,6 +156,7 @@ class TestPIPRadarPerformance:
             "nm_max_acordos": "3ª Promotoria de Justiça",
             "nm_max_arquivamentos": "4ª Promotoria de Justiça",
             "nm_max_abeturas_vista": "5ª Promotoria de Justiça",
+            "cod_pct": 200,
         }
         assert ser_data == expected_data
 
