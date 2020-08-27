@@ -1,15 +1,10 @@
 import datetime
 import json
 
-import cx_Oracle
+from django.conf import settings
 
+from database.db_connect import Oracle_DB
 from desaparecidos.queries.rank import query as q_rank
-
-
-def client(db_username, db_pwd, db_host):
-    orcl = cx_Oracle.connect(db_username, db_pwd, db_host, encoding="UTF-8",)
-    cursor = orcl.cursor()
-    return cursor
 
 
 def format_query(query, id_sinalid):
@@ -43,12 +38,6 @@ def format_query(query, id_sinalid):
     return query.replace("{{ id_sinalid }}", id_sinalid).replace(
         "{{ filter }}", table_filter
     )
-
-
-def rank_query(cursor, id_sinalid):
-    f_query = format_query(q_rank, id_sinalid)
-    cursor.execute(f_query)
-    return cursor.fetchall()
 
 
 def serialize(result_set, limit=None):
@@ -88,8 +77,14 @@ def serialize(result_set, limit=None):
 
 
 # TODO: PLACE limit in the query!
-def rank(cursor, id_sinalid, limit=100):
-    result_set = rank_query(cursor, id_sinalid)
+def rank(id_sinalid, limit=100):
+    cursor = Oracle_DB.connect(
+        settings.DESAPARECIDOS_DB_USER,
+        settings.DESAPARECIDOS_DB_PWD,
+        settings.DESAPARECIDOS_DB_HOST
+    )
+    query = format_query(q_rank, id_sinalid)
+    result_set = Oracle_DB.execute(cursor, query)
     return (
         serialize(result_set, limit)
         if result_set
