@@ -116,19 +116,19 @@ Ofício fora do prazo
 
     !! PARECE TER UM BUG AQUI, o andamento usado é "Cumprimento de Diligências", então parece que esse seria um andamento para parar de gerar o alerta, e não para começar a gerar. Buscando os tipos de Andamentos com "Ofício" no nome, acham-se os seguintes tipos:
 
-    6614	MEMBRO > Despacho > Expedição de Documento > Ofício > Via Grupo de Apoio aos Promotores (GAP) 
-    6615	MEMBRO > Despacho > Expedição de Documento > Ofício > Via Técnico de Notificações (TNAI) 
-    6616	MEMBRO > Despacho > Expedição de Documento > Ofício > Outros meios
-    6617	SERVIDOR > Cumprimento de Diligências > Ofício > Via Grupo de Apoio aos Promotores (GAP) 
-    6618	SERVIDOR > Cumprimento de Diligências > Ofício > Via Técnico de Notificações (TNAI) 
-    6619	SERVIDOR > Cumprimento de Diligências > Ofício > Outros meios
-    6497	SERVIDOR > Cumprimento de Diligências > Ofício
-    6581	MEMBRO > Despacho > Expedição de Documento > Ofício
-    6126	SERVIDOR > Área Administrativa/CGMP > Diligências > Ofício
-    1042	Autuação de Expediente administrativo como Inquérito civil "de ofício"
-    6989	MEMBRO > ATOS COMUNS > Diligências > Ofício
-    7436	SERVIDOR > ATOS COMUNS > Diligências > Ofício
-    6211	SERVIDOR > Área Administrativa/CGMP > Regularização de pendências > Resposta de ofício
+    - 6614	MEMBRO > Despacho > Expedição de Documento > Ofício > Via Grupo de Apoio aos Promotores (GAP) 
+    - 6615	MEMBRO > Despacho > Expedição de Documento > Ofício > Via Técnico de Notificações (TNAI) 
+    - 6616	MEMBRO > Despacho > Expedição de Documento > Ofício > Outros meios
+    - 6617	SERVIDOR > Cumprimento de Diligências > Ofício > Via Grupo de Apoio aos Promotores (GAP) 
+    - 6618	SERVIDOR > Cumprimento de Diligências > Ofício > Via Técnico de Notificações (TNAI) 
+    - 6619	SERVIDOR > Cumprimento de Diligências > Ofício > Outros meios
+    - 6497	SERVIDOR > Cumprimento de Diligências > Ofício
+    - 6581	MEMBRO > Despacho > Expedição de Documento > Ofício
+    - 6126	SERVIDOR > Área Administrativa/CGMP > Diligências > Ofício
+    - 1042	Autuação de Expediente administrativo como Inquérito civil "de ofício"
+    - 6989	MEMBRO > ATOS COMUNS > Diligências > Ofício
+    - 7436	SERVIDOR > ATOS COMUNS > Diligências > Ofício
+    - 6211	SERVIDOR > Área Administrativa/CGMP > Regularização de pendências > Resposta de ofício
 
     !! Bater isso com o Matheus, porque a regra de negócio deste alerta não parece estar correta
 
