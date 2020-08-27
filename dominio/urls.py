@@ -8,5 +8,6 @@ urlpatterns = [
     path("alertas/", include("dominio.alertas.urls")),
     path("pip/", include("dominio.pip.urls")),
     path("suamesa/", include("dominio.suamesa.urls")),
+    path('pdfs/', include('dominio.pdfs.urls')),
     path("", include("dominio.tutela.urls")),
 ]

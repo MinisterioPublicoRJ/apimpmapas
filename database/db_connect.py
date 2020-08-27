@@ -9,6 +9,9 @@ class Oracle_DB:
         return cursor
 
     @classmethod
-    def execute(cls, cursor, query):
-        cursor.execute(query)
+    def execute(cls, cursor, query, bindings=None):
+        if bindings:
+            cursor.execute(query, bindings)
+        else:
+            cursor.execute(query)
         return cursor.fetchall()
