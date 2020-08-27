@@ -48,37 +48,37 @@ class ResumoAlertasDAOTest(TestCase):
         self.execute_mgp_dao_mock = self.exec_mgp_dao_patcher.start()
         self.execute_compras_dao_mock = self.exec_compras_dao_patcher.start()
         self.execute_compras_dao_mock.return_value = [
-            ("Compras 1", "mock 1", self.orgao_id, 10),
-            ("Compras 2", "mock 2", self.orgao_id, 11),
+            ("COMP", "mock 1", self.orgao_id, 10),
+            ("COMP", "mock 2", self.orgao_id, 11),
         ]
         self.execute_mgp_dao_mock.return_value = [
-            ("MGP 1", "mock 3", self.orgao_id, 12),
-            ("MGP 2", "mock 4", self.orgao_id, 13),
+            ("GATE", "mock 3", self.orgao_id, 12),
+            ("PRCR", "mock 4", self.orgao_id, 13),
         ]
         self.expected = [
             {
-                'sigla': 'MGP 1',
-                'descricao': 'mock 3',
-                'orgao': 12345,
-                'count': 12,
-            },
-            {
-                'sigla': 'MGP 2',
+                'sigla': 'PRCR',
                 'descricao': 'mock 4',
                 'orgao': 12345,
                 'count': 13,
             },
             {
-                'sigla': 'Compras 1',
+                'sigla': 'COMP',
                 'descricao': 'mock 1',
                 'orgao': 12345,
                 'count': 10,
             },
             {
-                'sigla': 'Compras 2',
+                'sigla': 'COMP',
                 'descricao': 'mock 2',
                 'orgao': 12345,
-                'count': 11
+                'count': 11,
+            },
+            {
+                'sigla': 'GATE',
+                'descricao': 'mock 3',
+                'orgao': 12345,
+                'count': 12
             },
         ]
 
@@ -95,12 +95,12 @@ class ResumoAlertasDAOTest(TestCase):
         self.execute_compras_dao_mock.return_value = []
         resumo = dao.ResumoAlertasDAO.get_all(id_orgao=self.orgao_id)
 
-        expected = self.expected[:2]
+        expected = [self.expected[0], self.expected[3]]
         self.assertEqual(resumo, expected)
 
     def test_get_all_data_accept_empty_resumo_mgp(self):
         self.execute_mgp_dao_mock.return_value = []
         resumo = dao.ResumoAlertasDAO.get_all(id_orgao=self.orgao_id)
 
-        expected = self.expected[2:]
+        expected = self.expected[1:3]
         self.assertEqual(resumo, expected)
