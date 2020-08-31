@@ -104,3 +104,126 @@ class ResumoAlertasDAOTest(TestCase):
 
         expected = self.expected[1:3]
         self.assertEqual(resumo, expected)
+
+
+class TestAlertaMGPDAO(TestCase):
+    def setUp(self):
+        self.run_query_patcher = mock.patch("dominio.alertas.dao.run_query")
+        self.run_query_mock = self.run_query_patcher.start()
+
+    def tearDown(self):
+        self.run_query_patcher.stop()
+
+    def test_validos_por_orgaos(self):
+        orgao_id = 12345
+        self.run_query_mock.return_value = [
+            (
+                'data 1',
+                'data 2',
+                0,
+                'data 3',
+                'data 4',
+                'data 5',
+                'data 6',
+                'data 7',
+                int(orgao_id),
+                'data 8',
+                'COMP',
+            )
+        ]
+        resp = dao.AlertaMGPDAO.get(orgao_id=orgao_id)
+        expected_resp = [
+            {
+                'doc_dk': 'data 1',
+                'num_doc': 'data 2',
+                'num_ext': 0,
+                'etiqueta': 'data 3',
+                'classe_doc': 'data 4',
+                'data_alerta': 'data 5',
+                'orgao': 'data 6',
+                'classe_hier': 'data 7',
+                'dias_passados': 12345,
+                'descricao': 'data 8',
+                'sigla': 'COMP'}
+        ]
+
+        self.run_query_mock.assert_called_once_with(
+            dao.AlertaMGPDAO.query(),
+            {"orgao_id": orgao_id},
+        )
+        self.assertEqual(resp, expected_resp)
+
+    def test_validos_por_orgaos_tipo(self):
+        orgao_id = 12345
+        tipo_alerta = 'ALRT'
+        self.run_query_mock.return_value = [
+            (
+                'data 1',
+                'data 2',
+                0,
+                'data 3',
+                'data 4',
+                'data 5',
+                'data 6',
+                'data 7',
+                int(orgao_id),
+                'data 8',
+                'DORD',
+            ),
+            (
+                'data 1',
+                'data 2',
+                0,
+                'data 3',
+                'data 4',
+                'data 5',
+                'data 6',
+                'data 7',
+                int(orgao_id),
+                'data 8',
+                'COMP',
+            ),
+        ]
+        resp = dao.AlertaMGPDAO.get(orgao_id=orgao_id, tipo_alerta=tipo_alerta)
+        expected_resp = [
+            {
+                'doc_dk': 'data 1',
+                'num_doc': 'data 2',
+                'num_ext': 0,
+                'etiqueta': 'data 3',
+                'classe_doc': 'data 4',
+                'data_alerta': 'data 5',
+                'orgao': 'data 6',
+                'classe_hier': 'data 7',
+                'dias_passados': 12345,
+                'descricao': 'data 8',
+                'sigla': 'COMP'
+            },
+            {
+                'doc_dk': 'data 1',
+                'num_doc': 'data 2',
+                'num_ext': 0,
+                'etiqueta': 'data 3',
+                'classe_doc': 'data 4',
+                'data_alerta': 'data 5',
+                'orgao': 'data 6',
+                'classe_hier': 'data 7',
+                'dias_passados': 12345,
+                'descricao': 'data 8',
+                'sigla': 'DORD'
+            }
+        ]
+
+        cls = dao.AlertaMGPDAO
+        with open(
+            cls.QUERIES_DIR.child("validos_por_orgao_tipo.sql")
+        ) as fobj:
+            expected_query = fobj.read()
+
+        expected_query = expected_query.format(**cls.table_namespaces)
+
+        self.run_query_mock.assert_called_once_with(
+            expected_query,
+            {"orgao_id": orgao_id, "tipo_alerta": tipo_alerta},
+        )
+        self.assertEqual(resp, expected_resp)

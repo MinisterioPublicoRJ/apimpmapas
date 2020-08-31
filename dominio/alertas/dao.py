@@ -1,6 +1,7 @@
 from django.conf import settings
 
 from dominio.dao import GenericDAO
+from dominio.db_connectors import run_query
 from dominio.alertas import serializers
 from dominio.alertas.helper import ordem as alrt_ordem
 
@@ -48,6 +49,47 @@ class ResumoAlertasComprasDAO(ResumoAlertasDAO, AlertasDAO):
         "schema": settings.TABLE_NAMESPACE,
         "schema_alertas_compras": settings.SCHEMA_ALERTAS,
     }
+
+
+class AlertaMGPDAO(AlertasDAO):
+    query_file = None
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
+    columns = [
+        "doc_dk",
+        "num_doc",
+        "num_ext",
+        "etiqueta",
+        "classe_doc",
+        "data_alerta",
+        "orgao",
+        "classe_hier",
+        "dias_passados",
+        "descricao",
+        "sigla",
+    ]
+
+    @classmethod
+    def ordena_alertas(cls, alertas):
+        return [
+            res_alerta
+            for sigla in alrt_ordem
+            for res_alerta in alertas
+            if res_alerta['sigla'] == sigla
+        ]
+
+    @classmethod
+    def execute(cls, **kwargs):
+        return run_query(cls.query(), kwargs)
+
+    @classmethod
+    def get(cls, accept_empty=True, **kwargs):
+        if "tipo_alerta" in kwargs:
+            cls.query_file = "validos_por_orgao_tipo.sql"
+        else:
+            cls.query_file = "validos_por_orgao_base.sql"
+
+        result_set = super().get(accept_empty, **kwargs)
+        return cls.ordena_alertas(result_set)
 
 
 class AlertaComprasDAO(AlertasDAO):
