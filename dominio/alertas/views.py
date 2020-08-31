@@ -1,9 +1,12 @@
+from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from dominio.db_connectors import get_hbase_table
 from dominio.mixins import CacheMixin, PaginatorMixin, JWTAuthMixin
 from dominio.models import Alerta
 from dominio.alertas import dao
+from dominio.utils import hbase_encode_row
 
 from .serializers import AlertasListaSerializer
 
@@ -51,5 +54,24 @@ class AlertasComprasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
 
 
 class DispensarAlertaView(JWTAuthMixin, APIView):
+    def get_hbase_key(self, orgao_id, sigla_alerta, alerta_id):
+        return f"{orgao_id}_{sigla_alerta}_{alerta_id}"
+
+    def get_hbase_row(self):
+        orgao_id = self.kwargs.get("orgao_id")
+        sigla = self.kwargs.get("sigla")
+        alerta_id = self.request.GET.get("alerta_id")
+
+        key = self.get_hbase_key(orgao_id, sigla, alerta_id)
+        data = {
+            "orgao": orgao_id,
+            "sigla": sigla,
+            "alerta_id": alerta_id,
+        }
+        return hbase_encode_row((key, data))
+
     def post(self, request, *args, **kwargs):
+        # TODO: criar serializador para dados da requisição
+        hbase_table = get_hbase_table(settings.HBASE_DISPENSAR_ALERTAS_TABLE)
+        hbase_table.put(*self.get_hbase_row())
         return Response(data={})
