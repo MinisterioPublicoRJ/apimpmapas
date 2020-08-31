@@ -64,7 +64,7 @@ seguintes colunas:
 
 Um órgão pode possuir apenas um pacote de atribuição. No entanto, alguns
 órgãos podem não ter pacote atribuido na tabela (como foi, inicialmente,
-o caso das PIPs - para elas, foi criado um código especialmente para
+o caso das PIPs - para elas, foram criados códigos especialmente para
 comportá-las).
 
 As Tutelas Coletivas correspondem aos seguintes pacotes:
@@ -101,14 +101,31 @@ As Tutelas Coletivas correspondem aos seguintes pacotes:
 | 33      | Tutela Coletiva - Sem Ranking Específico              |
 +---------+-------------------------------------------------------+
 
-Já as PIPs Territoriais que nos interessam estão todas em um mesmo
-pacote:
+Já as PIPs estão divididas da seguinte maneira:
 
-+---------+-----------------------------------------------+
-| cod_pct | pacote_atribuicao                             |
-+=========+===============================================+
-| 200     | PACOTE AUXILIAR PARA PIPS NO USO DO PROMOTRON |
-+---------+-----------------------------------------------+
++---------+--------------------------------+
+| cod_pct | pacote_atribuicao              |
++=========+================================+
+| 200     | PIPs Territoriais 1a CI        |
++---------+--------------------------------+
+| 201     | PIPs Territoriais 2a CI        |
++---------+--------------------------------+
+| 202     | PIPs Territoriais 3a CI        |
++---------+--------------------------------+
+| 203     | PIPs Territoriais Interior     |
++---------+--------------------------------+
+| 204     | PIPs Violência Doméstica 1a CI |
++---------+--------------------------------+
+| 205     | PIPs Violência Doméstica 2a CI |
++---------+--------------------------------+
+| 206     | PIPs Violência Doméstica 3a CI |
++---------+--------------------------------+
+| 207     | PIPs Especializadas 1a CI      |
++---------+--------------------------------+
+| 208     | PIPs Especializadas 2a CI      |
++---------+--------------------------------+
+| 209     | PIPs Especializadas 3a CI      |
++---------+--------------------------------+
 
 Isso inclui as seguintes PIPs:
 
@@ -239,7 +256,7 @@ TB_PIP_AISP
 -----------
 
 Tabela contendo o mapeamento das PIPs às suas respectivas AISPs. Também
-mapeia a PIP ao código antigo dela. Possui as seguintes colunas
+mapeia a PIP ao código antigo dela - se houver. Possui as seguintes colunas:
 
 -  ``pip_codigo`` (int) : o código numérico do órgão.
 -  ``aisp_codigo`` (int) : o código numérico da AISP. Corresponde ao
@@ -251,10 +268,26 @@ O ``pip_codigo_antigo`` é necessário em alguns cálculos pois os órgãos
 (no sistema do MGP) correspondentes às PIPs atuais só foram criados no
 início de 2020. Porém, as PIPs em si já existiam, mas sob um código
 antigo diferente. Assim, ao buscar dados mais antigos, é necessário
-utilizar os dois códigos.
+utilizar os dois códigos. A exceção a este caso são as PIPs Territoriais de Interior, que mantiveram os mesmos códigos.
+
+++ Pode ser interessante aqui colocar uma tabela com cada órgão e a lista de AISPs associadas
 
 O script de criação da tabela se encontra em
 ``scripts-bda/robo_promotoria/src/create_table_pip_aisp.sql``.
+
+.. _tabelas-auxiliares-tb-pip-cisp:
+
+TB_PIP_CISP
+-----------
+
+Tabela contendo o mapeamento das PIPs às suas respectivas CISPs.
+
+-  ``pip_codigo`` (int) : o código numérico do órgão.
+-  ``cisp_codigo`` (int) : o código numérico da CISP. Corresponde ao
+   número da DP.
+-  ``cisp_nome`` (str) : o nome da CISP, correspondente à DP.
+
+Atualmente, as PIPs Especializadas não estão associadas a nenhuma CISP.
 
 .. _tabelas-auxiliares-tb-regra-negocio-investigacao:
 
@@ -314,7 +347,7 @@ As classes de documentos utilizadas no momento são:
 |                                   | acompanhamento de Instituições    |
 +-----------------------------------+-----------------------------------+
 
--  PIPs (pacote 200):
+-  PIPs (pacotes 200 a 209):
 
 +-----------------------------------+-----------------------------------+
 | classe_documento                  | hierarquia                        |
@@ -332,12 +365,6 @@ As classes de documentos utilizadas no momento são:
 |                                   | Investigatórios > Procedimento    |
 |                                   | Investigatório Criminal (PIC-MP)  |
 +-----------------------------------+-----------------------------------+
-
-Atualmente usada apenas no Resumo do Dia - Frase de Acervo, e no antigo
-dominio.tutela.views.SuaMesaInvestigacoes (investigacoes da tutela),
-assim como no antigo DetalheAcervo
-(dominio.tutela.views.AcervoDetalheView) ++ Essa frase sairá daqui, e
-esta explicação irá para as dependências de cada componente que a usa.
 
 Para visualizar a hierarquia das classes definidas para cada pacote de
 atribuição, a seguinte query pode ser utilizada:
@@ -487,11 +514,6 @@ informações. Assim, para as Tutelas temos:
 |                                   | Execução Extrajudicial de         |
 |                                   | Alimentos                         |
 +-----------------------------------+-----------------------------------+
-
-Atualmente usada apenas para criação da tabela de lista de processos, e
-do SuaMesaProcessos antigo da tutela
-(dominio.tutela.views.SuaMesaProcessos). ++ Essa frase sairá daqui, e
-esta explicação irá para as dependências de cada componente que a usa.
 
 Para visualizar a hierarquia das classes definidas para cada pacote de
 atribuição, a seguinte query pode ser utilizada:
@@ -721,9 +743,6 @@ maneira:
 |                                   | Penal > Oferecimento de acordo    |
 +-----------------------------------+-----------------------------------+
 
-Atualmente usado apenas no Resumo do Dia - Frase de Resolutividade. ++
-Essa frase sairá daqui, e esta explicação irá para as dependências de
-cada componente que a usa.
 
 ::
 

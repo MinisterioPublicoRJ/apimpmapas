@@ -24,9 +24,7 @@ Alguns dos objetivos para esta documentação são:
 Aspectos Iniciais
 -----------------
 
-Por enquanto, o Promotron só está implementado para as promotorias de Tutela Coletiva (com exceção das Tutelas Coletivas de infância ou de idoso), e para as PIPs Territoriais, Promotorias de Investigação Penal Territoriais (ou seja, as Especializadas não estão sendo consideradas). Ao falar "PIP" nesta documentação, refere-se às PIPs Territoriais.
-
-!! Atualmente, para definir se uma promotoria é válida e algo deve ser mostrado para ele, busca-se o tipo da promotoria no backend (função tipo_orgao no apimpmapas/login/jwtlogin.py). Esta função remove as Tutelas de Idoso e/ou Infância. Porém não remove as PIPs Especializadas (que virão com muitos dados faltantes - já que não há atribuição definida para estas no BDA).
+Por enquanto, o Promotron só está implementado para as promotorias de Tutela Coletiva (com exceção das Tutelas Coletivas de infância ou de idoso), e para as PIPs, Promotorias de Investigação Penal. Nas primeiras versões do Promotron para PIPs, apenas as PIPs Territoriais (sem contar Interior) estavam sendo considerados. Agora, todas as PIPs são levadas em consideração.
 
 .. _introducao-atribuicao:
 
@@ -36,9 +34,9 @@ Atribuição
 O conceito de **atribuição** (ou **pacote de atribuição**) é muito usado no projeto como um todo, por isso vale a pena explicá-lo. Para fins dos cálculos realizados, a atribuição nada mais é do que um grupo de promotorias similares - e que portanto faz sentido de serem comparadas de forma conjunta. Um exemplo disso são as Promotorias de Tutela Coletiva de Cidadania.
 
 - Tutelas Coletivas: a atribuição diz respeito ao pacote de atribuição no qual a Tutela está inserida (Consumidor, Cidadania, etc).
-- PIPs: a atribuição diz respeito a todas as PIPs Territoriais.
+- PIPs: a atribuição diz respeito à combinação de Família (Territorial, Violência Doméstica, e Especializada) e Território (1a CI, 2a CI, 3a CI, e Interior - quando houver) da PIP.
 
-As atribuições estão definidas na tabela auxiliar do BDA de nome ``atualizacao_pj_pacote``, e podem ser modificadas ou adicionadas (por exemplo, a atribuição de código 200 foi criada especificamente para as PIPs).
+As atribuições estão definidas na tabela auxiliar do BDA de nome ``atualizacao_pj_pacote``, e podem ser modificadas ou adicionadas (por exemplo, as atribuição de código 200-209 foram criada especificamente para auxiliar nos cálculos de PIPs).
 
 
 Ciclo de geração
