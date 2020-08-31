@@ -59,7 +59,7 @@ class DispensarAlertaView(JWTAuthMixin, APIView):
 
     def get_hbase_row(self):
         orgao_id = self.kwargs.get("orgao_id")
-        sigla = self.kwargs.get("sigla")
+        sigla = self.kwargs.get("sigla").upper()
         alerta_id = self.request.GET.get("alerta_id")
 
         key = self.get_hbase_key(orgao_id, sigla, alerta_id)

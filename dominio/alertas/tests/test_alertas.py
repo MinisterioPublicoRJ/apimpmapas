@@ -209,7 +209,7 @@ class TestDispensarAlertasCompras(NoJWTTestCase, TestCase):
         self.get_hbase_table_mock.return_value = self.hbase_obj_mock
 
         self.orgao_id = "12345"
-        self.sigla_alerta = "comp"
+        self.sigla_alerta = "COMP"
         self.url = reverse(
             "dominio:dispensar_alerta",
             args=(self.orgao_id, self.sigla_alerta),
