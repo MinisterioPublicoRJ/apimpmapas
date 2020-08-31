@@ -225,15 +225,17 @@ class TestDispensarAlertasCompras(NoJWTTestCase, TestCase):
         resp = self.client.post(self.url)
 
         self.get_hbase_table_mock.assert_called_once_with(
+            settings.PROMOTRON_HBASE_NAMESPACE
+            +
             settings.HBASE_DISPENSAR_ALERTAS_TABLE,
         )
         expected_hbase_key = (
             f"{self.orgao_id}_{self.sigla_alerta}_{alerta_id}".encode()
         )
         expected_hbase_data = {
-            b"orgao": self.orgao_id.encode(),
-            b"sigla": self.sigla_alerta.encode(),
-            b"alerta_id": alerta_id.encode(),
+            b"dados_alertas:orgao": self.orgao_id.encode(),
+            b"dados_alertas:sigla": self.sigla_alerta.encode(),
+            b"dados_alertas:alerta_id": alerta_id.encode(),
         }
         self.hbase_obj_mock.put.assert_called_once_with(
                 expected_hbase_key,

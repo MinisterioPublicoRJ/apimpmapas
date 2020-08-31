@@ -64,14 +64,18 @@ class DispensarAlertaView(JWTAuthMixin, APIView):
 
         key = self.get_hbase_key(orgao_id, sigla, alerta_id)
         data = {
-            "orgao": orgao_id,
-            "sigla": sigla,
-            "alerta_id": alerta_id,
+            "dados_alertas:orgao": orgao_id,
+            "dados_alertas:sigla": sigla,
+            "dados_alertas:alerta_id": alerta_id,
         }
         return hbase_encode_row((key, data))
 
     def post(self, request, *args, **kwargs):
         # TODO: criar serializador para dados da requisição
-        hbase_table = get_hbase_table(settings.HBASE_DISPENSAR_ALERTAS_TABLE)
+        hbase_table = get_hbase_table(
+            settings.PROMOTRON_HBASE_NAMESPACE
+            +
+            settings.HBASE_DISPENSAR_ALERTAS_TABLE
+        )
         hbase_table.put(*self.get_hbase_row())
         return Response(data={})
