@@ -4,7 +4,9 @@ from database.db_connect import Oracle_DB
 
 
 class ItGateDAO:
-    def get(self, it_gate_id):
+
+    @classmethod
+    def get(cls, it_gate_id, request):
         cursor = Oracle_DB.connect(
             settings.ORA_USER,
             settings.ORA_PASS,

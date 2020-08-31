@@ -6,7 +6,7 @@ from dominio.mixins import CacheMixin, JWTAuthAllMixin
 from dominio.pdfs.dao import ItGateDAO
 
 
-class ItGateView(JWTAuthAllMixin, CacheMixin, APIView):
+class ItGateView(CacheMixin, APIView):
     cache_config = 'GATE_IT_CACHE_TIMEOUT'
 
     def get(self, request, *args, **kwargs):
