@@ -194,3 +194,19 @@ class AlertaComprasTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, expected_output)
+
+
+class TestDispensarAlertasCompras(NoJWTTestCase, TestCase):
+    def setUp(self):
+        super().setUp()
+        self.orgao_id = "12345"
+        self.sigla_alerta = "comp"
+        self.url = reverse(
+            "dominio:dispensar_alerta",
+            args=(self.orgao_id, self.sigla_alerta),
+        )
+
+    def test_post_dispensa_alerta_compra(self):
+        resp = self.client.post(self.url)
+
+        self.assertEqual(resp.status_code, 200)

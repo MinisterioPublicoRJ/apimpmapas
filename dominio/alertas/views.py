@@ -48,3 +48,8 @@ class AlertasComprasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
         id_orgao = int(kwargs.get(self.orgao_url_kwarg))
         data = dao.AlertaComprasDAO.get(id_orgao=id_orgao, accept_empty=True)
         return Response(data=data)
+
+
+class DispensarAlertaView(JWTAuthMixin, APIView):
+    def post(self, request, *args, **kwargs):
+        return Response(data={})
