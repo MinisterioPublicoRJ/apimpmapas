@@ -2,6 +2,7 @@ from django.conf import settings
 
 from dominio.dao import GenericDAO
 from dominio.alertas import serializers
+from dominio.alertas.helper import ordem as alrt_ordem
 
 
 class AlertasDAO(GenericDAO):
@@ -24,8 +25,16 @@ class ResumoAlertasDAO:
             resumo.extend(
                 ResumoDAOClass.get(id_orgao=id_orgao, accept_empty=True)
             )
+        return cls.ordena_resumo(resumo)
 
-        return resumo
+    @classmethod
+    def ordena_resumo(cls, resumo):
+        return [
+            res_alerta
+            for sigla in alrt_ordem
+            for res_alerta in resumo
+            if res_alerta['sigla'] == sigla
+        ]
 
 
 class ResumoAlertasMGPDAO(ResumoAlertasDAO, AlertasDAO):

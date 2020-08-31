@@ -113,38 +113,38 @@ class AlertaResumoTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         orgao_id = '12345'
 
         _execute_compras_dao.return_value = [
-            ("Compras 1", "mock 1", int(orgao_id), 10),
-            ("Compras 2", "mock 2", int(orgao_id), 11),
+            ("COMP", "mock 1", int(orgao_id), 10),
+            ("COMP", "mock 2", int(orgao_id), 11),
         ]
         _execute_mgp_dao.return_value = [
-            ("MGP 1", "mock 3", int(orgao_id), 12),
-            ("MGP 2", "mock 4", int(orgao_id), 13),
+            ("OUVI", "mock 3", int(orgao_id), 12),
+            ("PRCR", "mock 4", int(orgao_id), 13),
         ]
 
         alertas_expected = [
             {
-                'sigla': 'MGP 1',
-                'descricao': 'mock 3',
-                'orgao': 12345,
-                'count': 12,
-            },
-            {
-                'sigla': 'MGP 2',
+                'sigla': 'PRCR',
                 'descricao': 'mock 4',
                 'orgao': 12345,
                 'count': 13,
             },
             {
-                'sigla': 'Compras 1',
+                'sigla': 'COMP',
                 'descricao': 'mock 1',
                 'orgao': 12345,
                 'count': 10,
             },
             {
-                'sigla': 'Compras 2',
+                'sigla': 'COMP',
                 'descricao': 'mock 2',
                 'orgao': 12345,
                 'count': 11
+            },
+            {
+                'sigla': 'OUVI',
+                'descricao': 'mock 3',
+                'orgao': 12345,
+                'count': 12,
             },
         ]
 

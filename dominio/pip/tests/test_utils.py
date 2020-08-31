@@ -13,13 +13,15 @@ class UtilsPIPTest(TestCase):
     @mock.patch("dominio.pip.utils.run_query")
     def test_get_orgaos_same_aisps(self, _run_query):
         _run_query.return_value = [
-            (1, 1, "AISP1"),
-            (1, 2, "AISP2"),
-            (2, 1, "AISP1"),
-            (2, 2, "AISP2"),
-            (3, 3, "AISP3"),
-            (4, 3, "AISP3"),
-            (5, 3, "AISP3"),
+            (1, 1, "AISP1", 200),
+            (1, 2, "AISP2", 200),
+            (2, 1, "AISP1", 200),
+            (2, 2, "AISP2", 200),
+            (3, 3, "AISP3", 200),
+            (4, 3, "AISP3", 200),
+            (5, 3, "AISP3", 200),
+            (6, 1, "AISP1", 201),
+            (6, 2, "AISP2", 201)
         ]
 
         orgao_id_test = 1
