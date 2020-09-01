@@ -46,7 +46,7 @@ class ResumoAlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
         return Response(data=alertas_resumo)
 
 
-class AlertasComprasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
+class AlertasComprasView(JWTAuthMixin, PaginatorMixin, APIView):
     cache_config = 'ALERTAS_COMPRAS_CACHE_TIMEOUT'
 
     def get(self, request, *args, **kwargs):
