@@ -79,16 +79,16 @@ class AlertaMGPDAO(AlertasDAO):
 
     @classmethod
     def execute(cls, **kwargs):
-        return run_query(cls.query(), kwargs)
+        return run_query(cls.query(), kwargs) or []
 
     @classmethod
     def get(cls, accept_empty=True, **kwargs):
-        if "tipo_alerta" in kwargs:
+        if kwargs.get("tipo_alerta") is not None:
             cls.query_file = "validos_por_orgao_tipo.sql"
         else:
             cls.query_file = "validos_por_orgao_base.sql"
 
-        result_set = super().get(accept_empty, **kwargs)
+        result_set = super().get(accept_empty=accept_empty, **kwargs)
         return cls.ordena_alertas(result_set)
 
 

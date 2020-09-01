@@ -11,8 +11,8 @@ from dominio.tests.testconf import NoJWTTestCase, NoCacheTestCase
 
 class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
-    @mock.patch('dominio.alertas.views.Alerta')
-    def test_alert_list(self, _Alerta):
+    @mock.patch.object(dao.AlertaMGPDAO, 'get')
+    def test_alert_list(self, _AlertaMGPDAO_get):
         orgao_id = '0000000'
         alertas_return = [
             {
@@ -46,7 +46,7 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
             }
         ]
 
-        _Alerta.validos_por_orgao.return_value = alertas_return
+        _AlertaMGPDAO_get.return_value = alertas_return
 
         url = reverse(
             'dominio:lista_alertas',
@@ -57,8 +57,8 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, alertas_expected)
 
-    @mock.patch('dominio.alertas.views.Alerta')
-    def test_alert_tipo(self, _Alerta):
+    @mock.patch.object(dao.AlertaMGPDAO, 'get')
+    def test_alert_tipo(self, _AlertaMGPDAO_get):
         orgao_id = '0000000'
         tipo_alerta = 'ALRT'
 
@@ -94,7 +94,7 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
             }
         ]
 
-        _Alerta.validos_por_orgao.return_value = alertas_return
+        _AlertaMGPDAO_get.return_value = alertas_return
 
         url = reverse(
             'dominio:lista_alertas',
