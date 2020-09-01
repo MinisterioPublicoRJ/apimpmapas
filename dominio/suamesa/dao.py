@@ -130,3 +130,7 @@ class SuaMesaDetalheFactoryDAO(SuaMesaDAO):
 
         DAO = cls.switcher(tipo)
         return DAO.get(orgao_id=orgao_id, request=request)
+
+
+class DocumentoDAO:
+    pass

@@ -1,7 +1,10 @@
 from django.urls import path
 
-from dominio.suamesa.views import SuaMesaView, SuaMesaDetalheView
-
+from dominio.suamesa.views import (
+    DocumentosDetalheView,
+    SuaMesaView,
+    SuaMesaDetalheView
+)
 
 urlpatterns = [
     path(
@@ -14,4 +17,9 @@ urlpatterns = [
         SuaMesaDetalheView.as_view(),
         name="suamesa-documentos-detalhe",
     ),
+    path(
+        "documentos/documento/<str:num_mprj>",
+        DocumentosDetalheView.as_view(),
+        name="suamesa-documentos-documento",
+    )
 ]
