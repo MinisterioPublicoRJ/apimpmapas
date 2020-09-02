@@ -64,7 +64,7 @@ class DispensarAlertaView(JWTAuthMixin, APIView):
     def get_hbase_key(self, orgao_id, sigla_alerta, alerta_id):
         return f"{orgao_id}_{sigla_alerta}_{alerta_id}"
 
-    def get_hbase_row(self):
+    def prepare_hbase_row(self):
         orgao_id = self.kwargs.get(self.orgao_url_kwarg)
         sigla = self.kwargs.get("sigla").upper()
         alerta_id = self.get_alerta_id()
@@ -78,12 +78,13 @@ class DispensarAlertaView(JWTAuthMixin, APIView):
         return hbase_encode_row((key, data))
 
     def post(self, request, *args, **kwargs):
+        row = self.prepare_hbase_row()
         hbase_table = get_hbase_table(
             settings.PROMOTRON_HBASE_NAMESPACE
             +
             settings.HBASE_DISPENSAR_ALERTAS_TABLE
         )
-        hbase_table.put(*self.get_hbase_row())
+        hbase_table.put(*row)
         return Response(
             data={"detail": "Alerta dispensado com sucesso"},
             status=201
