@@ -212,7 +212,7 @@ class TestDispensarAlertasCompras(NoJWTTestCase, TestCase):
         self.sigla_alerta = "COMP"
         self.url = reverse(
             "dominio:dispensar_alerta",
-            args=(self.orgao_id, self.sigla_alerta),
+            args=(self.orgao_id,),
         )
 
     def tearDown(self):

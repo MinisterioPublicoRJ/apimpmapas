@@ -65,8 +65,8 @@ class DispensarAlertaView(JWTAuthMixin, APIView):
         return f"{orgao_id}_{sigla_alerta}_{alerta_id}"
 
     def prepare_hbase_row(self):
+        sigla = "COMP"
         orgao_id = self.kwargs.get(self.orgao_url_kwarg)
-        sigla = self.kwargs.get("sigla").upper()
         alerta_id = self.get_alerta_id()
 
         key = self.get_hbase_key(orgao_id, sigla, alerta_id)
