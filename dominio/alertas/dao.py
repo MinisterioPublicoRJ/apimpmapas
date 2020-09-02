@@ -1,5 +1,6 @@
 from django.conf import settings
 
+from database.db_connect import Oracle_DB
 from dominio.dao import GenericDAO
 from dominio.alertas import serializers
 from dominio.alertas.helper import ordem as alrt_ordem
@@ -60,6 +61,16 @@ class AlertaComprasDAO(AlertasDAO):
         "item"
     ]
     serializer = serializers.AlertasComprasSerializer
+    table_namespaces = {
+        "schema": settings.TABLE_NAMESPACE,
+        "schema_alertas_compras": settings.SCHEMA_ALERTAS,
+    }
+
+
+class ITGateDAO(AlertasDAO):
+    query_file = "its_gate.sql"
+    columns = ["itcn_dk", ]
+    serializer = serializers.ItGateSerializer
     table_namespaces = {
         "schema": settings.TABLE_NAMESPACE,
         "schema_alertas_compras": settings.SCHEMA_ALERTAS,

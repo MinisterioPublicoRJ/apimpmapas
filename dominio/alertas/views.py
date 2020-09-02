@@ -48,3 +48,12 @@ class AlertasComprasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
         id_orgao = int(kwargs.get(self.orgao_url_kwarg))
         data = dao.AlertaComprasDAO.get(id_orgao=id_orgao, accept_empty=True)
         return Response(data=data)
+
+
+class ITsGateView(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = 'ITS_GATE_CACHE_TIMEOUT'
+
+    def get(self, request, *args, **kwargs):
+        docu_dk = int(kwargs.get(self.orgao_url_kwarg))
+        data = dao.ITGateDAO.get(docu_dk=docu_dk)
+        return Response(data=data)
