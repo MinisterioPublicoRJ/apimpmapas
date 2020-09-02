@@ -241,4 +241,9 @@ class TestDispensarAlertasCompras(NoJWTTestCase, TestCase):
                 expected_hbase_key,
                 expected_hbase_data
         )
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 201)
+
+    def test_bad_request_missing_alerta_id(self):
+        resp = self.client.post(self.url)
+
+        self.assertEqual(resp.status_code, 400)
