@@ -23,6 +23,14 @@ class PIPPrincipaisInvestigadosSerializer(serializers.Serializer):
     flag_top50 = serializers.BooleanField()
 
 
+class PIPPrincipaisInvestigadosPerfilSerializer(serializers.Serializer):
+    nm_investigado = serializers.CharField()
+    nm_mae = serializers.CharField()
+    cpf = serializers.CharField()
+    rg = serializers.CharField()
+    dt_nasc = serializers.DateTimeField()
+
+
 class PIPPrincipaisInvestigadosListaSerializer(serializers.Serializer):
     representante_dk = serializers.IntegerField()
     nm_investigado = serializers.CharField()

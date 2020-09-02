@@ -17,6 +17,7 @@ from dominio.pip.serializers import (
     PIPIndicadoresSucessoParser,
     PIPDetalheAproveitamentosSerializer,
     PIPPrincipaisInvestigadosListaSerializer,
+    PIPPrincipaisInvestigadosPerfilSerializer,
 )
 
 from .utils import get_top_n_by_aisp, get_orgaos_same_aisps
@@ -264,6 +265,19 @@ class PIPPrincipaisInvestigadosDAO(GenericPIPDAO):
         )
 
         return data
+
+
+class PIPPrincipaisInvestigadosPerfilDAO(GenericPIPDAO):
+    query_file = "pip_principais_investigados_perfil.sql"
+    columns = [
+        "nm_investigado",
+        "nm_mae",
+        "cpf",
+        "rg",
+        "dt_nasc",
+    ]
+    table_namespaces = {"schema": settings.EXADATA_NAMESPACE}
+    serializer = PIPPrincipaisInvestigadosPerfilSerializer
 
 
 class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
