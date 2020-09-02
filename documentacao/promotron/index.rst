@@ -18,6 +18,7 @@ Welcome to Promotron's documentation!
    SuaMesa.rst
    RadarDePerformance.rst
    Alertas.rst
+   ListaProcessos.rst
 
 
 

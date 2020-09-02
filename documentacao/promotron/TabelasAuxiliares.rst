@@ -127,7 +127,7 @@ Já as PIPs estão divididas da seguinte maneira:
 | 209     | PIPs Especializadas 3a CI      |
 +---------+--------------------------------+
 
-Isso inclui as seguintes PIPs:
+Isso inclui as seguintes PIPs: (++ Tabela abaixo desatualizada! As PIPs aqui abaixo representam apenas os pacotes 200, 201 e 202. As PIPs de outros pacotes ainda não foram inclusas nesta tabela. Atualização por vir.)
 
 +-----------------------------------+-----------------------------------+
 | orgi_orga_dk                      | orgi_nm_orgao                     |
