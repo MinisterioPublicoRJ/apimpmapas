@@ -104,3 +104,204 @@ class ResumoAlertasDAOTest(TestCase):
 
         expected = self.expected[1:3]
         self.assertEqual(resumo, expected)
+
+
+class TestAlertaMGPDAO(TestCase):
+    def setUp(self):
+        self.run_query_patcher = mock.patch("dominio.alertas.dao.run_query")
+        self.run_query_mock = self.run_query_patcher.start()
+
+    def tearDown(self):
+        self.run_query_patcher.stop()
+
+    def test_validos_por_orgaos(self):
+        orgao_id = 12345
+        self.run_query_mock.return_value = [
+            (
+                'data 1',
+                'data 2',
+                0,
+                'data 3',
+                'data 4',
+                'data 5',
+                'data 6',
+                'data 7',
+                int(orgao_id),
+                'data 8',
+                'COMP',
+            )
+        ]
+        resp = dao.AlertaMGPDAO.get(orgao_id=orgao_id)
+        expected_resp = [
+            {
+                'doc_dk': 'data 1',
+                'num_doc': 'data 2',
+                'num_ext': 0,
+                'etiqueta': 'data 3',
+                'classe_doc': 'data 4',
+                'data_alerta': 'data 5',
+                'orgao': 'data 6',
+                'classe_hier': 'data 7',
+                'dias_passados': 12345,
+                'descricao': 'data 8',
+                'sigla': 'COMP'}
+        ]
+
+        self.run_query_mock.assert_called_once_with(
+            dao.AlertaMGPDAO.query(),
+            {"orgao_id": orgao_id},
+        )
+        self.assertEqual(resp, expected_resp)
+
+    def test_validos_por_orgaos_tipo(self):
+        orgao_id = 12345
+        tipo_alerta = 'ALRT'
+        self.run_query_mock.return_value = [
+            (
+                'data 1',
+                'data 2',
+                0,
+                'data 3',
+                'data 4',
+                'data 5',
+                'data 6',
+                'data 7',
+                int(orgao_id),
+                'data 8',
+                'DORD',
+            ),
+            (
+                'data 1',
+                'data 2',
+                0,
+                'data 3',
+                'data 4',
+                'data 5',
+                'data 6',
+                'data 7',
+                int(orgao_id),
+                'data 8',
+                'COMP',
+            ),
+        ]
+        resp = dao.AlertaMGPDAO.get(orgao_id=orgao_id, tipo_alerta=tipo_alerta)
+        expected_resp = [
+            {
+                'doc_dk': 'data 1',
+                'num_doc': 'data 2',
+                'num_ext': 0,
+                'etiqueta': 'data 3',
+                'classe_doc': 'data 4',
+                'data_alerta': 'data 5',
+                'orgao': 'data 6',
+                'classe_hier': 'data 7',
+                'dias_passados': 12345,
+                'descricao': 'data 8',
+                'sigla': 'COMP'
+            },
+            {
+                'doc_dk': 'data 1',
+                'num_doc': 'data 2',
+                'num_ext': 0,
+                'etiqueta': 'data 3',
+                'classe_doc': 'data 4',
+                'data_alerta': 'data 5',
+                'orgao': 'data 6',
+                'classe_hier': 'data 7',
+                'dias_passados': 12345,
+                'descricao': 'data 8',
+                'sigla': 'DORD'
+            }
+        ]
+
+        cls = dao.AlertaMGPDAO
+        with open(
+            cls.QUERIES_DIR.child("validos_por_orgao_tipo.sql")
+        ) as fobj:
+            expected_query = fobj.read()
+
+        expected_query = expected_query.format(**cls.table_namespaces)
+
+        self.run_query_mock.assert_called_once_with(
+            expected_query,
+            {"orgao_id": orgao_id, "tipo_alerta": tipo_alerta},
+        )
+        self.assertEqual(resp, expected_resp)
+
+
+class TestFiltraAlertasDispensados(TestCase):
+    def setUp(self):
+        self.orgao_id = "12345"
+        self.get_hbase_table_patcher = mock.patch.object(
+            dao.FiltraAlertasDispensadosMixin, "get_table"
+        )
+        self.get_hbase_table_mock = self.get_hbase_table_patcher.start()
+
+        self.table_mock = mock.Mock()
+        self.dados_hbase = [
+            (
+                b"key 1",
+                {
+                    b"dados_alertas:alerta_id": b"12345",
+                    b"dados_alertas:orgao": self.orgao_id.encode(),
+                    b"dados_alertas:sigla": b"COMP"
+                }
+            ),
+            (
+                b"key 2",
+                {
+                    b"dados_alertas:alerta_id": b"bbbbb-12345",
+                    b"dados_alertas:orgao": self.orgao_id.encode(),
+                    b"dados_alertas:sigla": b"COMP"
+                }
+            )
+        ]
+        self.table_mock.scan.return_value = self.dados_hbase
+        self.get_hbase_table_mock.return_value = self.table_mock
+
+        self.get_patcher = mock.patch.object(dao.AlertasDAO, "get")
+        self.get_mock = self.get_patcher.start()
+
+        self.alertas = [
+            {
+                'sigla': 'COMP',
+                'contrato': 'aaaa',
+                'iditem': 87654,
+                'contrato_iditem': 'aaaa-87654',
+                'item': 'item desc',
+            },
+            {
+                'sigla': 'COMP',
+                'contrato': 'bbbbb',
+                'iditem': 12345,
+                'contrato_iditem': 'bbbbb-12345',
+                'item': 'item desc',
+            },
+        ]
+        self.get_mock.return_value = self.alertas
+        self.expected_filtrados = self.alertas[:1]
+
+    def tearDown(self):
+        self.get_hbase_table_patcher.stop()
+        self.get_patcher.stop()
+
+    def test_prepara_dados_hbase(self):
+        prep_hbase = dao.FiltraAlertasDispensadosMixin.prepara_dados_hbase(
+            self.dados_hbase
+        )
+        expected = [("COMP", "12345"), ("COMP", "bbbbb-12345")]
+
+        self.assertEqual(prep_hbase, expected)
+
+    def test_filtra_alertas_dispensados(self):
+        class AlertaMock(dao.FiltraAlertasDispensadosMixin, dao.AlertasDAO):
+            orgao_kwarg = "id_orgao"
+            alerta_id_kwarg = "contrato_iditem"
+            sigla_kwarg = "sigla"
+
+        resp = AlertaMock.get(id_orgao=self.orgao_id)
+
+        self.table_mock.scan.assert_called_once_with(
+            row_prefix=f"{self.orgao_id}".encode()
+        )
+        self.assertEqual(resp, self.expected_filtrados)

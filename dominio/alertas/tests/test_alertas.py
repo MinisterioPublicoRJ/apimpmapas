@@ -1,17 +1,21 @@
 from datetime import datetime
 from unittest import mock
 
+from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 
 from dominio.alertas import dao
+from dominio.alertas.tests.testconf import (
+    RemoveFiltroAlertasDispensadosTestCase,
+)
 from dominio.tests.testconf import NoJWTTestCase, NoCacheTestCase
 
 
 class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
-    @mock.patch('dominio.alertas.views.Alerta')
-    def test_alert_list(self, _Alerta):
+    @mock.patch.object(dao.AlertaMGPDAO, 'get')
+    def test_alert_list(self, _AlertaMGPDAO_get):
         orgao_id = '0000000'
         alertas_return = [
             {
@@ -45,7 +49,7 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
             }
         ]
 
-        _Alerta.validos_por_orgao.return_value = alertas_return
+        _AlertaMGPDAO_get.return_value = alertas_return
 
         url = reverse(
             'dominio:lista_alertas',
@@ -56,8 +60,8 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, alertas_expected)
 
-    @mock.patch('dominio.alertas.views.Alerta')
-    def test_alert_tipo(self, _Alerta):
+    @mock.patch.object(dao.AlertaMGPDAO, 'get')
+    def test_alert_tipo(self, _AlertaMGPDAO_get):
         orgao_id = '0000000'
         tipo_alerta = 'ALRT'
 
@@ -93,7 +97,7 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
             }
         ]
 
-        _Alerta.validos_por_orgao.return_value = alertas_return
+        _AlertaMGPDAO_get.return_value = alertas_return
 
         url = reverse(
             'dominio:lista_alertas',
@@ -158,7 +162,11 @@ class AlertaResumoTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         self.assertEqual(resp.data, alertas_expected)
 
 
-class AlertaComprasTest(NoJWTTestCase, NoCacheTestCase, TestCase):
+class AlertaComprasTest(
+        RemoveFiltroAlertasDispensadosTestCase,
+        NoJWTTestCase,
+        NoCacheTestCase,
+        TestCase):
 
     @mock.patch.object(dao.AlertaComprasDAO, "execute")
     def test_alert_compras(self, _execute):
@@ -194,3 +202,55 @@ class AlertaComprasTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, expected_output)
+
+
+class TestDispensarAlertasCompras(NoJWTTestCase, TestCase):
+    def setUp(self):
+        super().setUp()
+
+        self.get_hbase_table_patcher = mock.patch(
+            "dominio.alertas.views.get_hbase_table"
+        )
+        self.get_hbase_table_mock = self.get_hbase_table_patcher.start()
+        self.hbase_obj_mock = mock.Mock()
+        self.get_hbase_table_mock.return_value = self.hbase_obj_mock
+
+        self.orgao_id = "12345"
+        self.sigla_alerta = "COMP"
+        self.url = reverse(
+            "dominio:dispensar_alerta",
+            args=(self.orgao_id,),
+        )
+
+    def tearDown(self):
+        super().tearDown()
+        self.get_hbase_table_patcher.stop()
+
+    def test_post_dispensa_alerta_compra(self):
+        alerta_id = "abc123"
+        self.url += f"?alerta_id={alerta_id}"
+        resp = self.client.post(self.url)
+
+        self.get_hbase_table_mock.assert_called_once_with(
+            settings.PROMOTRON_HBASE_NAMESPACE
+            +
+            settings.HBASE_DISPENSAR_ALERTAS_TABLE,
+        )
+        expected_hbase_key = (
+            f"{self.orgao_id}_{self.sigla_alerta}_{alerta_id}".encode()
+        )
+        expected_hbase_data = {
+            b"dados_alertas:orgao": self.orgao_id.encode(),
+            b"dados_alertas:sigla": self.sigla_alerta.encode(),
+            b"dados_alertas:alerta_id": alerta_id.encode(),
+        }
+        self.hbase_obj_mock.put.assert_called_once_with(
+                expected_hbase_key,
+                expected_hbase_data
+        )
+        self.assertEqual(resp.status_code, 201)
+
+    def test_bad_request_missing_alerta_id(self):
+        resp = self.client.post(self.url)
+
+        self.assertEqual(resp.status_code, 400)
