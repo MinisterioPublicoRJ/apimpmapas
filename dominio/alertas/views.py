@@ -89,3 +89,30 @@ class DispensarAlertaView(JWTAuthMixin, APIView):
             data={"detail": "Alerta dispensado com sucesso"},
             status=201
         )
+
+
+class RetornarAlertaView(JWTAuthMixin, APIView):
+    def get_alerta_id(self):
+        ser = IdentificadorAlertaSerializer(data=self.request.GET)
+        ser.is_valid(raise_exception=True)
+        return ser.validated_data["alerta_id"]
+
+    def get_hbase_key(self, orgao_id, sigla_alerta, alerta_id):
+        return f"{orgao_id}_{sigla_alerta}_{alerta_id}".encode()
+
+    def post(self, request, *args, **kwargs):
+        sigla = "COMP"
+        orgao_id = self.kwargs.get(self.orgao_url_kwarg)
+        alerta_id = self.get_alerta_id()
+
+        hbase_table = get_hbase_table(
+            settings.PROMOTRON_HBASE_NAMESPACE
+            +
+            settings.HBASE_DISPENSAR_ALERTAS_TABLE
+        )
+        hbase_table.delete(self.get_hbase_key(orgao_id, sigla, alerta_id))
+
+        return Response(
+            data={"detail": "Alerta retornado com sucesso"},
+            status=200
+        )

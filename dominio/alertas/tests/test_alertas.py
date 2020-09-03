@@ -254,3 +254,47 @@ class TestDispensarAlertasCompras(NoJWTTestCase, TestCase):
         resp = self.client.post(self.url)
 
         self.assertEqual(resp.status_code, 400)
+
+
+class TestRetornaAlertasCompras(NoJWTTestCase, TestCase):
+    def setUp(self):
+        super().setUp()
+
+        self.get_hbase_table_patcher = mock.patch(
+            "dominio.alertas.views.get_hbase_table"
+        )
+        self.get_hbase_table_mock = self.get_hbase_table_patcher.start()
+        self.hbase_obj_mock = mock.Mock()
+        self.get_hbase_table_mock.return_value = self.hbase_obj_mock
+
+        self.orgao_id = "12345"
+        self.sigla_alerta = "COMP"
+        self.url = reverse(
+            "dominio:retornar_alerta",
+            args=(self.orgao_id,),
+        )
+
+    def tearDown(self):
+        super().tearDown()
+        self.get_hbase_table_patcher.stop()
+
+    def test_post_dispensa_alerta_compra(self):
+        alerta_id = "abc123"
+        self.url += f"?alerta_id={alerta_id}"
+        resp = self.client.post(self.url)
+
+        self.get_hbase_table_mock.assert_called_once_with(
+            settings.PROMOTRON_HBASE_NAMESPACE
+            +
+            settings.HBASE_DISPENSAR_ALERTAS_TABLE,
+        )
+        expected_hbase_key = (
+            f"{self.orgao_id}_{self.sigla_alerta}_{alerta_id}".encode()
+        )
+        self.hbase_obj_mock.delete.assert_called_once_with(expected_hbase_key)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_bad_request_missing_alerta_id(self):
+        resp = self.client.post(self.url)
+
+        self.assertEqual(resp.status_code, 400)
