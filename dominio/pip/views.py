@@ -158,7 +158,12 @@ class PIPPrincipaisInvestigadosListaView(JWTAuthMixin, CacheMixin, APIView):
     def get(self, request, *args, **kwargs):
         representante_dk = int(kwargs.get("representante_dk"))
 
-        data_perfil = PIPPrincipaisInvestigadosPerfilDAO.get(dk=representante_dk)
-        data = PIPPrincipaisInvestigadosListaDAO.get(dk=representante_dk)
+        data_perf = PIPPrincipaisInvestigadosPerfilDAO.get(dk=representante_dk)
+        data_lista = PIPPrincipaisInvestigadosListaDAO.get(dk=representante_dk)
+
+        data = {
+            'perfil': data_perf,
+            'procedimentos': data_lista
+        }
 
         return Response(data)
