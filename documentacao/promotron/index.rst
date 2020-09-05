@@ -19,6 +19,7 @@ Welcome to Promotron's documentation!
    RadarDePerformance.rst
    Alertas.rst
    ListaProcessos.rst
+   TempoDeTramitacao.rst
 
 
 

@@ -10,7 +10,7 @@ Lista de Processos
 User Manual
 ~~~~~~~~~~~
 
-O componente de Lista de Processos é usado para indicar os processos judiciais que tiveram algum tipo de andamento na última semana. Só são considerados documentos e andamentos que não tenham sido cancelados. O documento pode estar com status Em Andamento ou Finalizado no sistema, nenhum filtro é aplicado neste sentido.
+O componente de Lista de Processos é usado para indicar os andamentos dos processos judiciais associados ao órgão. Só são considerados documentos e andamentos que não tenham sido cancelados, e que estejam ainda com status Em Andamento.
 
 Para que estes cálculos sejam feitos corretamente, é necessário que o órgão tenha um pacote definido na tabela :ref:`tabelas-auxiliares-atualizacao-pj-pacote`, e que este pacote tenha classes de documentos associadas na tabela :ref:`tabelas-auxiliares-tb-regra-negocio-processo`, que serão usadas para identificar quais documentos correspondem a processos. Ao clicar na referência da tabela de regras acima, é possível verificar quais classes estão atualmente definidas.
 
