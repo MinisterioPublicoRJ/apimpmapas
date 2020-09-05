@@ -447,7 +447,7 @@ Estrutura do Código
 ~~~~~~~~~~~~~~~~~~~
 
 Processo BDA
-************
+------------
 
 ::
 
@@ -488,7 +488,7 @@ Script Auxiliar 2: https://github.com/MinisterioPublicoRJ/scripts-bda/blob/maste
 .. _`Script Auxiliar do Tempo de Tramitação`: https://github.com/MinisterioPublicoRJ/scripts-bda/blob/master/robo_promotoria/src/tramitacao/utils_tempo.py
 
 View Backend
-************
+------------
 
 ::
 
