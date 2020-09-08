@@ -27,9 +27,19 @@ class HBaseGate:
     @property
     def get_table(self):
         try:
-            connection = HBaseConnection(self.server, timeout=self.timeout)
+            connection = HBaseConnection(
+                self.server,
+                timeout=self.timeout,
+                transport="framed",
+                protocol="compact",
+            )
         except Exception:
-            connection = HBaseConnection(self.server, timeout=self.timeout)
+            connection = HBaseConnection(
+                self.server,
+                timeout=self.timeout,
+                transport="framed",
+                protocol="compact",
+            )
 
         return connection.table(self.table_name)
 
