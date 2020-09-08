@@ -152,18 +152,27 @@ class PIPPrincipaisInvestigadosView(
         return Response(data)
 
 
-class PIPPrincipaisInvestigadosListaView(JWTAuthMixin, CacheMixin, APIView):
+class PIPPrincipaisInvestigadosListaView(
+        JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
     cache_config = "PIP_PRINCIPAIS_INVESTIGADOS_LISTA_CACHE_TIMEOUT"
+    PRINCIPAIS_INVESTIGADOS_PROCEDIMENTOS_SIZE = 20
 
     def get(self, request, *args, **kwargs):
         representante_dk = int(kwargs.get("representante_dk"))
+        page = int(request.GET.get("page", 1))
 
         data_perf = PIPPrincipaisInvestigadosPerfilDAO.get(dk=representante_dk)
         data_lista = PIPPrincipaisInvestigadosListaDAO.get(dk=representante_dk)
 
+        page_data = self.paginate(
+            data_lista,
+            page=page,
+            page_size=self.PRINCIPAIS_INVESTIGADOS_PROCEDIMENTOS_SIZE
+        )
+
         data = {
             'perfil': data_perf,
-            'procedimentos': data_lista
+            'procedimentos': page_data
         }
 
         return Response(data)
