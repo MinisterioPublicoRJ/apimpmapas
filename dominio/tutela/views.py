@@ -79,7 +79,7 @@ class DetalheAcervoView(JWTAuthMixin, CacheMixin, APIView):
         return run_query(query, parameters)
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(self.kwargs['orgao_id'])
+        orgao_id = int(self.kwargs.get(self.orgao_url_kwarg))
 
         date_today = datetime.now().date()
         dt_fim = str(date_today)
@@ -158,7 +158,7 @@ class OutliersView(JWTAuthMixin, CacheMixin, APIView):
         return run_query(query, parameters)
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(self.kwargs['orgao_id'])
+        orgao_id = int(self.kwargs.get(self.orgao_url_kwarg))
 
         data = self.get_data(
             orgao_id=orgao_id
@@ -192,7 +192,7 @@ class SaidasView(JWTAuthMixin, CacheMixin, APIView):
         return run_query(query, parameters)
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(self.kwargs['orgao_id'])
+        orgao_id = int(self.kwargs.get(self.orgao_url_kwarg))
 
         data = self.get_saidas(
             orgao_id=orgao_id
@@ -246,7 +246,7 @@ class EntradasView(JWTAuthMixin, CacheMixin, APIView):
         return run_query(query, parameters)
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(self.kwargs['orgao_id'])
+        orgao_id = int(self.kwargs.get(self.orgao_url_kwarg))
         nr_cpf = str(self.kwargs['nr_cpf'])
 
         data = self.get_entradas(
@@ -281,7 +281,7 @@ class SuaMesaVistasAbertas(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAMESAVISTAS_CACHE_TIMEOUT'
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get("orgao_id"))
+        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
         cpf = kwargs.get("cpf")
 
         doc_count = Vista.vistas.abertas_promotor(orgao_id, cpf).count()
@@ -294,7 +294,7 @@ class SuaMesaInvestigacoes(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAMESAINVESTIGACOES_CACHE_TIMEOUT'
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get("orgao_id"))
+        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
 
         regras_investigacoes = suamesa.get_regras(
             orgao_id,
@@ -311,7 +311,7 @@ class SuaMesaProcessos(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAMESAPROCESSOS_CACHE_TIMEOUT'
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get("orgao_id"))
+        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
 
         regras_processos = suamesa.get_regras(orgao_id, tipo='processo')
         doc_count = Documento.processos.em_juizo(
@@ -325,7 +325,7 @@ class SuaMesaFinalizados(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAMESAFINALIZADOS_CACHE_TIMEOUT'
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get("orgao_id"))
+        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
 
         regras_saidas = (6251, 6657, 6655, 6644, 6326)
         regras_arquiv = (7912, 6548, 6326, 6681, 6678, 6645, 6682, 6680, 6679,
@@ -351,7 +351,7 @@ class SuaMesaDetalheView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAMESADETALHE_CACHE_TIMEOUT'
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get("orgao_id"))
+        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
         cpf = kwargs.get("cpf")
 
         mesa_detalhe = Vista.vistas.agg_abertas_por_data(orgao_id, cpf)
@@ -386,7 +386,7 @@ class DetalheProcessosJuizoView(JWTAuthMixin, CacheMixin, APIView):
         return run_query(query, parameters)
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(self.kwargs['orgao_id'])
+        orgao_id = int(self.kwargs.get(self.orgao_url_kwarg))
 
         data_acoes = self.get_numero_acoes_propostas_pacote_atribuicao(
             orgao_id=orgao_id
@@ -422,7 +422,7 @@ class SuaMesaVistasListaView(
     cache_config = 'SUAMESAVISTASLISTA_CACHE_TIMEOUT'
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get("orgao_id"))
+        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
         cpf = kwargs.get("cpf")
         abertura = kwargs.get("abertura")
         lista_aberturas = ("ate_vinte", "vinte_trinta", "trinta_mais")
@@ -456,7 +456,7 @@ class TempoTramitacaoView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'TEMPO_TRAMITACAO_CACHE_TIMEOUT'
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(self.kwargs['orgao_id'])
+        orgao_id = int(self.kwargs.get(self.orgao_url_kwarg))
         version = self.request.GET.get('version')
 
         if version == '1.1':
@@ -499,7 +499,7 @@ class DesarquivamentosView(JWTAuthMixin, CacheMixin, APIView):
             return self.fetch_set(result_set)
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(self.kwargs['orgao_id'])
+        orgao_id = int(self.kwargs.get(self.orgao_url_kwarg))
         # TODO: pensar numa forma geral de discernir 404 de respostas
         # vazias e respostas não existentes
 
@@ -521,7 +521,7 @@ class ListaProcessosView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
         return run_query(query, parameters)
 
     def get(self, request, *args, **kwargs):
-        orgao_id = int(self.kwargs['orgao_id'])
+        orgao_id = int(self.kwargs.get(self.orgao_url_kwarg))
         page = int(request.GET.get("page", 1))
 
         data = self.get_data(orgao_id)

@@ -89,6 +89,7 @@ class TestBuildLoginResponse(TestCase):
             "sexo": "X",
             "token": "auth-token",
             "tipo_permissao": "regular",
+            "ids_orgaos_lotados_validos": ["098765", "1234"],
             "orgao_selecionado":
             {
                 "cpf": "CPF 1",
@@ -338,6 +339,12 @@ class TestPermissoesUsuarioRegular(TestCase):
 
     def test_retorna_orgaos_de_usuario(self):
         self.assertEqual(self.permissoes.orgaos_lotados, self.expected)
+
+    def test_retorna_ids_orgaos_lotados_validos(self):
+        ids_orgaos_lotados_validos = self.permissoes.ids_orgaos_lotados_validos
+        expected_ids = ["098765", "9999"]
+
+        self.assertEqual(ids_orgaos_lotados_validos, expected_ids)
 
     def test_retorna_orgaos_VALIDOS_de_usuario(self):
         """Retorna orgaos validos (do ponto de vista do Promotron).

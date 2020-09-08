@@ -95,6 +95,13 @@ class PermissaoUsuario:
         lista_cisps = dao.ListaDPsPIPsDAO.get()
         return {d['id_orgao']: d['dps'] for d in lista_cisps}
 
+    @property
+    def ids_orgaos_lotados_validos(self):
+        return [
+            o.get("cdorgao")
+            for o in self._filtra_orgaos_invalidos(self.orgaos_lotados)
+        ]
+
     def _get_cisps_from_orgao(self, id_orgao):
         return self.pip_cisps.get(id_orgao, '')
 
@@ -168,6 +175,9 @@ def build_login_response(permissoes):
     response["cpf"] = permissoes.dados_usuario["cpf"]
     response["nome"] = permissoes.dados_usuario["nome"]
     response["matricula"] = permissoes.dados_usuario["matricula"]
+    response["ids_orgaos_lotados_validos"] = (
+        permissoes.ids_orgaos_lotados_validos
+    )
 
     response["token"] = jwt.encode(
         response, settings.JWT_SECRET, algorithm="HS256",

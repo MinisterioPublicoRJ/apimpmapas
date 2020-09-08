@@ -1,0 +1,17 @@
+ordem = [
+    'PRCR',
+    'COMP',
+    'GATE',
+    'MCSI',
+    'MVVD',
+    'IC1A',
+    'PA1A',
+    'PPFP',
+    'OFFP',
+    'OUVI',
+    'NF30',
+    'VADF',
+    'DT2I',
+    'DORD',
+    'DNTJ',
+]
