@@ -23,9 +23,17 @@ class PIPPrincipaisInvestigadosSerializer(serializers.Serializer):
     flag_top50 = serializers.BooleanField()
 
 
+class PIPPrincipaisInvestigadosPerfilSerializer(serializers.Serializer):
+    nm_investigado = serializers.CharField()
+    nm_mae = serializers.CharField()
+    cpf = serializers.CharField()
+    rg = serializers.CharField()
+    dt_nasc = serializers.DateTimeField()
+
+
 class PIPPrincipaisInvestigadosListaSerializer(serializers.Serializer):
     representante_dk = serializers.IntegerField()
-    nm_investigado = serializers.CharField()
+    coautores = serializers.CharField()
     tipo_personagem = serializers.CharField()
     orgao_id = serializers.IntegerField()
     documento_nr_mp = serializers.CharField()
@@ -35,6 +43,8 @@ class PIPPrincipaisInvestigadosListaSerializer(serializers.Serializer):
     etiqueta = serializers.CharField()
     assuntos = serializers.ListField(serializers.CharField())
     fase_documento = serializers.CharField()
+    dt_ultimo_andamento = serializers.DateTimeField()
+    desc_ultimo_andamento = serializers.CharField()
 
 
 class PIPIndicadoresSucessoParser(serializers.Serializer):

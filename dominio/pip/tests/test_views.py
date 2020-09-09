@@ -241,9 +241,15 @@ class TestPIPPrincipaisInvestigadosView(
 
 class TestPIPPrincipaisInvestigadosListaView(
         NoJWTTestCase, NoCacheTestCase, TestCase):
+    @mock.patch("dominio.pip.views.PIPPrincipaisInvestigadosPerfilDAO.get")
     @mock.patch("dominio.pip.views.PIPPrincipaisInvestigadosListaDAO.get")
-    def test_correct_response(self, _get_data):
-        _get_data.return_value = {"data": 1}
+    def test_correct_response(self, _get_procedimentos, _get_perfil):
+        _get_perfil.return_value = {"data": 1}
+        _get_procedimentos.return_value = [{"data": 1}, {"data": 2}]
+        expected_output = {
+            "perfil": {"data": 1},
+            "procedimentos": [{"data": 1}, {"data": 2}]
+        }
 
         url = reverse(
             "dominio:pip-principais-investigados-lista",
@@ -251,6 +257,7 @@ class TestPIPPrincipaisInvestigadosListaView(
         )
         resp = self.client.get(url)
 
-        _get_data.assert_called_once_with(dk=12345)
+        _get_perfil.assert_called_once_with(dk=12345)
+        _get_procedimentos.assert_called_once_with(dk=12345)
         assert resp.status_code == 200
-        assert resp.data == {"data": 1}
+        assert resp.data == expected_output

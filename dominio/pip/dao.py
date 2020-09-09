@@ -17,10 +17,11 @@ from dominio.pip.serializers import (
     PIPIndicadoresSucessoParser,
     PIPDetalheAproveitamentosSerializer,
     PIPPrincipaisInvestigadosListaSerializer,
+    PIPPrincipaisInvestigadosPerfilSerializer,
 )
 
 from .utils import get_top_n_by_aisp, get_orgaos_same_aisps
-from dominio.dao import GenericDAO
+from dominio.dao import GenericDAO, SingleDataObjectDAO
 
 
 class GenericPIPDAO(GenericDAO):
@@ -266,11 +267,24 @@ class PIPPrincipaisInvestigadosDAO(GenericPIPDAO):
         return data
 
 
+class PIPPrincipaisInvestigadosPerfilDAO(SingleDataObjectDAO, GenericPIPDAO):
+    query_file = "pip_principais_investigados_perfil.sql"
+    columns = [
+        "nm_investigado",
+        "nm_mae",
+        "cpf",
+        "rg",
+        "dt_nasc",
+    ]
+    table_namespaces = {"schema": settings.EXADATA_NAMESPACE}
+    serializer = PIPPrincipaisInvestigadosPerfilSerializer
+
+
 class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
     query_file = "pip_principais_investigados_lista.sql"
     columns = [
         "representante_dk",
-        "nm_investigado",
+        "coautores",
         "tipo_personagem",
         "orgao_id",
         "documento_nr_mp",
@@ -279,7 +293,9 @@ class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
         "nm_orgao",
         "etiqueta",
         "assuntos",
-        "fase_documento"
+        "fase_documento",
+        "dt_ultimo_andamento",
+        "desc_ultimo_andamento"
     ]
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
     serializer = PIPPrincipaisInvestigadosListaSerializer
@@ -287,9 +303,10 @@ class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
     @classmethod
     def serialize(cls, result_set):
         # Assuntos vem separados por ' --- ' no banco
+        idx = cls.columns.index('assuntos')
         result_set = [
-            row[:-2] + tuple([row[-2].split(' --- ')]) + row[-1:]
-            if isinstance(row[-2], str)
+            row[:idx] + tuple([row[idx].split(' --- ')]) + row[idx+1:]
+            if isinstance(row[idx], str)
             else row
             for row in result_set
         ]
