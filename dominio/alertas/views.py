@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 from dominio.db_connectors import get_hbase_table
 from dominio.mixins import CacheMixin, PaginatorMixin, JWTAuthMixin
-from dominio.alertas import dao
+from dominio.alertas import controllers, dao
 from dominio.utils import hbase_encode_row
 
 from .serializers import AlertasListaSerializer, IdentificadorAlertaSerializer
@@ -116,3 +116,21 @@ class RetornarAlertaView(JWTAuthMixin, APIView):
             data={"detail": "Alerta retornado com sucesso"},
             status=200
         )
+
+
+class EnviarAlertaComprasOuvidoriaView(JWTAuthMixin, APIView):
+    def get_alerta_id(self):
+        ser = IdentificadorAlertaSerializer(data=self.request.GET)
+        ser.is_valid(raise_exception=True)
+        return ser.validated_data["alerta_id"]
+
+    def post(self, request, *args, **kwargs):
+        orgao_id = self.kwargs.get(self.orgao_url_kwarg)
+        alerta_id = self.get_alerta_id()
+
+        controller = controllers.EnviaAlertaComprasOuvidoriaController(
+            orgao_id,
+            alerta_id
+        )
+        resp, status = controller.envia()
+        return Response(data=resp, status=status)

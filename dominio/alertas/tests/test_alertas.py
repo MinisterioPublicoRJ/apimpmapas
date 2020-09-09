@@ -298,3 +298,44 @@ class TestRetornaAlertasCompras(NoJWTTestCase, TestCase):
         resp = self.client.post(self.url)
 
         self.assertEqual(resp.status_code, 400)
+
+
+class TestEnviarAlertasComprasOuvidoria(NoJWTTestCase, TestCase):
+    def setUp(self):
+        super().setUp()
+        self.orgao_id = "12345"
+        self.url = reverse(
+            "dominio:alerta_compras_ouvidoria",
+            args=(self.orgao_id,)
+        )
+
+        self.get_hbase_table_patcher = mock.patch(
+            "dominio.alertas.views.get_hbase_table"
+        )
+        self.get_hbase_table_mock = self.get_hbase_table_patcher.start()
+
+        self.controller_patcher = mock.patch(
+            "dominio.alertas.views.controllers"
+            ".EnviaAlertaComprasOuvidoriaController"
+        )
+        self.controller_mock = self.controller_patcher.start()
+
+        self.status = 201
+        self.resp = {"detail": "alerta enviado com sucesso para ouvidoria"}
+        self.controller_obj_mock = mock.Mock()
+        self.controller_obj_mock.envia.return_value = (self.resp, self.status)
+        self.controller_mock.return_value = self.controller_obj_mock
+
+    def tearDown(self):
+        super().tearDown()
+        self.get_hbase_table_patcher.stop()
+        self.controller_patcher.stop()
+
+    def test_envia_alerta_compras_para_ouvidoria(self):
+        alerta_id = "abc12345"
+        self.url += f"?alerta_id={alerta_id}"
+        resp = self.client.post(self.url)
+
+        self.controller_obj_mock.envia.assert_called_once_with()
+        self.controller_mock.assert_called_once_with(self.orgao_id, alerta_id)
+        self.assertEqual(resp.status_code, self.status)
