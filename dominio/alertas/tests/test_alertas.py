@@ -339,3 +339,8 @@ class TestEnviarAlertasComprasOuvidoria(NoJWTTestCase, TestCase):
         self.controller_obj_mock.envia.assert_called_once_with()
         self.controller_mock.assert_called_once_with(self.orgao_id, alerta_id)
         self.assertEqual(resp.status_code, self.status)
+
+    def test_bad_request_alerta_id_nao_informado(self):
+        resp = self.client.post(self.url)
+
+        self.assertEqual(resp.status_code, 400)
