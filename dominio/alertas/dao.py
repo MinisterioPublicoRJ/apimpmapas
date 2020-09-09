@@ -13,6 +13,15 @@ class FiltraAlertasDispensadosMixin:
     col_family = "dados_alertas:"
 
     @classmethod
+    def prepara_hbase_query(cls, orgao_id):
+        return (
+            "SingleColumnValueFilter('dados_alertas', 'orgao', =,"
+            f" 'binary:{orgao_id}')"
+            " OR SingleColumnValueFilter('dados_alertas', 'orgao', =,"
+            " 'binary:ALL')"
+        ).encode()
+
+    @classmethod
     def prepara_dados_hbase(cls, dados):
         sigla_key = f"{cls.col_family}sigla".encode()
         id_key = f"{cls.col_family}alerta_id".encode()
@@ -35,7 +44,7 @@ class FiltraAlertasDispensadosMixin:
     def filtra(cls, orgao_id, result_set):
         table = cls.get_table()
         dispensados = cls.prepara_dados_hbase(
-            table.scan(row_prefix=f"{orgao_id}".encode())
+            table.scan(filter=cls.prepara_hbase_query(orgao_id))
         )
 
         filtrados = []

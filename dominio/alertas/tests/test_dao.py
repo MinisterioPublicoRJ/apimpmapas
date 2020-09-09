@@ -285,6 +285,20 @@ class TestFiltraAlertasDispensados(TestCase):
         self.get_hbase_table_patcher.stop()
         self.get_patcher.stop()
 
+    def test_create_hbase_query(self):
+        hbase_query = dao.FiltraAlertasDispensadosMixin.prepara_hbase_query(
+            self.orgao_id
+        )
+
+        expected = (
+            "SingleColumnValueFilter('dados_alertas', 'orgao', =,"
+            f" 'binary:{self.orgao_id}')"
+            " OR SingleColumnValueFilter('dados_alertas', 'orgao', =,"
+            " 'binary:ALL')"
+        ).encode()
+
+        self.assertEqual(hbase_query, expected)
+
     def test_prepara_dados_hbase(self):
         prep_hbase = dao.FiltraAlertasDispensadosMixin.prepara_dados_hbase(
             self.dados_hbase
@@ -300,8 +314,95 @@ class TestFiltraAlertasDispensados(TestCase):
             sigla_kwarg = "sigla"
 
         resp = AlertaMock.get(id_orgao=self.orgao_id)
+        expected_hbase_query = AlertaMock.prepara_hbase_query(self.orgao_id)
 
         self.table_mock.scan.assert_called_once_with(
-            row_prefix=f"{self.orgao_id}".encode()
+            filter=expected_hbase_query
+        )
+        self.assertEqual(resp, self.expected_filtrados)
+
+
+class TestFiltraAlertasDispensadosTodosOrgaos(TestCase):
+    def setUp(self):
+        self.orgao_id = "12345"
+        self.get_hbase_table_patcher = mock.patch.object(
+            dao.FiltraAlertasDispensadosMixin, "get_table"
+        )
+        self.get_hbase_table_mock = self.get_hbase_table_patcher.start()
+
+        self.table_mock = mock.Mock()
+        self.dados_hbase = [
+            (
+                b"key 1",
+                {
+                    b"dados_alertas:alerta_id": b"12345",
+                    b"dados_alertas:orgao": self.orgao_id.encode(),
+                    b"dados_alertas:sigla": b"COMP"
+                }
+            ),
+            (
+                b"key 2",
+                {
+                    b"dados_alertas:alerta_id": b"bbbbb-12345",
+                    b"dados_alertas:orgao": self.orgao_id.encode(),
+                    b"dados_alertas:sigla": b"COMP"
+                }
+            ),
+            (
+                b"key 3",
+                {
+                    b"dados_alertas:alerta_id": b"cccc-12345",
+                    b"dados_alertas:orgao": "ALL",
+                    b"dados_alertas:sigla": b"COMP"
+                }
+            ),
+        ]
+        self.table_mock.scan.return_value = self.dados_hbase
+        self.get_hbase_table_mock.return_value = self.table_mock
+
+        self.get_patcher = mock.patch.object(dao.AlertasDAO, "get")
+        self.get_mock = self.get_patcher.start()
+
+        self.alertas = [
+            {
+                'sigla': 'COMP',
+                'contrato': 'aaaa',
+                'iditem': 87654,
+                'contrato_iditem': 'aaaa-87654',
+                'item': 'item desc',
+            },
+            {
+                'sigla': 'COMP',
+                'contrato': 'bbbbb',
+                'iditem': 12345,
+                'contrato_iditem': 'bbbbb-12345',
+                'item': 'item desc',
+            },
+            {
+                'sigla': 'COMP',
+                'contrato': 'ccccc',
+                'iditem': 12345,
+                'contrato_iditem': 'cccc-12345',
+                'item': 'item desc',
+            },
+        ]
+        self.get_mock.return_value = self.alertas
+        self.expected_filtrados = self.alertas[:1]
+
+    def tearDown(self):
+        self.get_hbase_table_patcher.stop()
+        self.get_patcher.stop()
+
+    def test_filtra_alertas_dispensados(self):
+        class AlertaMock(dao.FiltraAlertasDispensadosMixin, dao.AlertasDAO):
+            orgao_kwarg = "id_orgao"
+            alerta_id_kwarg = "contrato_iditem"
+            sigla_kwarg = "sigla"
+
+        resp = AlertaMock.get(id_orgao=self.orgao_id)
+        expected_hbase_query = AlertaMock.prepara_hbase_query(self.orgao_id)
+
+        self.table_mock.scan.assert_called_once_with(
+            filter=expected_hbase_query
         )
         self.assertEqual(resp, self.expected_filtrados)
