@@ -35,17 +35,20 @@ class DispensaAlertaComprasController(BaseController):
     hbase_cf = "dados_alertas"
     hbase_table_name = settings.HBASE_DISPENSAR_ALERTAS_TABLE
 
+    # TODO: transformar em um métodos de instância
     @classmethod
     def dispensa_para_orgao(cls, orgao_id, alerta_id):
         row_key = cls.get_row_key(orgao_id, alerta_id)
         data = cls.get_row_data(orgao_id, alerta_id)
         cls.get_table().put(row_key, data)
 
+    # TODO: transformar em um métodos de instância
     @classmethod
     def retorna_para_orgao(cls, orgao_id, alerta_id):
         row_key = cls.get_row_key(orgao_id, alerta_id)
         cls.get_table().delete(row_key)
 
+    # TODO: transformar em um métodos de instância
     @classmethod
     def dispensa_para_todos_orgaos(cls, alerta_id):
         row_key = cls.get_row_key("ALL", alerta_id)
@@ -62,6 +65,7 @@ class EnviaAlertaComprasOuvidoriaController(BaseController):
         self.orgao_id = str(orgao_id)
         self.alerta_id = str(alerta_id)
 
+    # TODO: transformar em um métodos de instância
     @classmethod
     def rollback_envio(cls, orgao_id, alerta_id):
         row_key = cls.get_row_key(orgao_id, alerta_id)
@@ -93,6 +97,7 @@ class EnviaAlertaComprasOuvidoriaController(BaseController):
         )
 
     def envia_email(self):
+        # TODO: passar a instância (self) da classe para a task
         async_envia_email_ouvidoria.delay(
             self.orgao_id,
             self.alerta_sigla,
