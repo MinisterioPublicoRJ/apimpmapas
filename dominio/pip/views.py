@@ -160,7 +160,7 @@ class PIPPrincipaisInvestigadosListaView(
     def get(self, request, *args, **kwargs):
         representante_dk = int(kwargs.get("representante_dk"))
         page = int(request.GET.get("page", 1))
-        pess_dk = int(request.GET.get("pess_dk", None))
+        pess_dk = int(request.GET.get("pess_dk", 0))
 
         similares = PIPPrincipaisInvestigadosPerfilDAO.get(dk=representante_dk)
         perfil = similares[0] if similares else {}

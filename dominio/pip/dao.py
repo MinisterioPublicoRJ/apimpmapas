@@ -326,7 +326,7 @@ class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
     @classmethod
     def get(cls, accept_empty=False, **kwargs):
         data = super().get(accept_empty, **kwargs)
-        pess_dk = kwargs.get("pess_dk", None)
+        pess_dk = kwargs.get("pess_dk")
         if pess_dk:
             data = [x for x in data if x['pess_dk'] == pess_dk]
         return data
