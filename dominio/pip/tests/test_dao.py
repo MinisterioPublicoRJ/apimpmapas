@@ -393,6 +393,7 @@ class TestPIPPrincipaisInvestigadosListaDAO:
         result_set = [
             (
                 16,
+                16,
                 "Nome",
                 "Tipo",
                 29933850,
@@ -410,6 +411,7 @@ class TestPIPPrincipaisInvestigadosListaDAO:
         ser_data = PIPPrincipaisInvestigadosListaDAO.serialize(result_set)
         expected_data = [{
             "representante_dk": 16,
+            "pess_dk": 16,
             "coautores": "Nome",
             "tipo_personagem": "Tipo",
             "orgao_id": 29933850,

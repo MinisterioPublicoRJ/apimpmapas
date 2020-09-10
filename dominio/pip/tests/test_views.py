@@ -244,10 +244,11 @@ class TestPIPPrincipaisInvestigadosListaView(
     @mock.patch("dominio.pip.views.PIPPrincipaisInvestigadosPerfilDAO.get")
     @mock.patch("dominio.pip.views.PIPPrincipaisInvestigadosListaDAO.get")
     def test_correct_response(self, _get_procedimentos, _get_perfil):
-        _get_perfil.return_value = {"data": 1}
+        _get_perfil.return_value = [{"data": 1}]
         _get_procedimentos.return_value = [{"data": 1}, {"data": 2}]
         expected_output = {
             "perfil": {"data": 1},
+            "similares": [{"data": 1}],
             "procedimentos": [{"data": 1}, {"data": 2}]
         }
 
@@ -258,6 +259,6 @@ class TestPIPPrincipaisInvestigadosListaView(
         resp = self.client.get(url)
 
         _get_perfil.assert_called_once_with(dk=12345)
-        _get_procedimentos.assert_called_once_with(dk=12345)
+        _get_procedimentos.assert_called_once_with(dk=12345, pess_dk=0)
         assert resp.status_code == 200
         assert resp.data == expected_output
