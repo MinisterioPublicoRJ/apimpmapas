@@ -685,7 +685,28 @@ O Radar de Performance da PIP analisa 5 eixos de ação da promotoria:
 
 Para cada um destes eixos temos o número total de andamentos detectados num período de 6 meses, assim como o valor máximo presente em um mesmo órgão daquela atribuição. Os andamentos não podem ter sido cancelados, e nem o documento ao qual se referem.
 
-Diferentemente do :ref:`radar-performance-tutela`
+O único eixo em que isso não se aplica, é o eixo de "devoluções à DP", que não leva em consideração diretamente tipos de andamento, mas sim vistas.
+
+Diferentemente do :ref:`radar-performance-tutela` (que considera documentos de qualquer classe), o Radar de Performance da PIP está restrito a um certo conjunto de documentos:
+
++-----------------------------------+-----------------------------------+
+| cldc_dk                           | hierarquia                        |
++===================================+===================================+
+| 3                                 | PROCESSO MILITAR > PROCESSO       |
+|                                   | CRIMINAL > Procedimentos          |
+|                                   | Investigatórios > Inquérito       |
+|                                   | Policial Militar                  |
++-----------------------------------+-----------------------------------+
+| 494                               | PROCESSO CRIMINAL > Procedimentos |
+|                                   | Investigatórios > Inquérito       |
+|                                   | Policial                          |
++-----------------------------------+-----------------------------------+
+| 590                               | PROCESSO CRIMINAL > Procedimentos |
+|                                   | Investigatórios > Procedimento    |
+|                                   | Investigatório Criminal (PIC-MP)  |
++-----------------------------------+-----------------------------------+
+
+Isso quer dizer que, caso um andamento de denúncia, por exemplo, tenha ocorrido em um documento que não pertença a alguma destas classes, ele não será contabilizado no radar.
 
 O gráfico permite analisar, visualmente, quais eixos estão mais próximos do máximo, e quais estão mais próximos de 0. Além disso, é possível ver o perfil médio daquela atribuição em cada um dos eixos. Assim, pode-se comparar a promotoria em questão, com o comportamento médio dos outros órgãos similares a ela.
 
