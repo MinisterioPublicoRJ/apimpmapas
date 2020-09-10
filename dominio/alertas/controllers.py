@@ -4,6 +4,44 @@ from dominio.alertas.tasks import async_envia_email_ouvidoria
 from dominio.db_connectors import get_hbase_table
 
 
+class DispensaAlertaComprasCotroller:
+    alerta_sigla = "COMP"
+    hbase_cf = "dados_alertas"
+
+    @classmethod
+    def get_table(cls):
+        return get_hbase_table(
+            settings.PROMOTRON_HBASE_NAMESPACE
+            +
+            settings.HBASE_DISPENSAR_ALERTAS_TABLE
+        )
+
+    @classmethod
+    def get_row_key(cls, orgao_id, alerta_id):
+        return (
+            f"{orgao_id}_{cls.alerta_sigla}_{alerta_id}"
+        ).encode()
+
+    @classmethod
+    def get_row_data(cls, orgao_id, alerta_id):
+        return {
+            f"{cls.hbase_cf}:orgao".encode(): orgao_id.encode(),
+            f"{cls.hbase_cf}:alerta_id".encode(): alerta_id.encode(),
+            f"{cls.hbase_cf}:sigla".encode(): cls.alerta_sigla.encode(),
+        }
+
+    @classmethod
+    def dispensa_para_orgao(cls, orgao_id, alerta_id):
+        row_key = cls.get_row_key(orgao_id, alerta_id)
+        data = cls.get_row_data(orgao_id, alerta_id)
+        cls.get_table().put(row_key, data)
+
+    @classmethod
+    def retorna_para_orgao(cls, orgao_id, alerta_id):
+        row_key = cls.get_row_key(orgao_id, alerta_id)
+        cls.get_table().delete(row_key)
+
+
 class EnviaAlertaComprasOuvidoriaController:
     alerta_sigla = "COMP"
     hbase_cf = "dados_alertas"
@@ -21,23 +59,19 @@ class EnviaAlertaComprasOuvidoriaController:
         )
 
     @classmethod
-    def rollback_envio(cls, orgao_id, alerta_sigla, alerta_id):
-        row_key = cls.get_row_key(orgao_id, alerta_sigla, alerta_id)
+    def rollback_envio(cls, orgao_id, alerta_id):
+        row_key = cls.get_row_key(orgao_id, alerta_id)
         cls.get_table().delete(row_key)
 
     @classmethod
-    def get_row_key(cls, orgao_id, alerta_sigla, alerta_id):
+    def get_row_key(cls, orgao_id, alerta_id):
         return (
-            f"alerta_ouvidoria_{orgao_id}_{alerta_sigla}_{alerta_id}"
+            f"alerta_ouvidoria_{orgao_id}_{cls.alerta_sigla}_{alerta_id}"
         ).encode()
 
     @property
     def row_key(self):
-        return self.get_row_key(
-            self.orgao_id,
-            self.alerta_sigla,
-            self.alerta_id
-        )
+        return self.get_row_key(self.orgao_id, self.alerta_id)
 
     @property
     def row_data(self):

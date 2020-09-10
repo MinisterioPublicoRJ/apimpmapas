@@ -6,6 +6,62 @@ from django.test import TestCase
 from dominio.alertas import controllers
 
 
+class TestDispensaAlertasController(TestCase):
+    def setUp(self):
+        self.cls = controllers.DispensaAlertaComprasCotroller
+        self.orgao_id = "12345"
+        self.alerta_id = "abc12345"
+        self.alerta_sigla = self.cls.alerta_sigla
+
+        self.get_hbase_table_patcher = mock.patch(
+            "dominio.alertas.controllers.get_hbase_table"
+        )
+        self.get_hbase_table_mock = self.get_hbase_table_patcher.start()
+        self.hbase_obj_mock = mock.Mock()
+        self.get_hbase_table_mock.return_value = self.hbase_obj_mock
+
+        self.expected_hbase_key = (
+            f"{self.orgao_id}_{self.alerta_sigla}_{self.alerta_id}".encode()
+        )
+        self.expected_hbase_data = {
+            b"dados_alertas:orgao": self.orgao_id.encode(),
+            b"dados_alertas:sigla": self.alerta_sigla.encode(),
+            b"dados_alertas:alerta_id": self.alerta_id.encode(),
+        }
+
+    def tearDown(self):
+        self.get_hbase_table_patcher.stop()
+
+    def test_dispensa_alerta_para_orgao(self):
+        self.cls.dispensa_para_orgao(
+            self.orgao_id,
+            self.alerta_id
+        )
+        self.get_hbase_table_mock.assert_called_once_with(
+            settings.PROMOTRON_HBASE_NAMESPACE
+            +
+            settings.HBASE_DISPENSAR_ALERTAS_TABLE,
+        )
+        self.hbase_obj_mock.put.assert_called_once_with(
+            self.expected_hbase_key,
+            self.expected_hbase_data
+        )
+
+    def test_retorna_alerta_para_orgao(self):
+        self.cls.retorna_para_orgao(
+            self.orgao_id,
+            self.alerta_id
+        )
+        self.get_hbase_table_mock.assert_called_once_with(
+            settings.PROMOTRON_HBASE_NAMESPACE
+            +
+            settings.HBASE_DISPENSAR_ALERTAS_TABLE,
+        )
+        self.hbase_obj_mock.delete.assert_called_once_with(
+            self.expected_hbase_key,
+        )
+
+
 class TestEnviaAlertaComprasOuvidoriaController(TestCase):
     def setUp(self):
         self.alerta_sigla = (
@@ -92,7 +148,6 @@ class TestEnviaAlertaComprasOuvidoriaController(TestCase):
         cls = controllers.EnviaAlertaComprasOuvidoriaController
         row_key = cls.get_row_key(
             self.orgao_id,
-            self.alerta_sigla,
             self.alerta_id
         )
 
@@ -102,7 +157,6 @@ class TestEnviaAlertaComprasOuvidoriaController(TestCase):
         cls = controllers.EnviaAlertaComprasOuvidoriaController
         cls.rollback_envio(
             self.orgao_id,
-            cls.alerta_sigla,
             self.alerta_id
         )
 
