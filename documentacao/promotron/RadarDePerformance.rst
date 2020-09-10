@@ -670,14 +670,90 @@ Radar de Performance da PIP
 User Manual
 ~~~~~~~~~~~
 
+Regras de Arquivamento
+**********************
+
+Regras de Denúncia
+******************
+
+Regras de Medida Cautelar
+*************************
+
+Regras de Devoluções à DP
+*************************
+
+Regras de Acordo de Não-Persecução Penal
+****************************************
+
 Estrutura do Código
 ~~~~~~~~~~~~~~~~~~~
 
 Processo BDA
 ************
 
+::
+
+   Nome da Tabela: TB_PIP_RADAR_PERFORMANCE
+   Colunas: 
+        aisp_codigo (string)
+        aisp_nome (string)
+        orgao_id (int)
+        nr_denuncias (int)
+        nr_cautelares (int)
+        nr_acordos_n_persecucao (int)
+        nr_arquivamentos (int)
+        nr_aberturas_vista (int)
+        max_denuncias (int)
+        max_cautelares (int)
+        max_acordos (int)
+        max_arquivamentos (int)
+        max_vistas (int)
+        perc_denuncias (double)
+        perc_cautelares (double)
+        perc_acordos (double)
+        perc_arquivamentos (double)
+        perc_aberturas_vista (double)
+        med_denuncias (double)
+        med_cautelares (double)
+        med_acordos (double)
+        med_arquivamentos (double)
+        med_vistas (double)
+        var_med_denuncias (double)
+        var_med_cautelares (double)
+        var_med_acordos (double)
+        var_med_arquivamentos (double)
+        var_med_aberturas_vista (double)
+        dt_calculo (timestamp)
+        nm_max_denuncias (string)
+        nm_max_cautelares (string)
+        nm_max_acordos (string)
+        nm_max_arquivamentos (string)
+        nm_max_aberturas (string)
+        cod_pct (int)
+    
+
+URL do Script: https://github.com/MinisterioPublicoRJ/scripts-bda/blob/master/robo_promotoria/src/tabela_pip_radar_performance.py.
+
 View Backend
 ************
+
+::
+
+   GET dominio/pip/radar-performance/<str:orgao_id>
+
+   HTTP 200 OK
+   Allow: GET, HEAD, OPTIONS
+   Content-Type: application/json
+   Vary: Accept
+
+   {
+       "atributo1": 1,
+       "atributo2": 2,
+   }
+
+Nome da View: `PIPRadarPerformanceView`_.
+
+.. _ViewTal: https://github.com/MinisterioPublicoRJ/apimpmapas/blob/develop/dominio/pip/views.py
 
 Dependências
 ~~~~~~~~~~~~
