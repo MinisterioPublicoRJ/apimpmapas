@@ -4,23 +4,22 @@ from dominio.alertas.tasks import async_envia_email_ouvidoria
 from dominio.db_connectors import get_hbase_table
 
 
-class DispensaAlertaComprasCotroller:
-    alerta_sigla = "COMP"
-    hbase_cf = "dados_alertas"
+class BaseController:
+    alerta_sigla = None
+    hbase_cf = None
+    hbase_table_name = None
 
     @classmethod
     def get_table(cls):
         return get_hbase_table(
             settings.PROMOTRON_HBASE_NAMESPACE
             +
-            settings.HBASE_DISPENSAR_ALERTAS_TABLE
+            cls.hbase_table_name
         )
 
     @classmethod
     def get_row_key(cls, orgao_id, alerta_id):
-        return (
-            f"{orgao_id}_{cls.alerta_sigla}_{alerta_id}"
-        ).encode()
+        return f"{orgao_id}_{cls.alerta_sigla}_{alerta_id}".encode()
 
     @classmethod
     def get_row_data(cls, orgao_id, alerta_id):
@@ -29,6 +28,12 @@ class DispensaAlertaComprasCotroller:
             f"{cls.hbase_cf}:alerta_id".encode(): alerta_id.encode(),
             f"{cls.hbase_cf}:sigla".encode(): cls.alerta_sigla.encode(),
         }
+
+
+class DispensaAlertaComprasCotroller(BaseController):
+    alerta_sigla = "COMP"
+    hbase_cf = "dados_alertas"
+    hbase_table_name = settings.HBASE_DISPENSAR_ALERTAS_TABLE
 
     @classmethod
     def dispensa_para_orgao(cls, orgao_id, alerta_id):
@@ -42,32 +47,19 @@ class DispensaAlertaComprasCotroller:
         cls.get_table().delete(row_key)
 
 
-class EnviaAlertaComprasOuvidoriaController:
+class EnviaAlertaComprasOuvidoriaController(BaseController):
     alerta_sigla = "COMP"
     hbase_cf = "dados_alertas"
+    hbase_table_name = settings.HBASE_ALERTAS_OUVIDORIA_TABLE
 
     def __init__(self, orgao_id, alerta_id):
         self.orgao_id = str(orgao_id)
         self.alerta_id = str(alerta_id)
 
     @classmethod
-    def get_table(cls):
-        return get_hbase_table(
-            settings.PROMOTRON_HBASE_NAMESPACE
-            +
-            settings.HBASE_ALERTAS_OUVIDORIA_TABLE
-        )
-
-    @classmethod
     def rollback_envio(cls, orgao_id, alerta_id):
         row_key = cls.get_row_key(orgao_id, alerta_id)
         cls.get_table().delete(row_key)
-
-    @classmethod
-    def get_row_key(cls, orgao_id, alerta_id):
-        return (
-            f"alerta_ouvidoria_{orgao_id}_{cls.alerta_sigla}_{alerta_id}"
-        ).encode()
 
     @property
     def row_key(self):
@@ -75,11 +67,7 @@ class EnviaAlertaComprasOuvidoriaController:
 
     @property
     def row_data(self):
-        return {
-            f"{self.hbase_cf}:orgao".encode(): self.orgao_id.encode(),
-            f"{self.hbase_cf}:alerta_id".encode(): self.alerta_id.encode(),
-            f"{self.hbase_cf}:sigla".encode(): self.alerta_sigla.encode(),
-        }
+        return self.get_row_data(self.orgao_id, self.alerta_id)
 
     @property
     def alerta_already_sent(self):

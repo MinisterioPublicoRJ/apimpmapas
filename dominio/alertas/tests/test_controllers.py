@@ -93,8 +93,7 @@ class TestEnviaAlertaComprasOuvidoriaController(TestCase):
         }
         self.expected_status = 201
         self.expected_row_key = (
-            f"alerta_ouvidoria_{self.orgao_id}_{self.alerta_sigla}"
-            f"_{self.alerta_id}"
+            f"{self.orgao_id}_{self.alerta_sigla}_{self.alerta_id}"
         ).encode()
         cf = self.controller.hbase_cf
         self.expected_data = {
