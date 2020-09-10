@@ -61,10 +61,11 @@ class JWTAuthMixin:
         # TODO: nos deveríamos aceitar POST de um admin para qualquer órgão?
         is_admin = token_payload.get("tipo_permissao", "regular") == "admin"
         orgaos = (
-            token_payload.get("ids_orgaos_lotados_validos", [])
-            + [token_payload.get("orgao")]
+            [int(o)
+             for o in token_payload.get("ids_orgaos_lotados_validos", [])]
+            + [int(token_payload.get("orgao"))]
         )
-        return is_admin or kwargs.get(self.orgao_url_kwarg) in orgaos
+        return is_admin or int(kwargs.get(self.orgao_url_kwarg)) in orgaos
 
     def dispatch(self, request, *args, **kwargs):
         try:
