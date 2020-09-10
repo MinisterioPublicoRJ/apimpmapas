@@ -12,24 +12,44 @@ class EnviaAlertaComprasOuvidoriaController:
         self.orgao_id = str(orgao_id)
         self.alerta_id = str(alerta_id)
 
-    @property
-    def get_row_key(self):
-        return (
-            f"alerta_ouvidoria_{self.orgao_id}_{self.alerta_sigla}_"
-            f"{self.alerta_id}"
-        ).encode()
-
-    @property
-    def get_table(self):
+    @classmethod
+    def get_table(cls):
         return get_hbase_table(
             settings.PROMOTRON_HBASE_NAMESPACE
             +
             settings.HBASE_ALERTAS_OUVIDORIA_TABLE
         )
 
+    @classmethod
+    def rollback_envio(cls, orgao_id, alerta_sigla, alerta_id):
+        row_key = cls.get_row_key(orgao_id, alerta_sigla, alerta_id)
+        cls.get_table().delete(row_key)
+
+    @classmethod
+    def get_row_key(cls, orgao_id, alerta_sigla, alerta_id):
+        return (
+            f"alerta_ouvidoria_{orgao_id}_{alerta_sigla}_{alerta_id}"
+        ).encode()
+
+    @property
+    def row_key(self):
+        return self.get_row_key(
+            self.orgao_id,
+            self.alerta_sigla,
+            self.alerta_id
+        )
+
+    @property
+    def row_data(self):
+        return {
+            f"{self.hbase_cf}:orgao".encode(): self.orgao_id.encode(),
+            f"{self.hbase_cf}:alerta_id".encode(): self.alerta_id.encode(),
+            f"{self.hbase_cf}:sigla".encode(): self.alerta_sigla.encode(),
+        }
+
     @property
     def alerta_already_sent(self):
-        result = self.get_table.scan(row_prefix=self.get_row_key)
+        result = self.get_table().scan(row_prefix=self.row_key)
         try:
             next(result)
             sent = True
@@ -38,18 +58,10 @@ class EnviaAlertaComprasOuvidoriaController:
 
         return sent
 
-    @property
-    def get_row_data(self):
-        return {
-            f"{self.hbase_cf}:orgao".encode(): self.orgao_id.encode(),
-            f"{self.hbase_cf}:alerta_id".encode(): self.alerta_id.encode(),
-            f"{self.hbase_cf}:sigla".encode(): self.alerta_sigla.encode(),
-        }
-
     def save_alerta_state(self):
-        self.get_table.put(
-            self.get_row_key,
-            self.get_row_data
+        self.get_table().put(
+            self.row_key,
+            self.row_data
         )
 
     def envia_email(self):

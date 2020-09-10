@@ -36,29 +36,28 @@ class TestEnviaAlertaComprasOuvidoriaController(TestCase):
             "detail": "Alerta enviado para ouvidoria com sucesso"
         }
         self.expected_status = 201
+        self.expected_row_key = (
+            f"alerta_ouvidoria_{self.orgao_id}_{self.alerta_sigla}"
+            f"_{self.alerta_id}"
+        ).encode()
+        cf = self.controller.hbase_cf
+        self.expected_data = {
+            f"{cf}:orgao".encode(): self.orgao_id.encode(),
+            f"{cf}:alerta_id".encode(): self.alerta_id.encode(),
+            f"{cf}:sigla".encode(): self.controller.alerta_sigla.encode(),
+        }
 
     def tearDown(self):
         self.get_hbase_table_patcher.stop()
         self.async_envia_email_patcher.stop()
 
     def test_cria_chave_do_banco(self):
-        expected = (
-            f"alerta_ouvidoria_{self.orgao_id}_{self.alerta_sigla}"
-            f"_{self.alerta_id}"
-        ).encode()
-
-        self.assertEqual(self.controller.get_row_key, expected)
+        self.assertEqual(self.controller.row_key, self.expected_row_key)
 
     def test_cria_dados_para_hbase(self):
-        data = self.controller.get_row_data
-        cf = self.controller.hbase_cf
-        expected_data = {
-            f"{cf}:orgao".encode(): self.orgao_id.encode(),
-            f"{cf}:alerta_id".encode(): self.alerta_id.encode(),
-            f"{cf}:sigla".encode(): self.controller.alerta_sigla.encode(),
-        }
+        data = self.controller.row_data
 
-        self.assertEqual(data, expected_data)
+        self.assertEqual(data, self.expected_data)
 
     def test_envia_email(self):
         self.controller.envia_email()
@@ -89,15 +88,37 @@ class TestEnviaAlertaComprasOuvidoriaController(TestCase):
         )
         self.assertEqual(status, 409)
 
+    def test_get_row_key(self):
+        cls = controllers.EnviaAlertaComprasOuvidoriaController
+        row_key = cls.get_row_key(
+            self.orgao_id,
+            self.alerta_sigla,
+            self.alerta_id
+        )
+
+        self.assertEqual(row_key, self.expected_row_key)
+
+    def test_rollback_em_caso_de_erro(self):
+        cls = controllers.EnviaAlertaComprasOuvidoriaController
+        cls.rollback_envio(
+            self.orgao_id,
+            cls.alerta_sigla,
+            self.alerta_id
+        )
+
+        self.hbase_table_mock.delete.assert_called_once_with(
+            self.expected_row_key
+        )
+
     def test_envia_para_ouvidoria_com_sucesso(self):
         resp, status = self.controller.envia()
 
         self.hbase_table_mock.scan.assert_called_once_with(
-            row_prefix=self.controller.get_row_key
+            row_prefix=self.controller.row_key
         )
         self.hbase_table_mock.put.assert_called_once_with(
-            self.controller.get_row_key,
-            self.controller.get_row_data
+            self.expected_row_key,
+            self.expected_data
         )
 
         connection_str = (
