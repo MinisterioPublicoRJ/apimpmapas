@@ -8,7 +8,7 @@ from dominio.alertas import controllers
 
 class TestDispensaAlertasController(TestCase):
     def setUp(self):
-        self.cls = controllers.DispensaAlertaComprasCotroller
+        self.cls = controllers.DispensaAlertaComprasController
         self.orgao_id = "12345"
         self.alerta_id = "abc12345"
         self.alerta_sigla = self.cls.alerta_sigla

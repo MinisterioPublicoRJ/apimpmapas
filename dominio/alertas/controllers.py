@@ -30,7 +30,7 @@ class BaseController:
         }
 
 
-class DispensaAlertaComprasCotroller(BaseController):
+class DispensaAlertaComprasController(BaseController):
     alerta_sigla = "COMP"
     hbase_cf = "dados_alertas"
     hbase_table_name = settings.HBASE_DISPENSAR_ALERTAS_TABLE

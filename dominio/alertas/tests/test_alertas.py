@@ -214,7 +214,7 @@ class TestDispensarAlertasCompras(NoJWTTestCase, TestCase):
         )
 
         self.dispensa_patcher = mock.patch.object(
-            controllers.DispensaAlertaComprasCotroller, "dispensa_para_orgao"
+            controllers.DispensaAlertaComprasController, "dispensa_para_orgao"
         )
         self.dispensa_controller_mock = self.dispensa_patcher.start()
 
@@ -249,7 +249,7 @@ class TestRetornaAlertasCompras(NoJWTTestCase, TestCase):
         )
 
         self.dispensa_patcher = mock.patch.object(
-            controllers.DispensaAlertaComprasCotroller, "retorna_para_orgao"
+            controllers.DispensaAlertaComprasController, "retorna_para_orgao"
         )
         self.dispensa_controller_mock = self.dispensa_patcher.start()
 

@@ -62,7 +62,7 @@ class DispensarAlertaView(JWTAuthMixin, APIView):
         orgao_id = self.kwargs.get(self.orgao_url_kwarg)
         alerta_id = self.get_alerta_id()
 
-        controllers.DispensaAlertaComprasCotroller.dispensa_para_orgao(
+        controllers.DispensaAlertaComprasController.dispensa_para_orgao(
             orgao_id, alerta_id
         )
         return Response(
@@ -81,7 +81,7 @@ class RetornarAlertaView(JWTAuthMixin, APIView):
         orgao_id = self.kwargs.get(self.orgao_url_kwarg)
         alerta_id = self.get_alerta_id()
 
-        controllers.DispensaAlertaComprasCotroller.retorna_para_orgao(
+        controllers.DispensaAlertaComprasController.retorna_para_orgao(
             orgao_id, alerta_id
         )
 
