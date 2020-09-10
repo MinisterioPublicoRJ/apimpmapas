@@ -7,6 +7,8 @@ O Radar de Performance é um componente destinado a facilitar a análise das aç
 
 Os endpoints e tabelas dos Radares de Performance de PIP e Tutela são separados. Assim, eles serão tratados também em subseções separadas.
 
+.. _radar-performance-tutela:
+
 Radar de Performance da Tutela
 ------------------------------
 
@@ -667,8 +669,27 @@ Troubleshooting
 Radar de Performance da PIP
 ---------------------------
 
+.. figure:: figuras/radar_performance_pip.png
+   :alt: RadarPIP
+
 User Manual
 ~~~~~~~~~~~
+
+O Radar de Performance da PIP analisa 5 eixos de ação da promotoria:
+
+- Arquivamentos;
+- Denúncias;
+- Medidas Cautelares;
+- Devoluções à DP;
+- e Acordos de Não-Persecução.
+
+Para cada um destes eixos temos o número total de andamentos detectados num período de 6 meses, assim como o valor máximo presente em um mesmo órgão daquela atribuição. Os andamentos não podem ter sido cancelados, e nem o documento ao qual se referem.
+
+Diferentemente do :ref:`radar-performance-tutela`
+
+O gráfico permite analisar, visualmente, quais eixos estão mais próximos do máximo, e quais estão mais próximos de 0. Além disso, é possível ver o perfil médio daquela atribuição em cada um dos eixos. Assim, pode-se comparar a promotoria em questão, com o comportamento médio dos outros órgãos similares a ela.
+
+Os tipos de andamento considerados em cada um dos 5 eixos são os seguintes:
 
 Regras de Arquivamento
 **********************
