@@ -72,6 +72,7 @@ class EnviaAlertaComprasOuvidoriaController:
         )
 
     def prepara_resposta(self, already_sent):
+        # TODO: talvez levantar excessão e tratar na view
         status = 201
         msg = "Alerta enviado para ouvidoria com sucesso"
 

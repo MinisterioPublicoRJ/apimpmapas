@@ -114,7 +114,7 @@ class TestEnviaAlertaComprasOuvidoriaController(TestCase):
         resp, status = self.controller.envia()
 
         self.hbase_table_mock.scan.assert_called_once_with(
-            row_prefix=self.controller.row_key
+            row_prefix=self.expected_row_key
         )
         self.hbase_table_mock.put.assert_called_once_with(
             self.expected_row_key,
@@ -137,3 +137,23 @@ class TestEnviaAlertaComprasOuvidoriaController(TestCase):
         )
         self.assertEqual(resp, self.expected_resp)
         self.assertEqual(status, self.expected_status)
+
+    def test_email_ja_enviado_para_ouvidoria(self):
+        self.hbase_table_mock.scan.return_value = iter((True,))
+
+        resp, status = self.controller.envia()
+
+        self.hbase_table_mock.scan.assert_called_once_with(
+            row_prefix=self.expected_row_key
+        )
+        self.hbase_table_mock.put.assert_not_called()
+        self.async_envia_email_mock.delay.assert_not_called()
+
+        self.assertEqual(
+            resp,
+            {"detail": "Este alerta já foi enviado para ouvidoria"}
+        )
+        self.assertEqual(
+            status,
+            409
+        )
