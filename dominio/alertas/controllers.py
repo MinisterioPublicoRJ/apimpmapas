@@ -46,6 +46,12 @@ class DispensaAlertaComprasCotroller(BaseController):
         row_key = cls.get_row_key(orgao_id, alerta_id)
         cls.get_table().delete(row_key)
 
+    @classmethod
+    def dispensa_para_todos_orgaos(cls, alerta_id):
+        row_key = cls.get_row_key("ALL", alerta_id)
+        data = cls.get_row_data("ALL", alerta_id)
+        cls.get_table().put(row_key, data)
+
 
 class EnviaAlertaComprasOuvidoriaController(BaseController):
     alerta_sigla = "COMP"
