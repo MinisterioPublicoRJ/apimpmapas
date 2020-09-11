@@ -64,7 +64,12 @@ class JWTAuthMixin:
             token_payload.get("ids_orgaos_lotados_validos", [])
             + [token_payload.get("orgao")]
         )
-        return is_admin or kwargs.get(self.orgao_url_kwarg) in orgaos
+        orgao_url = kwargs.get(self.orgao_url_kwarg)
+        return (
+            is_admin
+            or orgao_url in orgaos
+            or not orgao_url
+        )
 
     def dispatch(self, request, *args, **kwargs):
         try:

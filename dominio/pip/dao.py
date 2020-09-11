@@ -21,7 +21,7 @@ from dominio.pip.serializers import (
 )
 
 from .utils import get_top_n_by_aisp, get_orgaos_same_aisps
-from dominio.dao import GenericDAO, SingleDataObjectDAO
+from dominio.dao import GenericDAO
 
 
 class GenericPIPDAO(GenericDAO):
@@ -267,16 +267,20 @@ class PIPPrincipaisInvestigadosDAO(GenericPIPDAO):
         return data
 
 
-class PIPPrincipaisInvestigadosPerfilDAO(SingleDataObjectDAO, GenericPIPDAO):
+class PIPPrincipaisInvestigadosPerfilDAO(GenericPIPDAO):
     query_file = "pip_principais_investigados_perfil.sql"
     columns = [
+        "pess_dk",
         "nm_investigado",
         "nm_mae",
         "cpf",
         "rg",
         "dt_nasc",
     ]
-    table_namespaces = {"schema": settings.EXADATA_NAMESPACE}
+    table_namespaces = {
+        "schema_exadata": settings.EXADATA_NAMESPACE,
+        "schema": settings.TABLE_NAMESPACE
+    }
     serializer = PIPPrincipaisInvestigadosPerfilSerializer
 
 
@@ -284,6 +288,7 @@ class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
     query_file = "pip_principais_investigados_lista.sql"
     columns = [
         "representante_dk",
+        "pess_dk",
         "coautores",
         "tipo_personagem",
         "orgao_id",
@@ -317,6 +322,14 @@ class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
             row['nm_orgao'] = format_text(nm_orgao)
 
         return ser_data
+
+    @classmethod
+    def get(cls, accept_empty=False, **kwargs):
+        data = super().get(accept_empty, **kwargs)
+        pess_dk = kwargs.get("pess_dk")
+        if pess_dk:
+            data = [x for x in data if x['pess_dk'] == pess_dk]
+        return data
 
 
 class PIPIndicadoresDeSucessoDAO(GenericPIPDAO):

@@ -160,18 +160,23 @@ class PIPPrincipaisInvestigadosListaView(
     def get(self, request, *args, **kwargs):
         representante_dk = int(kwargs.get("representante_dk"))
         page = int(request.GET.get("page", 1))
+        pess_dk = int(request.GET.get("pess_dk", 0))
 
-        data_perf = PIPPrincipaisInvestigadosPerfilDAO.get(dk=representante_dk)
-        data_lista = PIPPrincipaisInvestigadosListaDAO.get(dk=representante_dk)
+        similares = PIPPrincipaisInvestigadosPerfilDAO.get(dk=representante_dk)
+        perfil = similares[0] if similares else {}
+        procedimentos = PIPPrincipaisInvestigadosListaDAO.get(
+            dk=representante_dk, pess_dk=pess_dk
+        )
 
         page_data = self.paginate(
-            data_lista,
+            procedimentos,
             page=page,
             page_size=self.PRINCIPAIS_INVESTIGADOS_PROCEDIMENTOS_SIZE
         )
 
         data = {
-            'perfil': data_perf,
+            'perfil': perfil,
+            'similares': similares,
             'procedimentos': page_data
         }
 

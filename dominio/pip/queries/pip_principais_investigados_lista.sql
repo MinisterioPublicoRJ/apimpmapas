@@ -1,5 +1,6 @@
 SELECT 
     representante_dk,
+    pess_dk,
     coautores,
     tppe_descricao,
     pip_codigo,

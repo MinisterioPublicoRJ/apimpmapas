@@ -24,6 +24,7 @@ class PIPPrincipaisInvestigadosSerializer(serializers.Serializer):
 
 
 class PIPPrincipaisInvestigadosPerfilSerializer(serializers.Serializer):
+    pess_dk = serializers.IntegerField()
     nm_investigado = serializers.CharField()
     nm_mae = serializers.CharField()
     cpf = serializers.CharField()
@@ -33,6 +34,7 @@ class PIPPrincipaisInvestigadosPerfilSerializer(serializers.Serializer):
 
 class PIPPrincipaisInvestigadosListaSerializer(serializers.Serializer):
     representante_dk = serializers.IntegerField()
+    pess_dk = serializers.IntegerField()
     coautores = serializers.CharField()
     tipo_personagem = serializers.CharField()
     orgao_id = serializers.IntegerField()
