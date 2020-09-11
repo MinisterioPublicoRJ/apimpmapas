@@ -78,6 +78,22 @@ class TestDispensaAlertasController(TestCase):
             self.expected_hbase_data
         )
 
+    def test_retorna_alerta_para_todos_orgaos(self):
+        self.expected_hbase_key = (
+            f"ALL_{self.alerta_sigla}_{self.alerta_id}".encode()
+        )
+
+        self.controller.retorna_para_todos_orgaos()
+
+        self.get_hbase_table_mock.assert_called_once_with(
+            settings.PROMOTRON_HBASE_NAMESPACE
+            +
+            settings.HBASE_DISPENSAR_ALERTAS_TABLE,
+        )
+        self.hbase_obj_mock.delete.assert_called_once_with(
+            self.expected_hbase_key,
+        )
+
 
 class TestEnviaAlertaComprasOuvidoriaController(TestCase):
     def setUp(self):

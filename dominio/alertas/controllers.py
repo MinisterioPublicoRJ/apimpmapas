@@ -46,6 +46,10 @@ class DispensaAlertaComprasController(BaseController):
         row_key = self.get_row_key(self.orgao_id, self.alerta_id)
         self.get_table.delete(row_key)
 
+    def retorna_para_todos_orgaos(self):
+        row_key = self.get_row_key("ALL", self.alerta_id)
+        self.get_table.delete(row_key)
+
     def dispensa_para_todos_orgaos(self):
         row_key = self.get_row_key("ALL", self.alerta_id)
         data = self.get_row_data("ALL", self.alerta_id)
@@ -94,7 +98,6 @@ class EnviaAlertaComprasOuvidoriaController(BaseController):
         )
 
     def envia_email(self):
-        # TODO: passar a instância (self) da classe para a task
         async_envia_email_ouvidoria.delay(self)
 
     def prepara_resposta(self, already_sent):
