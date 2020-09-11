@@ -69,7 +69,11 @@ class JWTAuthMixin:
         )
         orgao_url = kwargs.get(self.orgao_url_kwarg)
         orgao_url = int(orgao_url) if orgao_url else orgao_url
-        return is_admin or orgao_url in orgaos
+        return (
+            is_admin
+            or orgao_url in orgaos
+            or not orgao_url
+        )
 
     def dispatch(self, request, *args, **kwargs):
         try:
