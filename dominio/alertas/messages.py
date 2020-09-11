@@ -1,3 +1,4 @@
+from cached_property import cached_property
 from django.template import Context, Template
 
 
@@ -9,7 +10,7 @@ class MensagemOuvidoriaCompras:
         self.orgao_id = orgao_id
         self.alerta_id = alerta_id
 
-    @property
+    @cached_property
     def context(self):
         return Context(
             {"orgao_id": self.orgao_id, "alerta_id": self.alerta_id}
