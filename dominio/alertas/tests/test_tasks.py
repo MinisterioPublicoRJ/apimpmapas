@@ -20,13 +20,21 @@ class TestEnviaEmailOuvidoria(TestCase):
         )
         self.mail_mock = self.mail_patcher.start()
 
+        self.messager_patcher = mock.patch.object(
+            self.controller,
+            "render_message"
+        )
+        self.expected_msg = "<html></html>"
+        self.message_mock = self.messager_patcher.start()
+        self.message_mock.return_value = self.expected_msg
+
     def tearDown(self):
         self.mail_patcher.stop()
+        self.message_mock = self.messager_patcher.stop()
 
     def test_envia_email(self):
         async_envia_email_ouvidoria.run(self.controller)
-
-        self.mail_mock.assert_called_once_with("message")
+        self.mail_mock.assert_called_once_with(self.expected_msg)
 
     @mock.patch.object(async_envia_email_ouvidoria, "retry")
     def test_envia_email_erro(self, _retry):
@@ -34,5 +42,5 @@ class TestEnviaEmailOuvidoria(TestCase):
 
         async_envia_email_ouvidoria.run(self.controller)
 
-        self.mail_mock.assert_called_once_with("message")
+        self.mail_mock.assert_called_once_with(self.expected_msg)
         _retry.assert_called()

@@ -20,7 +20,7 @@ class CustomTaskClass(celery.task.Task):
 @app.task(base=CustomTaskClass, default_retry_delay=30, max_retries=3)
 def async_envia_email_ouvidoria(controller):
     try:
-        msg = "message"
+        msg = controller.render_message()
         envia_email_ouvidoria(msg)
     except Exception as e:
         try:

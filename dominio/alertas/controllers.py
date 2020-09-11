@@ -1,5 +1,6 @@
 from django.conf import settings
 
+from dominio.alertas.messages import MensagemOuvidoriaCompras
 from dominio.alertas.tasks import async_envia_email_ouvidoria
 from dominio.db_connectors import get_hbase_table
 
@@ -99,6 +100,10 @@ class EnviaAlertaComprasOuvidoriaController(BaseController):
 
     def envia_email(self):
         async_envia_email_ouvidoria.delay(self)
+
+    def render_message(self):
+        messager = MensagemOuvidoriaCompras(self.orgao_id, self.alerta_id)
+        return messager.render()
 
     def prepara_resposta(self, already_sent):
         # TODO: talvez levantar excessão e tratar na view

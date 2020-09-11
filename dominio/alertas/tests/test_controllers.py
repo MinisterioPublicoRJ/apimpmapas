@@ -126,6 +126,15 @@ class TestEnviaAlertaComprasOuvidoriaController(TestCase):
         self.dispensa_todos_orgaos_mock = self.dispensa_controller_patcher\
             .start()
 
+        self.expected_msg = "<html></html>"
+        self.messager_obj_mock = mock.Mock()
+        self.messager_obj_mock.render.return_value = self.expected_msg
+        self.messager_patcher = mock.patch(
+            "dominio.alertas.controllers.MensagemOuvidoriaCompras"
+        )
+        self.messager_mock = self.messager_patcher.start()
+        self.messager_mock.return_value = self.messager_obj_mock
+
         self.expected_resp = {
             "detail": "Alerta enviado para ouvidoria com sucesso"
         }
@@ -144,6 +153,7 @@ class TestEnviaAlertaComprasOuvidoriaController(TestCase):
         self.get_hbase_table_patcher.stop()
         self.async_envia_email_patcher.stop()
         self.dispensa_controller_patcher.stop()
+        self.messager_mock = self.messager_patcher.start()
 
     def test_cria_chave_do_banco(self):
         self.assertEqual(self.controller.row_key, self.expected_row_key)
@@ -237,6 +247,11 @@ class TestEnviaAlertaComprasOuvidoriaController(TestCase):
             status,
             409
         )
+
+    def test_render_mensagem_para_ouvidoria(self):
+        msg = self.controller.render_message()
+
+        self.assertEqual(msg, self.expected_msg)
 
     def test_success_method(self):
         self.controller.success()
