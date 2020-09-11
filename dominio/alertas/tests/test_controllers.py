@@ -8,10 +8,13 @@ from dominio.alertas import controllers
 
 class TestDispensaAlertasController(TestCase):
     def setUp(self):
-        self.cls = controllers.DispensaAlertaComprasController
         self.orgao_id = "12345"
         self.alerta_id = "abc12345"
-        self.alerta_sigla = self.cls.alerta_sigla
+        self.controller = controllers.DispensaAlertaComprasController(
+            self.orgao_id,
+            self.alerta_id
+        )
+        self.alerta_sigla = self.controller.alerta_sigla
 
         self.get_hbase_table_patcher = mock.patch(
             "dominio.alertas.controllers.get_hbase_table"
@@ -33,10 +36,8 @@ class TestDispensaAlertasController(TestCase):
         self.get_hbase_table_patcher.stop()
 
     def test_dispensa_alerta_para_orgao(self):
-        self.cls.dispensa_para_orgao(
-            self.orgao_id,
-            self.alerta_id
-        )
+        self.controller.dispensa_para_orgao()
+
         self.get_hbase_table_mock.assert_called_once_with(
             settings.PROMOTRON_HBASE_NAMESPACE
             +
@@ -48,10 +49,8 @@ class TestDispensaAlertasController(TestCase):
         )
 
     def test_retorna_alerta_para_orgao(self):
-        self.cls.retorna_para_orgao(
-            self.orgao_id,
-            self.alerta_id
-        )
+        self.controller.retorna_para_orgao()
+
         self.get_hbase_table_mock.assert_called_once_with(
             settings.PROMOTRON_HBASE_NAMESPACE
             +
@@ -67,7 +66,7 @@ class TestDispensaAlertasController(TestCase):
         )
         self.expected_hbase_data[b"dados_alertas:orgao"] = b"ALL"
 
-        self.cls.dispensa_para_todos_orgaos(self.alerta_id)
+        self.controller.dispensa_para_todos_orgaos()
 
         self.get_hbase_table_mock.assert_called_once_with(
             settings.PROMOTRON_HBASE_NAMESPACE
@@ -82,9 +81,6 @@ class TestDispensaAlertasController(TestCase):
 
 class TestEnviaAlertaComprasOuvidoriaController(TestCase):
     def setUp(self):
-        self.alerta_sigla = (
-            controllers.EnviaAlertaComprasOuvidoriaController.alerta_sigla
-        )
         self.orgao_id = "12345"
         self.alerta_id = "abc12345"
 
@@ -92,6 +88,7 @@ class TestEnviaAlertaComprasOuvidoriaController(TestCase):
             orgao_id=self.orgao_id,
             alerta_id=self.alerta_id
         )
+        self.alerta_sigla = self.controller.alerta_sigla
 
         self.get_hbase_table_patcher = mock.patch(
             "dominio.alertas.controllers.get_hbase_table"
@@ -105,6 +102,13 @@ class TestEnviaAlertaComprasOuvidoriaController(TestCase):
             "dominio.alertas.controllers.async_envia_email_ouvidoria"
         )
         self.async_envia_email_mock = self.async_envia_email_patcher.start()
+
+        self.dispensa_controller_patcher = mock.patch.object(
+            controllers.DispensaAlertaComprasController,
+            "dispensa_para_todos_orgaos"
+        )
+        self.dispensa_todos_orgaos_mock = self.dispensa_controller_patcher\
+            .start()
 
         self.expected_resp = {
             "detail": "Alerta enviado para ouvidoria com sucesso"
@@ -123,6 +127,7 @@ class TestEnviaAlertaComprasOuvidoriaController(TestCase):
     def tearDown(self):
         self.get_hbase_table_patcher.stop()
         self.async_envia_email_patcher.stop()
+        self.dispensa_controller_patcher.stop()
 
     def test_cria_chave_do_banco(self):
         self.assertEqual(self.controller.row_key, self.expected_row_key)
@@ -136,9 +141,7 @@ class TestEnviaAlertaComprasOuvidoriaController(TestCase):
         self.controller.envia_email()
 
         self.async_envia_email_mock.delay.assert_called_once_with(
-            self.controller.orgao_id,
-            self.controller.alerta_sigla,
-            self.controller.alerta_id,
+            self.controller
         )
 
     def test_prepara_resposta_email_ainda_nao_enviado(self):
@@ -162,20 +165,12 @@ class TestEnviaAlertaComprasOuvidoriaController(TestCase):
         self.assertEqual(status, 409)
 
     def test_get_row_key(self):
-        cls = controllers.EnviaAlertaComprasOuvidoriaController
-        row_key = cls.get_row_key(
-            self.orgao_id,
-            self.alerta_id
-        )
+        row_key = self.controller.get_row_key(self.orgao_id, self.alerta_id)
 
         self.assertEqual(row_key, self.expected_row_key)
 
     def test_rollback_em_caso_de_erro(self):
-        cls = controllers.EnviaAlertaComprasOuvidoriaController
-        cls.rollback_envio(
-            self.orgao_id,
-            self.alerta_id
-        )
+        self.controller.rollback()
 
         self.hbase_table_mock.delete.assert_called_once_with(
             self.expected_row_key
@@ -202,9 +197,7 @@ class TestEnviaAlertaComprasOuvidoriaController(TestCase):
             [mock.call(connection_str), mock.call(connection_str)]
         )
         self.async_envia_email_mock.delay.assert_called_once_with(
-            self.controller.orgao_id,
-            self.controller.alerta_sigla,
-            self.controller.alerta_id,
+            self.controller
         )
         self.assertEqual(resp, self.expected_resp)
         self.assertEqual(status, self.expected_status)
@@ -228,3 +221,8 @@ class TestEnviaAlertaComprasOuvidoriaController(TestCase):
             status,
             409
         )
+
+    def test_success_method(self):
+        self.controller.success()
+
+        self.dispensa_todos_orgaos_mock.assert_called_once()

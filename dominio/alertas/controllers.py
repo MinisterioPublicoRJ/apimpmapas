@@ -9,24 +9,26 @@ class BaseController:
     hbase_cf = None
     hbase_table_name = None
 
-    @classmethod
-    def get_table(cls):
+    def __init__(self, orgao_id, alerta_id):
+        self.orgao_id = str(orgao_id)
+        self.alerta_id = str(alerta_id)
+
+    @property
+    def get_table(self):
         return get_hbase_table(
             settings.PROMOTRON_HBASE_NAMESPACE
             +
-            cls.hbase_table_name
+            self.hbase_table_name
         )
 
-    @classmethod
-    def get_row_key(cls, orgao_id, alerta_id):
-        return f"{orgao_id}_{cls.alerta_sigla}_{alerta_id}".encode()
+    def get_row_key(self, orgao_id, alerta_id):
+        return f"{orgao_id}_{self.alerta_sigla}_{alerta_id}".encode()
 
-    @classmethod
-    def get_row_data(cls, orgao_id, alerta_id):
+    def get_row_data(self, orgao_id, alerta_id):
         return {
-            f"{cls.hbase_cf}:orgao".encode(): orgao_id.encode(),
-            f"{cls.hbase_cf}:alerta_id".encode(): alerta_id.encode(),
-            f"{cls.hbase_cf}:sigla".encode(): cls.alerta_sigla.encode(),
+            f"{self.hbase_cf}:orgao".encode(): orgao_id.encode(),
+            f"{self.hbase_cf}:alerta_id".encode(): alerta_id.encode(),
+            f"{self.hbase_cf}:sigla".encode(): self.alerta_sigla.encode(),
         }
 
 
@@ -35,25 +37,19 @@ class DispensaAlertaComprasController(BaseController):
     hbase_cf = "dados_alertas"
     hbase_table_name = settings.HBASE_DISPENSAR_ALERTAS_TABLE
 
-    # TODO: transformar em um métodos de instância
-    @classmethod
-    def dispensa_para_orgao(cls, orgao_id, alerta_id):
-        row_key = cls.get_row_key(orgao_id, alerta_id)
-        data = cls.get_row_data(orgao_id, alerta_id)
-        cls.get_table().put(row_key, data)
+    def dispensa_para_orgao(self):
+        row_key = self.get_row_key(self.orgao_id, self.alerta_id)
+        data = self.get_row_data(self.orgao_id, self.alerta_id)
+        self.get_table.put(row_key, data)
 
-    # TODO: transformar em um métodos de instância
-    @classmethod
-    def retorna_para_orgao(cls, orgao_id, alerta_id):
-        row_key = cls.get_row_key(orgao_id, alerta_id)
-        cls.get_table().delete(row_key)
+    def retorna_para_orgao(self):
+        row_key = self.get_row_key(self.orgao_id, self.alerta_id)
+        self.get_table.delete(row_key)
 
-    # TODO: transformar em um métodos de instância
-    @classmethod
-    def dispensa_para_todos_orgaos(cls, alerta_id):
-        row_key = cls.get_row_key("ALL", alerta_id)
-        data = cls.get_row_data("ALL", alerta_id)
-        cls.get_table().put(row_key, data)
+    def dispensa_para_todos_orgaos(self):
+        row_key = self.get_row_key("ALL", self.alerta_id)
+        data = self.get_row_data("ALL", self.alerta_id)
+        self.get_table.put(row_key, data)
 
 
 class EnviaAlertaComprasOuvidoriaController(BaseController):
@@ -61,15 +57,16 @@ class EnviaAlertaComprasOuvidoriaController(BaseController):
     hbase_cf = "dados_alertas"
     hbase_table_name = settings.HBASE_ALERTAS_OUVIDORIA_TABLE
 
-    def __init__(self, orgao_id, alerta_id):
-        self.orgao_id = str(orgao_id)
-        self.alerta_id = str(alerta_id)
+    def rollback(self):
+        row_key = self.get_row_key(self.orgao_id, self.alerta_id)
+        self.get_table.delete(row_key)
 
-    # TODO: transformar em um métodos de instância
-    @classmethod
-    def rollback_envio(cls, orgao_id, alerta_id):
-        row_key = cls.get_row_key(orgao_id, alerta_id)
-        cls.get_table().delete(row_key)
+    def success(self):
+        dispensa_controller = DispensaAlertaComprasController(
+            self.orgao_id,
+            self.alerta_id
+        )
+        dispensa_controller.dispensa_para_todos_orgaos()
 
     @property
     def row_key(self):
@@ -81,7 +78,7 @@ class EnviaAlertaComprasOuvidoriaController(BaseController):
 
     @property
     def alerta_already_sent(self):
-        result = self.get_table().scan(row_prefix=self.row_key)
+        result = self.get_table.scan(row_prefix=self.row_key)
         try:
             next(result)
             sent = True
@@ -91,18 +88,14 @@ class EnviaAlertaComprasOuvidoriaController(BaseController):
         return sent
 
     def save_alerta_state(self):
-        self.get_table().put(
+        self.get_table.put(
             self.row_key,
             self.row_data
         )
 
     def envia_email(self):
         # TODO: passar a instância (self) da classe para a task
-        async_envia_email_ouvidoria.delay(
-            self.orgao_id,
-            self.alerta_sigla,
-            self.alerta_id,
-        )
+        async_envia_email_ouvidoria.delay(self)
 
     def prepara_resposta(self, already_sent):
         # TODO: talvez levantar excessão e tratar na view
