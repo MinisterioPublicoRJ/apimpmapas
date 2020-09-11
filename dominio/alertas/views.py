@@ -53,6 +53,8 @@ class AlertasComprasView(JWTAuthMixin, PaginatorMixin, APIView):
 
 
 class DispensarAlertaView(JWTAuthMixin, APIView):
+    # TODO: get_object que retorna 404 se alerta não existir
+
     def get_alerta_id(self):
         ser = IdentificadorAlertaSerializer(data=self.request.GET)
         ser.is_valid(raise_exception=True)
@@ -72,6 +74,8 @@ class DispensarAlertaView(JWTAuthMixin, APIView):
 
 
 class RetornarAlertaView(JWTAuthMixin, APIView):
+    # TODO: get_object que retorna 404 se alerta não existir
+
     def get_alerta_id(self):
         ser = IdentificadorAlertaSerializer(data=self.request.GET)
         ser.is_valid(raise_exception=True)
@@ -92,6 +96,8 @@ class RetornarAlertaView(JWTAuthMixin, APIView):
 
 
 class EnviarAlertaComprasOuvidoriaView(JWTAuthMixin, APIView):
+    # TODO: get_object que retorna 404 se alerta não existir
+
     def get_alerta_id(self):
         ser = IdentificadorAlertaSerializer(data=self.request.GET)
         ser.is_valid(raise_exception=True)
