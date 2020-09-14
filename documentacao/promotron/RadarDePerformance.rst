@@ -30,6 +30,20 @@ Para cada um destes eixos temos o número total de andamentos detectados num per
 
 O gráfico permite analisar, visualmente, quais eixos estão mais próximos do máximo, e quais estão mais próximos de 0. Além disso, é possível ver o perfil médio daquela atribuição em cada um dos eixos. Assim, pode-se comparar a promotoria em questão, com o comportamento médio dos outros órgãos similares a ela.
 
+Nos casos em que, em um mesmo documento, mais de um andamento tenha ocorrido numa mesma data, utilizamos uma ordem de prioridade para decidir quais serão levados em consideração, e quais serão descartadas. Essa ordem de prioridade é a seguinte:
+
+- Peso 5: Ajuizamento de Ação;
+- Peso 4: TACs;
+- Peso 3: Instauração;
+- Peso 2: Arquivamento;
+- Peso 1: Indeferimento.
+
+Por exemplo, caso, em um dado dia, um documento tenha tido um andamento para Ajuizamento de Ação, e outro andamento de Arquivamento, apenas o andamento de Ajuizamento de Ação será contabilizado. Caso haja 2 ajuizamentos de ação, apenas será contado 1.
+
+No entanto, se esses andamentos ocorrerem em dia distintos, eles serão contabilizados. No mesmo exemplo, caso o dia do andamento de Ajuizamento de Ação fosse diferente do dia do andamento de Arquivamento, ambos seriam levados em consideração.
+
+Um outro ponto relevante é que existem alguns tipos de andamentos que podem cancelar andamentos de determinados eixos. Por exemplo, um andamento de Cancelamento de Indeferimento pode cancelar um andamento do eixo de Indeferimento, caso ele tenha ocorrido no mesmo documento e na mesma data do Indeferimento ou em uma data posterior. Os andamentos que cancelam outros serão explicitados mais abaixo.
+
 Os tipos de andamento considerados em cada um dos 5 eixos são os seguintes:
 
 Regras de Arquivamento
@@ -455,56 +469,12 @@ Regras de Termos de Ajuste de Conduta
 +-----------------------------------+-----------------------------------+
 
 
-Estrutura do Código
-~~~~~~~~~~~~~~~~~~~
+Regras de Cancelamentos de Andamento
+************************************
 
-Processo BDA
-************
+Os seguintes andamentos servem para cancelar outros. É relevante notar que o andamento de Indeferimento, ao mesmo tempo em que cancela uma Instauração que tenha ocorrido anteriormente, também irá adicionar à contagem do eixo de Indeferimento. Da mesma forma, o andamento de Reconsideração do Indeferimento também é usado para somar no eixo de Instauração, ao mesmo tempo em que tira da contagem Indeferimentos feitos anteriormente.
 
-::
-
-   Nome da Tabela: TB_RADAR_PERFORMANCE
-   Colunas: 
-        cod_pct (int)
-        pacote_atribuicao (string)
-        orgao_id (int)
-        nr_arquivamentos (int)
-        nr_indeferimentos (int)
-        nr_instauracoes (int)
-        nr_tac (int)
-        nr_acoes (int)
-        max_pacote_arquivamentos (int)
-        max_pacote_indeferimentos (int)
-        max_pacote_instauracoes (int)
-        max_pacote_tac (int)
-        max_pacote_acoes (int)
-        perc_arquivamentos (double)
-        perc_indeferimentos (double)
-        perc_instauracoes (double)
-        perc_tac (double)
-        perc_acoes (double)
-        med_pacote_aquivamentos (double)
-        med_pacote_indeferimentos (double)
-        med_pacote_instauracoes (double)
-        med_pacote_tac (double)
-        med_pacote_acoes (double)
-        var_med_arquivaentos (double)
-        var_med_indeferimentos (double)
-        var_med_instauracoes (double)
-        var_med_tac (double)
-        var_med_acoes (double)
-        dt_calculo (timestamp)
-        nm_max_arquivamentos (string)
-        nm_max_indeferimentos (string)
-        nm_max_instauracoes (string)
-        nm_max_tac (string)
-        nm_max_acoes (string)
-
-!! Há um erro de digitação na coluna "var_med_arquivaentos".
-
-O script de criação das tabelas irá filtrar os andamentos que ocorreram nos últimos 180 dias correntes, que não foram cancelados e cujo documento não tenha sido cancelado, e que possuam qualquer um dos tipos determinados nas regras de negócio da subseção anterior.
-
-Também são considerados alguns andamentos "canceladores", ou seja, que anulam os andamentos de determinados eixos. São eles:
+Outro ponto importante é que os andamentos de desarquivamento podem ser usados para cancelar a contagem de andamentos tanto no eixo de Ação, quanto de TACs ou Arquivamentos, e não apenas no eixo de Desarquivamento.
 
 Andamentos que cancelam instaurações:
 
@@ -564,6 +534,56 @@ Andamentos que cancelam arquivamentos, TACs ou ACPs:
 |                                   | CSMP                                                    |
 +-----------------------------------+---------------------------------------------------------+
 
+Estrutura do Código
+~~~~~~~~~~~~~~~~~~~
+
+Processo BDA
+************
+
+::
+
+   Nome da Tabela: TB_RADAR_PERFORMANCE
+   Colunas: 
+        cod_pct (int)
+        pacote_atribuicao (string)
+        orgao_id (int)
+        nr_arquivamentos (int)
+        nr_indeferimentos (int)
+        nr_instauracoes (int)
+        nr_tac (int)
+        nr_acoes (int)
+        max_pacote_arquivamentos (int)
+        max_pacote_indeferimentos (int)
+        max_pacote_instauracoes (int)
+        max_pacote_tac (int)
+        max_pacote_acoes (int)
+        perc_arquivamentos (double)
+        perc_indeferimentos (double)
+        perc_instauracoes (double)
+        perc_tac (double)
+        perc_acoes (double)
+        med_pacote_aquivamentos (double)
+        med_pacote_indeferimentos (double)
+        med_pacote_instauracoes (double)
+        med_pacote_tac (double)
+        med_pacote_acoes (double)
+        var_med_arquivaentos (double)
+        var_med_indeferimentos (double)
+        var_med_instauracoes (double)
+        var_med_tac (double)
+        var_med_acoes (double)
+        dt_calculo (timestamp)
+        nm_max_arquivamentos (string)
+        nm_max_indeferimentos (string)
+        nm_max_instauracoes (string)
+        nm_max_tac (string)
+        nm_max_acoes (string)
+
+!! Há um erro de digitação na coluna "var_med_arquivaentos" na tabela no banco. Não afeta a operação, mas bom deixar registrado que precisa ser consertado.
+
+O script de criação das tabelas irá filtrar os andamentos que ocorreram nos últimos 180 dias correntes, que não foram cancelados e cujo documento não tenha sido cancelado, e que possuam qualquer um dos tipos determinados nas regras de negócio da subseção anterior.
+
+Também são considerados alguns andamentos "canceladores", ou seja, que anulam os andamentos de determinados eixos. Eles estão definidos na seção anterior.
 
 Com os andamentos (e cancelamentos) definidos, é montada uma ordem de prioridades para cada um dos cinco eixos. Isso é feito para tratar os casos em que andamentos de dois eixos diferentes possam ter sido realizados no mesmo dia no sistema, para o mesmo documento no mesmo órgão. A ordem de prioridade é definida com os seguintes pesos:
 
@@ -715,17 +735,182 @@ Os tipos de andamento considerados em cada um dos 5 eixos são os seguintes:
 Regras de Arquivamento
 **********************
 
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+| id   | hierarquia                                                                                                                                 |
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+| 6017 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Extinção da Punibilidade por Outros Fundamentos                       |
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+| 6018 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Ausência/Insuficiência de Provas (Falta de Suporte Fático Probatório) |
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+| 6020 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Parcial > Extinção da Punibilidade por Outros Fundamentos                        |
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+| 6338 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Desconhecimento do Autor                                              |
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+| 6339 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Inexistência de Crime                                                 |
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+| 6340 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Prescrição                                                            |
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+| 6341 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Decadência                                                            |
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+| 6342 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Retratação Lei Maria da Penha                                         |
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+| 6343 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Pagamento de Débito Tributário                                        |
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+| 6346 | MEMBRO > Arquivamento > Sem remessa ao Conselho Superior/Câmara > Integral                                                                 |
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+| 6350 | MEMBRO > Homologação de Arquivamento                                                                                                       |
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+| 6359 | MEMBRO > Decisão Artigo 28 CPP / 397 CPPM > Confirmação Integral > Arquivamento                                                            |
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+| 6392 | MEMBRO > Ciência > Arquivamento                                                                                                            |
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+| 6549 | MEMBRO > Arquivamento > Com remessa ao Centro de Apoio Operacional das Promotorias Eleitorais  CAO Eleitoral (EN 30-CSMP)                  |
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+| 6591 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Falta de condições para o regular exercício do direito de ação        |
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+| 6593 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Parcial > Falta de condições para o exercício do direito de ação                 |
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+| 7745 | MEMBRO > Arquivamento > De notícia de fato ou procedimento de atribuição originária do PGJ                                                 |
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+| 7871 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Morte do Agente                                                       |
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+| 7897 | MEMBRO > Decisão Artigo 28 CPP / 397 CPPM > Confirmação Parcial > Arquivamento                                                             |
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+| 7912 | MEMBRO > Arquivamento > Com Remessa ao PRE/PGE                                                                                             |
++------+--------------------------------------------------------------------------------------------------------------------------------------------+
+
 Regras de Denúncia
 ******************
 
++------+---------------------------------------------------+
+| id   | hierarquia                                        |
++------+---------------------------------------------------+
+| 1201 | Oferecimento de denúncia                          |
++------+---------------------------------------------------+
+| 1202 | Oferecimento de denúncia com pedido de prisão     |
++------+---------------------------------------------------+
+| 6252 | MEMBRO > Ajuizamento de Ação > Denúncia           |
++------+---------------------------------------------------+
+| 6253 | MEMBRO > Ajuizamento de Ação > Denúncia > Escrita |
++------+---------------------------------------------------+
+| 6254 | MEMBRO > Ajuizamento de Ação > Denúncia > Oral    |
++------+---------------------------------------------------+
+
 Regras de Medida Cautelar
 *************************
+
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| id   | hierarquia                                                                                                                                                          |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 1030 | Propositura de medida cautelar autônoma                                                                                                                             |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 1208 | Manifestação em medida cautelar requerida pela autoridade policial                                                                                                  |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6038 | MEMBRO > Medida Incidental (cautelar) > Requerimento de Medida Cautelar de Interceptação Telefônica                                                                 |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6039 | MEMBRO > Medida Incidental (cautelar) > Requerimento de Medida Cautelar de Interceptação de Dados Telemáticos                                                       |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6040 | MEMBRO > Medida Incidental (cautelar) > Requerimento de Medida Cautelar de Obtenção de Dados Cadastrais                                                             |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6041 | MEMBRO > Medida Incidental (cautelar) > Requerimento de Medida Cautelar de Quebra de Sigilo Bancário                                                                |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6042 | MEMBRO > Medida Incidental (cautelar) > Requerimento de Medida Cautelar de Quebra de Sigilo Fiscal                                                                  |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6043 | MEMBRO > Medida Incidental (cautelar) > Outros Requerimentos de Natureza Cautelar                                                                                   |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6257 | MEMBRO > Medida Incidental (cautelar)                                                                                                                               |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6258 | MEMBRO > Medida Incidental (cautelar) > Requerimento de Medida Protetiva                                                                                            |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6367 | MEMBRO > Requerimento de Prisão > Preventiva > Preventiva - Art. 312 CPP                                                                                            |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6368 | MEMBRO > Requerimento de Prisão > Preventiva > Preventiva - Art. 366 CPP                                                                                            |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6369 | MEMBRO > Requerimento de Prisão > Preventiva > Preventiva - Art. 255 CPPM                                                                                           |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6370 | MEMBRO > Requerimento de Prisão > Temporária                                                                                                                        |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6620 | MEMBRO > Requerimento de Prisão > Preventiva > Preventiva - Art. 310, II, CPP (conversão)                                                                           |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6648 | MEMBRO > Ajuizamento de Ação > Requerimento de Outras Medidas Cautelares (Não Incidentais)                                                                          |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6649 | MEMBRO > Ajuizamento de Ação > Requerimento de Outras Medidas Cautelares (Não Incidentais) > Requerimento de Medida Cautelar de Interceptação Telefônica            |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6650 | MEMBRO > Ajuizamento de Ação > Requerimento de Outras Medidas Cautelares (Não Incidentais) > Requerimento de Medida Cautelar de Interceptação de Dados Telemáticos  |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6651 | MEMBRO > Ajuizamento de Ação > Requerimento de Outras Medidas Cautelares (Não Incidentais) > Requerimento de Medida Cautelar de Obtenção de Dados Cadastrais        |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6652 | MEMBRO > Ajuizamento de Ação > Requerimento de Outras Medidas Cautelares (Não Incidentais) > Requerimento de Medida Cautelar de Quebra de Sigilo Bancário           |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6653 | MEMBRO > Ajuizamento de Ação > Requerimento de Outras Medidas Cautelares (Não Incidentais) > Requerimento de Medida Cautelar de Quebra de Sigilo Fiscal             |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6654 | MEMBRO > Ajuizamento de Ação > Requerimento de Outras Medidas Cautelares (Não Incidentais) > Outros Requerimentos de Natureza Cautelar  (não incidentais)           |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 7815 | MEMBRO > Medida Incidental (cautelar) > Requerimento de Medida Cautelar de Busca e Apreensão                                                                        |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 7816 | MEMBRO > Ajuizamento de Ação > Requerimento de Outras Medidas Cautelares (Não Incidentais) > Requerimento de Medida Cautelar de Busca e Apreensão                   |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 7877 | MEMBRO > Medida Incidental (cautelar) > Requerimento de Medida Cautelar do Art. 319 CPP                                                                             |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 7878 | MEMBRO > Ajuizamento de Ação > Requerimento de Outras Medidas Cautelares (Não Incidentais) > Requerimento de Medida Cautelar do Art. 319 CPP                        |
++------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 Regras de Devoluções à DP
 *************************
 
 Regras de Acordo de Não-Persecução Penal
 ****************************************
+
++------+------------------------------------------------------------------+
+| id   | hierarquia                                                       |
++------+------------------------------------------------------------------+
+| 7827 | MEMBRO > Despacho > Acordo Extrajudicial                         |
++------+------------------------------------------------------------------+
+| 7883 | MEMBRO > Acordo de Não Persecução Penal > Celebração de acordo   |
++------+------------------------------------------------------------------+
+| 7914 | MEMBRO > Acordo de Não Persecução Penal                          |
++------+------------------------------------------------------------------+
+| 7928 | MEMBRO > Ciência > Homologação de Acordo de Não Persecução Penal |
++------+------------------------------------------------------------------+
+
+Regras de Cancelamento
+**********************
+
+Essas regras de cancelamento ainda não estão corretamente implementadas, mas os andamentos que serão utilizados já estão mapeados.
+
+Andamentos que cancelam acordos:
+
++------+-------------------------------------------------------------------------+
+| id   | hierarquia                                                              |
++------+-------------------------------------------------------------------------+
+| 7920 | MEMBRO > Manifestação > Pela rescisão do Acordo de Não Persecução Penal |
++------+-------------------------------------------------------------------------+
+
+Andamentos que cancelam arquivamentos (!! devem cancelar Denúncias também?):
+
++------+----------------------------------------------------------------------------------------------------+
+| id   | hierarquia                                                                                         |
++------+----------------------------------------------------------------------------------------------------+
+| 1027 | Promoção de desarquivamento em virtude de novas provas por decisão do Conselho Superior do MPRJ    |
++------+----------------------------------------------------------------------------------------------------+
+| 1028 | Desarquivamento                                                                                    |
++------+----------------------------------------------------------------------------------------------------+
+| 6003 | MEMBRO > Desarquivamento (em virtude de novas provas) > Por decisão do Conselho Superior do MPRJ   |
++------+----------------------------------------------------------------------------------------------------+
+| 6075 | MEMBRO > Área Administrativa/CGMP > Desarquivamento                                                |
++------+----------------------------------------------------------------------------------------------------+
+| 6307 | MEMBRO > Desarquivamento (em virtude de novas provas)                                              |
++------+----------------------------------------------------------------------------------------------------+
+| 6798 | MEMBRO > ATOS COMUNS > Desarquivamento                                                             |
++------+----------------------------------------------------------------------------------------------------+
+| 7245 | SERVIDOR > ATOS COMUNS > Desarquivamento                                                           |
++------+----------------------------------------------------------------------------------------------------+
+| 7801 | MEMBRO > Desarquivamento (em virtude de novas provas) > Por decisão do Procurador-Geral de Justiça |
++------+----------------------------------------------------------------------------------------------------+
+| 7802 | MEMBRO > Desarquivamento (em virtude de novas provas) > Sem remessa ao PGJ ou ao CSMP              |
++------+----------------------------------------------------------------------------------------------------+
+| 7803 | MEMBRO > Requerimento de desarquivamento ao PGJ ou ao CSMP                                         |
++------+----------------------------------------------------------------------------------------------------+
 
 Estrutura do Código
 ~~~~~~~~~~~~~~~~~~~
