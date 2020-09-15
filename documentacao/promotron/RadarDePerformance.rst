@@ -685,6 +685,11 @@ Dependências
 Troubleshooting
 ~~~~~~~~~~~~~~~
 
+- Verificar que a resposta está vindo para o Front. Caso não esteja, verificar se a tabela TB_RADAR_PERFORMANCE possui dados para o órgão em questão.
+- Se a tabela possuir dados para o órgão, o problema provavelmente está no backend.
+- Caso a tabela não possua dados para o dado órgão, verificar que ele possui pacote de atribuição definido na tabela :ref:`tabelas-auxiliares-atualizacao-pj-pacote`.
+- Caso possua, verificar se o órgão tem andamentos nos últimos 180 dias nas tabelas do Exadata.
+
 
 Radar de Performance da PIP
 ---------------------------
@@ -729,6 +734,8 @@ Diferentemente do :ref:`radar-performance-tutela` (que considera documentos de q
 Isso quer dizer que, caso um andamento de denúncia, por exemplo, tenha ocorrido em um documento que não pertença a alguma destas classes, ele não será contabilizado no radar.
 
 O gráfico permite analisar, visualmente, quais eixos estão mais próximos do máximo, e quais estão mais próximos de 0. Além disso, é possível ver o perfil médio daquela atribuição em cada um dos eixos. Assim, pode-se comparar a promotoria em questão, com o comportamento médio dos outros órgãos similares a ela.
+
+Outra diferença em relação ao radar de tutela é que, neste caso, não há uma ordem de prioridade para eixos que ocorram na mesma data. Assim, caso um andamento de denúncia ocorrer conjuntamente com um andamento de medida cautelar, ambos serão contabilizados. A exceção é quando dois andamentos do mesmo eixo ocorrem ao mesmo tempo. Então, caso 2 denúncias ou 2 medidas cautelares sejam feitas na mesma data, apenas 1 será contada em cada eixo.
 
 Os tipos de andamento considerados em cada um dos 5 eixos são os seguintes:
 
@@ -858,6 +865,16 @@ Regras de Medida Cautelar
 Regras de Devoluções à DP
 *************************
 
+O eixo de baixas à DP não possui andamentos específicos dele. Na verdade, ele é calculado a partir das vistas que não tiveram andamentos considerados importantes. Os andamentos importantes são, basicamente, todos os andamentos listados nas outras subseções aqui (ou seja, arquivamentos, denúncias, cautelares, acordos, e também os andamentos de cancelamento).
+
+Assim, caso uma vista não tenha tido um andamento, ou se ela tiver tido apenas andamentos considerados não-importantes, ela será considerada na contagem do eixo de baixa à DP.
+
+Exemplo: A vista 1 não possui andamento associado. Já a vista 2 possui um único andamento, de Encaminhamento ao Membro. E a vista 3 possui um Encaminhamento ao Membro e uma Denúncia. A vista 1 e 2 serão contadas como baixas à DP; a vista 3, não.
+
+É importante notar também que, para a contagem dos outros eixos, só consideramos os andamentos que ocorreram nos últimos 180 dias, enquanto que, para a baixa à DP, esse filtro é aplicado à data de abertura da vista (e não a data do andamento). Ou seja, uma vista que tenha sido aberta antes destes 180 dias, será eliminada deste cálculo, mesmo que seu andamento tenha ocorrido dentro do intervalo.
+
+Exemplo: A vista 1 foi aberta há 181 dias e possui um andamento de Denúncia há 179 dias. A vista 2 foi aberta também há 181 dias, e possui um Encaminhamento ao Membro há 179 dias. Já a vista 3 foi aberta há 179 dias, e possui um Encaminhamento ao Membro apenas. Neste caso, apenas a vista 3 será contabilizada como baixa à DP. Já no eixo de Denúncias, a Denúncia da vista 1 será contabilizada (já que, embora a data de abertura seja anterior ao intervalo, a data do andamento não é).
+
 Regras de Acordo de Não-Persecução Penal
 ****************************************
 
@@ -876,7 +893,7 @@ Regras de Acordo de Não-Persecução Penal
 Regras de Cancelamento
 **********************
 
-Essas regras de cancelamento ainda não estão corretamente implementadas, mas os andamentos que serão utilizados já estão mapeados.
+Além das regras para contabilizar andamentos de cada eixo, existem algumas regras de andamentos que cancelam outros. Por exemplo, caso um andamento de rescição de acordo ocorra na mesma data ou em data posterior a um andamento de acordo, este será desconsiderado da contagem no eixo.
 
 Andamentos que cancelam acordos:
 
@@ -886,7 +903,7 @@ Andamentos que cancelam acordos:
 | 7920 | MEMBRO > Manifestação > Pela rescisão do Acordo de Não Persecução Penal |
 +------+-------------------------------------------------------------------------+
 
-Andamentos que cancelam arquivamentos (!! devem cancelar Denúncias também?):
+Andamentos que cancelam arquivamentos (obs.: no radar de tutela, os desarquivamentos cancelam tanto arquivamentos quanto TACs e ajuizamentos de ação - na PIP, eles cancelam apenas arquivamentos, não cancelando nenhum dos outros eixos):
 
 +------+----------------------------------------------------------------------------------------------------+
 | id   | hierarquia                                                                                         |
@@ -958,6 +975,39 @@ Processo BDA
         nm_max_aberturas (string)
         cod_pct (int)
     
+!! Apesar do campo ser salvo como "aberturas_vista", ele é referente na verdade às baixas à DP.
+
+O script de criação das tabelas irá primeiramente filtrar as vistas de PIPs (sem andamentos ainda), cujos documentos não foram cancelados e que sejam da classe determinada nas regras de negócio. Essas vistas são mantidas numa primeira tabela temporária, e serão usadas mais tarde no cálculo das baixas à DP.
+
+Em seguida, duas tabelas são calculadas: uma com as vistas e seus andamentos, para os andamentos considerados importantes e que tenham ocorrido no intervalo dos últimos 180 dias, e que não tenham sido cancelados. A cada andamento é atribuído um número de 1 a 4, que identifica em que eixo ele se encaixa.
+
+Uma tabela análoga é feita para os andamentos canceladores - e o número atribuído é o oposto do eixo que ele cancela (por exemplo, os desarquivamentos estão atribuídos ao número -1, para contrapôr o 1 referente ao eixo de arquivamentos).
+
+Assim, caso um andamento cancelador de um eixo tenha ocorrido, no mesmo documento, em uma data igual ou maior que a do andamento, essa soma será 0, o que é usado para desconsiderar determinados andamentos da contagem. Isso quer dizer que, caso um Arquivamento seja seguido de um Desarquivamento, ele não será contado. Pode-se então fazer a contagem, eliminando também possíveis duplicidades no mesmo dia (um DISTINCT é realizado para eliminar múltiplas denúncias, ou múltiplas cautelares no mesmo dia, por exemplo).
+
+Fica faltando apenas a contagem do NR_BAIXA_DP. Esta, por sua vez, é feita juntando a tabela de andamentos importantes, com a tabela inicial de vistas, filtrando pelas vistas que possuem data de abertura no intervalo dos últimos 180 dias. Ora, caso uma vista esteja presente na tabela com todas as vistas, mas não está presente na tabela de andamentos importantes, ela será contabilizada. Senão, ela será descartada.
+
+Com as contagens de cada um dos eixos para cada órgão em mãos, os passos seguintes se tornam intuitivos. Calculam-se os seguintes campos:
+
+Campos ``nr``
+    Número de andamentos de cada eixo dentro do órgão
+
+Campos ``max``
+    Número máximo de andamentos do eixo, em um único órgão do pacote
+
+Campos ``perc``
+    O percentual relativo entre o valor do órgão naquele eixo e o máximo, por exemplo: :math:`perc\_tac = \frac{nr\_tac}{max\_tac}`
+
+Campos ``med``
+    O valor da mediana do pacote naquele eixo
+
+Campos ``var_med``
+    A variação entre o valor do eixo no órgão e a mediana do pacote, por exemplo: :math:`var\_med\_tac = \frac{(nr\_tac) - (med\_tac)}{med\_tac}`
+
+Campos ``nm_max``
+    O nome do órgão que representa o máximo do pacote naquele eixo
+
+Os resultados são então salvos na tabela, sobrescrevendo os dados anteriores.
 
 URL do Script: https://github.com/MinisterioPublicoRJ/scripts-bda/blob/master/robo_promotoria/src/tabela_pip_radar_performance.py.
 
@@ -974,16 +1024,63 @@ View Backend
    Vary: Accept
 
    {
-       "atributo1": 1,
-       "atributo2": 2,
+        "aisp_codigo": "1,2",
+        "aisp_nome": "AISP1, AISP2",
+        "orgao_id": 12345.0,
+        "nr_denuncias": 45,
+        "nr_cautelares": 29,
+        "nr_acordos_n_persecucao": 5,
+        "nr_arquivamentos": 0,
+        "nr_aberturas_vista": 0,
+        "max_aisp_denuncias": 156,
+        "max_aisp_cautelares": 99,
+        "max_aisp_acordos": 38,
+        "max_aisp_arquivamentos": 1,
+        "max_aisp_aberturas_vista": 12,
+        "perc_denuncias": 0.28846153846153844,
+        "perc_cautelares": 0.29292929292929293,
+        "perc_acordos": 0.13157894736842105,
+        "perc_arquivamentos": 0.0,
+        "perc_aberturas_vista": 0.0,
+        "med_aisp_denuncias": 53.5,
+        "med_aisp_cautelares": 47.0,
+        "med_aisp_acordos": 20.0,
+        "med_aisp_arquivamentos": 0.0,
+        "med_aisp_aberturas_vista": 1.5,
+        "var_med_denuncias": -0.1588785046728972,
+        "var_med_cautelares": -0.3829787234042553,
+        "var_med_acordos": -0.75,
+        "var_med_arquivamentos": null,
+        "var_med_aberturas_vista": -1.0,
+        "dt_calculo": "2020-03-30T10:46:14.837000",
+        "nm_max_denuncias": "Promotoria de Justiça 1",
+        "nm_max_cautelares": "Promotoria de Justiça 2, Promotoria de Justiça 3",
+        "nm_max_acordos": "Promotoria de Justiça 4",
+        "nm_max_arquivamentos": "1ª Promotoria de Justiça",
+        "nm_max_abeturas_vista": "4ª Promtoria de Justiça",
+        "cod_pct": 123,
    }
+
+!! Alguns nomes de campo, como o max e med, dão a entender que o cálculo é feito dentro da AISP apenas. Refatorar estes nomes para que fiquem mais próximos do que realmente é calculado é desejável.
 
 Nome da View: `PIPRadarPerformanceView`_.
 
-.. _ViewTal: https://github.com/MinisterioPublicoRJ/apimpmapas/blob/develop/dominio/pip/views.py
+A View no Backend apenas irá consultar a tabela TB_PIP_RADAR_PERFORMANCE no BDA filtrando pelo órgão selecionado, formatando o nome das promotorias, e retornando a resposta no formato especificado acima.
+
+.. _PIPRadarPerformanceView: https://github.com/MinisterioPublicoRJ/apimpmapas/blob/develop/dominio/pip/views.py
 
 Dependências
 ~~~~~~~~~~~~
 
+- Tabelas do Exadata
+- :ref:`tabelas-auxiliares-atualizacao-pj-pacote`
+- :ref:`tabelas-auxiliares-tb-pip-aisp`
+
 Troubleshooting
 ~~~~~~~~~~~~~~~
+
+- Verificar que a resposta está vindo para o Front. Caso não esteja, verificar se a tabela TB_PIP_RADAR_PERFORMANCE possui dados para o órgão em questão.
+- Se a tabela possuir dados para o órgão, o problema provavelmente está no backend.
+- Caso a tabela não possua dados para o dado órgão, verificar que ele possui pacote de atribuição definido na tabela :ref:`tabelas-auxiliares-atualizacao-pj-pacote`.
+- Também verificar se o órgão está presente na tabela :ref:`tabelas-auxiliares-tb-pip-aisp`.
+- Caso sim, verificar se o órgão tem andamentos nos últimos 180 dias nas tabelas do Exadata, para as classes de documento definidas nas regras.
