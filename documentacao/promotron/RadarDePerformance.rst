@@ -744,7 +744,7 @@ Regras de Arquivamento
 
 +------+--------------------------------------------------------------------------------------------------------------------------------------------+
 | id   | hierarquia                                                                                                                                 |
-+------+--------------------------------------------------------------------------------------------------------------------------------------------+
++======+============================================================================================================================================+
 | 6017 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Extinção da Punibilidade por Outros Fundamentos                       |
 +------+--------------------------------------------------------------------------------------------------------------------------------------------+
 | 6018 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Ausência/Insuficiência de Provas (Falta de Suporte Fático Probatório) |
@@ -771,7 +771,7 @@ Regras de Arquivamento
 +------+--------------------------------------------------------------------------------------------------------------------------------------------+
 | 6392 | MEMBRO > Ciência > Arquivamento                                                                                                            |
 +------+--------------------------------------------------------------------------------------------------------------------------------------------+
-| 6549 | MEMBRO > Arquivamento > Com remessa ao Centro de Apoio Operacional das Promotorias Eleitorais  CAO Eleitoral (EN 30-CSMP)                  |
+| 6549 | MEMBRO > Arquivamento > Com remessa ao Centro de Apoio Operacional das Promotorias Eleitorais CAO Eleitoral (EN 30-CSMP)                   |
 +------+--------------------------------------------------------------------------------------------------------------------------------------------+
 | 6591 | MEMBRO > Arquivamento > Com remessa ao Poder Judiciário > Integral > Falta de condições para o regular exercício do direito de ação        |
 +------+--------------------------------------------------------------------------------------------------------------------------------------------+
@@ -791,7 +791,7 @@ Regras de Denúncia
 
 +------+---------------------------------------------------+
 | id   | hierarquia                                        |
-+------+---------------------------------------------------+
++======+===================================================+
 | 1201 | Oferecimento de denúncia                          |
 +------+---------------------------------------------------+
 | 1202 | Oferecimento de denúncia com pedido de prisão     |
@@ -808,7 +808,7 @@ Regras de Medida Cautelar
 
 +------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | id   | hierarquia                                                                                                                                                          |
-+------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
++======+=====================================================================================================================================================================+
 | 1030 | Propositura de medida cautelar autônoma                                                                                                                             |
 +------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | 1208 | Manifestação em medida cautelar requerida pela autoridade policial                                                                                                  |
@@ -880,7 +880,7 @@ Regras de Acordo de Não-Persecução Penal
 
 +------+------------------------------------------------------------------+
 | id   | hierarquia                                                       |
-+------+------------------------------------------------------------------+
++======+==================================================================+
 | 7827 | MEMBRO > Despacho > Acordo Extrajudicial                         |
 +------+------------------------------------------------------------------+
 | 7883 | MEMBRO > Acordo de Não Persecução Penal > Celebração de acordo   |
@@ -899,7 +899,7 @@ Andamentos que cancelam acordos:
 
 +------+-------------------------------------------------------------------------+
 | id   | hierarquia                                                              |
-+------+-------------------------------------------------------------------------+
++======+=========================================================================+
 | 7920 | MEMBRO > Manifestação > Pela rescisão do Acordo de Não Persecução Penal |
 +------+-------------------------------------------------------------------------+
 
@@ -907,7 +907,7 @@ Andamentos que cancelam arquivamentos (obs.: no radar de tutela, os desarquivame
 
 +------+----------------------------------------------------------------------------------------------------+
 | id   | hierarquia                                                                                         |
-+------+----------------------------------------------------------------------------------------------------+
++======+====================================================================================================+
 | 1027 | Promoção de desarquivamento em virtude de novas provas por decisão do Conselho Superior do MPRJ    |
 +------+----------------------------------------------------------------------------------------------------+
 | 1028 | Desarquivamento                                                                                    |
@@ -996,13 +996,13 @@ Campos ``max``
     Número máximo de andamentos do eixo, em um único órgão do pacote
 
 Campos ``perc``
-    O percentual relativo entre o valor do órgão naquele eixo e o máximo, por exemplo: :math:`perc\_tac = \frac{nr\_tac}{max\_tac}`
+    O percentual relativo entre o valor do órgão naquele eixo e o máximo, por exemplo: :math:`perc\_cautelares = \frac{nr\_cautelares}{max\_cautelares}`
 
 Campos ``med``
     O valor da mediana do pacote naquele eixo
 
 Campos ``var_med``
-    A variação entre o valor do eixo no órgão e a mediana do pacote, por exemplo: :math:`var\_med\_tac = \frac{(nr\_tac) - (med\_tac)}{med\_tac}`
+    A variação entre o valor do eixo no órgão e a mediana do pacote, por exemplo: :math:`var\_med\_cautelares = \frac{(nr\_cautelares) - (med\_tac)}{med\_tac}`
 
 Campos ``nm_max``
     O nome do órgão que representa o máximo do pacote naquele eixo
