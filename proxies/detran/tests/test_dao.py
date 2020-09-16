@@ -309,7 +309,10 @@ class TestHBaseGate:
         table = db_gate.get_table
 
         _Connection.assert_called_once_with(
-            settings.HBASE_SERVER, timeout=settings.HBASE_TIMEOUT,
+            settings.HBASE_SERVER,
+            timeout=settings.HBASE_TIMEOUT,
+            transport="framed",
+            protocol="compact",
         )
         connection_mock.table.assert_called_once_with(table_name)
         assert table == "table obj"

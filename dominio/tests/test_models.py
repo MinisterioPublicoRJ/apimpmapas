@@ -2,10 +2,9 @@ from datetime import date
 from unittest import mock, TestCase
 
 import pytest
-from django.conf import settings
 from freezegun import freeze_time
 
-from dominio.models import Alerta, Usuario
+from dominio.models import Usuario
 
 
 @pytest.mark.django_db(transaction=True)
@@ -53,113 +52,3 @@ class TestUsuario(TestCase):
         gender = usuario.get_gender(cdmatricula="12345")
 
         self.assertEqual(gender, "X")
-
-
-class TestAlertaModels(TestCase):
-    @mock.patch("dominio.models.run_query")
-    def test_validos_por_orgaos(self, _run_query):
-        orgao_id = 12345
-        _run_query.return_value = [
-            (
-                'data 1',
-                'data 2',
-                0,
-                'data 3',
-                'data 4',
-                'data 5',
-                'data 6',
-                'data 7',
-                int(orgao_id),
-                'data 8',
-                'COMP',
-            )
-        ]
-        resp = Alerta.validos_por_orgao(orgao_id)
-        expected_resp = [
-            {
-                'doc_dk': 'data 1',
-                'num_doc': 'data 2',
-                'num_ext': 0,
-                'etiqueta': 'data 3',
-                'classe_doc': 'data 4',
-                'data_alerta': 'data 5',
-                'orgao': 'data 6',
-                'classe_hier': 'data 7',
-                'dias_passados': 12345,
-                'descricao': 'data 8',
-                'sigla': 'COMP'}
-        ]
-
-        _run_query.assert_called_once_with(
-            Alerta.query_base.format(schema=settings.TABLE_NAMESPACE),
-            {"orgao_id": orgao_id},
-        )
-        self.assertEqual(resp, expected_resp)
-
-    @mock.patch("dominio.models.run_query")
-    def test_validos_por_orgaos_tipo(self, _run_query):
-        orgao_id = 12345
-        tipo_alerta = 'ALRT'
-        _run_query.return_value = [
-            (
-                'data 1',
-                'data 2',
-                0,
-                'data 3',
-                'data 4',
-                'data 5',
-                'data 6',
-                'data 7',
-                int(orgao_id),
-                'data 8',
-                'DORD',
-            ),
-            (
-                'data 1',
-                'data 2',
-                0,
-                'data 3',
-                'data 4',
-                'data 5',
-                'data 6',
-                'data 7',
-                int(orgao_id),
-                'data 8',
-                'COMP',
-            ),
-        ]
-        resp = Alerta.validos_por_orgao(orgao_id, tipo_alerta)
-        expected_resp = [
-            {
-                'doc_dk': 'data 1',
-                'num_doc': 'data 2',
-                'num_ext': 0,
-                'etiqueta': 'data 3',
-                'classe_doc': 'data 4',
-                'data_alerta': 'data 5',
-                'orgao': 'data 6',
-                'classe_hier': 'data 7',
-                'dias_passados': 12345,
-                'descricao': 'data 8',
-                'sigla': 'COMP'
-            },
-            {
-                'doc_dk': 'data 1',
-                'num_doc': 'data 2',
-                'num_ext': 0,
-                'etiqueta': 'data 3',
-                'classe_doc': 'data 4',
-                'data_alerta': 'data 5',
-                'orgao': 'data 6',
-                'classe_hier': 'data 7',
-                'dias_passados': 12345,
-                'descricao': 'data 8',
-                'sigla': 'DORD'
-            }
-        ]
-
-        _run_query.assert_called_once_with(
-            Alerta.query_tipo.format(schema=settings.TABLE_NAMESPACE),
-            {"orgao_id": orgao_id, "tipo_alerta": tipo_alerta},
-        )
-        self.assertEqual(resp, expected_resp)

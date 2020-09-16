@@ -1,27 +1,32 @@
 from django.urls import path
 
-from .views import (
-    AlertasView,
-    ResumoAlertasView,
-    AlertasComprasView,
-    ITsGateView
-)
+from dominio.alertas import views
 
 urlpatterns = [
-    path('<str:orgao_id>', AlertasView.as_view(), name='lista_alertas'),
+    path('<str:orgao_id>', views.AlertasView.as_view(), name='lista_alertas'),
     path(
         'list/<str:orgao_id>',
-        ResumoAlertasView.as_view(),
+        views.ResumoAlertasView.as_view(),
         name='resumo_alertas'
     ),
     path(
+        "dispensar/<str:orgao_id>/comp",
+        views.DispensarAlertaView.as_view(),
+        name="dispensar_alerta"
+    ),
+    path(
+        "retornar/<str:orgao_id>/comp",
+        views.RetornarAlertaView.as_view(),
+        name="retornar_alerta"
+    ),
+    path(
         'compras/<str:orgao_id>',
-        AlertasComprasView.as_view(),
+        views.AlertasComprasView.as_view(),
         name='compras_alertas'
     ),
     path(
         'itgate/<str:orgao_id>/<str:docu_dk>',
-        ITsGateView.as_view(),
+        views.ITsGateView.as_view(),
         name='its_gate'
     ),
 ]
