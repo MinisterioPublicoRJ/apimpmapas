@@ -154,13 +154,3 @@ class AlertaComprasDAO(FiltraAlertasDispensadosMixin, AlertasDAO):
     orgao_kwarg = "id_orgao"
     alerta_id_kwarg = "contrato_iditem"
     sigla_kwarg = "sigla"
-
-
-class ITGateDAO(AlertasDAO):
-    query_file = "its_gate.sql"
-    columns = ["itcn_dk", ]
-    serializer = serializers.ItGateSerializer
-    table_namespaces = {
-        "schema": settings.TABLE_NAMESPACE,
-        "schema_alertas_compras": settings.SCHEMA_ALERTAS,
-    }

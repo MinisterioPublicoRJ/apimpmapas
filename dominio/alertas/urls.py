@@ -24,9 +24,4 @@ urlpatterns = [
         views.AlertasComprasView.as_view(),
         name='compras_alertas'
     ),
-    path(
-        'itgate/<str:orgao_id>/<str:docu_dk>',
-        views.ITsGateView.as_view(),
-        name='its_gate'
-    ),
 ]
