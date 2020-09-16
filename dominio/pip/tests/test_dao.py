@@ -12,6 +12,7 @@ from dominio.pip.dao import (
     PIPRadarPerformanceDAO,
     PIPPrincipaisInvestigadosDAO,
     PIPPrincipaisInvestigadosListaDAO,
+    PIPPrincipaisInvestigadosPerfilDAO
 )
 from dominio.pip.utils import get_aisps
 
@@ -424,5 +425,182 @@ class TestPIPPrincipaisInvestigadosListaDAO:
             "fase_documento": "FaseDoc",
             "dt_ultimo_andamento": '2020-04-22T13:36:06.668000Z',
             "desc_ultimo_andamento": "Andamento 1"
+        }]
+        assert ser_data == expected_data
+
+    @mock.patch.object(PIPPrincipaisInvestigadosListaDAO, "execute")
+    def test_get_pess_dk(self, _execute):
+        _execute.return_value = [
+            (
+                16,
+                16,
+                "Nome",
+                "Tipo",
+                29933850,
+                "123456",
+                datetime(2020, 4, 22, 13, 36, 6, 668000),
+                "Classe",
+                "5ª PROMOTORIA DE JUSTIÇA",
+                "Etiqueta",
+                "Assunto 1 --- Assunto 2",
+                "FaseDoc",
+                datetime(2020, 4, 22, 13, 36, 6, 668000),
+                "Andamento 1"
+            ),
+            (
+                16,
+                1,
+                "Nome",
+                "Tipo",
+                29933850,
+                "123456",
+                datetime(2020, 4, 22, 13, 36, 6, 668000),
+                "Classe",
+                "5ª PROMOTORIA DE JUSTIÇA",
+                "Etiqueta",
+                "Assunto 1 --- Assunto 2",
+                "FaseDoc",
+                datetime(2020, 4, 22, 13, 36, 6, 668000),
+                "Andamento 1"  
+            )
+        ]
+        expected = [
+            {
+                "representante_dk": 16,
+                "pess_dk": 1,
+                "coautores": "Nome",
+                "tipo_personagem": "Tipo",
+                "orgao_id": 29933850,
+                "documento_nr_mp": "123456",
+                "documento_dt_cadastro": '2020-04-22T13:36:06.668000Z',
+                "documento_classe": "Classe",
+                "nm_orgao": "5ª Promotoria de Justiça",
+                "etiqueta": "Etiqueta",
+                "assuntos": ["Assunto 1", "Assunto 2"],
+                "fase_documento": "FaseDoc",
+                "dt_ultimo_andamento": '2020-04-22T13:36:06.668000Z',
+                "desc_ultimo_andamento": "Andamento 1"
+            }
+        ]
+        output = PIPPrincipaisInvestigadosListaDAO.get(representante_dk=16, pess_dk=1)
+        assert output == expected
+
+    @mock.patch.object(PIPPrincipaisInvestigadosListaDAO, "execute")
+    def test_get_no_pess_dk(self, _execute):
+        _execute.return_value = [
+            (
+                16,
+                16,
+                "Nome",
+                "Tipo",
+                29933850,
+                "123456",
+                datetime(2020, 4, 22, 13, 36, 6, 668000),
+                "Classe",
+                "5ª PROMOTORIA DE JUSTIÇA",
+                "Etiqueta",
+                "Assunto 1 --- Assunto 2",
+                "FaseDoc",
+                datetime(2020, 4, 22, 13, 36, 6, 668000),
+                "Andamento 1"
+            ),
+            (
+                16,
+                1,
+                "Nome",
+                "Tipo",
+                29933850,
+                "123456",
+                datetime(2020, 4, 22, 13, 36, 6, 668000),
+                "Classe",
+                "5ª PROMOTORIA DE JUSTIÇA",
+                "Etiqueta",
+                "Assunto 1 --- Assunto 2",
+                "FaseDoc",
+                datetime(2020, 4, 22, 13, 36, 6, 668000),
+                "Andamento 1"  
+            )
+        ]
+        expected = [
+            {
+                "representante_dk": 16,
+                "pess_dk": 16,
+                "coautores": "Nome",
+                "tipo_personagem": "Tipo",
+                "orgao_id": 29933850,
+                "documento_nr_mp": "123456",
+                "documento_dt_cadastro": '2020-04-22T13:36:06.668000Z',
+                "documento_classe": "Classe",
+                "nm_orgao": "5ª Promotoria de Justiça",
+                "etiqueta": "Etiqueta",
+                "assuntos": ["Assunto 1", "Assunto 2"],
+                "fase_documento": "FaseDoc",
+                "dt_ultimo_andamento": '2020-04-22T13:36:06.668000Z',
+                "desc_ultimo_andamento": "Andamento 1"
+            },
+            {
+                "representante_dk": 16,
+                "pess_dk": 1,
+                "coautores": "Nome",
+                "tipo_personagem": "Tipo",
+                "orgao_id": 29933850,
+                "documento_nr_mp": "123456",
+                "documento_dt_cadastro": '2020-04-22T13:36:06.668000Z',
+                "documento_classe": "Classe",
+                "nm_orgao": "5ª Promotoria de Justiça",
+                "etiqueta": "Etiqueta",
+                "assuntos": ["Assunto 1", "Assunto 2"],
+                "fase_documento": "FaseDoc",
+                "dt_ultimo_andamento": '2020-04-22T13:36:06.668000Z',
+                "desc_ultimo_andamento": "Andamento 1"
+            }
+        ]
+        output = PIPPrincipaisInvestigadosListaDAO.get(representante_dk=16)
+        assert output == expected
+
+
+class TestPIPPrincipaisInvestigadosPerfilDAO:
+    def test_serialize_pesf_result(self):
+        result_set = [
+            (
+                16,
+                "Nome",
+                "Nome Mae",
+                None,
+                "123456",
+                datetime(2020, 4, 22, 13, 36, 6, 668000),
+                None,
+                None
+            ),
+        ]
+        ser_data = PIPPrincipaisInvestigadosPerfilDAO.serialize(result_set)
+        expected_data = [{
+            "pess_dk": 16,
+            "nm_investigado": "Nome",
+            "nm_mae": "Nome Mae",
+            "cpf": None,
+            "rg": "123456",
+            "dt_nasc": '2020-04-22T13:36:06.668000Z'
+        }]
+        assert ser_data == expected_data
+
+    def test_serialize_pesj_result(self):
+        result_set = [
+            (
+                16,
+                None,
+                None,
+                None,
+                None,
+                None,
+                "Nome Pesj",
+                "123456"
+            ),
+        ]
+        ser_data = PIPPrincipaisInvestigadosPerfilDAO.serialize(result_set)
+        expected_data = [{
+            "pess_dk": 16,
+            "nm_pesj": "Nome Pesj",
+            "cnpj": "123456"
         }]
         assert ser_data == expected_data
