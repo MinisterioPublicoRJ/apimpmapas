@@ -153,7 +153,7 @@ class PIPPrincipaisInvestigadosView(
 
 
 class PIPPrincipaisInvestigadosListaView(
-        JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
+        JWTAuthMixin, PaginatorMixin, APIView):
     cache_config = "PIP_PRINCIPAIS_INVESTIGADOS_LISTA_CACHE_TIMEOUT"
     PRINCIPAIS_INVESTIGADOS_PROCEDIMENTOS_SIZE = 20
 

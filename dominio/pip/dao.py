@@ -282,6 +282,16 @@ class PIPPrincipaisInvestigadosPerfilDAO(GenericPIPDAO):
         "schema": settings.TABLE_NAMESPACE
     }
     serializer = PIPPrincipaisInvestigadosPerfilSerializer
+    cache_prefix = 'PIP_PRINCIPAIS_INVESTIGADOS_PERFIL'
+
+    @classmethod
+    def get(cls, accept_empty=False, **kwargs):
+        cache_key = '{}_DATA_{}'.format(cls.cache_prefix, kwargs.get("representante_dk"))
+        data = cache.get(cache_key, default=None)
+        if not data:
+            data = super().get(accept_empty, **kwargs)
+            cache.set(cache_key, data, timeout=settings.CACHE_TIMEOUT)
+        return data
 
 
 class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
@@ -304,6 +314,7 @@ class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
     ]
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
     serializer = PIPPrincipaisInvestigadosListaSerializer
+    cache_prefix = 'PIP_PRINCIPAIS_INVESTIGADOS_LISTA'
 
     @classmethod
     def serialize(cls, result_set):
@@ -325,7 +336,12 @@ class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
 
     @classmethod
     def get(cls, accept_empty=False, **kwargs):
-        data = super().get(accept_empty, **kwargs)
+        cache_key = '{}_DATA_{}'.format(cls.cache_prefix, kwargs.get("representante_dk"))
+        data = cache.get(cache_key, default=None)
+        if not data:
+            data = super().get(accept_empty, **kwargs)
+            cache.set(cache_key, data, timeout=settings.CACHE_TIMEOUT)
+
         pess_dk = kwargs.get("pess_dk")
         if pess_dk:
             data = [x for x in data if x['pess_dk'] == pess_dk]
