@@ -4,7 +4,7 @@ import logging
 from django.conf import settings
 from impala.dbapi import connect as bda_connect
 from impala.error import HiveServer2Error as BDA_Error
-from happybase import Connection as HBaseConnection
+from happybase_kerberos_patch import KerberosConnection
 
 from lupa.exceptions import QueryError
 
@@ -46,11 +46,11 @@ def get_hbase_table(table_name, server=None, timeout=None):
     hbase_timeout = timeout or settings.PROMOTRON_HBASE_TIMEOUT
 
     try:
-        connection = HBaseConnection(
+        connection = KerberosConnection(
             hbase_server,
+            protocol='compact',
+            use_kerberos=True,
             timeout=hbase_timeout,
-            transport="framed",
-            protocol="compact",
         )
         return connection.table(table_name)
     except Exception as e:

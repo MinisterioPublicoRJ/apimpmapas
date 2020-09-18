@@ -43,3 +43,6 @@ thriftpy2==0.4.10
 
 #solr
 requests-kerberos==0.12.0
+
+#hbase
+git+https://github.com/MinisterioPublicoRJ/happybase-kerberos-patch.git
