@@ -34,7 +34,7 @@ class TestImpalaConnector(TestCase):
             port=settings.IMPALA_PORT,
             use_ssl=False,
             user=settings.KERBEROS_USER,
-            kerberos_service_name='impala',
+            kerberos_service_name=settings.KERBEROS_SERVICE_NAME,
             auth_mechanism='GSSAPI'
         )
         self.cursor_mock.execute.assert_called_once_with(
