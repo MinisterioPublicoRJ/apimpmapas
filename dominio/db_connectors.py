@@ -19,7 +19,7 @@ def execute(query, parameters):
         port=settings.IMPALA_PORT,
         use_ssl=False,
         user=settings.KERBEROS_USER,
-        kerberos_service_name='impala',
+        kerberos_service_name=settings.KERBEROS_SERVICE_NAME,
         auth_mechanism='GSSAPI'
     ) as conn:
         with conn.cursor() as curs:
