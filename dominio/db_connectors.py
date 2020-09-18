@@ -16,7 +16,11 @@ os.environ['NLS_LANG'] = 'American_America.UTF8'
 def execute(query, parameters):
     with bda_connect(
         host=settings.IMPALA_HOST,
-        port=settings.IMPALA_PORT
+        port=settings.IMPALA_PORT,
+        use_ssl=False,
+        user=settings.KERBEROS_USER,
+        kerberos_service_name='impala',
+        auth_mechanism='GSSAPI'
     ) as conn:
         with conn.cursor() as curs:
             try:

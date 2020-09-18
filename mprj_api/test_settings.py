@@ -241,3 +241,6 @@ PROXIES_PLACAS_ROLE = config("PROXIES_PLACAS_ROLE", default="role")
 ZOOKEEPER_SERVER = config("ZOOKEEPER_SERVER", default="zookeeper")
 PLACAS_SOLR_COLLECTION = config("PLACAS_SOLR_COLLECTION", default="placas")
 PLACAS_SOLR_MAX_ROWS = config("PLACAS_SOLR_MAX_ROWS", cast=int, default=1_000)
+
+#KERBEROS AUTH
+KERBEROS_USER = config("KERBEROS_USER")
