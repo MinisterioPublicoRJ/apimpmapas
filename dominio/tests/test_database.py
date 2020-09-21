@@ -84,7 +84,7 @@ class RunQuery(TestCase):
 
 
 class HBaseTests(TestCase):
-    @mock.patch("dominio.db_connectors.HBaseConnection")
+    @mock.patch("dominio.db_connectors.KerberosConnection")
     def test_hbase_get_table(self, _HBaseConnection):
         connection_mock = mock.MagicMock()
         connection_mock.table.return_value = "Table"
@@ -95,7 +95,7 @@ class HBaseTests(TestCase):
         self.assertEqual(output, "Table")
         connection_mock.table.assert_called_once_with("tabela")
 
-    @mock.patch("dominio.db_connectors.HBaseConnection")
+    @mock.patch("dominio.db_connectors.KerberosConnection")
     def test_hbase_get_table_failed_connection(self, _HBaseConnection):
         _HBaseConnection.side_effect = Exception
 
