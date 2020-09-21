@@ -20,9 +20,17 @@ class TestSolrClient(TestCase):
         self.solr_mock = self.pysolr_solr_patcher.start()
         self.solr_mock.return_value = "solr connection"
 
+        self.kerberos_patcher = mock.patch(
+            "proxies.solr.client.HTTPKerberosAuth"
+        )
+        self.kerberos_mock = self.kerberos_patcher.start()
+        self.kerberos_auth_mock = mock.Mock()
+        self.kerberos_mock.return_value = self.kerberos_auth_mock
+
     def tearDown(self):
         self.pysolr_zoo_patcher.stop()
         self.pysolr_solr_patcher.stop()
+        self.kerberos_patcher.stop()
 
     def test_create_solr_client(self):
         solr_client = create_solr_client()
@@ -32,6 +40,7 @@ class TestSolrClient(TestCase):
             self.zoo_mock.return_value,
             settings.PLACAS_SOLR_COLLECTION,
             timeout=300,
+            auth=self.kerberos_auth_mock,
         )
         self.assertEqual(solr_client._client, "solr connection")
 
