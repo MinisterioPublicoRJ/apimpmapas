@@ -345,10 +345,10 @@ class PIPComparadorRadaresDAO(GenericPIPDAO):
         "orgao_id",
         "orgao_codamp",
         "orgi_nm_orgao",
+        "perc_denuncias",
+        "perc_cautelares",
+        "perc_acordos",
         "perc_arquivamentos",
-        "perc_indeferimentos",
-        "perc_instauracoes",
-        "perc_tac",
-        "perc_acoes",
+        "perc_aberturas_vista",
     ]
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
