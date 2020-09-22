@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import (
+    ComparadorRadaresView,
     DesarquivamentosView,
     SaidasView,
     EntradasView,
@@ -97,6 +98,11 @@ urlpatterns = [
         "lista/processos/<str:orgao_id>",
         ListaProcessosView.as_view(),
         name="lista-processos"
+    ),
+    path(
+        "comparador-radares/<str:orgao_id>",
+        ComparadorRadaresView.as_view(),
+        name="tutela-comparador-radares"
     ),
 ]
 urlpatterns += suamesa_urls + stats_urls
