@@ -384,26 +384,27 @@ Allow: GET, HEAD, OPTIONS
 Content-Type: application/json
 Vary: Accept
 
-{
-    "orgao_id": "3456",
-    "orgao_codamp": "2ª PJ",
-    "orgi_nm_orgao": "2ª PROMOTORIA",
-    "perc_arquivamentos": 1.0,
-    "perc_indeferimentos": 0.0,
-    "perc_instauracoes": None,
-    "perc_tac": 0.7,
-    "perc_acoes": None
-},
-{
-    "orgao_id": "6789",
-    "orgao_codamp": "1ª PJ",
-    "orgi_nm_orgao": "1ª PROMOTORIA",
-    "perc_arquivamentos": 1.0,
-    "perc_indeferimentos": 1.0,
-    "perc_instauracoes": None,
-    "perc_tac": 1.0,
-    "perc_acoes": None
-}
+[
+  {
+      "orgao_id": "3456",
+      "orgao_codamp": "2ª PJ",
+      "orgi_nm_orgao": "2ª PROMOTORIA",
+      "perc_arquivamentos": 1.0,
+      "perc_indeferimentos": 0.0,
+      "perc_instauracoes": None,
+      "perc_tac": 0.7,
+      "perc_acoes": None
+  },
+  {
+      "orgao_id": "6789",
+      "orgao_codamp": "1ª PJ",
+      "orgi_nm_orgao": "1ª PROMOTORIA",
+      "perc_arquivamentos": 1.0,
+      "perc_indeferimentos": 1.0,
+      "perc_instauracoes": None,
+      "perc_tac": 1.0,
+      "perc_acoes": None
+  }
 ]
 ```
 
@@ -419,26 +420,27 @@ Allow: GET, HEAD, OPTIONS
 Content-Type: application/json
 Vary: Accept
 
-{
-    "orgao_id": "3456",
-    "orgao_codamp": "2ª PJ",
-    "orgi_nm_orgao": "2ª PROMOTORIA",
-    "perc_arquivamentos": 1.0,
-    "perc_indeferimentos": 0.0,
-    "perc_instauracoes": None,
-    "perc_tac": 0.7,
-    "perc_acoes": None
-},
-{
-    "orgao_id": "6789",
-    "orgao_codamp": "1ª PJ",
-    "orgi_nm_orgao": "1ª PROMOTORIA",
-    "perc_arquivamentos": 1.0,
-    "perc_indeferimentos": 1.0,
-    "perc_instauracoes": None,
-    "perc_tac": 1.0,
-    "perc_acoes": None
-}
+[
+  {
+      "orgao_id": "3456",
+      "orgao_codamp": "2ª PJ",
+      "orgi_nm_orgao": "2ª PROMOTORIA",
+      "perc_arquivamentos": 1.0,
+      "perc_indeferimentos": 0.0,
+      "perc_instauracoes": None,
+      "perc_tac": 0.7,
+      "perc_acoes": None
+  },
+  {
+      "orgao_id": "6789",
+      "orgao_codamp": "1ª PJ",
+      "orgi_nm_orgao": "1ª PROMOTORIA",
+      "perc_arquivamentos": 1.0,
+      "perc_indeferimentos": 1.0,
+      "perc_instauracoes": None,
+      "perc_tac": 1.0,
+      "perc_acoes": None
+  }
 ]
 ```
 
