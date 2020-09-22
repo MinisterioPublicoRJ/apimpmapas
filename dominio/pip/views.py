@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from dominio.mixins import CacheMixin, JWTAuthMixin, PaginatorMixin
 from dominio.models import Vista, Documento
 from dominio.pip.dao import (
+    PIPComparadorRadaresDAO,
     PIPDetalheAproveitamentosDAO,
     PIPIndicadoresDeSucessoDAO,
     PIPRadarPerformanceDAO,
@@ -181,3 +182,9 @@ class PIPPrincipaisInvestigadosListaView(
         }
 
         return Response(data)
+
+
+class PIPComparadorRadaresView(JWTAuthMixin, APIView):
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(self.kwargs.get(self.orgao_url_kwarg))
+        return Response(data=PIPComparadorRadaresDAO.get(orgao_id=orgao_id))
