@@ -288,7 +288,9 @@ class PIPPrincipaisInvestigadosPerfilDAO(GenericPIPDAO):
 
     @classmethod
     def get(cls, accept_empty=False, **kwargs):
-        cache_key = '{}_DATA_{}'.format(cls.cache_prefix, kwargs.get("representante_dk"))
+        cache_key = '{}_DATA_{}'.format(
+            cls.cache_prefix, kwargs.get("representante_dk")
+        )
         data = cache.get(cache_key, default=None)
         if not data:
             data = super().get(accept_empty, **kwargs)
@@ -302,9 +304,15 @@ class PIPPrincipaisInvestigadosPerfilDAO(GenericPIPDAO):
         # Verifica se é pessoa física ou jurídica
         keys_pesj = cls.columns[0:1] + cls.columns[6:]
         keys_pesf = cls.columns[0:6]
-        keys_to_keep = keys_pesj if ser_data and ser_data[0]['nm_pesj'] else keys_pesf
+        keys_to_keep = (
+            keys_pesj if ser_data and ser_data[0]['nm_pesj']
+            else keys_pesf
+        )
 
-        ser_data = [{key: row[key] for key in row if key in keys_to_keep} for row in ser_data]
+        ser_data = [
+            {key: row[key] for key in row if key in keys_to_keep}
+            for row in ser_data
+        ]
 
         return ser_data
 
@@ -351,7 +359,9 @@ class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
 
     @classmethod
     def get(cls, accept_empty=False, **kwargs):
-        cache_key = '{}_DATA_{}'.format(cls.cache_prefix, kwargs.get("representante_dk"))
+        cache_key = '{}_DATA_{}'.format(
+            cls.cache_prefix, kwargs.get("representante_dk")
+        )
         data = cache.get(cache_key, default=None)
         if not data:
             data = super().get(accept_empty, **kwargs)

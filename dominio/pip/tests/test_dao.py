@@ -461,7 +461,7 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "Assunto 1 --- Assunto 2",
                 "FaseDoc",
                 datetime(2020, 4, 22, 13, 36, 6, 668000),
-                "Andamento 1"  
+                "Andamento 1"
             )
         ]
         expected = [
@@ -482,7 +482,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "desc_ultimo_andamento": "Andamento 1"
             }
         ]
-        output = PIPPrincipaisInvestigadosListaDAO.get(representante_dk=16, pess_dk=1)
+        output = PIPPrincipaisInvestigadosListaDAO.get(
+            representante_dk=16, pess_dk=1
+        )
         assert output == expected
 
     @mock.patch.object(PIPPrincipaisInvestigadosListaDAO, "execute")
@@ -518,7 +520,7 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "Assunto 1 --- Assunto 2",
                 "FaseDoc",
                 datetime(2020, 4, 22, 13, 36, 6, 668000),
-                "Andamento 1"  
+                "Andamento 1"
             )
         ]
         expected = [
