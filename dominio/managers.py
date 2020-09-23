@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 
-from django.db import models
+from django.db import connections, models
 from django.db.models import (
     Case,
     Q,
@@ -93,11 +93,19 @@ class VistaManager(models.Manager):
 
 class InvestigacoesManager(models.Manager):
     def em_curso(self, orgao_id, regras):
-        return self.get_queryset().filter(
-            docu_orgi_orga_dk_responsavel=orgao_id,
-            docu_cldc_dk__in=regras,
-            docu_fsdc_dk=1
-        ).exclude(docu_tpst_dk=11)
+        query = """
+            SELECT COUNT(DOCU_FSDC_DK) AS "__COUNT" FROM "MCPR_DOCUMENTO"
+            WHERE ("MCPR_DOCUMENTO"."DOCU_CLDC_DK" IN (%s, %s)
+                AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
+                AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" = %s
+                AND NOT ("MCPR_DOCUMENTO"."DOCU_TPST_DK" = 11))
+        """
+        rs = [(0,)]
+        with connections["dominio_db"].cursor() as cursor:
+            cursor.execute(query, regras + [orgao_id])
+            rs = cursor.fetchall()
+
+        return rs[0][0]
 
     def em_curso_pip_aisp(self, orgao_ids):
         return self.get_queryset().filter(

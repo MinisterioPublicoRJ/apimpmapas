@@ -46,9 +46,7 @@ class TestSuaMesaFunctions(NoJWTTestCase, NoCacheTestCase, TestCase):
 
     @mock.patch('dominio.suamesa.dao_functions.Documento')
     def test_get_tutela_investigacoes(self, _Documento):
-        manager_mock = mock.MagicMock()
-        manager_mock.count.return_value = 1
-        _Documento.investigacoes.em_curso.return_value = manager_mock
+        _Documento.investigacoes.em_curso.return_value = 1
         orgao_id = 10
         mock_request = mock.MagicMock()
         mock_request.GET = {}
@@ -59,7 +57,6 @@ class TestSuaMesaFunctions(NoJWTTestCase, NoCacheTestCase, TestCase):
         _Documento.investigacoes.em_curso.assert_called_once_with(
             orgao_id, [51219, 51220, 51221, 51222, 51223, 392, 395]
         )
-        manager_mock.count.assert_called_once_with()
 
     @mock.patch('dominio.suamesa.dao_functions.Documento')
     def test_get_tutela_processos(self, _Documento):
@@ -85,9 +82,7 @@ class TestSuaMesaFunctions(NoJWTTestCase, NoCacheTestCase, TestCase):
 
     @mock.patch('dominio.suamesa.dao_functions.Documento')
     def test_get_pip_inqueritos(self, _Documento):
-        manager_mock = mock.MagicMock()
-        manager_mock.count.return_value = 1
-        _Documento.investigacoes.em_curso.return_value = manager_mock
+        _Documento.investigacoes.em_curso.return_value = 1
         orgao_id = 10
         mock_request = mock.MagicMock()
         mock_request.GET = {}
@@ -98,13 +93,10 @@ class TestSuaMesaFunctions(NoJWTTestCase, NoCacheTestCase, TestCase):
         _Documento.investigacoes.em_curso.assert_called_once_with(
             orgao_id, [494, 3]
         )
-        manager_mock.count.assert_called_once_with()
 
     @mock.patch('dominio.suamesa.dao_functions.Documento')
     def test_get_pip_pics(self, _Documento):
-        manager_mock = mock.MagicMock()
-        manager_mock.count.return_value = 1
-        _Documento.investigacoes.em_curso.return_value = manager_mock
+        _Documento.investigacoes.em_curso.return_value = 1
         orgao_id = 10
         mock_request = mock.MagicMock()
         mock_request.GET = {}
@@ -115,7 +107,6 @@ class TestSuaMesaFunctions(NoJWTTestCase, NoCacheTestCase, TestCase):
         _Documento.investigacoes.em_curso.assert_called_once_with(
             orgao_id, [590]
         )
-        manager_mock.count.assert_called_once_with()
 
     @mock.patch('dominio.suamesa.dao_functions.get_orgaos_same_aisps')
     @mock.patch('dominio.suamesa.dao_functions.Documento')
