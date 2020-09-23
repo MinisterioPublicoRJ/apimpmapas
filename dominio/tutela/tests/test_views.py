@@ -508,3 +508,57 @@ class TestNumeroDesarquivamentos(NoJWTTestCase, TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, expected)
+
+
+class TestComparadorRadares(NoJWTTestCase, TestCase):
+    @mock.patch("dominio.tutela.views.ComparadorRadaresDAO.execute")
+    def test_correct_response(self, _execute):
+        _execute.return_value = [
+            (
+                "3456",
+                "2ª PJ",
+                "2ª PROMOTORIA",
+                1.0,
+                0.0,
+                None,
+                0.7,
+                None
+            ),
+            (
+                "6789",
+                "1ª PJ",
+                "1ª PROMOTORIA",
+                1.0,
+                1.0,
+                None,
+                1.0,
+                None
+            )
+        ]
+        url = reverse("dominio:tutela-comparador-radares", args=("12345",))
+        resp = self.client.get(url)
+        expected_data = [
+            {
+                "orgao_id": "3456",
+                "orgao_codamp": "2ª PJ",
+                "orgi_nm_orgao": "2ª PROMOTORIA",
+                "perc_arquivamentos": 1.0,
+                "perc_indeferimentos": 0.0,
+                "perc_instauracoes": None,
+                "perc_tac": 0.7,
+                "perc_acoes": None
+            },
+            {
+                "orgao_id": "6789",
+                "orgao_codamp": "1ª PJ",
+                "orgi_nm_orgao": "1ª PROMOTORIA",
+                "perc_arquivamentos": 1.0,
+                "perc_indeferimentos": 1.0,
+                "perc_instauracoes": None,
+                "perc_tac": 1.0,
+                "perc_acoes": None
+            }
+        ]
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, expected_data)
