@@ -93,21 +93,19 @@ class VistaManager(models.Manager):
 
 class InvestigacoesManager(models.Manager):
     def em_curso(self, orgao_id, regras):
-        parametros = ['regras' + i for i in range(len(regras))]
-        parametros = ','.join(parametros)
+        parametros = ",".join([f":regra{i}" for i in range(len(regras))])
         query = f"""
             SELECT COUNT(DOCU_FSDC_DK) AS "__COUNT" FROM "MCPR_DOCUMENTO"
-            WHERE ("MCPR_DOCUMENTO"."DOCU_CLDC_DK" IN (parametros)
-                AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
-                AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" = %s
-                AND NOT ("MCPR_DOCUMENTO"."DOCU_TPST_DK" = 11))
+            WHERE ("MCPR_DOCUMENTO"."DOCU_CLDC_DK" IN ({parametros})
+              AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
+              AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" = :orgao_id
+              AND NOT ("MCPR_DOCUMENTO"."DOCU_TPST_DK" = 11))
         """
         rs = [(0,)]
+        prep_stat = {f"regra{i}": v for i, v in enumerate(regras)}
+        prep_stat["orgao_id"] = orgao_id
         with connections["dominio_db"].cursor() as cursor:
-            cursor.execute(query, orgao_id, {
-                'regra' + i: v
-                for i, v in enumerate(regras)
-            })
+            cursor.execute(query, prep_stat)
             rs = cursor.fetchall()
 
         return rs[0][0]
