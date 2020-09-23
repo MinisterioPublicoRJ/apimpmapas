@@ -93,16 +93,21 @@ class VistaManager(models.Manager):
 
 class InvestigacoesManager(models.Manager):
     def em_curso(self, orgao_id, regras):
-        query = """
+        parametros = ['regras' + i for i in range(len(regras))]
+        parametros = ','.join(parametros)
+        query = f"""
             SELECT COUNT(DOCU_FSDC_DK) AS "__COUNT" FROM "MCPR_DOCUMENTO"
-            WHERE ("MCPR_DOCUMENTO"."DOCU_CLDC_DK" IN (%s, %s)
+            WHERE ("MCPR_DOCUMENTO"."DOCU_CLDC_DK" IN (parametros)
                 AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
                 AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" = %s
                 AND NOT ("MCPR_DOCUMENTO"."DOCU_TPST_DK" = 11))
         """
         rs = [(0,)]
         with connections["dominio_db"].cursor() as cursor:
-            cursor.execute(query, regras + [orgao_id])
+            cursor.execute(query, orgao_id, {
+                'regra' + i: v
+                for i, v in enumerate(regras)
+            })
             rs = cursor.fetchall()
 
         return rs[0][0]
