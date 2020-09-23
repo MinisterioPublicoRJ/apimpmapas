@@ -41,8 +41,7 @@ def get_tutela_processos(orgao_id, request):
         582, 323,                 # Execução Provisória
         319, 51218, 51217, 51205  # Execução Extrajudicial
     ]
-    return Documento.processos.em_juizo(
-            orgao_id, regras).count()
+    return Documento.processos.em_juizo(orgao_id, regras)
 
 
 def get_pip_inqueritos(orgao_id, request):
