@@ -121,7 +121,7 @@ class InvestigacoesManager(models.Manager):
         parametros = ",".join([f":regra{i}" for i in range(len(regras))])
         orgaos = ",".join([f":orgao{i}" for i in range(len(orgao_ids))])
         query = f"""
-            SELECT COUNT(DOCU_FSDC_DK) AS "__COUNT" FROM "MCPR_DOCUMENTO"
+            SELECT /*+ PARALLEL,2 */ COUNT(DOCU_FSDC_DK) AS "__COUNT" FROM "MCPR_DOCUMENTO"
             WHERE ("MCPR_DOCUMENTO"."DOCU_CLDC_DK" IN ({parametros})
              AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
              AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" IN ({orgaos})
