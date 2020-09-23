@@ -118,11 +118,23 @@ class InvestigacoesManager(models.Manager):
         ).exclude(docu_tpst_dk=11)
 
     def em_curso_grupo(self, orgao_ids, regras):
-        return self.get_queryset().filter(
-            docu_orgi_orga_dk_responsavel__in=orgao_ids,
-            docu_cldc_dk__in=regras,
-            docu_fsdc_dk=1
-        ).exclude(docu_tpst_dk=11)
+        parametros = ",".join([f":regra{i}" for i in range(len(regras))])
+        orgaos = ",".join([f":orgao{i}" for i in range(len(orgao_ids))])
+        query = f"""
+            SELECT COUNT(DOCU_FSDC_DK) AS "__COUNT" FROM "MCPR_DOCUMENTO"
+            WHERE ("MCPR_DOCUMENTO"."DOCU_CLDC_DK" IN ({parametros})
+              AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
+              AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" IN ({orgaos})
+              AND NOT ("MCPR_DOCUMENTO"."DOCU_TPST_DK" = 11))
+        """
+        rs = [(0,)]
+        prep_stat = {f"regra{i}": v for i, v in enumerate(regras)}
+        prep_stat.update({f"orgao{i}": v for i, v in enumerate(orgao_ids)})
+        with connections["dominio_db"].cursor() as cursor:
+            cursor.execute(query, prep_stat)
+            rs = cursor.fetchall()
+
+        return rs[0][0]
 
 
 class ProcessosManager(InvestigacoesManager):
