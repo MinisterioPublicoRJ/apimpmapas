@@ -123,9 +123,9 @@ class InvestigacoesManager(models.Manager):
         query = f"""
             SELECT COUNT(DOCU_FSDC_DK) AS "__COUNT" FROM "MCPR_DOCUMENTO"
             WHERE ("MCPR_DOCUMENTO"."DOCU_CLDC_DK" IN ({parametros})
-              AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
-              AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" IN ({orgaos})
-              AND NOT ("MCPR_DOCUMENTO"."DOCU_TPST_DK" = 11))
+             AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
+             AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" IN ({orgaos})
+             AND NOT ("MCPR_DOCUMENTO"."DOCU_TPST_DK" = 11))
         """
         rs = [(0,)]
         prep_stat = {f"regra{i}": v for i, v in enumerate(regras)}

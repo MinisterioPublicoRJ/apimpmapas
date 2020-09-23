@@ -66,7 +66,7 @@ def get_pip_aisp(orgao_id, request):
 
     return Documento.investigacoes.em_curso_grupo(
         orgaos_same_aisp, regras
-    ).count()
+    )
 
 
 def get_tutela_finalizados(orgao_id, request):
