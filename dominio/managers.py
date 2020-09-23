@@ -10,7 +10,6 @@ from django.db.models import (
     Sum,
     When,
 )
-from django.db.models.functions import Substr
 
 
 class VistaManager(models.Manager):
@@ -121,7 +120,8 @@ class InvestigacoesManager(models.Manager):
         parametros = ",".join([f":regra{i}" for i in range(len(regras))])
         orgaos = ",".join([f":orgao{i}" for i in range(len(orgao_ids))])
         query = f"""
-            SELECT /*+ PARALLEL,2 */ COUNT(DOCU_FSDC_DK) AS "__COUNT" FROM "MCPR_DOCUMENTO"
+            SELECT /*+ PARALLEL,2 */
+            COUNT(DOCU_FSDC_DK) AS "__COUNT" FROM "MCPR_DOCUMENTO"
             WHERE ("MCPR_DOCUMENTO"."DOCU_CLDC_DK" IN ({parametros})
              AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
              AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" IN ({orgaos})
@@ -151,7 +151,8 @@ class ProcessosManager(InvestigacoesManager):
               AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
               AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" = :orgao_id
               AND NOT ("MCPR_DOCUMENTO"."DOCU_TPST_DK" = 11)
-              AND SUBSTR("MCPR_DOCUMENTO"."DOCU_NR_EXTERNO", 10, 4) = "MCPR_DOCUMENTO"."DOCU_ANO"
+              AND SUBSTR("MCPR_DOCUMENTO"."DOCU_NR_EXTERNO", 10, 4)
+                = "MCPR_DOCUMENTO"."DOCU_ANO"
               AND SUBSTR("MCPR_DOCUMENTO"."DOCU_NR_EXTERNO", 14, 3) = '819')
         """
         rs = [(0,)]
