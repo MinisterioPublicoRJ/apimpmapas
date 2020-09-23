@@ -8,7 +8,7 @@ refresh_kinit() {
     done
 }
 
-refresh_kinit &;
+refresh_kinit &
 sleep 1;
 
 if [ -z "$WORKER" ]

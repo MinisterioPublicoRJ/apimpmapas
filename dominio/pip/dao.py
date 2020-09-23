@@ -337,3 +337,18 @@ class PIPIndicadoresDeSucessoDAO(GenericPIPDAO):
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
     serializer = PIPIndicadoresSucessoParser
     columns = ["orgao_id", "indice", "tipo"]
+
+
+class PIPComparadorRadaresDAO(GenericPIPDAO):
+    query_file = "pip_comparador_radares.sql"
+    columns = [
+        "orgao_id",
+        "orgao_codamp",
+        "orgi_nm_orgao",
+        "perc_denuncias",
+        "perc_cautelares",
+        "perc_acordos",
+        "perc_arquivamentos",
+        "perc_aberturas_vista",
+    ]
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}

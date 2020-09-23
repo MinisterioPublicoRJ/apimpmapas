@@ -298,7 +298,7 @@ class TestDataTrafficControlle:
 
 
 class TestHBaseGate:
-    @mock.patch("proxies.detran.dao.HBaseConnection")
+    @mock.patch("proxies.detran.dao.KerberosConnection")
     def test_get_table(self, _Connection):
         connection_mock = mock.Mock()
         connection_mock.table.return_value = "table obj"
@@ -311,7 +311,7 @@ class TestHBaseGate:
         _Connection.assert_called_once_with(
             settings.HBASE_SERVER,
             timeout=settings.HBASE_TIMEOUT,
-            transport="framed",
+            use_kerberos=True,
             protocol="compact",
         )
         connection_mock.table.assert_called_once_with(table_name)
