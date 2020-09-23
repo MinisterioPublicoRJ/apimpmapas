@@ -208,7 +208,11 @@ class BdaAccess(CommonSetup):
 
         _bda_connect.assert_called_once_with(
             host=settings.IMPALA_HOST,
-            port=settings.IMPALA_PORT
+            port=settings.IMPALA_PORT,
+            use_ssl=False,
+            user=settings.KERBEROS_USER,
+            kerberos_service_name=settings.KERBEROS_SERVICE_NAME,
+            auth_mechanism='GSSAPI'
         )
 
     def test_generate_query_bda(self):
