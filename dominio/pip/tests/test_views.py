@@ -262,3 +262,57 @@ class TestPIPPrincipaisInvestigadosListaView(
         _get_procedimentos.assert_called_once_with(dk=12345, pess_dk=0)
         assert resp.status_code == 200
         assert resp.data == expected_output
+
+
+class TestComparadorRadares(NoJWTTestCase, TestCase):
+    @mock.patch("dominio.pip.views.PIPComparadorRadaresDAO.execute")
+    def test_correct_response(self, _execute):
+        _execute.return_value = [
+            (
+                "3456",
+                "2ª PJ",
+                "2ª PROMOTORIA",
+                1.0,
+                0.0,
+                None,
+                0.7,
+                None
+            ),
+            (
+                "6789",
+                "1ª PJ",
+                "1ª PROMOTORIA",
+                1.0,
+                1.0,
+                None,
+                1.0,
+                None
+            )
+        ]
+        url = reverse("dominio:pip-comparador-radares", args=("12345",))
+        resp = self.client.get(url)
+        expected_data = [
+            {
+                "orgao_id": "3456",
+                "orgao_codamp": "2ª PJ",
+                "orgi_nm_orgao": "2ª PROMOTORIA",
+                "perc_denuncias": 1.0,
+                "perc_cautelares": 0.0,
+                "perc_acordos": None,
+                "perc_arquivamentos": 0.7,
+                "perc_aberturas_vista": None
+            },
+            {
+                "orgao_id": "6789",
+                "orgao_codamp": "1ª PJ",
+                "orgi_nm_orgao": "1ª PROMOTORIA",
+                "perc_denuncias": 1.0,
+                "perc_cautelares": 1.0,
+                "perc_acordos": None,
+                "perc_arquivamentos": 1.0,
+                "perc_aberturas_vista": None
+            }
+        ]
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, expected_data)
