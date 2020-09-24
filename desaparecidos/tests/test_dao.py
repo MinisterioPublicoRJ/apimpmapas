@@ -177,10 +177,19 @@ class Dao(TestCase):
         self.assertEqual(resp_json, expected)
 
     @mock.patch("desaparecidos.dao.serialize", return_value="ser result")
-    @mock.patch("desaparecidos.dao.format_query", return_value="formatted_query")
+    @mock.patch(
+        "desaparecidos.dao.format_query",
+        return_value="formatted_query"
+    )
     @mock.patch.object(Oracle_DB, "execute", return_value="result")
     @mock.patch.object(Oracle_DB, "connect", return_value="cursor")
-    def test_whole_workflow(self, _connect, _execute, _format_query, _serialize):
+    def test_whole_workflow(
+        self,
+        _connect,
+        _execute,
+        _format_query,
+        _serialize
+    ):
         id_sinalid = "1234"
 
         result = rank(id_sinalid)
@@ -191,15 +200,27 @@ class Dao(TestCase):
                 settings.DESAPARECIDOS_DB_HOST
         )
         _format_query.assert_called_once_with(q_rank, id_sinalid)
-        _execute.assert_called_once_with(_connect.return_value, _format_query.return_value)
+        _execute.assert_called_once_with(
+            _connect.return_value,
+            _format_query.return_value
+        )
         _serialize.assert_called_once_with("result", 100)
         self.assertEqual(result, "ser result")
 
     @mock.patch("desaparecidos.dao.serialize", return_value="ser result")
-    @mock.patch("desaparecidos.dao.format_query", return_value="formatted_query")
+    @mock.patch(
+        "desaparecidos.dao.format_query",
+        return_value="formatted_query"
+    )
     @mock.patch.object(Oracle_DB, 'execute', return_value='result')
     @mock.patch.object(Oracle_DB, 'connect', return_value='cursor')
-    def test_whole_workflow_with_limit(self, _connect, _execute, _format_query, _serialize):
+    def test_whole_workflow_with_limit(
+        self,
+        _connect,
+        _execute,
+        _format_query,
+        _serialize
+    ):
         id_sinalid = "1234"
 
         result = rank(id_sinalid, limit=200)
@@ -210,16 +231,27 @@ class Dao(TestCase):
                 settings.DESAPARECIDOS_DB_HOST
         )
         _format_query.assert_called_once_with(q_rank, id_sinalid)
-        _execute.assert_called_once_with(_connect.return_value, _format_query.return_value)
+        _execute.assert_called_once_with(
+            _connect.return_value,
+            _format_query.return_value
+        )
         _serialize.assert_called_once_with("result", 200)
         self.assertEqual(result, "ser result")
 
     @mock.patch("desaparecidos.dao.serialize")
-    @mock.patch("desaparecidos.dao.format_query", return_value="formatted_query")
+    @mock.patch(
+        "desaparecidos.dao.format_query",
+        return_value="formatted_query"
+    )
     @mock.patch.object(Oracle_DB, 'execute', return_value=[])
     @mock.patch.object(Oracle_DB, 'connect', return_value='cursor')
-    def test_whole_workflow_empty_response(self, _connect, _execute, _format_query, _serialize):
-        cursor = mock.MagicMock()
+    def test_whole_workflow_empty_response(
+        self,
+        _connect,
+        _execute,
+        _format_query,
+        _serialize
+    ):
         id_sinalid = "1234"
 
         result = rank(id_sinalid, limit=200)
@@ -229,8 +261,11 @@ class Dao(TestCase):
                 settings.DESAPARECIDOS_DB_PWD,
                 settings.DESAPARECIDOS_DB_HOST
         )
-        
+
         _format_query.assert_called_once_with(q_rank, id_sinalid)
-        _execute.assert_called_once_with(_connect.return_value, _format_query.return_value)
+        _execute.assert_called_once_with(
+            _connect.return_value,
+            _format_query.return_value
+        )
         _serialize.assert_not_called()
         self.assertEqual(result, {'erro': 'ID Sinalid não encontrado'})

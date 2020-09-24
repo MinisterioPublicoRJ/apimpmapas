@@ -1,6 +1,5 @@
 from django.conf import settings
 
-from database.db_connect import Oracle_DB
 from dominio.dao import GenericDAO
 from dominio.db_connectors import get_hbase_table, run_query
 from dominio.alertas import serializers

@@ -12,4 +12,5 @@ urlpatterns = [
         "documentos-detalhe/<str:orgao_id>",
         SuaMesaDetalheView.as_view(),
         name="suamesa-documentos-detalhe",
-    ),]
+    ),
+]
