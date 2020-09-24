@@ -1,6 +1,5 @@
 from unittest import mock
 
-from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 
