@@ -1,6 +1,7 @@
 import datetime
 import json
 
+import cx_Oracle
 from django.conf import settings
 
 from database.db_connect import Oracle_DB
