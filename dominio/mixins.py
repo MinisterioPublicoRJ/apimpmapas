@@ -85,13 +85,3 @@ class JWTAuthMixin:
 
         except (InvalidSignatureError, DecodeError):
             return HttpResponseForbidden()
-
-
-class JWTAuthAllMixin(JWTAuthMixin):
-    def dispatch(self, request, *args, **kwargs):
-        try:
-            unpack_jwt(request)
-            return super().dispatch(request, *args, **kwargs)
-
-        except (InvalidSignatureError, DecodeError):
-            return HttpResponseForbidden()
