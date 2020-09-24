@@ -2,7 +2,6 @@ from django.urls import path
 
 from dominio.alertas import views
 
-
 urlpatterns = [
     path('<str:orgao_id>', views.AlertasView.as_view(), name='lista_alertas'),
     path(
