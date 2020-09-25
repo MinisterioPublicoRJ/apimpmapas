@@ -613,24 +613,6 @@ maneira:
 | 1202                              | Oferecimento de denúncia com      |
 |                                   | pedido de prisão                  |
 +-----------------------------------+-----------------------------------+
-| 6017                              | MEMBRO > Arquivamento > Com       |
-|                                   | remessa ao Poder Judiciário >     |
-|                                   | Integral > Extinção da            |
-|                                   | Punibilidade por Outros           |
-|                                   | Fundamentos                       |
-+-----------------------------------+-----------------------------------+
-| 6018                              | MEMBRO > Arquivamento > Com       |
-|                                   | remessa ao Poder Judiciário >     |
-|                                   | Integral > Ausência/Insuficiência |
-|                                   | de Provas (Falta de Suporte       |
-|                                   | Fático Probatório)                |
-+-----------------------------------+-----------------------------------+
-| 6020                              | MEMBRO > Arquivamento > Com       |
-|                                   | remessa ao Poder Judiciário >     |
-|                                   | Parcial > Extinção da             |
-|                                   | Punibilidade por Outros           |
-|                                   | Fundamentos                       |
-+-----------------------------------+-----------------------------------+
 | 6252                              | MEMBRO > Ajuizamento de Ação >    |
 |                                   | Denúncia                          |
 +-----------------------------------+-----------------------------------+
@@ -640,75 +622,14 @@ maneira:
 | 6254                              | MEMBRO > Ajuizamento de Ação >    |
 |                                   | Denúncia > Oral                   |
 +-----------------------------------+-----------------------------------+
-| 6343                              | MEMBRO > Arquivamento > Com       |
-|                                   | remessa ao Poder Judiciário >     |
-|                                   | Integral > Pagamento de Débito    |
-|                                   | Tributário                        |
-+-----------------------------------+-----------------------------------+
-| 6346                              | MEMBRO > Arquivamento > Sem       |
-|                                   | remessa ao Conselho               |
-|                                   | Superior/Câmara > Integral        |
-+-----------------------------------+-----------------------------------+
-| 6350                              | MEMBRO > Homologação de           |
-|                                   | Arquivamento                      |
-+-----------------------------------+-----------------------------------+
-| 6359                              | MEMBRO > Decisão Artigo 28 CPP /  |
-|                                   | 397 CPPM > Confirmação Integral > |
-|                                   | Arquivamento                      |
-+-----------------------------------+-----------------------------------+
 | 6361                              | MEMBRO > Proposta de transação    |
 |                                   | penal                             |
 +-----------------------------------+-----------------------------------+
 | 6362                              | MEMBRO > Proposta de suspensão    |
 |                                   | condicional do processo           |
 +-----------------------------------+-----------------------------------+
-| 6338                              | MEMBRO > Arquivamento > Com       |
-|                                   | remessa ao Poder Judiciário >     |
-|                                   | Integral > Desconhecimento do     |
-|                                   | Autor                             |
-+-----------------------------------+-----------------------------------+
-| 6339                              | MEMBRO > Arquivamento > Com       |
-|                                   | remessa ao Poder Judiciário >     |
-|                                   | Integral > Inexistência de Crime  |
-+-----------------------------------+-----------------------------------+
-| 6340                              | MEMBRO > Arquivamento > Com       |
-|                                   | remessa ao Poder Judiciário >     |
-|                                   | Integral > Prescrição             |
-+-----------------------------------+-----------------------------------+
-| 6341                              | MEMBRO > Arquivamento > Com       |
-|                                   | remessa ao Poder Judiciário >     |
-|                                   | Integral > Decadência             |
-+-----------------------------------+-----------------------------------+
-| 6342                              | MEMBRO > Arquivamento > Com       |
-|                                   | remessa ao Poder Judiciário >     |
-|                                   | Integral > Retratação Lei Maria   |
-|                                   | da Penha                          |
-+-----------------------------------+-----------------------------------+
 | 6391                              | MEMBRO > Ciência > Suspensão do   |
 |                                   | processo - Art. 366 CPP           |
-+-----------------------------------+-----------------------------------+
-| 6392                              | MEMBRO > Ciência > Arquivamento   |
-+-----------------------------------+-----------------------------------+
-| 6549                              | MEMBRO > Arquivamento > Com       |
-|                                   | remessa ao Centro de Apoio        |
-|                                   | Operacional das Promotorias       |
-|                                   | Eleitorais  CAO Eleitoral (EN    |
-|                                   | 30-CSMP)                          |
-+-----------------------------------+-----------------------------------+
-| 6593                              | MEMBRO > Arquivamento > Com       |
-|                                   | remessa ao Poder Judiciário >     |
-|                                   | Parcial > Falta de condições para |
-|                                   | o exercício do direito de ação    |
-+-----------------------------------+-----------------------------------+
-| 6591                              | MEMBRO > Arquivamento > Com       |
-|                                   | remessa ao Poder Judiciário >     |
-|                                   | Integral > Falta de condições     |
-|                                   | para o regular exercício do       |
-|                                   | direito de ação                   |
-+-----------------------------------+-----------------------------------+
-| 7745                              | MEMBRO > Arquivamento > De        |
-|                                   | notícia de fato ou procedimento   |
-|                                   | de atribuição originária do PGJ   |
 +-----------------------------------+-----------------------------------+
 | 7827                              | MEMBRO > Despacho > Acordo        |
 |                                   | Extrajudicial                     |
@@ -720,19 +641,8 @@ maneira:
 |                                   | Penal > Pedido de homologação de  |
 |                                   | acordo                            |
 +-----------------------------------+-----------------------------------+
-| 7871                              | MEMBRO > Arquivamento > Com       |
-|                                   | remessa ao Poder Judiciário >     |
-|                                   | Integral > Morte do Agente        |
-+-----------------------------------+-----------------------------------+
 | 7928                              | MEMBRO > Ciência > Homologação de |
 |                                   | Acordo de Não Persecução Penal    |
-+-----------------------------------+-----------------------------------+
-| 7897                              | MEMBRO > Decisão Artigo 28 CPP /  |
-|                                   | 397 CPPM > Confirmação Parcial >  |
-|                                   | Arquivamento                      |
-+-----------------------------------+-----------------------------------+
-| 7912                              | MEMBRO > Arquivamento > Com       |
-|                                   | Remessa ao PRE/PGE                |
 +-----------------------------------+-----------------------------------+
 | 7868                              | MEMBRO > Colaboração Premiada     |
 +-----------------------------------+-----------------------------------+
@@ -741,6 +651,11 @@ maneira:
 +-----------------------------------+-----------------------------------+
 | 7915                              | MEMBRO > Acordo de Não Persecução |
 |                                   | Penal > Oferecimento de acordo    |
++-----------------------------------+-----------------------------------+
+| 7922                              | MEMBRO > Manifestação > Pela      |
+|                                   | extinção da punibilidade > Em     |
+|                                   | razão do cumprimento do Acordo de |
+|                                   | Não Persecução Penal              |
 +-----------------------------------+-----------------------------------+
 
 
