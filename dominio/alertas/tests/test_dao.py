@@ -127,6 +127,7 @@ class TestAlertaMGPDAO(TestCase):
                 'data 6',
                 'data 7',
                 int(orgao_id),
+                'id_comp',
                 'data 8',
                 'COMP',
             )
@@ -143,6 +144,7 @@ class TestAlertaMGPDAO(TestCase):
                 'orgao': 'data 6',
                 'classe_hier': 'data 7',
                 'dias_passados': 12345,
+                'id_alerta': 'id_comp',
                 'descricao': 'data 8',
                 'sigla': 'COMP'}
         ]
@@ -167,6 +169,7 @@ class TestAlertaMGPDAO(TestCase):
                 'data 6',
                 'data 7',
                 int(orgao_id),
+                'id_dord',
                 'data 8',
                 'DORD',
             ),
@@ -180,6 +183,7 @@ class TestAlertaMGPDAO(TestCase):
                 'data 6',
                 'data 7',
                 int(orgao_id),
+                'id_comp',
                 'data 8',
                 'COMP',
             ),
@@ -196,6 +200,7 @@ class TestAlertaMGPDAO(TestCase):
                 'orgao': 'data 6',
                 'classe_hier': 'data 7',
                 'dias_passados': 12345,
+                'id_alerta': 'id_comp',
                 'descricao': 'data 8',
                 'sigla': 'COMP'
             },
@@ -209,6 +214,7 @@ class TestAlertaMGPDAO(TestCase):
                 'orgao': 'data 6',
                 'classe_hier': 'data 7',
                 'dias_passados': 12345,
+                'id_alerta': 'id_dord',
                 'descricao': 'data 8',
                 'sigla': 'DORD'
             }

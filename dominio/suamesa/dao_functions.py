@@ -27,7 +27,7 @@ def get_tutela_investigacoes(orgao_id, request):
         392,                                # Inquérito Civil
         395                                 # Procedimento Preparatório
     ]
-    return Documento.investigacoes.em_curso(orgao_id, regras).count()
+    return Documento.investigacoes.em_curso(orgao_id, regras)
 
 
 def get_tutela_processos(orgao_id, request):
@@ -41,24 +41,19 @@ def get_tutela_processos(orgao_id, request):
         582, 323,                 # Execução Provisória
         319, 51218, 51217, 51205  # Execução Extrajudicial
     ]
-    return Documento.processos.em_juizo(
-            orgao_id, regras).count()
+    return Documento.processos.em_juizo(orgao_id, regras)
 
 
 def get_pip_inqueritos(orgao_id, request):
     """Busca o número de inquéritos ativos em uma PIP."""
     regras = [494, 3]  # Inquérito Policial, e Policial Militar em ordem
-    return Documento.investigacoes.em_curso(
-            orgao_id, regras
-        ).count()
+    return Documento.investigacoes.em_curso(orgao_id, regras)
 
 
 def get_pip_pics(orgao_id, request):
     """Busca o número de PICs ativos em uma PIP."""
     regras = [590]  # Procedimento Investigatório Criminal (PIC)
-    return Documento.investigacoes.em_curso(
-            orgao_id, regras
-        ).count()
+    return Documento.investigacoes.em_curso(orgao_id, regras)
 
 
 def get_pip_aisp(orgao_id, request):
@@ -70,7 +65,7 @@ def get_pip_aisp(orgao_id, request):
 
     return Documento.investigacoes.em_curso_grupo(
         orgaos_same_aisp, regras
-    ).count()
+    )
 
 
 def get_tutela_finalizados(orgao_id, request):

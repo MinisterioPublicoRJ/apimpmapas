@@ -401,7 +401,16 @@ class ListaProcessosViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         ]
 
         expected_query = """
-            SELECT * FROM {namespace}.tb_lista_processos
+            SELECT orgao_dk,
+            cldc_dk,
+            docu_nr_mp,
+            docu_nr_externo,
+            docu_tx_etiqueta,
+            personagens,
+            dt_ultimo_andamento,
+            ultimo_andamento,
+            url_tjrj
+            FROM {namespace}.tb_lista_processos
             WHERE orgao_dk = :orgao_id
             ORDER BY dt_ultimo_andamento DESC
         """.format(namespace=settings.TABLE_NAMESPACE)
