@@ -289,7 +289,7 @@ class PIPPrincipaisInvestigadosPerfilDAO(GenericPIPDAO):
     @classmethod
     def get(cls, accept_empty=False, **kwargs):
         cache_key = '{}_DATA_{}'.format(
-            cls.cache_prefix, kwargs.get("representante_dk")
+            cls.cache_prefix, kwargs.get("dk")
         )
         data = cache.get(cache_key, default=None)
         if not data:
@@ -360,7 +360,7 @@ class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
     @classmethod
     def get(cls, accept_empty=False, **kwargs):
         cache_key = '{}_DATA_{}'.format(
-            cls.cache_prefix, kwargs.get("representante_dk")
+            cls.cache_prefix, kwargs.get("dk")
         )
         data = cache.get(cache_key, default=None)
         if not data:
