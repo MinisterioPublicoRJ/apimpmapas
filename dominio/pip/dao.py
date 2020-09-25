@@ -276,12 +276,45 @@ class PIPPrincipaisInvestigadosPerfilDAO(GenericPIPDAO):
         "cpf",
         "rg",
         "dt_nasc",
+        "nm_pesj",
+        "cnpj"
     ]
     table_namespaces = {
         "schema_exadata": settings.EXADATA_NAMESPACE,
         "schema": settings.TABLE_NAMESPACE
     }
     serializer = PIPPrincipaisInvestigadosPerfilSerializer
+    cache_prefix = 'PIP_PRINCIPAIS_INVESTIGADOS_PERFIL'
+
+    @classmethod
+    def get(cls, accept_empty=False, **kwargs):
+        cache_key = '{}_DATA_{}'.format(
+            cls.cache_prefix, kwargs.get("representante_dk")
+        )
+        data = cache.get(cache_key, default=None)
+        if not data:
+            data = super().get(accept_empty, **kwargs)
+            cache.set(cache_key, data, timeout=settings.CACHE_TIMEOUT)
+        return data
+
+    @classmethod
+    def serialize(cls, result_set):
+        ser_data = super().serialize(result_set)
+
+        # Verifica se é pessoa física ou jurídica
+        keys_pesj = cls.columns[0:1] + cls.columns[6:]
+        keys_pesf = cls.columns[0:6]
+        keys_to_keep = (
+            keys_pesj if ser_data and ser_data[0]['nm_pesj']
+            else keys_pesf
+        )
+
+        ser_data = [
+            {key: row[key] for key in row if key in keys_to_keep}
+            for row in ser_data
+        ]
+
+        return ser_data
 
 
 class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
@@ -304,6 +337,7 @@ class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
     ]
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
     serializer = PIPPrincipaisInvestigadosListaSerializer
+    cache_prefix = 'PIP_PRINCIPAIS_INVESTIGADOS_LISTA'
 
     @classmethod
     def serialize(cls, result_set):
@@ -325,7 +359,14 @@ class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
 
     @classmethod
     def get(cls, accept_empty=False, **kwargs):
-        data = super().get(accept_empty, **kwargs)
+        cache_key = '{}_DATA_{}'.format(
+            cls.cache_prefix, kwargs.get("representante_dk")
+        )
+        data = cache.get(cache_key, default=None)
+        if not data:
+            data = super().get(accept_empty, **kwargs)
+            cache.set(cache_key, data, timeout=settings.CACHE_TIMEOUT)
+
         pess_dk = kwargs.get("pess_dk")
         if pess_dk:
             data = [x for x in data if x['pess_dk'] == pess_dk]
