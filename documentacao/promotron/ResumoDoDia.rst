@@ -21,7 +21,7 @@ User Manual
 ~~~~~~~~~~~
 
 Esta frase indica a porcentagem de promotorias de mesma atribuição que
-tiveram menos saídas do que a promotoria sendo analisada, nos últimos 30
+tiveram menos saídas do que a promotoria sendo analisada, calculado para os últimos 180
 dias correntes.
 
 O conceito de atribuição segue o que foi definido em :ref:`introducao-atribuicao`.
@@ -32,7 +32,7 @@ auxiliar :ref:`tabelas-auxiliares-tb-regra-negocio-saida`.
 
 Utilizando as regras, o cálculo é feito então contabilizando:
 
--  Os andamentos com data (pcao_dt_andamento) nos últimos 30 dias;
+-  Os andamentos com data (pcao_dt_andamento) nos últimos 180 dias;
 -  Que não foram cancelados;
 -  Cujos documentos não foram cancelados;
 -  Que tenham atribuição definida na tabela :ref:`tabelas-auxiliares-atualizacao-pj-pacote`;
@@ -82,9 +82,6 @@ O processo no BDA consiste em realizar as contagens de andamentos utilizando as 
 Em seguida, a tabela é salva no BDA. Uma coluna com a data de realização do último cálculo também é adicionada. Cada cálculo sobrescreve os resultados anteriores.
 
 URL do Script: https://github.com/MinisterioPublicoRJ/scripts-bda/blob/master/robo_promotoria/src/tabela_saida.py.
-
-!! Apesar da frase dizer últimos 30 dias, parece que o script de criação
-da tabela atualmente considera últimos 60 dias.
 
 View Backend
 ************
