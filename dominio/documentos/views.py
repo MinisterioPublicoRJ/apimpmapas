@@ -1,27 +1,19 @@
 from django.http import HttpResponse
 from django.views.generic import View
-from docxtpl import DocxTemplate
+
+from dominio.documentos.controllers import MinutaPrescricaoController
 
 
 class MinutaPrescricaoView(View):
-
     def get(self, request, *args, **kwargs):
-        template = (
-            'dominio/documentos/doc_templates/'
-            'minuta - prescricao.docx'
-        )
-        context = {'data_hoje': '28 de setembro de 2020'}
         mime_type = (
             'application/vnd.openxmlformats-officedocument.'
             'wordprocessingml.document'
         )
-
-        doc = DocxTemplate(template)
-        doc.render(context)
         response = HttpResponse(content_type=mime_type)
         response['Content-Disposition'] = (
             'attachment;'
             'filename=minuta-prescricao.docx'
         )
-        doc.save(response)
-        return response
+        controller = MinutaPrescricaoController(response)
+        return controller.render()
