@@ -9,6 +9,7 @@ class MinutaPrescricaoDAO(SingleDataObjectDAO):
     columns = [
         "num_procedimento",
         "data_fato",
+        "comarca_tj",
         "tempo_passado",
         "assunto_docto",
         "lei_docto"
