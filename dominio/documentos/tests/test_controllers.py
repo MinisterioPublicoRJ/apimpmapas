@@ -16,11 +16,13 @@ class TestMinutaPrescricaoController(TestCase):
             self.matricula
         )
         self.expected_dao_data = {
-            "data": "data"
+            "data": "data",
+            "comarca_tj": "RIO DE JANEIRO",
         }
         self.expected_data = {
             "data_hoje": "01 de janeiro de 2020",
             "matricula_promotor": self.matricula,
+            "preposicao_comarca": "DO",
         }
         self.expected_data.update(self.expected_dao_data)
 
@@ -59,3 +61,14 @@ class TestMinutaPrescricaoController(TestCase):
         context = self.controller.context
 
         self.assertEqual(context, self.expected_data)
+
+    def test_get_preposicao_comarca(self):
+        expected_preposicao = {
+            "QUALQUER": "DE",
+            "CAPITAL": "DA",
+            "RIO DE JANEIRO": "DO",
+        }
+
+        for key, value in expected_preposicao.items():
+            with self.subTest():
+                self.assertEqual(value, self.controller.get_preposicao(key))
