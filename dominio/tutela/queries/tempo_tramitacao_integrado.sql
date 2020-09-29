@@ -5,6 +5,7 @@ minimo_orgao,
 maximo_orgao,
 mediana_orgao,
 media_pacote,
+minimo_pacote,
 maximo_pacote,
 mediana_pacote 
 FROM {schema}.tb_tempo_tramitacao_integrado
