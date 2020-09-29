@@ -1,12 +1,8 @@
-from datetime import datetime, timedelta
-from decimal import Decimal
 from unittest import mock
 
-from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 
-from dominio.tutela.views import RadarView
 from dominio.tests.testconf import NoJWTTestCase, NoCacheTestCase
 
 

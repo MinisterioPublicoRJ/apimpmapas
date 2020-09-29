@@ -4,7 +4,6 @@ from django.test import TestCase
 from django.urls import reverse
 
 from dominio.tests.testconf import NoJWTTestCase, NoCacheTestCase
-from dominio.pip.utils import get_aisps
 
 
 class TestPIPIndicadoresSucesso(NoJWTTestCase, NoCacheTestCase, TestCase):

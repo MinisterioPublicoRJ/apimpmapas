@@ -1,10 +1,8 @@
 from datetime import datetime
 from unittest import mock
 
-import pytest
 from django.conf import settings
 
-from dominio.exceptions import APIEmptyResultError
 from dominio.pip.dao import (
     GenericPIPDAO,
     PIPIndicadoresDeSucessoDAO,
@@ -13,7 +11,6 @@ from dominio.pip.dao import (
     PIPPrincipaisInvestigadosListaDAO,
     PIPPrincipaisInvestigadosPerfilDAO
 )
-from dominio.pip.utils import get_aisps
 
 
 QUERIES_DIR = GenericPIPDAO.QUERIES_DIR
