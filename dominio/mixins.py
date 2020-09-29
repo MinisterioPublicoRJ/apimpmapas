@@ -77,9 +77,12 @@ class JWTAuthMixin:
 
     def dispatch(self, request, *args, **kwargs):
         try:
-            token_payload = unpack_jwt(request)
-            if self.authorize_user_in_orgao(token_payload, *args, **kwargs):
-                kwargs["matricula"] = token_payload.get("matricula")
+            self.token_payload = unpack_jwt(request)
+            if self.authorize_user_in_orgao(
+                self.token_payload,
+                *args,
+                **kwargs
+            ):
                 return super().dispatch(request, *args, **kwargs)
             else:
                 return HttpResponseForbidden()

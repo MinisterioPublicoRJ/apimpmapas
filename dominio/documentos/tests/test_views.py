@@ -4,14 +4,25 @@ from django.http import HttpResponse
 from django.test import TestCase
 from django.urls import reverse
 
+from dominio.tests.testconf import NoJWTTestCase
 
-class TestDownloadMinutaPrescricao(TestCase):
+
+class TestDownloadMinutaPrescricao(NoJWTTestCase, TestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.matricula = "12345678"
+        self.mock_jwt.return_value = {
+            "matricula": self.matricula
+        }
+
     @mock.patch("dominio.documentos.views.MinutaPrescricaoController")
     def test_correct_response(self, _controller):
         minuta_controller_mock = mock.Mock()
         _controller.return_value = minuta_controller_mock
 
         docu_dk = "12345"
+        matricula = self.matricula
         url = reverse("dominio:minuta-prescricao", args=(docu_dk,))
         resp = self.client.get(url)
 
@@ -22,7 +33,7 @@ class TestDownloadMinutaPrescricao(TestCase):
         )
 
         self.assertEqual(resp.status_code, 200)
-        _controller.assert_called_once_with(docu_dk)
+        _controller.assert_called_once_with(docu_dk, self.matricula)
         minuta_controller_mock.render.assert_called_once()
         self.assertIsInstance(
             minuta_controller_mock.render.call_args_list[0][0][0],

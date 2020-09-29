@@ -9,7 +9,11 @@ from dominio.documentos.dao import MinutaPrescricaoDAO
 class TestMinutaPrescricaoController(TestCase):
     def setUp(self):
         self.docu_dk = "12345"
-        self.controller = MinutaPrescricaoController(self.docu_dk)
+        self.matricula = "12345678"
+        self.controller = MinutaPrescricaoController(
+            self.docu_dk,
+            self.matricula
+        )
 
         self.http_response = HttpResponse()
 
