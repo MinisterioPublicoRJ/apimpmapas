@@ -1,6 +1,7 @@
 SELECT 
     docto.docu_nr_mp as num_procedimento,
     docto.docu_dt_fato as data_fato,
+    docto.docu_orgi_orga_dk_responsavel as orgao_responsavel,
     coma.cmrc_nm_comarca as comarca_tj,
     DATEDIFF(now(), docto.docu_dt_fato) as tempo_passado,
     group_concat(assu.assu_nm_assunto) as assunto_docto,
@@ -16,5 +17,6 @@ WHERE docto.docu_dk = :docu_dk
 GROUP BY
     docto.docu_nr_mp, 
     docto.docu_dt_fato,
+    docto.docu_orgi_orga_dk_responsavel,
     coma.cmrc_nm_comarca,
     DATEDIFF(now(), docto.docu_dt_fato)

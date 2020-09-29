@@ -8,7 +8,6 @@ from dominio.mixins import JWTAuthMixin
 class MinutaPrescricaoView(JWTAuthMixin, View):
     def get(self, request, *args, **kwargs):
         docu_dk = int(kwargs.get("docu_dk"))
-        matricula = self.token_payload.get("matricula")
         content_type = (
             'application/vnd.openxmlformats-officedocument.'
             'wordprocessingml.document'
@@ -18,6 +17,6 @@ class MinutaPrescricaoView(JWTAuthMixin, View):
             'attachment;'
             'filename=minuta-prescricao.docx'
         )
-        controller = MinutaPrescricaoController(docu_dk, matricula)
+        controller = MinutaPrescricaoController(docu_dk, self.token_payload)
         controller.render(response)
         return response
