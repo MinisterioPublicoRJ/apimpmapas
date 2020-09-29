@@ -25,9 +25,14 @@ from dominio.utils import (
     get_top_n_orderby_value_as_dict
 )
 from dominio.tutela.dao import (
+    OutliersDAO,
+    SaidasDAO,
+    EntradasDAO,
+    RadarPerformanceDAO,
     ComparadorRadaresDAO,
     TempoTramitacaoIntegradoDAO,
     TempoTramitacaoDAO,
+    ListaProcessosDAO,
 )
 
 
@@ -119,164 +124,32 @@ class DetalheAcervoView(JWTAuthMixin, CacheMixin, APIView):
 
 class OutliersView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'OUTLIERS_CACHE_TIMEOUT'
-    _fields = [
-        'cod_orgao',
-        'acervo_qtd',
-        'cod_atribuicao',
-        'minimo',
-        'maximo',
-        'media',
-        'primeiro_quartil',
-        'mediana',
-        'terceiro_quartil',
-        'iqr',
-        'lout',
-        'hout',
-        'dt_inclusao',
-    ]
-
-    def get_data(self, orgao_id):
-        query = """
-                SELECT
-                cod_orgao,
-                acervo,
-                cod_atribuicao,
-                minimo,
-                maximo,
-                media,
-                primeiro_quartil,
-                mediana,
-                terceiro_quartil,
-                iqr,
-                lout,
-                hout,
-                dt_inclusao
-                FROM {namespace}.tb_distribuicao
-                WHERE cod_orgao = :orgao_id
-                """.format(
-                    namespace=settings.TABLE_NAMESPACE
-                )
-        parameters = {
-            'orgao_id': orgao_id
-        }
-        return run_query(query, parameters)
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs.get(self.orgao_url_kwarg))
+        data = OutliersDAO.get(orgao_id=orgao_id)
 
-        data = self.get_data(
-            orgao_id=orgao_id
-        )
-
-        if not data:
-            raise Http404
-
-        data_obj = dict(zip(self._fields, data[0]))
-
-        data = OutliersSerializer(data_obj).data
         return Response(data)
 
 
 class SaidasView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SAIDAS_CACHE_TIMEOUT'
 
-    def get_saidas(self, orgao_id):
-
-        query = """
-                SELECT saidas, id_orgao, cod_pct, percent_rank, dt_calculo
-                FROM {namespace}.tb_saida
-                WHERE id_orgao = :orgao_id
-                """.format(
-                    namespace=settings.TABLE_NAMESPACE
-                )
-        parameters = {
-            'orgao_id': orgao_id
-        }
-
-        return run_query(query, parameters)
-
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs.get(self.orgao_url_kwarg))
+        data = SaidasDAO.get(orgao_id=orgao_id)
 
-        data = self.get_saidas(
-            orgao_id=orgao_id
-        )
-
-        if not data:
-            raise Http404
-
-        fields = [
-            'saidas',
-            'id_orgao',
-            'cod_pct',
-            'percent_rank',
-            'dt_calculo'
-        ]
-        data_obj = {
-            fieldname: value for fieldname, value in zip(fields, data[0])
-        }
-        data = SaidasSerializer(data_obj).data
         return Response(data)
 
 
 class EntradasView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'ENTRADAS_CACHE_TIMEOUT'
 
-    def get_entradas(self, orgao_id, nr_cpf):
-
-        query = """
-                SELECT
-                    nr_entradas_hoje,
-                    minimo,
-                    maximo,
-                    media,
-                    primeiro_quartil,
-                    mediana,
-                    terceiro_quartil,
-                    iqr,
-                    lout,
-                    hout
-                FROM {namespace}.tb_dist_entradas
-                WHERE comb_orga_dk = :orgao_id
-                AND comb_cpf = :nr_cpf
-                """.format(
-                    namespace=settings.TABLE_NAMESPACE
-                )
-        parameters = {
-            'orgao_id': orgao_id,
-            'nr_cpf': nr_cpf
-        }
-
-        return run_query(query, parameters)
-
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs.get(self.orgao_url_kwarg))
         nr_cpf = str(self.kwargs['nr_cpf'])
+        data = EntradasDAO.get(orgao_id=orgao_id, nr_cpf=nr_cpf)
 
-        data = self.get_entradas(
-            orgao_id=orgao_id,
-            nr_cpf=nr_cpf
-        )
-
-        if not data:
-            raise Http404
-
-        fields = [
-            'nr_entradas_hoje',
-            'minimo',
-            'maximo',
-            'media',
-            'primeiro_quartil',
-            'mediana',
-            'terceiro_quartil',
-            'iqr',
-            'lout',
-            'hout'
-        ]
-        data_obj = {
-            fieldname: value for fieldname, value in zip(fields, data[0])
-        }
-        data = EntradasSerializer(data_obj).data
         return Response(data)
 
 
@@ -514,54 +387,37 @@ class ListaProcessosView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
     cache_config = 'LISTA_PROCESSOS_CACHE_TIMEOUT'
     PROCESSOS_SIZE = 20
 
-    def get_data(self, orgao_id):
-        query = """
-            SELECT orgao_dk,
-            cldc_dk,
-            docu_nr_mp,
-            docu_nr_externo,
-            docu_tx_etiqueta,
-            personagens,
-            dt_ultimo_andamento,
-            ultimo_andamento,
-            url_tjrj
-            FROM {namespace}.tb_lista_processos
-            WHERE orgao_dk = :orgao_id
-            ORDER BY dt_ultimo_andamento DESC
-        """.format(namespace=settings.TABLE_NAMESPACE)
-        parameters = {"orgao_id": orgao_id}
-
-        return run_query(query, parameters)
-
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs.get(self.orgao_url_kwarg))
         page = int(request.GET.get("page", 1))
 
-        data = self.get_data(orgao_id)
-
-        if not data:
-            raise Http404
-
-        fields = [
-            'id_orgao',
-            'classe_documento',
-            'docu_nr_mp',
-            'docu_nr_externo',
-            'docu_etiqueta',
-            'docu_personagens',
-            'dt_ultimo_andamento',
-            'ultimo_andamento',
-            'url_tjrj'
-        ]
-        data_obj = [dict(zip(fields, row)) for row in data]
+        data = ListaProcessosDAO.get(orgao_id=orgao_id)
 
         page_data = self.paginate(
-            data_obj,
+            data,
             page=page,
             page_size=self.PROCESSOS_SIZE
         )
 
         return Response(data=page_data)
+
+
+class RadarView(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = 'RADAR_CACHE_TIMEOUT'
+
+    def parse_orgao_id(self, orgao_id):
+        try:
+            orgao_id = int(orgao_id)
+        except ValueError:
+            raise Http404("Valor <orgao_id> inválido")
+
+        return orgao_id
+
+    def get(self, request, *args, **kwargs):
+        orgao_id = self.parse_orgao_id(kwargs.get("orgao_id"))
+
+        data = RadarPerformanceDAO.get(orgao_id=orgao_id)
+        return Response(data=data)
 
 
 class ComparadorRadaresView(JWTAuthMixin, APIView):

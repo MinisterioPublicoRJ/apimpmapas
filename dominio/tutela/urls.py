@@ -2,6 +2,7 @@ from django.urls import path
 
 from .views import (
     ComparadorRadaresView,
+    RadarView,
     DesarquivamentosView,
     SaidasView,
     EntradasView,
@@ -17,7 +18,6 @@ from .views import (
     TempoTramitacaoView,
     ListaProcessosView,
 )
-from .radar_views import RadarView
 
 
 suamesa_urls = [

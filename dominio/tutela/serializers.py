@@ -52,22 +52,50 @@ class SuaMesaListaVistasSerializer(serializers.Serializer):
     classe = serializers.CharField()
 
 
-class DetalheAcervoSerializer(serializers.Serializer):
+class ListaProcessosSerializer(serializers.Serializer):
+    id_orgao = serializers.IntegerField()
+    classe_documento = serializers.CharField()
+    docu_nr_mp = serializers.CharField()
+    docu_nr_externo = serializers.CharField()
+    docu_etiqueta = serializers.CharField()
+    docu_personagens = serializers.CharField()
+    dt_ultimo_andamento = serializers.DateField()
+    ultimo_andamento = serializers.CharField()
+    url_tjrj = serializers.CharField()
 
-    class VariacaoPromotoriaSerializer(serializers.Serializer):
-        nm_promotoria = serializers.CharField()
-        variacao_acervo = serializers.FloatField(min_value=0)
 
-    variacao_acervo = serializers.FloatField()
-    top_n = VariacaoPromotoriaSerializer(many=True)
-
-
-class DetalheProcessosJuizoSerializer(serializers.Serializer):
-
-    class AcoesPromotoriaSerializer(serializers.Serializer):
-        nm_promotoria = serializers.CharField()
-        nr_acoes_propostas_30_dias = serializers.IntegerField(min_value=0)
-
-    nr_acoes_propostas_60_dias = serializers.IntegerField(min_value=0)
-    variacao_12_meses = serializers.FloatField()
-    top_n = AcoesPromotoriaSerializer(many=True)
+class RadarPerformanceSerializer(serializers.Serializer):
+    cod_pct = serializers.IntegerField()
+    pacote_atribuicao = serializers.CharField()
+    orgao_id = serializers.IntegerField()
+    nr_arquivamentos = serializers.IntegerField(min_value=0)
+    nr_indeferimentos = serializers.IntegerField(min_value=0)
+    nr_instauracoes = serializers.IntegerField(min_value=0)
+    nr_tac = serializers.IntegerField(min_value=0)
+    nr_acoes = serializers.IntegerField(min_value=0)
+    max_pacote_arquivamentos = serializers.IntegerField(min_value=0)
+    max_pacote_indeferimentos = serializers.IntegerField(min_value=0)
+    max_pacote_instauracoes = serializers.IntegerField(min_value=0)
+    max_pacote_tac = serializers.IntegerField(min_value=0)
+    max_pacote_acoes = serializers.IntegerField(min_value=0)
+    perc_arquivamentos = serializers.FloatField()
+    perc_indeferimentos = serializers.FloatField()
+    perc_instauracoes = serializers.FloatField()
+    perc_tac = serializers.FloatField()
+    perc_acoes = serializers.FloatField()
+    med_pacote_aquivamentos = serializers.FloatField()
+    med_pacote_indeferimentos = serializers.FloatField()
+    med_pacote_instauracoes = serializers.FloatField()
+    med_pacote_tac = serializers.FloatField()
+    med_pacote_acoes = serializers.FloatField()
+    var_med_arquivamentos = serializers.FloatField()
+    var_med_indeferimentos = serializers.FloatField()
+    var_med_instauracoes = serializers.FloatField()
+    var_med_tac = serializers.FloatField()
+    var_med_acoes = serializers.FloatField()
+    dt_calculo = serializers.DateTimeField()
+    nm_max_arquivamentos = serializers.CharField()
+    nm_max_indeferimentos = serializers.CharField()
+    nm_max_instauracoes = serializers.CharField()
+    nm_max_tac = serializers.CharField()
+    nm_max_acoes = serializers.CharField()
