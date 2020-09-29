@@ -79,6 +79,7 @@ class JWTAuthMixin:
         try:
             token_payload = unpack_jwt(request)
             if self.authorize_user_in_orgao(token_payload, *args, **kwargs):
+                kwargs["matricula"] = token_payload.get("matricula")
                 return super().dispatch(request, *args, **kwargs)
             else:
                 return HttpResponseForbidden()

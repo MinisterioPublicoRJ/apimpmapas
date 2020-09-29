@@ -2,11 +2,13 @@ from django.http import HttpResponse
 from django.views.generic import View
 
 from dominio.documentos.controllers import MinutaPrescricaoController
+from dominio.mixins import JWTAuthMixin
 
 
-class MinutaPrescricaoView(View):
+class MinutaPrescricaoView(JWTAuthMixin, View):
     def get(self, request, *args, **kwargs):
         docu_dk = kwargs.get("docu_dk")
+        matricula = kwargs.get("matricula")
         content_type = (
             'application/vnd.openxmlformats-officedocument.'
             'wordprocessingml.document'
@@ -16,6 +18,6 @@ class MinutaPrescricaoView(View):
             'attachment;'
             'filename=minuta-prescricao.docx'
         )
-        controller = MinutaPrescricaoController(docu_dk)
+        controller = MinutaPrescricaoController(docu_dk, matricula)
         controller.render(response)
         return response
