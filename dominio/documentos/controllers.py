@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from cached_property import cached_property
 from docxtpl import DocxTemplate
 
@@ -14,10 +16,13 @@ class MinutaPrescricaoController:
 
     @cached_property
     def context(self):
-        return MinutaPrescricaoDAO.get(
-            docu_dk=self.docu_dk,
-            matricula=self.matricula
-        )
+        context = {
+            "matricula_promotor": self.matricula,
+            "data_hoje": datetime.now()
+        }
+
+        context.update(MinutaPrescricaoDAO.get(docu_dk=self.docu_dk))
+        return context
 
     def render(self, response):
         doc = DocxTemplate(self.template)
