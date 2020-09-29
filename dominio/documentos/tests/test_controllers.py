@@ -1,6 +1,7 @@
 from unittest import TestCase, mock
 
 from django.http import HttpResponse
+from freezegun import freeze_time
 
 from dominio.documentos.controllers import MinutaPrescricaoController
 from dominio.documentos.dao import MinutaPrescricaoDAO
@@ -14,6 +15,14 @@ class TestMinutaPrescricaoController(TestCase):
             self.docu_dk,
             self.matricula
         )
+        self.expected_dao_data = {
+            "data": "data"
+        }
+        self.expected_data = {
+            "data_hoje": "01 de janeiro de 2020",
+            "matricula_promotor": self.matricula,
+        }
+        self.expected_data.update(self.expected_dao_data)
 
         self.http_response = HttpResponse()
 
@@ -28,7 +37,7 @@ class TestMinutaPrescricaoController(TestCase):
             MinutaPrescricaoDAO, "get"
         )
         self.mock_dao_get = self.dao_get_patcher.start()
-        self.mock_dao_get.return_value = "data"
+        self.mock_dao_get.return_value = self.expected_dao_data
 
     def tearDown(self):
         self.mock_docx_patcher.stop()
@@ -45,7 +54,8 @@ class TestMinutaPrescricaoController(TestCase):
             self.http_response
         )
 
+    @freeze_time('2020-01-01')
     def test_get_context_data(self):
         context = self.controller.context
 
-        self.assertEqual(context, "data")
+        self.assertEqual(context, self.expected_data)

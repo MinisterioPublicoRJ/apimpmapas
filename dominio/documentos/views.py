@@ -7,7 +7,7 @@ from dominio.mixins import JWTAuthMixin
 
 class MinutaPrescricaoView(JWTAuthMixin, View):
     def get(self, request, *args, **kwargs):
-        docu_dk = kwargs.get("docu_dk")
+        docu_dk = int(kwargs.get("docu_dk"))
         matricula = self.token_payload.get("matricula")
         content_type = (
             'application/vnd.openxmlformats-officedocument.'
