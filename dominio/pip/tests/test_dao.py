@@ -7,7 +7,6 @@ from django.conf import settings
 from dominio.exceptions import APIEmptyResultError
 from dominio.pip.dao import (
     GenericPIPDAO,
-    PIPDetalheAproveitamentosDAO,
     PIPIndicadoresDeSucessoDAO,
     PIPRadarPerformanceDAO,
     PIPPrincipaisInvestigadosDAO,
@@ -18,57 +17,6 @@ from dominio.pip.utils import get_aisps
 
 
 QUERIES_DIR = GenericPIPDAO.QUERIES_DIR
-
-
-class TestPIPDetalheAproveitamentosDAO:
-    @mock.patch("dominio.pip.utils.run_query")
-    @mock.patch("dominio.dao.impala_execute")
-    def test_pip_aproveitamentos_result(
-            self, _impala_execute, _run_query_aisps):
-        _impala_execute.return_value = [
-            (1, "TC 1", 20, 50, 0.75, 30),
-            (2, "TC 2", 30, 10, 0.5, 30),
-            (3, "TC 3", 50, 40, 1.0, 30),
-            (4, "TC 4", 10, 100, 0.75, 30),
-            (5, "TC 5", 40, 30, 0.75, 30),
-        ]
-        _run_query_aisps.return_value = [
-            (1, 1, "AISP1", 200),
-            (1, 2, "AISP2", 200),
-            (2, 1, "AISP1", 200),
-            (2, 2, "AISP2", 200),
-            (3, 3, "AISP3", 200),
-            (4, 3, "AISP3", 200),
-            (5, 3, "AISP3", 200),
-        ]
-
-        get_aisps.cache_clear()
-        response = PIPDetalheAproveitamentosDAO.get(orgao_id=1)
-
-        expected_response = {
-            "nr_aproveitamentos_periodo": 20,
-            "variacao_periodo": 0.75,
-            "top_n_pacote": [
-                {"nm_promotoria": "tc 3", "nr_aproveitamentos_periodo": 50},
-                {"nm_promotoria": "tc 5", "nr_aproveitamentos_periodo": 40},
-                {"nm_promotoria": "tc 2", "nr_aproveitamentos_periodo": 30},
-            ],
-            "nr_aisps": [1, 2],
-            "top_n_aisp": [
-                {"nm_promotoria": "tc 2", "nr_aproveitamentos_periodo": 30},
-                {"nm_promotoria": "tc 1", "nr_aproveitamentos_periodo": 20},
-            ],
-            "tamanho_periodo_dias": 30,
-        }
-
-        assert response == expected_response
-
-    @mock.patch("dominio.dao.impala_execute")
-    def test_pip_aproveitamentos_no_result(self, _impala_execute):
-        _impala_execute.return_value = []
-
-        with pytest.raises(APIEmptyResultError):
-            PIPDetalheAproveitamentosDAO.get(orgao_id=1)
 
 
 class TestPIPRadarPerformance:
