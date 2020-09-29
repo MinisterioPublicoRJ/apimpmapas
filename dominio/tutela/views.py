@@ -1,6 +1,3 @@
-from datetime import datetime, timedelta
-
-from django.conf import settings
 from django.db import connections
 from django.db.models import F
 from django.http import Http404
@@ -9,20 +6,10 @@ from rest_framework.views import APIView
 
 
 from dominio.tutela import suamesa
-from dominio.db_connectors import run_query
 from dominio.mixins import CacheMixin, PaginatorMixin, JWTAuthMixin
-from dominio.models import Vista, Documento, SubAndamento
+from dominio.models import Vista
 from dominio.tutela.serializers import (
-    SaidasSerializer,
-    OutliersSerializer,
-    EntradasSerializer,
-    DetalheAcervoSerializer,
-    DetalheProcessosJuizoSerializer,
     SuaMesaListaVistasSerializer,
-)
-from dominio.utils import (
-    get_value_given_key,
-    get_top_n_orderby_value_as_dict
 )
 from dominio.tutela.dao import (
     OutliersDAO,
@@ -34,92 +21,6 @@ from dominio.tutela.dao import (
     TempoTramitacaoDAO,
     ListaProcessosDAO,
 )
-
-
-class DetalheAcervoView(JWTAuthMixin, CacheMixin, APIView):
-    cache_config = 'DETALHE_ACERVO_CACHE_TIMEOUT'
-
-    @staticmethod
-    def get_acervo_increase(orgao_id, dt_inicio, dt_fim):
-        query = """
-                WITH tb_acervo_orgao_pct as (
-                    SELECT *
-                    FROM {namespace}.tb_acervo ac
-                    INNER JOIN (
-                        SELECT cod_pct
-                        FROM {namespace}.atualizacao_pj_pacote
-                        WHERE id_orgao = :orgao_id
-                        ) org
-                    ON org.cod_pct = ac.cod_atribuicao)
-                SELECT
-                    tb_data_fim.cod_orgao,
-                    pc.orgi_nm_orgao as nm_orgao,
-                    tb_data_fim.acervo_fim,
-                    tb_data_inicio.acervo_inicio,
-                    (acervo_fim - acervo_inicio)/acervo_inicio as variacao
-                FROM (
-                    SELECT cod_orgao, SUM(acervo) as acervo_fim
-                    FROM tb_acervo_orgao_pct acpc
-                    INNER JOIN {namespace}.tb_regra_negocio_investigacao regras
-                        ON regras.cod_atribuicao = acpc.cod_atribuicao
-                        AND regras.classe_documento = acpc.tipo_acervo
-                    WHERE dt_inclusao = to_timestamp(:dt_fim, 'yyyy-MM-dd')
-                    GROUP BY cod_orgao
-                    ) tb_data_fim
-                INNER JOIN (
-                    SELECT cod_orgao, SUM(acervo) as acervo_inicio
-                    FROM tb_acervo_orgao_pct acpc
-                    INNER JOIN {namespace}.tb_regra_negocio_investigacao regras
-                        ON regras.cod_atribuicao = acpc.cod_atribuicao
-                        AND regras.classe_documento = acpc.tipo_acervo
-                    WHERE dt_inclusao = to_timestamp(:dt_inicio, 'yyyy-MM-dd')
-                    GROUP BY cod_orgao
-                    ) tb_data_inicio
-                ON tb_data_fim.cod_orgao = tb_data_inicio.cod_orgao
-                INNER JOIN {namespace}.atualizacao_pj_pacote pc
-                ON pc.id_orgao = tb_data_fim.cod_orgao
-                """.format(namespace=settings.TABLE_NAMESPACE)
-        parameters = {
-            'orgao_id': orgao_id,
-            'dt_inicio': dt_inicio,
-            'dt_fim': dt_fim
-        }
-
-        return run_query(query, parameters)
-
-    def get(self, request, *args, **kwargs):
-        orgao_id = int(self.kwargs.get(self.orgao_url_kwarg))
-
-        date_today = datetime.now().date()
-        dt_fim = str(date_today)
-        dt_inicio = str(date_today - timedelta(30))
-
-        data = self.get_acervo_increase(
-            orgao_id=orgao_id,
-            dt_inicio=dt_inicio,
-            dt_fim=dt_fim
-        )
-
-        if not data:
-            raise Http404
-
-        variacao_acervo = get_value_given_key(
-            data, orgao_id, key_position=0, value_position=4)
-        top_n = get_top_n_orderby_value_as_dict(
-            data,
-            name_position=1,
-            value_position=4,
-            name_fieldname='nm_promotoria',
-            value_fieldname='variacao_acervo',
-            n=3)
-
-        data_obj = {
-            'variacao_acervo': variacao_acervo,
-            'top_n': top_n
-        }
-
-        data = DetalheAcervoSerializer(data_obj).data
-        return Response(data)
 
 
 class OutliersView(JWTAuthMixin, CacheMixin, APIView):
@@ -153,77 +54,6 @@ class EntradasView(JWTAuthMixin, CacheMixin, APIView):
         return Response(data)
 
 
-# Será substituído pelo dominio.suamesa.views.SuaMesaView
-class SuaMesaVistasAbertas(JWTAuthMixin, CacheMixin, APIView):
-    cache_config = 'SUAMESAVISTAS_CACHE_TIMEOUT'
-
-    def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
-        cpf = kwargs.get("cpf")
-
-        doc_count = Vista.vistas.abertas_promotor(orgao_id, cpf).count()
-
-        return Response(data={"suamesa_vistas": doc_count})
-
-
-# Será substituído pelo dominio.suamesa.views.SuaMesaView
-class SuaMesaInvestigacoes(JWTAuthMixin, CacheMixin, APIView):
-    cache_config = 'SUAMESAINVESTIGACOES_CACHE_TIMEOUT'
-
-    def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
-
-        regras_investigacoes = suamesa.get_regras(
-            orgao_id,
-            tipo='investigacao'
-        )
-        doc_count = Documento.investigacoes.em_curso(
-            orgao_id, regras_investigacoes).count()
-
-        return Response(data={"suamesa_investigacoes": doc_count})
-
-
-# Será substituído pelo dominio.suamesa.views.SuaMesaView
-class SuaMesaProcessos(JWTAuthMixin, CacheMixin, APIView):
-    cache_config = 'SUAMESAPROCESSOS_CACHE_TIMEOUT'
-
-    def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
-
-        regras_processos = suamesa.get_regras(orgao_id, tipo='processo')
-        doc_count = Documento.processos.em_juizo(
-            orgao_id, regras_processos).count()
-
-        return Response(data={"suamesa_processos": doc_count})
-
-
-# Será substituído pelo dominio.suamesa.views.SuaMesaView
-class SuaMesaFinalizados(JWTAuthMixin, CacheMixin, APIView):
-    cache_config = 'SUAMESAFINALIZADOS_CACHE_TIMEOUT'
-
-    def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
-
-        regras_saidas = (6251, 6657, 6655, 6644, 6326)
-        regras_arquiv = (7912, 6548, 6326, 6681, 6678, 6645, 6682, 6680, 6679,
-                         6644, 6668, 6666, 6665, 6669, 6667, 6664, 6655, 6662,
-                         6659, 6658, 6663, 6661, 6660, 6657, 6670, 6676, 6674,
-                         6673, 6677, 6675, 6672, 6018, 6341, 6338, 6019, 6017,
-                         6591, 6339, 6553, 7871, 6343, 6340, 6342, 6021, 6334,
-                         6331, 6022, 6020, 6593, 6332, 7872, 6336, 6333, 6335,
-                         7745, 6346, 6345, 6015, 6016, 6325, 6327, 6328, 6329,
-                         6330, 6337, 6344, 6656, 6671, 7869, 7870, 6324)
-
-        regras_finalizacoes = regras_saidas + regras_arquiv
-        doc_count = SubAndamento.finalizados.trinta_dias(
-            orgao_id, regras_finalizacoes)\
-            .values('andamento__vista__documento__docu_dk')\
-            .distinct()\
-            .count()
-
-        return Response(data={"suamesa_finalizados": doc_count})
-
-
 class SuaMesaDetalheView(JWTAuthMixin, CacheMixin, APIView):
     cache_config = 'SUAMESADETALHE_CACHE_TIMEOUT'
 
@@ -236,62 +66,6 @@ class SuaMesaDetalheView(JWTAuthMixin, CacheMixin, APIView):
             raise Http404
 
         return Response(mesa_detalhe)
-
-
-class DetalheProcessosJuizoView(JWTAuthMixin, CacheMixin, APIView):
-    cache_config = 'DETALHEPROCESSO_CACHE_TIMEOUT'
-
-    @staticmethod
-    def get_numero_acoes_propostas_pacote_atribuicao(orgao_id):
-        query = """
-            SELECT
-                orgao_id,
-                nm_orgao,
-                nr_acoes_ultimos_60_dias,
-                variacao_12_meses,
-                nr_acoes_ultimos_30_dias
-            FROM {namespace}.tb_detalhe_processo t1
-            JOIN (
-                SELECT cod_pct
-                FROM {namespace}.tb_detalhe_processo
-                WHERE orgao_id = :orgao_id) t2
-              ON t1.cod_pct = t2.cod_pct
-        """.format(namespace=settings.TABLE_NAMESPACE)
-        parameters = {
-            'orgao_id': orgao_id
-        }
-        return run_query(query, parameters)
-
-    def get(self, request, *args, **kwargs):
-        orgao_id = int(self.kwargs.get(self.orgao_url_kwarg))
-
-        data_acoes = self.get_numero_acoes_propostas_pacote_atribuicao(
-            orgao_id=orgao_id
-        )
-
-        if not data_acoes:
-            raise Http404
-
-        nr_acoes_60_dias = get_value_given_key(
-            data_acoes, orgao_id, key_position=0, value_position=2)
-        variacao_acoes_12_meses = get_value_given_key(
-            data_acoes, orgao_id, key_position=0, value_position=3)
-        top_n = get_top_n_orderby_value_as_dict(
-            data_acoes,
-            name_position=1,
-            value_position=4,
-            name_fieldname='nm_promotoria',
-            value_fieldname='nr_acoes_propostas_30_dias',
-            n=3)
-
-        data_obj = {
-            'nr_acoes_propostas_60_dias': nr_acoes_60_dias,
-            'variacao_12_meses': variacao_acoes_12_meses,
-            'top_n': top_n
-        }
-
-        data = DetalheProcessosJuizoSerializer(data_obj).data
-        return Response(data)
 
 
 class SuaMesaVistasListaView(
