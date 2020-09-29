@@ -1,6 +1,8 @@
 from cached_property import cached_property
 from docxtpl import DocxTemplate
 
+from dominio.documentos.dao import MinutaPrescricaoDAO
+
 
 # TODO: criar testes
 class MinutaPrescricaoController:
@@ -11,7 +13,7 @@ class MinutaPrescricaoController:
 
     @cached_property
     def context(self):
-        return {'data_hoje': '28 de setembro de 2020'}
+        return MinutaPrescricaoDAO.get(docu_dk=self.docu_dk)
 
     def render(self, response):
         doc = DocxTemplate(self.template)
