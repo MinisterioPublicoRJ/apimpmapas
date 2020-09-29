@@ -22,7 +22,6 @@ class TestDownloadMinutaPrescricao(NoJWTTestCase, TestCase):
         _controller.return_value = minuta_controller_mock
 
         docu_dk = "12345"
-        matricula = self.matricula
         url = reverse("dominio:minuta-prescricao", args=(docu_dk,))
         resp = self.client.get(url)
 
