@@ -1,4 +1,5 @@
-from datetime import datetime
+import locale
+from datetime import date
 
 from cached_property import cached_property
 from docxtpl import DocxTemplate
@@ -6,7 +7,6 @@ from docxtpl import DocxTemplate
 from dominio.documentos.dao import MinutaPrescricaoDAO
 
 
-# TODO: criar testes
 class MinutaPrescricaoController:
     template = "dominio/documentos/doc_templates/minuta - prescricao.docx"
 
@@ -16,9 +16,10 @@ class MinutaPrescricaoController:
 
     @cached_property
     def context(self):
+        locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
         context = {
             "matricula_promotor": self.matricula,
-            "data_hoje": datetime.now()
+            "data_hoje": date.today().strftime('%d de %B de %Y')
         }
 
         context.update(MinutaPrescricaoDAO.get(docu_dk=self.docu_dk))
