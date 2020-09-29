@@ -54,3 +54,18 @@ class TempoTramitacaoDAO(GenericTutelaDAO):
         "mediana_orgao_t2",
     ]
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
+
+
+class ComparadorRadaresDAO(GenericTutelaDAO):
+    query_file = "comparador_radares.sql"
+    columns = [
+        "orgao_id",
+        "orgao_codamp",
+        "orgi_nm_orgao",
+        "perc_arquivamentos",
+        "perc_indeferimentos",
+        "perc_instauracoes",
+        "perc_tac",
+        "perc_acoes",
+    ]
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}

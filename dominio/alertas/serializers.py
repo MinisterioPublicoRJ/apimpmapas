@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 
 class AlertasListaSerializer(serializers.Serializer):
+    id_alerta = serializers.CharField()
     sigla = serializers.CharField()
     descricao = serializers.CharField()
     doc_dk = serializers.IntegerField()

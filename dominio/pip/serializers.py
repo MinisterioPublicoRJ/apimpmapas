@@ -30,6 +30,8 @@ class PIPPrincipaisInvestigadosPerfilSerializer(serializers.Serializer):
     cpf = serializers.CharField()
     rg = serializers.CharField()
     dt_nasc = serializers.DateTimeField()
+    nm_pesj = serializers.CharField()
+    cnpj = serializers.CharField()
 
 
 class PIPPrincipaisInvestigadosListaSerializer(serializers.Serializer):

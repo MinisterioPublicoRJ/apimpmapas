@@ -24,7 +24,11 @@ from dominio.utils import (
     get_value_given_key,
     get_top_n_orderby_value_as_dict
 )
-from dominio.tutela.dao import TempoTramitacaoIntegradoDAO, TempoTramitacaoDAO
+from dominio.tutela.dao import (
+    ComparadorRadaresDAO,
+    TempoTramitacaoIntegradoDAO,
+    TempoTramitacaoDAO,
+)
 
 
 class DetalheAcervoView(JWTAuthMixin, CacheMixin, APIView):
@@ -512,7 +516,16 @@ class ListaProcessosView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
 
     def get_data(self, orgao_id):
         query = """
-            SELECT * FROM {namespace}.tb_lista_processos
+            SELECT orgao_dk,
+            cldc_dk,
+            docu_nr_mp,
+            docu_nr_externo,
+            docu_tx_etiqueta,
+            personagens,
+            dt_ultimo_andamento,
+            ultimo_andamento,
+            url_tjrj
+            FROM {namespace}.tb_lista_processos
             WHERE orgao_dk = :orgao_id
             ORDER BY dt_ultimo_andamento DESC
         """.format(namespace=settings.TABLE_NAMESPACE)
@@ -549,3 +562,9 @@ class ListaProcessosView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
         )
 
         return Response(data=page_data)
+
+
+class ComparadorRadaresView(JWTAuthMixin, APIView):
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(self.kwargs.get(self.orgao_url_kwarg))
+        return Response(data=ComparadorRadaresDAO.get(orgao_id=orgao_id))

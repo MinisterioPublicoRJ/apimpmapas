@@ -59,7 +59,41 @@ class RadarView(JWTAuthMixin, CacheMixin, APIView):
 
     def get_radar_data(self, orgao_id):
         query = """
-            SELECT * FROM {schema}.tb_radar_performance
+            SELECT cod_pct,
+            pacote_atribuicao,
+            orgao_id,
+            nr_arquivamentos,
+            nr_indeferimentos,
+            nr_instauracaoes,
+            nr_tac,
+            nr_acoes,
+            max_pacote_arquivamentos,
+            max_pacote_indeferimentos,
+            max_pacote_instauracoes,
+            max_pacote_tac,
+            max_pacote_acoes,
+            perc_arquivamentos,
+            perc_indeferimentos,
+            perc_instauracaoes,
+            perc_tac,
+            perc_acoes,
+            med_pacote_arquivamentos,
+            med_pacote_indeferimentos,
+            med_pacote_instauracoes,
+            med_pacote_tac,
+            med_pacote_acoes,
+            var_med_arquivaentos,
+            var_med_indeferimentos,
+            var_med_instauracoes,
+            var_med_tac,
+            var_med_acoes,
+            dt_calculo,
+            nm_max_arquivamentos,
+            nm_max_indeferimentos,
+            nm_max_instauracoes,
+            nm_max_tac,
+            nm_max_acoes
+            FROM {schema}.tb_radar_performance
             WHERE orgao_id = :orgao_id
         """
         f_query = query.format(
