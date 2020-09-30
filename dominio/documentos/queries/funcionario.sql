@@ -1,7 +1,7 @@
 SELECT
     func.cdmatricula as matricula,
-    func.nmfuncionario as nome,
-    carg.nmcargo as cargo
+    func.nmfuncionario as nome
 FROM {schema}.rh_funcionario func
-JOIN {schema}.rh_cargos carg ON carg.cdcargo = func.cdcargo
-WHERE func.cdmatricula = :matricula
+WHERE 
+    func.cdmatricula = :matricula
+    AND func.cdtipfunc IN (1, 2)

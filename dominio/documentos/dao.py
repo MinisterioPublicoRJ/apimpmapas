@@ -3,8 +3,13 @@ from django.conf import settings
 from dominio.dao import SingleDataObjectDAO
 
 
-class MinutaPrescricaoDAO(SingleDataObjectDAO):
+class DocumentosDAO(SingleDataObjectDAO):
     QUERIES_DIR = settings.BASE_DIR.child("dominio", "documentos", "queries")
+    table_namespaces = {
+        "schema": settings.EXADATA_NAMESPACE,
+    }
+
+class MinutaPrescricaoDAO(DocumentosDAO):
     query_file = "minuta_prescricao.sql"
     columns = [
         "num_procedimento",
@@ -15,19 +20,19 @@ class MinutaPrescricaoDAO(SingleDataObjectDAO):
         "assunto_docto",
         "lei_docto"
     ]
-    table_namespaces = {
-        "schema": settings.EXADATA_NAMESPACE,
-    }
 
 
-class DadosUsuarioDAO(SingleDataObjectDAO):
-    QUERIES_DIR = settings.BASE_DIR.child("dominio", "documentos", "queries")
+class DadosUsuarioDAO(DocumentosDAO):
     query_file = "funcionario.sql"
     columns = [
         "matricula",
-        "nome",
-        "cargo"
+        "nome"
     ]
-    table_namespaces = {
-        "schema": settings.EXADATA_NAMESPACE,
-    }
+
+
+class DadosPromotorDAO(DocumentosDAO):
+    query_file = "promotor.sql"
+    columns = [
+        "matricula",
+        "nome"
+    ]
