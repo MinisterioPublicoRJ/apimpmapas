@@ -25,7 +25,7 @@ class MinutaPrescricaoController:
         return "CAPITAL" if comarca == "RIO DE JANEIRO" else comarca
 
     def get_responsavel(self, orgao, matricula):
-        logado = DadosUsuarioDAO.get(matricula)
+        logado = DadosUsuarioDAO.get(matricula=matricula)
         # TODO Aqui iremos checar se ele é um 'PROMOTOR DE JUSTICA' e se
         # não for, pegar o promotor responsavel pela promotoria do documento
 

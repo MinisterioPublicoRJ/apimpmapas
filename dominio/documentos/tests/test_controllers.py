@@ -13,9 +13,12 @@ class TestMinutaPrescricaoController(TestCase):
         self.docu_dk = "12345"
         self.matricula = "12345678"
         self.nome = "fulano de tal"
+        self.token_payload = {
+            "matricula": self.matricula
+        }
         self.controller = MinutaPrescricaoController(
             self.docu_dk,
-            self.matricula
+            self.token_payload
         )
         self.expected_dao_data = {
             "data": "data",
