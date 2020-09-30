@@ -11,9 +11,8 @@ class TestDownloadMinutaPrescricao(NoJWTTestCase, TestCase):
 
     def setUp(self):
         super().setUp()
-        self.matricula = "12345678"
         self.mock_jwt.return_value = {
-            "matricula": self.matricula
+            "matricula": "12345678"
         }
 
     @mock.patch("dominio.documentos.views.MinutaPrescricaoController")
@@ -32,7 +31,10 @@ class TestDownloadMinutaPrescricao(NoJWTTestCase, TestCase):
         )
 
         self.assertEqual(resp.status_code, 200)
-        _controller.assert_called_once_with(docu_dk, self.matricula)
+        _controller.assert_called_once_with(
+            docu_dk,
+            self.mock_jwt.return_value
+        )
         minuta_controller_mock.render.assert_called_once()
         self.assertIsInstance(
             minuta_controller_mock.render.call_args_list[0][0][0],

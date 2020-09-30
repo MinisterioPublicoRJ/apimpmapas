@@ -1,30 +1,43 @@
+from datetime import datetime
 from unittest import TestCase, mock
 
 from django.http import HttpResponse
 from freezegun import freeze_time
 
 from dominio.documentos.controllers import MinutaPrescricaoController
-from dominio.documentos.dao import MinutaPrescricaoDAO
+from dominio.documentos.dao import DadosUsuarioDAO, MinutaPrescricaoDAO
 
 
 class TestMinutaPrescricaoController(TestCase):
     def setUp(self):
         self.docu_dk = "12345"
         self.matricula = "12345678"
+        self.nome = "fulano de tal"
         self.controller = MinutaPrescricaoController(
             self.docu_dk,
             self.matricula
         )
         self.expected_dao_data = {
             "data": "data",
-            "comarca_tj": "RIO DE JANEIRO",
+            "data_fato": datetime.strptime('01/01/00', '%d/%m/%y'),
+            "comarca_tj": "NITEROI",
         }
         self.expected_data = {
             "data_hoje": "01 de janeiro de 2020",
-            "matricula_promotor": self.matricula,
-            "preposicao_comarca": "DO",
+            "preposicao_comarca": "DE",
         }
         self.expected_data.update(self.expected_dao_data)
+
+        self.formatted_dao_data = {
+            "data_fato": "01 de janeiro de 2000",
+        }
+        self.expected_data.update(self.formatted_dao_data)
+
+        self.expected_user_data = {
+            "matricula": self.matricula,
+            "nome": self.nome,
+        }
+        self.expected_data.update(self.expected_user_data)
 
         self.http_response = HttpResponse()
 
@@ -41,9 +54,16 @@ class TestMinutaPrescricaoController(TestCase):
         self.mock_dao_get = self.dao_get_patcher.start()
         self.mock_dao_get.return_value = self.expected_dao_data
 
+        self.user_dao_patcher = mock.patch.object(
+            DadosUsuarioDAO, "get"
+        )
+        self.mock_user_dao_get = self.user_dao_patcher.start()
+        self.mock_user_dao_get.return_value = self.expected_user_data
+
     def tearDown(self):
         self.mock_docx_patcher.stop()
         self.dao_get_patcher.stop()
+        self.user_dao_patcher.stop()
 
     def test_render_document(self):
         self.controller.render(self.http_response)
