@@ -10,9 +10,9 @@ from dominio.documentos.dao import DadosUsuarioDAO, MinutaPrescricaoDAO
 class MinutaPrescricaoController:
     template = "dominio/documentos/doc_templates/minuta - prescricao.docx"
 
-    def __init__(self, docu_dk, matricula):
+    def __init__(self, docu_dk, token_payload):
         self.docu_dk = docu_dk
-        self.matricula = matricula
+        self.matricula = token_payload.get("matricula")
 
     def get_preposicao(self, comarca):
         preposicoes = {

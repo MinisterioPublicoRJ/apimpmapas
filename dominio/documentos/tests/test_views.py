@@ -33,7 +33,7 @@ class TestDownloadMinutaPrescricao(NoJWTTestCase, TestCase):
         self.assertEqual(resp.status_code, 200)
         _controller.assert_called_once_with(
             docu_dk,
-            self.mock_jwt.return_value
+            self.mock_jwt.return_value.get("matricula")
         )
         minuta_controller_mock.render.assert_called_once()
         self.assertIsInstance(
