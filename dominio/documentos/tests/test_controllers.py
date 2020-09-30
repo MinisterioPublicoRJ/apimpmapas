@@ -95,3 +95,15 @@ class TestMinutaPrescricaoController(TestCase):
         for key, value in expected_preposicao.items():
             with self.subTest():
                 self.assertEqual(value, self.controller.get_preposicao(key))
+
+    def test_corrige_comarca(self):
+        comarca_rj = "RIO DE JANEIRO"
+        comarca_qualquer = "QUALQUER"
+
+        corrigida_rj = self.controller.corrige_comarca(comarca_rj)
+        corrigida_qualquer = self.controller.corrige_comarca(comarca_qualquer)
+        expected_rj = "CAPITAL"
+        expected_qualquer = "QUALQUER"
+
+        self.assertEqual(corrigida_rj, expected_rj)
+        self.assertEqual(corrigida_qualquer, expected_qualquer)
