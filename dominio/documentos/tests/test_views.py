@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.test import TestCase
 from django.urls import reverse
 
+from dominio.documentos.views import MinutaPrescricaoView
 from dominio.tests.testconf import NoJWTTestCase
 
 
@@ -14,6 +15,26 @@ class TestDownloadMinutaPrescricao(NoJWTTestCase, TestCase):
         self.mock_jwt.return_value = {
             "matricula": "12345678"
         }
+        self. expected_cont_type = (
+            "Content-Type",
+            'application/vnd.openxmlformats-officedocument.'
+            'wordprocessingml.document'
+        )
+        self.expected_disposition = (
+            "Content-Disposition",
+            "attachment;filename=minuta-prescricao.docx"
+        )
+
+    def test_create_response(self):
+        resp = MinutaPrescricaoView().create_response()
+
+        headers = resp._headers
+        self.assertIsInstance(resp, HttpResponse)
+        self.assertEqual(headers["content-type"], self.expected_cont_type)
+        self.assertEqual(
+            headers["content-disposition"],
+            self.expected_disposition
+        )
 
     @mock.patch("dominio.documentos.views.MinutaPrescricaoController")
     def test_correct_response(self, _controller):
