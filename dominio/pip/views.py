@@ -2,66 +2,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from dominio.mixins import CacheMixin, JWTAuthMixin, PaginatorMixin
-from dominio.models import Vista, Documento
 from dominio.pip.dao import (
     PIPComparadorRadaresDAO,
-    PIPDetalheAproveitamentosDAO,
     PIPIndicadoresDeSucessoDAO,
     PIPRadarPerformanceDAO,
     PIPPrincipaisInvestigadosDAO,
     PIPPrincipaisInvestigadosListaDAO,
     PIPPrincipaisInvestigadosPerfilDAO,
 )
-from dominio.pip.utils import get_orgaos_same_aisps
-
-
-class PIPDetalheAproveitamentosView(JWTAuthMixin, CacheMixin, APIView):
-    cache_config = "PIP_DETALHEAPROVEITAMENTOS_CACHE_TIMEOUT"
-
-    def get(self, request, *args, **kwargs):
-        orgao_id = int(self.kwargs.get(self.orgao_url_kwarg))
-
-        data = PIPDetalheAproveitamentosDAO.get(orgao_id=orgao_id)
-        return Response(data)
-
-
-class PIPVistasAbertasMensalView(JWTAuthMixin, CacheMixin, APIView):
-    cache_config = "PIP_VISTASABERTASMENSAL_CACHE_TIMEOUT"
-
-    def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
-        cpf = kwargs.get("cpf")
-
-        aberturas = Vista.vistas.aberturas_30_dias_PIP(orgao_id, cpf)
-        nr_aberturas_30_dias = aberturas.count()
-        nr_investigacoes_30_dias = (
-            aberturas.filter().values("documento").distinct().count()
-        )
-
-        data = {
-            "nr_aberturas_30_dias": nr_aberturas_30_dias,
-            "nr_investigacoes_30_dias": nr_investigacoes_30_dias,
-        }
-
-        return Response(data=data)
-
-
-# Será substituído pelo dominio.suamesa.views.SuaMesaView
-class PIPSuaMesaInvestigacoesAISPView(JWTAuthMixin, CacheMixin, APIView):
-    cache_config = "PIP_SUAMESAINVESTIGACOESAISP_CACHE_TIMEOUT"
-
-    def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
-
-        _, orgaos_same_aisp = get_orgaos_same_aisps(orgao_id)
-
-        doc_count = Documento.investigacoes.em_curso_pip_aisp(
-            orgaos_same_aisp
-        ).count()
-
-        data = {"aisp_nr_investigacoes": doc_count}
-
-        return Response(data=data)
 
 
 class PIPIndicadoresDeSucessoView(JWTAuthMixin, CacheMixin, APIView):
@@ -70,38 +18,6 @@ class PIPIndicadoresDeSucessoView(JWTAuthMixin, CacheMixin, APIView):
     def get(self, request, *args, **kwargs):
         orgao_id = int(kwargs.get(self.orgao_url_kwarg))
         data = PIPIndicadoresDeSucessoDAO.get(orgao_id=orgao_id)
-        return Response(data=data)
-
-
-# Será substituído pelo dominio.suamesa.views.SuaMesaView
-class PIPSuaMesaInqueritosView(JWTAuthMixin, CacheMixin, APIView):
-    cache_config = "PIP_SUAMESAINQUERITOS_CACHE_TIMEOUT"
-
-    def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
-
-        doc_count = Documento.investigacoes.em_curso(
-            orgao_id, [3, 494]
-        ).count()
-
-        data = {"pip_nr_inqueritos": doc_count}
-
-        return Response(data=data)
-
-
-# Será substituído pelo dominio.suamesa.views.SuaMesaView
-class PIPSuaMesaPICsView(JWTAuthMixin, CacheMixin, APIView):
-    cache_config = "PIP_SUAMESAPICS_CACHE_TIMEOUT"
-
-    def get(self, request, *args, **kwargs):
-        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
-
-        doc_count = Documento.investigacoes.em_curso(
-            orgao_id, [590]
-        ).count()
-
-        data = {"pip_nr_pics": doc_count}
-
         return Response(data=data)
 
 
