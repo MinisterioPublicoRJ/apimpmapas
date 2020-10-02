@@ -5,10 +5,11 @@ from cached_property import cached_property
 from docxtpl import DocxTemplate
 
 from dominio.documentos.dao import (
+    DadosAssuntoDAO,
     DadosPromotorDAO,
-    DadosUsuarioDAO,
     MinutaPrescricaoDAO
 )
+
 
 class MinutaPrescricaoController:
     template = "dominio/documentos/doc_templates/minuta - prescricao.docx"
@@ -42,16 +43,18 @@ class MinutaPrescricaoController:
             else:
                 delitos.append(assunto)
 
-        result = {
-            "nome_delito": "",
-            "lei_delito": "",
-            "max_pena": "",
-        }
-        for delito in delitos:
-            #TODO concatenar os delitos em result
+        result = {}
+        result["nome_delito"] = ' , '.join(
+            [item['nome_delito'] for item in assunto]
+        )
+        result["lei_delito"] = ' , '.join(
+            [item['lei_delito'] for item in assunto]
+        )
+        result["max_pena"] = ' , '.join(
+            [(item['max_pena'] * alteracao) for item in assunto]
+        )
 
         return result
-        
 
     @cached_property
     def context(self):
