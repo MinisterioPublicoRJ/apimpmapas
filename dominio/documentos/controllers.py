@@ -13,11 +13,10 @@ from dominio.documentos.dao import (
 class MinutaPrescricaoController:
     template = "dominio/documentos/doc_templates/minuta - prescricao.docx"
 
-    def __init__(self, docu_dk, token_payload):
+    def __init__(self, orgao_id, docu_dk, cpf):
+        self.orgao_id = orgao_id
         self.docu_dk = docu_dk
-        self.token_payload = token_payload
-        self.matricula = token_payload.get("matricula")
-        self.permissao = token_payload.get("tipo_permissao")
+        self.cpf = cpf
 
     def get_preposicao(self, comarca):
         preposicoes = {
@@ -29,24 +28,44 @@ class MinutaPrescricaoController:
     def corrige_comarca(self, comarca):
         return "CAPITAL" if comarca == "RIO DE JANEIRO" else comarca
 
-    def get_responsavel(self, orgao):
-        if self.check_lotacao_orgao(self.token_payload):
-            promotor = DadosUsuarioDAO.get(
-                matricula=self.token_payload.get("matricula")
-            )
-            if promotor:
-                return usuario
-        return DadosPromotorDAO.get(orgao=orgao)
+    @cached_property
+    def get_responsavel(self):
+        return DadosPromotorDAO.get(cpf=self.cpf)
+
+    def get_delitos(self):
+        lista_assuntos = DadosAssuntoDAO.get(docu_dk=self.docu_dk)
+        delitos = []
+        alteracao = 1
+        for assunto in lista_assuntos:
+            if assunto.get("multiplicador") == 1:
+                alteracao *= assunto.get("max_pena")
+            else:
+                delitos.append(assunto)
+
+        result = {
+            "nome_delito": "",
+            "lei_delito": "",
+            "max_pena": "",
+        }
+        for delito in delitos:
+            #TODO concatenar os delitos em result
+
+        return result
+        
 
     @cached_property
     def context(self):
         locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
         context = {"data_hoje": date.today().strftime("%d de %B de %Y")}
         context.update(MinutaPrescricaoDAO.get(docu_dk=self.docu_dk))
-        context.update(self.get_responsavel(
-            orgao=context.get("orgao_responsavel"),
-            matricula=self.token_payload.get("matricula")
-        ))
+        context.update(self.get_delitos())
+        promotor = self.get_responsavel()
+        context.update(
+            self.get_responsavel(
+                matricula_promotor=promotor.get("matricula_promotor"),
+                nome_promotor=promotor.get("nome_promotor")
+            )
+        )
         context["comarca_tj"] = self.corrige_comarca(context["comarca_tj"])
         context["preposicao_comarca"] = self.get_preposicao(
             context["comarca_tj"]

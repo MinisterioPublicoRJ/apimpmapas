@@ -17,22 +17,22 @@ class MinutaPrescricaoDAO(DocumentosDAO):
         "orgao_responsavel",
         "comarca_tj",
         "tempo_passado",
-        "assunto_docto",
-        "lei_docto"
-    ]
-
-
-class DadosUsuarioDAO(DocumentosDAO):
-    query_file = "funcionario.sql"
-    columns = [
-        "matricula",
-        "nome"
     ]
 
 
 class DadosPromotorDAO(DocumentosDAO):
-    query_file = "promotor.sql"
+    query_file = "dados_promotor.sql"
     columns = [
-        "matricula",
-        "nome"
+        "matricula_promotor",
+        "nome_promotor",
+    ]
+
+
+class DadosAssuntoDAO(DocumentosDAO):
+    query_file = "dados_assunto.sql"
+    columns = [
+        "nome_delito",
+        "artigo_lei",
+        "max_pena",
+        "multiplicador",
     ]

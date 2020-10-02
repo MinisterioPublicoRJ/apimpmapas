@@ -21,8 +21,14 @@ class MinutaPrescricaoView(JWTAuthMixin, View):
         return response
 
     def get(self, request, *args, **kwargs):
-        docu_dk = int(kwargs.get("docu_dk"))
-        controller = MinutaPrescricaoController(docu_dk, self.token_payload)
+        orgao_id = kwargs.get(self.orgao_url_kwarg)
+        docu_dk = kwargs.get("docu_dk")
+        cpf = kwargs.get("cpf")
+        controller = MinutaPrescricaoController(
+            orgao_id=orgao_id,
+            docu_dk=docu_dk,
+            cpf=cpf
+        )
         response = self.create_response()
         controller.render(response)
         return response

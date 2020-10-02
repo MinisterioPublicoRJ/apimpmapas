@@ -107,3 +107,15 @@ class TestMinutaPrescricaoController(TestCase):
 
         self.assertEqual(corrigida_rj, expected_rj)
         self.assertEqual(corrigida_qualquer, expected_qualquer)
+
+
+class TestResponsavelMinuta(TestCase):
+    def setUp(self):
+        pass
+    def test_promotor_lotado(self):
+        resp_check_lotacao = controller()
+        self.assertTrue(resp_check_lotacao)    
+    def test_acessor_lotado(self):
+        pass
+    def test_admin_outro(self):
+        pass
