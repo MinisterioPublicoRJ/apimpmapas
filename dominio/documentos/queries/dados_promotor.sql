@@ -1,5 +1,5 @@
 SELECT 
     cdmatricula as matricula_promotor,
     NMFUNCIONARIO as nome_promotor
-FROM RH_FUNCIONARIO
+FROM {schema}.RH_FUNCIONARIO
 WHERE CPF = :cpf

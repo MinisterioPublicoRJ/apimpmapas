@@ -30,10 +30,11 @@ class MinutaPrescricaoController:
         return "CAPITAL" if comarca == "RIO DE JANEIRO" else comarca
 
     @cached_property
-    def get_responsavel(self):
+    def responsavel(self):
         return DadosPromotorDAO.get(cpf=self.cpf)
 
-    def get_delitos(self):
+    @cached_property
+    def delitos(self):
         lista_assuntos = DadosAssuntoDAO.get(docu_dk=self.docu_dk)
         delitos = []
         alteracao = 1
@@ -45,13 +46,13 @@ class MinutaPrescricaoController:
 
         result = {}
         result["nome_delito"] = ' , '.join(
-            [item['nome_delito'] for item in assunto]
+            [item["nome_delito"] for item in delitos]
         )
         result["lei_delito"] = ' , '.join(
-            [item['lei_delito'] for item in assunto]
+            [item["artigo_lei"] for item in delitos]
         )
         result["max_pena"] = ' , '.join(
-            [(item['max_pena'] * alteracao) for item in assunto]
+            [str(item["max_pena"] * alteracao) for item in delitos]
         )
 
         return result
@@ -61,14 +62,8 @@ class MinutaPrescricaoController:
         locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
         context = {"data_hoje": date.today().strftime("%d de %B de %Y")}
         context.update(MinutaPrescricaoDAO.get(docu_dk=self.docu_dk))
-        context.update(self.get_delitos())
-        promotor = self.get_responsavel()
-        context.update(
-            self.get_responsavel(
-                matricula_promotor=promotor.get("matricula_promotor"),
-                nome_promotor=promotor.get("nome_promotor")
-            )
-        )
+        context.update(self.delitos)
+        context.update(self.responsavel)
         context["comarca_tj"] = self.corrige_comarca(context["comarca_tj"])
         context["preposicao_comarca"] = self.get_preposicao(
             context["comarca_tj"]

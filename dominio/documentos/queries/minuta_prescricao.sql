@@ -3,7 +3,7 @@ SELECT
     docto.docu_dt_fato as data_fato,
     docto.docu_orgi_orga_dk_responsavel as orgao_responsavel,
     coma.cmrc_nm_comarca as comarca_tj,
-    (DATEDIFF(now(), docto.docu_dt_fato)/365) as tempo_passado,
+    (DATEDIFF(now(), docto.docu_dt_fato)/365) as tempo_passado
 FROM 
     {schema}.mcpr_documento docto
     JOIN {schema}.orgi_foro_orgao ofo ON docto.docu_orgi_orga_dk_responsavel = ofo.forg_orgi_dk

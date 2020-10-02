@@ -1,4 +1,3 @@
-import os
 from datetime import datetime
 from decimal import Decimal
 from unittest import mock

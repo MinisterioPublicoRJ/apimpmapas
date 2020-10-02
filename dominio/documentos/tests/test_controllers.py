@@ -112,10 +112,13 @@ class TestMinutaPrescricaoController(TestCase):
 class TestResponsavelMinuta(TestCase):
     def setUp(self):
         pass
+
     def test_promotor_lotado(self):
         resp_check_lotacao = controller()
-        self.assertTrue(resp_check_lotacao)    
+        self.assertTrue(resp_check_lotacao)
+
     def test_acessor_lotado(self):
         pass
+
     def test_admin_outro(self):
         pass
