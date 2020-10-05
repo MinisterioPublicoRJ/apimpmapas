@@ -53,7 +53,7 @@ class TestMinutaDAO(TestImpalaExecuteMixin, TestCase):
 class TestDadosPromotorDAO(TestImpalaExecuteMixin, TestCase):
     def test_get_correct(self):
         nome_promotor = "Nome"
-        matricula_promotor = "Matricula"
+        matricula_promotor = "00001234"
 
         cpf = "00000000"
         self._impala_execute.return_value = [
@@ -65,7 +65,7 @@ class TestDadosPromotorDAO(TestImpalaExecuteMixin, TestCase):
 
         data = DadosPromotorDAO.get(cpf=cpf)
         expected_value = {
-            "matricula_promotor": matricula_promotor,
+            "matricula_promotor": "1234",
             "nome_promotor": nome_promotor,
         }
 

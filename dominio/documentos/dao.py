@@ -28,6 +28,14 @@ class DadosPromotorDAO(DocumentosDAO):
         "nome_promotor",
     ]
 
+    @classmethod
+    def serialize(cls, result_set):
+        ser_data = super().serialize(result_set)
+        ser_data["matricula_promotor"] = str(
+            int(ser_data["matricula_promotor"])
+        )
+        return ser_data
+
 
 class DadosAssuntoDAO(GenericDAO):
     QUERIES_DIR = settings.BASE_DIR.child("dominio", "documentos", "queries")
