@@ -111,14 +111,33 @@ class TestMinutaPrescricaoController(TestCase):
 
 class TestResponsavelMinuta(TestCase):
     def setUp(self):
-        pass
+        self.orgao_id = "5678"
+        self.docu_dk = "12345"
+        self.cpf = "1234567890"
 
-    def test_promotor_lotado(self):
-        resp_check_lotacao = controller()
-        self.assertTrue(resp_check_lotacao)
+        self.controller = MinutaPrescricaoController(
+            self.orgao_id, self.docu_dk, self.cpf
+        )
 
-    def test_acessor_lotado(self):
-        pass
+        self.dados_promotor_patcher = mock.patch.object(
+            DadosPromotorDAO, "get"
+        )
 
-    def test_admin_outro(self):
-        pass
+        self.nome_promotor = "Nome"
+        self.matricula_promotor = "12345"
+
+        self.expected_responsavel = {
+            "nome_promotor": self.nome_promotor,
+            "matricula_promotor": self.matricula_promotor
+        }
+
+        self.mock_dados_promotor = self.dados_promotor_patcher.start()
+        self.mock_dados_promotor.return_value = self.expected_responsavel
+
+    def tearDown(self):
+        self.dados_promotor_patcher.stop()
+
+    def test_get_reponsavel(self):
+        responsavel = self.controller.responsavel
+
+        self.assertEqual(responsavel, self.expected_responsavel)
