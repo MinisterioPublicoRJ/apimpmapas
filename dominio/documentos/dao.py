@@ -26,6 +26,7 @@ class DadosPromotorDAO(DocumentosDAO):
     columns = [
         "matricula_promotor",
         "nome_promotor",
+        "sexo",
     ]
 
     @classmethod

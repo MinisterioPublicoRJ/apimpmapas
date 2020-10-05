@@ -54,12 +54,14 @@ class TestDadosPromotorDAO(TestImpalaExecuteMixin, TestCase):
     def test_get_correct(self):
         nome_promotor = "Nome"
         matricula_promotor = "00001234"
+        sexo = "X"
 
         cpf = "00000000"
         self._impala_execute.return_value = [
             (
                 matricula_promotor,
                 nome_promotor,
+                sexo,
             ),
         ]
 
@@ -67,6 +69,7 @@ class TestDadosPromotorDAO(TestImpalaExecuteMixin, TestCase):
         expected_value = {
             "matricula_promotor": "1234",
             "nome_promotor": nome_promotor,
+            "sexo": sexo
         }
 
         self.assertEqual(data, expected_value)
