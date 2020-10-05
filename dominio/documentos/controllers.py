@@ -9,6 +9,7 @@ from dominio.documentos.dao import (
     DadosPromotorDAO,
     MinutaPrescricaoDAO
 )
+from dominio.documentos.helpers import formata_pena
 
 
 class MinutaPrescricaoController:
@@ -52,7 +53,10 @@ class MinutaPrescricaoController:
             [item["lei_delito"] for item in delitos]
         )
         result["max_pena"] = ' , '.join(
-            [str(item["max_pena"] * alteracao) for item in delitos]
+            [
+                str(formata_pena(item["max_pena"] * alteracao))
+                for item in delitos
+            ]
         )
 
         return result

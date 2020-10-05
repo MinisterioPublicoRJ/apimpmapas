@@ -70,7 +70,7 @@ class TestMinutaPrescricaoController(TestCase):
             {
                 "nome_delito": self.nome_delito,
                 "lei_delito": self.lei_delito,
-                "max_pena": str(self.max_pena),
+                "max_pena": "10 anos",
             }
         )
 
@@ -222,7 +222,7 @@ class TestDelitosMinuta(TestCase):
         self.expected_delitos = {
             "nome_delito": self.nome_delito[1],
             "lei_delito": self.lei_delito[1],
-            "max_pena": "50"
+            "max_pena": "50 anos"
         }
 
     def tearDown(self):
