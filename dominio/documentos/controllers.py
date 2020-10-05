@@ -13,7 +13,7 @@ from dominio.documentos.helpers import formata_pena
 
 
 class MinutaPrescricaoController:
-    template = "dominio/documentos/doc_templates/minuta - prescricao.docx"
+    template = "dominio/documentos/doc_templates/minuta_prescricao.docx"
 
     def __init__(self, orgao_id, docu_dk, cpf):
         self.orgao_id = orgao_id
