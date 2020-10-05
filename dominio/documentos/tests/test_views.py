@@ -12,9 +12,6 @@ class TestDownloadMinutaPrescricao(NoJWTTestCase, TestCase):
 
     def setUp(self):
         super().setUp()
-        self.mock_jwt.return_value = {
-            "matricula": "12345678"
-        }
         self. expected_cont_type = (
             "Content-Type",
             'application/vnd.openxmlformats-officedocument.'
@@ -41,8 +38,13 @@ class TestDownloadMinutaPrescricao(NoJWTTestCase, TestCase):
         minuta_controller_mock = mock.Mock()
         _controller.return_value = minuta_controller_mock
 
+        orgao_id = 56789
         docu_dk = 12345
-        url = reverse("dominio:minuta-prescricao", args=(docu_dk,))
+        cpf = "1234567890"
+        url = reverse(
+            "dominio:minuta-prescricao",
+            args=(orgao_id, cpf, docu_dk)
+        )
         resp = self.client.get(url)
 
         expected_cont_type = (
@@ -53,8 +55,9 @@ class TestDownloadMinutaPrescricao(NoJWTTestCase, TestCase):
 
         self.assertEqual(resp.status_code, 200)
         _controller.assert_called_once_with(
-            docu_dk,
-            self.mock_jwt.return_value
+            orgao_id=orgao_id,
+            docu_dk=docu_dk,
+            cpf=cpf
         )
         minuta_controller_mock.render.assert_called_once()
         self.assertIsInstance(
