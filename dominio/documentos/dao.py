@@ -38,7 +38,7 @@ class DadosAssuntoDAO(GenericDAO):
     }
     columns = [
         "nome_delito",
-        "artigo_lei",
+        "lei_delito",
         "max_pena",
         "multiplicador",
     ]

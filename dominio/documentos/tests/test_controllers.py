@@ -5,21 +5,41 @@ from django.http import HttpResponse
 from freezegun import freeze_time
 
 from dominio.documentos.controllers import MinutaPrescricaoController
-from dominio.documentos.dao import DadosUsuarioDAO, MinutaPrescricaoDAO
+from dominio.documentos.dao import (
+    DadosAssuntoDAO,
+    DadosPromotorDAO,
+    MinutaPrescricaoDAO,
+)
 
 
 class TestMinutaPrescricaoController(TestCase):
     def setUp(self):
+        self.orgao_id = "5678"
         self.docu_dk = "12345"
+        self.cpf = "1234567890"
+
         self.matricula = "12345678"
         self.nome = "fulano de tal"
-        self.token_payload = {
-            "matricula": self.matricula
-        }
         self.controller = MinutaPrescricaoController(
+            self.orgao_id,
             self.docu_dk,
-            self.token_payload
+            self.cpf,
         )
+
+        # Dados DAO assunto
+        self.nome_delito = "Delito"
+        self.lei_delito = "Artigo 111"
+        self.max_pena = 10
+        self.multiplicador = 2
+
+        self.matricula_promotor = "12345"
+        self.nome_promotor = "Nome"
+
+        self.expected_promotor_data = {
+            "matricula_promotor": self.matricula_promotor,
+            "nome_promotor": self.nome_promotor,
+        }
+
         self.expected_dao_data = {
             "data": "data",
             "data_fato": datetime.strptime('01/01/00', '%d/%m/%y'),
@@ -34,13 +54,25 @@ class TestMinutaPrescricaoController(TestCase):
         self.formatted_dao_data = {
             "data_fato": "01 de janeiro de 2000",
         }
-        self.expected_data.update(self.formatted_dao_data)
 
-        self.expected_user_data = {
-            "matricula": self.matricula,
-            "nome": self.nome,
-        }
-        self.expected_data.update(self.expected_user_data)
+        self.expected_assunto_data = [
+            {
+                "nome_delito": self.nome_delito,
+                "lei_delito": self.lei_delito,
+                "max_pena": self.max_pena,
+                "multiplicador": self.multiplicador,
+            }
+        ]
+
+        self.expected_data.update(self.formatted_dao_data)
+        self.expected_data.update(self.expected_promotor_data)
+        self.expected_data.update(
+            {
+                "nome_delito": self.nome_delito,
+                "lei_delito": self.lei_delito,
+                "max_pena": str(self.max_pena),
+            }
+        )
 
         self.http_response = HttpResponse()
 
@@ -57,16 +89,23 @@ class TestMinutaPrescricaoController(TestCase):
         self.mock_dao_get = self.dao_get_patcher.start()
         self.mock_dao_get.return_value = self.expected_dao_data
 
-        self.user_dao_patcher = mock.patch.object(
-            DadosUsuarioDAO, "get"
+        self.assunto_dao_patcher = mock.patch.object(
+            DadosAssuntoDAO, "get"
         )
-        self.mock_user_dao_get = self.user_dao_patcher.start()
-        self.mock_user_dao_get.return_value = self.expected_user_data
+        self.mock_assunto_dao_get = self.assunto_dao_patcher.start()
+        self.mock_assunto_dao_get.return_value = self.expected_assunto_data
+
+        self.promotor_dao_patcher = mock.patch.object(
+            DadosPromotorDAO, "get"
+        )
+        self.mock_promotor_dao_get = self.promotor_dao_patcher.start()
+        self.mock_promotor_dao_get.return_value = self.expected_promotor_data
 
     def tearDown(self):
         self.mock_docx_patcher.stop()
         self.dao_get_patcher.stop()
-        self.user_dao_patcher.stop()
+        self.assunto_dao_patcher.stop()
+        self.promotor_dao_patcher.stop()
 
     def test_render_document(self):
         self.controller.render(self.http_response)
@@ -157,29 +196,39 @@ class TestDelitosMinuta(TestCase):
             DadosAssuntoDAO, "get"
         )
 
-        self.nome_delito = "Delito"
-        self.artigo_lei = "Artigo 111"
-        self.max_pena = 10
-        self.multiplicador = 1
+        self.nome_delito = ["Delito 1", "Delito 2"]
+        self.lei_delito = ["Artigo 1", "Artigo 2"]
+        self.max_pena = [5, 10]
+        self.multiplicador = [1, 2]
 
         self.dao_delitos_data = [
             {
-                "nome_delito": self.nome_delito,
-                "artigo_lei": self.artigo_lei,
-                "max_pena": self.max_pena,
-                "multiplicador": self.multiplicador,
-            }
+                "nome_delito": self.nome_delito[0],
+                "lei_delito": self.lei_delito[0],
+                "max_pena": self.max_pena[0],
+                "multiplicador": self.multiplicador[0],
+            },
+            {
+                "nome_delito": self.nome_delito[1],
+                "lei_delito": self.lei_delito[1],
+                "max_pena": self.max_pena[1],
+                "multiplicador": self.multiplicador[1],
+            },
         ]
 
         self.mock_dados_assunto = self.dados_assunto_patcher.start()
         self.mock_dados_assunto.return_value = self.dao_delitos_data
 
-        self.expected_delitos = []
+        self.expected_delitos = {
+            "nome_delito": self.nome_delito[1],
+            "lei_delito": self.lei_delito[1],
+            "max_pena": "50"
+        }
 
     def tearDown(self):
         self.dados_assunto_patcher.stop()
 
-    def test_get_reponsavel(self):
+    def test_get_delitos(self):
         delitos = self.controller.delitos
 
         self.assertEqual(delitos, self.expected_delitos)

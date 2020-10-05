@@ -11,16 +11,24 @@ from dominio.documentos.dao import (
 )
 
 
-class TestMinutaDAO(TestCase):
-    @mock.patch("dominio.dao.impala_execute")
-    def test_get_correct(self, _impala_execute):
+class TestImpalaExecuteMixin:
+    def setUp(self):
+        self.patcher = mock.patch("dominio.dao.impala_execute")
+        self._impala_execute = self.patcher.start()
+
+    def tearDown(self):
+        self.patcher.stop()
+
+
+class TestMinutaDAO(TestImpalaExecuteMixin, TestCase):
+    def test_get_correct(self):
         num_procedimento = "num_proc"
         data_fato = datetime(2020, 10, 10, 0, 0)
         org_resp = Decimal("1234")
         comarca = "nome_comarca"
         tempo_passado = 12345
         docu_dk = 1234
-        _impala_execute.return_value = [
+        self._impala_execute.return_value = [
             (
                 num_procedimento,
                 data_fato,
@@ -42,49 +50,47 @@ class TestMinutaDAO(TestCase):
         self.assertEqual(data, expected_value)
 
 
-class TestDadosPromotorDAO(TestCase):
-    @mock.patch("dominio.dao.impala_execute")
-    def test_get_correct(self, _impala_execute):
+class TestDadosPromotorDAO(TestImpalaExecuteMixin, TestCase):
+    def test_get_correct(self):
         nome_promotor = "Nome"
         matricula_promotor = "Matricula"
 
-        cpf = "1234567890"
-        _impala_execute.return_value = [
+        cpf = "00000000"
+        self._impala_execute.return_value = [
             (
                 matricula_promotor,
                 nome_promotor,
             ),
         ]
+
+        data = DadosPromotorDAO.get(cpf=cpf)
         expected_value = {
             "matricula_promotor": matricula_promotor,
             "nome_promotor": nome_promotor,
         }
 
-        data = DadosPromotorDAO.get(cpf=cpf)
-
         self.assertEqual(data, expected_value)
 
 
-class TestDadosAssuntoDAO(TestCase):
-    @mock.patch("dominio.dao.impala_execute")
-    def test_get_correct(self, _impala_execute):
-        docu_dk = "12345"
+class TestDadosAssuntoDAO(TestImpalaExecuteMixin, TestCase):
+    def test_get_correct(self):
+        docu_dk = "00000"
 
         nome_delito = ["DELITO 1", "DELITO 2"]
-        artigo_lei = ["Artigo 1", "Artigo 2"]
+        lei_delito = ["Artigo 1", "Artigo 2"]
         max_pena = [5, 10]
         multiplicador = [1, 2]
 
-        _impala_execute.return_value = [
+        self._impala_execute.return_value = [
             (
                 nome_delito[0],
-                artigo_lei[0],
+                lei_delito[0],
                 max_pena[0],
                 multiplicador[0]
             ),
             (
                 nome_delito[1],
-                artigo_lei[1],
+                lei_delito[1],
                 max_pena[1],
                 multiplicador[1]
             ),
@@ -92,13 +98,13 @@ class TestDadosAssuntoDAO(TestCase):
         expected_value = [
             {
                 "nome_delito": nome_delito[0],
-                "artigo_lei": artigo_lei[0],
+                "lei_delito": lei_delito[0],
                 "max_pena": max_pena[0],
                 "multiplicador": multiplicador[0],
             },
             {
                 "nome_delito": nome_delito[1],
-                "artigo_lei": artigo_lei[1],
+                "lei_delito": lei_delito[1],
                 "max_pena": max_pena[1],
                 "multiplicador": multiplicador[1],
             },

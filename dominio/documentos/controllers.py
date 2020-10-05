@@ -49,7 +49,7 @@ class MinutaPrescricaoController:
             [item["nome_delito"] for item in delitos]
         )
         result["lei_delito"] = ' , '.join(
-            [item["artigo_lei"] for item in delitos]
+            [item["lei_delito"] for item in delitos]
         )
         result["max_pena"] = ' , '.join(
             [str(item["max_pena"] * alteracao) for item in delitos]
