@@ -141,3 +141,45 @@ class TestResponsavelMinuta(TestCase):
         responsavel = self.controller.responsavel
 
         self.assertEqual(responsavel, self.expected_responsavel)
+
+
+class TestDelitosMinuta(TestCase):
+    def setUp(self):
+        self.orgao_id = "5678"
+        self.docu_dk = "12345"
+        self.cpf = "1234567890"
+
+        self.controller = MinutaPrescricaoController(
+            self.orgao_id, self.docu_dk, self.cpf
+        )
+
+        self.dados_assunto_patcher = mock.patch.object(
+            DadosAssuntoDAO, "get"
+        )
+
+        self.nome_delito = "Delito"
+        self.artigo_lei = "Artigo 111"
+        self.max_pena = 10
+        self.multiplicador = 1
+
+        self.dao_delitos_data = [
+            {
+                "nome_delito": self.nome_delito,
+                "artigo_lei": self.artigo_lei,
+                "max_pena": self.max_pena,
+                "multiplicador": self.multiplicador,
+            }
+        ]
+
+        self.mock_dados_assunto = self.dados_assunto_patcher.start()
+        self.mock_dados_assunto.return_value = self.dao_delitos_data
+
+        self.expected_delitos = []
+
+    def tearDown(self):
+        self.dados_assunto_patcher.stop()
+
+    def test_get_reponsavel(self):
+        delitos = self.controller.delitos
+
+        self.assertEqual(delitos, self.expected_delitos)

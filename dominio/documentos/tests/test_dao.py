@@ -4,7 +4,11 @@ from unittest import mock
 
 from django.test import TestCase
 
-from dominio.documentos.dao import DadosPromotorDAO, MinutaPrescricaoDAO
+from dominio.documentos.dao import (
+    DadosAssuntoDAO,
+    DadosPromotorDAO,
+    MinutaPrescricaoDAO,
+)
 
 
 class TestMinutaDAO(TestCase):
@@ -57,5 +61,49 @@ class TestDadosPromotorDAO(TestCase):
         }
 
         data = DadosPromotorDAO.get(cpf=cpf)
+
+        self.assertEqual(data, expected_value)
+
+
+class TestDadosAssuntoDAO(TestCase):
+    @mock.patch("dominio.dao.impala_execute")
+    def test_get_correct(self, _impala_execute):
+        docu_dk = "12345"
+
+        nome_delito = ["DELITO 1", "DELITO 2"]
+        artigo_lei = ["Artigo 1", "Artigo 2"]
+        max_pena = [5, 10]
+        multiplicador = [1, 2]
+
+        _impala_execute.return_value = [
+            (
+                nome_delito[0],
+                artigo_lei[0],
+                max_pena[0],
+                multiplicador[0]
+            ),
+            (
+                nome_delito[1],
+                artigo_lei[1],
+                max_pena[1],
+                multiplicador[1]
+            ),
+        ]
+        expected_value = [
+            {
+                "nome_delito": nome_delito[0],
+                "artigo_lei": artigo_lei[0],
+                "max_pena": max_pena[0],
+                "multiplicador": multiplicador[0],
+            },
+            {
+                "nome_delito": nome_delito[1],
+                "artigo_lei": artigo_lei[1],
+                "max_pena": max_pena[1],
+                "multiplicador": multiplicador[1],
+            },
+        ]
+
+        data = DadosAssuntoDAO.get(docu_dk=docu_dk)
 
         self.assertEqual(data, expected_value)
