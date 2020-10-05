@@ -9,7 +9,7 @@ from dominio.documentos.dao import (
     DadosPromotorDAO,
     MinutaPrescricaoDAO
 )
-from dominio.documentos.helpers import formata_pena
+from dominio.documentos.helpers import formata_lista, formata_pena
 
 
 class MinutaPrescricaoController:
@@ -36,6 +36,8 @@ class MinutaPrescricaoController:
 
     @cached_property
     def delitos(self):
+        # TODO: talvez levar esse código para o DAO. Pode ser que não seja
+        # responsabilidade do Controller saber como o dados é preparado.
         lista_assuntos = DadosAssuntoDAO.get(docu_dk=self.docu_dk)
         delitos = []
         alteracao = 1
@@ -46,13 +48,13 @@ class MinutaPrescricaoController:
                 delitos.append(assunto)
 
         result = {}
-        result["nome_delito"] = ' , '.join(
+        result["nome_delito"] = formata_lista(
             [item["nome_delito"] for item in delitos]
         )
-        result["lei_delito"] = ' , '.join(
+        result["lei_delito"] = formata_lista(
             [item["lei_delito"] for item in delitos]
         )
-        result["max_pena"] = ' , '.join(
+        result["max_pena"] = formata_lista(
             [
                 str(formata_pena(item["max_pena"] * alteracao))
                 for item in delitos

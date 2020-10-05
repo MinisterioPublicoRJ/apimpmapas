@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from dominio.documentos.helpers import formata_pena
+from dominio.documentos.helpers import formata_lista, formata_pena
 
 
 class TestFormataPena(TestCase):
@@ -16,3 +16,29 @@ class TestFormataPena(TestCase):
             with self.subTest():
                 resp = formata_pena(info["input"])
                 self.assertEqual(resp, info["output"])
+
+
+class TestFormataListaComVirgula(TestCase):
+    def test_formata_lista_um_elemento(self):
+        lista = ["Info"]
+
+        lista_formatada = formata_lista(lista)
+        expected_lista = "Info"
+
+        self.assertEqual(lista_formatada, expected_lista)
+
+    def test_formata_lista_dois_elementos(self):
+        lista = ["Info 1", "Info 2"]
+
+        lista_formatada = formata_lista(lista)
+        expected_lista = "Info 1 e Info 2"
+
+        self.assertEqual(lista_formatada, expected_lista)
+
+    def test_formata_lista_maior_que_dois_elementos(self):
+        lista = ["Info 1", "Info 2", "Info 3"]
+
+        lista_formatada = formata_lista(lista)
+        expected_lista = "Info 1, Info 2 e Info 3"
+
+        self.assertEqual(lista_formatada, expected_lista)

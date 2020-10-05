@@ -12,3 +12,12 @@ def formata_pena(pena):
         pena_info += f" e {mes} {mes_txt}"
 
     return pena_info
+
+
+def formata_lista(lista):
+    if len(lista) > 1:
+        f_lista = ", ".join(lista[:-1]) + f" e {lista[-1]}"
+    else:
+        f_lista = f"{lista[0]}"
+
+    return f_lista
