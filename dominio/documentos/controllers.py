@@ -37,7 +37,7 @@ class MinutaPrescricaoController:
     @cached_property
     def delitos(self):
         # TODO: talvez levar esse código para o DAO. Pode ser que não seja
-        # responsabilidade do Controller saber como o dados é preparado.
+        # responsabilidade do Controller saber como o dado é preparado.
         lista_assuntos = DadosAssuntoDAO.get(docu_dk=self.docu_dk)
         delitos = []
         alteracao = 1
