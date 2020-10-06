@@ -1,4 +1,3 @@
-import locale
 from datetime import date
 
 from cached_property import cached_property
@@ -9,7 +8,7 @@ from dominio.documentos.dao import (
     DadosPromotorDAO,
     MinutaPrescricaoDAO
 )
-from dominio.documentos.helpers import formata_lista, formata_pena
+from dominio.documentos.helpers import formata_lista, formata_pena, traduz_mes
 
 
 class MinutaPrescricaoController:
@@ -65,8 +64,9 @@ class MinutaPrescricaoController:
 
     @cached_property
     def context(self):
-        locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
-        context = {"data_hoje": date.today().strftime("%d de %B de %Y")}
+        context = {
+            "data_hoje": traduz_mes(date.today().strftime("%d de %B de %Y"))
+        }
         context.update(MinutaPrescricaoDAO.get(docu_dk=self.docu_dk))
         context.update(self.delitos)
         context.update(self.responsavel)
@@ -74,7 +74,9 @@ class MinutaPrescricaoController:
         context["preposicao_comarca"] = self.get_preposicao(
             context["comarca_tj"]
         )
-        context["data_fato"] = context["data_fato"].strftime("%d de %B de %Y")
+        context["data_fato"] = traduz_mes(
+            context["data_fato"].strftime("%d de %B de %Y")
+        )
 
         return context
 

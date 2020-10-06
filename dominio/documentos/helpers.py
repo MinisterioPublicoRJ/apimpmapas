@@ -21,3 +21,24 @@ def formata_lista(lista):
         f_lista = f"{lista[0]}"
 
     return f_lista
+
+
+def traduz_mes(txt):
+    meses = {
+        "January": "janeiro",
+        "February": "fevereiro",
+        "March": "março",
+        "April": "abril",
+        "May": "maio",
+        "June": "junho",
+        "July": "julho",
+        "August": "agosto",
+        "September": "setembro",
+        "October": "outubro",
+        "November": "novembro",
+        "December": "dezembro",
+    }
+    for mes_ingles, mes_pt in meses.items():
+        txt = txt.replace(mes_ingles, mes_pt)
+
+    return txt

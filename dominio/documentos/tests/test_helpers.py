@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from dominio.documentos.helpers import formata_lista, formata_pena
+from dominio.documentos.helpers import formata_lista, formata_pena, traduz_mes
 
 
 class TestFormataPena(TestCase):
@@ -42,3 +42,18 @@ class TestFormataListaComVirgula(TestCase):
         expected_lista = "Info 1, Info 2 e Info 3"
 
         self.assertEqual(lista_formatada, expected_lista)
+
+
+class TestTraduzNomeMes(TestCase):
+    def test_traduz_nome_mes(self):
+        meses_info = [
+            {"input": "1 January 1970", "output": "1 janeiro 1970"},
+            {"input": "February", "output": "fevereiro"},
+            {"input": "September", "output": "setembro"},
+            {"input": "December", "output": "dezembro"},
+        ]
+
+        for info in meses_info:
+            with self.subTest():
+                resp = traduz_mes(info["input"])
+                self.assertEqual(resp, info["output"])
