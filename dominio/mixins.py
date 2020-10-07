@@ -60,16 +60,29 @@ class JWTAuthMixin:
     def authorize_user_in_orgao(self, token_payload, *args, **kwargs):
         # TODO: nos deveríamos aceitar POST de um admin para qualquer órgão?
         is_admin = token_payload.get("tipo_permissao", "regular") == "admin"
+        orgaos_validos = token_payload.get("ids_orgaos_lotados_validos", [])
+        orgao_payload = token_payload.get("orgao")
+        orgao_payload = int(orgao_payload) if orgao_payload else None
         orgaos = (
-            token_payload.get("ids_orgaos_lotados_validos", [])
-            + [token_payload.get("orgao")]
+            [int(o) for o in orgaos_validos]
+            + [orgao_payload]
         )
-        return is_admin or kwargs.get(self.orgao_url_kwarg) in orgaos
+        orgao_url = kwargs.get(self.orgao_url_kwarg)
+        orgao_url = int(orgao_url) if orgao_url else orgao_url
+        return (
+            is_admin
+            or orgao_url in orgaos
+            or not orgao_url
+        )
 
     def dispatch(self, request, *args, **kwargs):
         try:
-            token_payload = unpack_jwt(request)
-            if self.authorize_user_in_orgao(token_payload, *args, **kwargs):
+            self.token_payload = unpack_jwt(request)
+            if self.authorize_user_in_orgao(
+                self.token_payload,
+                *args,
+                **kwargs
+            ):
                 return super().dispatch(request, *args, **kwargs)
             else:
                 return HttpResponseForbidden()

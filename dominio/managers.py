@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 
-from django.db import models
+from django.db import connections, models
 from django.db.models import (
     Case,
     Q,
@@ -10,7 +10,6 @@ from django.db.models import (
     Sum,
     When,
 )
-from django.db.models.functions import Substr
 
 
 class VistaManager(models.Manager):
@@ -93,11 +92,22 @@ class VistaManager(models.Manager):
 
 class InvestigacoesManager(models.Manager):
     def em_curso(self, orgao_id, regras):
-        return self.get_queryset().filter(
-            docu_orgi_orga_dk_responsavel=orgao_id,
-            docu_cldc_dk__in=regras,
-            docu_fsdc_dk=1
-        ).exclude(docu_tpst_dk=11)
+        parametros = ",".join([f":regra{i}" for i in range(len(regras))])
+        query = f"""
+            SELECT COUNT(DOCU_FSDC_DK) AS "__COUNT" FROM "MCPR_DOCUMENTO"
+            WHERE ("MCPR_DOCUMENTO"."DOCU_CLDC_DK" IN ({parametros})
+              AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
+              AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" = :orgao_id
+              AND NOT ("MCPR_DOCUMENTO"."DOCU_TPST_DK" = 11))
+        """
+        rs = [(0,)]
+        prep_stat = {f"regra{i}": v for i, v in enumerate(regras)}
+        prep_stat["orgao_id"] = orgao_id
+        with connections["dominio_db"].cursor() as cursor:
+            cursor.execute(query, prep_stat)
+            rs = cursor.fetchall()
+
+        return rs[0][0]
 
     def em_curso_pip_aisp(self, orgao_ids):
         return self.get_queryset().filter(
@@ -107,11 +117,24 @@ class InvestigacoesManager(models.Manager):
         ).exclude(docu_tpst_dk=11)
 
     def em_curso_grupo(self, orgao_ids, regras):
-        return self.get_queryset().filter(
-            docu_orgi_orga_dk_responsavel__in=orgao_ids,
-            docu_cldc_dk__in=regras,
-            docu_fsdc_dk=1
-        ).exclude(docu_tpst_dk=11)
+        parametros = ",".join([f":regra{i}" for i in range(len(regras))])
+        orgaos = ",".join([f":orgao{i}" for i in range(len(orgao_ids))])
+        query = f"""
+            SELECT /*+ PARALLEL,2 */
+            COUNT(DOCU_FSDC_DK) AS "__COUNT" FROM "MCPR_DOCUMENTO"
+            WHERE ("MCPR_DOCUMENTO"."DOCU_CLDC_DK" IN ({parametros})
+             AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
+             AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" IN ({orgaos})
+             AND NOT ("MCPR_DOCUMENTO"."DOCU_TPST_DK" = 11))
+        """
+        rs = [(0,)]
+        prep_stat = {f"regra{i}": v for i, v in enumerate(regras)}
+        prep_stat.update({f"orgao{i}": v for i, v in enumerate(orgao_ids)})
+        with connections["dominio_db"].cursor() as cursor:
+            cursor.execute(query, prep_stat)
+            rs = cursor.fetchall()
+
+        return rs[0][0]
 
 
 class ProcessosManager(InvestigacoesManager):
@@ -121,13 +144,25 @@ class ProcessosManager(InvestigacoesManager):
         Para tal, o número 819 deve estar presente entre as posicoes 14⁻17
         e a string entre as posicoes 10-14 deve ser igual ao campo DOCU_ANO
         """
+        parametros = ",".join([f":regra{i}" for i in range(len(regras))])
+        query = f"""
+            SELECT COUNT(1) AS "__COUNT" FROM "MCPR_DOCUMENTO"
+            WHERE ("MCPR_DOCUMENTO"."DOCU_CLDC_DK" IN ({parametros})
+              AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
+              AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" = :orgao_id
+              AND NOT ("MCPR_DOCUMENTO"."DOCU_TPST_DK" = 11)
+              AND SUBSTR("MCPR_DOCUMENTO"."DOCU_NR_EXTERNO", 10, 4)
+                = "MCPR_DOCUMENTO"."DOCU_ANO"
+              AND SUBSTR("MCPR_DOCUMENTO"."DOCU_NR_EXTERNO", 14, 3) = '819')
+        """
+        rs = [(0,)]
+        prep_stat = {f"regra{i}": v for i, v in enumerate(regras)}
+        prep_stat["orgao_id"] = orgao_id
+        with connections["dominio_db"].cursor() as cursor:
+            cursor.execute(query, prep_stat)
+            rs = cursor.fetchall()
 
-        docs_tj = super().em_curso(orgao_id, regras)
-        docs_tj = docs_tj.annotate(
-            nr_ano=Substr("docu_nr_externo", 10, 4),
-            codigo_tj=Substr("docu_nr_externo", 14, 3)
-        )
-        return docs_tj.filter(nr_ano=F("docu_ano"), codigo_tj="819")
+        return rs[0][0]
 
 
 class FinalizadosManager(models.Manager):

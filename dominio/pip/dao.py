@@ -4,90 +4,23 @@ from django.conf import settings
 from django.core.cache import cache
 
 from dominio.db_connectors import get_hbase_table
-from dominio.exceptions import APIEmptyResultError
 from dominio.utils import (
     format_text,
     hbase_encode_row,
     hbase_decode_row,
-    get_top_n_orderby_value_as_dict,
-    get_value_given_key,
 )
 from dominio.pip.serializers import (
     PIPPrincipaisInvestigadosSerializer,
     PIPIndicadoresSucessoParser,
-    PIPDetalheAproveitamentosSerializer,
     PIPPrincipaisInvestigadosListaSerializer,
+    PIPPrincipaisInvestigadosPerfilSerializer,
 )
 
-from .utils import get_top_n_by_aisp, get_orgaos_same_aisps
 from dominio.dao import GenericDAO
 
 
 class GenericPIPDAO(GenericDAO):
     QUERIES_DIR = settings.BASE_DIR.child("dominio", "pip", "queries")
-
-
-class PIPDetalheAproveitamentosDAO(GenericPIPDAO):
-    query_file = "pip_detalhe_aproveitamentos.sql"
-    serializer = PIPDetalheAproveitamentosSerializer
-    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
-
-    @classmethod
-    @lru_cache(maxsize=None)
-    def query(cls):
-        return super().query()
-
-    @classmethod
-    def get(cls, **kwargs):
-        data = super().execute(**kwargs)
-        if not data:
-            raise APIEmptyResultError
-
-        orgao_id = kwargs['orgao_id']
-
-        aisps, orgaos_same_aisps = get_orgaos_same_aisps(orgao_id)
-        top_n_aisp = get_top_n_by_aisp(
-            orgaos_same_aisps,
-            data,
-            name_position=1,
-            value_position=2,
-            name_fieldname="nm_promotoria",
-            value_fieldname="nr_aproveitamentos_periodo",
-            n=3,
-        )
-        for row in top_n_aisp:
-            row['nm_promotoria'] = format_text(row['nm_promotoria'])
-
-        nr_aproveitamentos_periodo = get_value_given_key(
-            data, orgao_id, key_position=0, value_position=2
-        )
-        variacao_periodo = get_value_given_key(
-            data, orgao_id, key_position=0, value_position=4
-        )
-        tamanho_periodo_dias = get_value_given_key(
-            data, orgao_id, key_position=0, value_position=5
-        )
-        top_n_pacote = get_top_n_orderby_value_as_dict(
-            data,
-            name_position=1,
-            value_position=2,
-            name_fieldname="nm_promotoria",
-            value_fieldname="nr_aproveitamentos_periodo",
-            n=3,
-        )
-        for row in top_n_pacote:
-            row['nm_promotoria'] = format_text(row['nm_promotoria'])
-
-        data_obj = {
-            "nr_aproveitamentos_periodo": nr_aproveitamentos_periodo,
-            "variacao_periodo": variacao_periodo,
-            "top_n_pacote": top_n_pacote,
-            "nr_aisps": aisps,
-            "top_n_aisp": top_n_aisp,
-            "tamanho_periodo_dias": tamanho_periodo_dias,
-        }
-        data = cls.serializer(data_obj).data
-        return data
 
 
 class PIPRadarPerformanceDAO(GenericPIPDAO):
@@ -266,11 +199,62 @@ class PIPPrincipaisInvestigadosDAO(GenericPIPDAO):
         return data
 
 
+class PIPPrincipaisInvestigadosPerfilDAO(GenericPIPDAO):
+    query_file = "pip_principais_investigados_perfil.sql"
+    columns = [
+        "pess_dk",
+        "nm_investigado",
+        "nm_mae",
+        "cpf",
+        "rg",
+        "dt_nasc",
+        "nm_pesj",
+        "cnpj"
+    ]
+    table_namespaces = {
+        "schema_exadata": settings.EXADATA_NAMESPACE,
+        "schema": settings.TABLE_NAMESPACE
+    }
+    serializer = PIPPrincipaisInvestigadosPerfilSerializer
+    cache_prefix = 'PIP_PRINCIPAIS_INVESTIGADOS_PERFIL'
+
+    @classmethod
+    def get(cls, accept_empty=False, **kwargs):
+        cache_key = '{}_DATA_{}'.format(
+            cls.cache_prefix, kwargs.get("dk")
+        )
+        data = cache.get(cache_key, default=None)
+        if not data:
+            data = super().get(accept_empty, **kwargs)
+            cache.set(cache_key, data, timeout=settings.CACHE_TIMEOUT)
+        return data
+
+    @classmethod
+    def serialize(cls, result_set):
+        ser_data = super().serialize(result_set)
+
+        # Verifica se é pessoa física ou jurídica
+        keys_pesj = cls.columns[0:1] + cls.columns[6:]
+        keys_pesf = cls.columns[0:6]
+        keys_to_keep = (
+            keys_pesj if ser_data and ser_data[0]['nm_pesj']
+            else keys_pesf
+        )
+
+        ser_data = [
+            {key: row[key] for key in row if key in keys_to_keep}
+            for row in ser_data
+        ]
+
+        return ser_data
+
+
 class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
     query_file = "pip_principais_investigados_lista.sql"
     columns = [
         "representante_dk",
-        "nm_investigado",
+        "pess_dk",
+        "coautores",
         "tipo_personagem",
         "orgao_id",
         "documento_nr_mp",
@@ -279,17 +263,21 @@ class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
         "nm_orgao",
         "etiqueta",
         "assuntos",
-        "fase_documento"
+        "fase_documento",
+        "dt_ultimo_andamento",
+        "desc_ultimo_andamento"
     ]
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
     serializer = PIPPrincipaisInvestigadosListaSerializer
+    cache_prefix = 'PIP_PRINCIPAIS_INVESTIGADOS_LISTA'
 
     @classmethod
     def serialize(cls, result_set):
         # Assuntos vem separados por ' --- ' no banco
+        idx = cls.columns.index('assuntos')
         result_set = [
-            row[:-2] + tuple([row[-2].split(' --- ')]) + row[-1:]
-            if isinstance(row[-2], str)
+            row[:idx] + tuple([row[idx].split(' --- ')]) + row[idx+1:]
+            if isinstance(row[idx], str)
             else row
             for row in result_set
         ]
@@ -301,9 +289,39 @@ class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
 
         return ser_data
 
+    @classmethod
+    def get(cls, accept_empty=False, **kwargs):
+        cache_key = '{}_DATA_{}'.format(
+            cls.cache_prefix, kwargs.get("dk")
+        )
+        data = cache.get(cache_key, default=None)
+        if not data:
+            data = super().get(accept_empty, **kwargs)
+            cache.set(cache_key, data, timeout=settings.CACHE_TIMEOUT)
+
+        pess_dk = kwargs.get("pess_dk")
+        if pess_dk:
+            data = [x for x in data if x['pess_dk'] == pess_dk]
+        return data
+
 
 class PIPIndicadoresDeSucessoDAO(GenericPIPDAO):
     query_file = "pip_indicadores_sucesso.sql"
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
     serializer = PIPIndicadoresSucessoParser
     columns = ["orgao_id", "indice", "tipo"]
+
+
+class PIPComparadorRadaresDAO(GenericPIPDAO):
+    query_file = "pip_comparador_radares.sql"
+    columns = [
+        "orgao_id",
+        "orgao_codamp",
+        "orgi_nm_orgao",
+        "perc_denuncias",
+        "perc_cautelares",
+        "perc_acordos",
+        "perc_arquivamentos",
+        "perc_aberturas_vista",
+    ]
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}

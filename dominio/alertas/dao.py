@@ -122,6 +122,7 @@ class AlertaMGPDAO(AlertasDAO):
         "orgao",
         "classe_hier",
         "dias_passados",
+        "id_alerta",
         "descricao",
         "sigla",
     ]

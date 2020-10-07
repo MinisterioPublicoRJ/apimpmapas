@@ -4,7 +4,7 @@ from time import sleep
 
 from django.conf import settings
 from django.core.cache import cache
-from happybase import Connection as HBaseConnection
+from happybase_kerberos_patch import KerberosConnection
 
 from dominio.db_connectors import execute as impala_execute
 from proxies.detran.client import request_data as request_detran_data
@@ -27,17 +27,17 @@ class HBaseGate:
     @property
     def get_table(self):
         try:
-            connection = HBaseConnection(
+            connection = KerberosConnection(
                 self.server,
                 timeout=self.timeout,
-                transport="framed",
+                use_kerberos=True,
                 protocol="compact",
             )
         except Exception:
-            connection = HBaseConnection(
+            connection = KerberosConnection(
                 self.server,
                 timeout=self.timeout,
-                transport="framed",
+                use_kerberos=True,
                 protocol="compact",
             )
 
