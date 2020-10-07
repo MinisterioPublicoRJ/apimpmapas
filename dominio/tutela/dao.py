@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from dominio.dao import GenericDAO
+from dominio.dao import GenericDAO, SingleDataObjectDAO
 from dominio.tutela.serializers import (
     OutliersSerializer,
     SaidasSerializer,
@@ -15,7 +15,7 @@ class GenericTutelaDAO(GenericDAO):
     QUERIES_DIR = settings.BASE_DIR.child("dominio", "tutela", "queries")
 
 
-class OutliersDAO(GenericTutelaDAO):
+class OutliersDAO(GenericTutelaDAO, SingleDataObjectDAO):
     query_file = "outliers.sql"
     columns = [
         "cod_orgao",
@@ -36,7 +36,7 @@ class OutliersDAO(GenericTutelaDAO):
     serializer = OutliersSerializer
 
 
-class SaidasDAO(GenericTutelaDAO):
+class SaidasDAO(GenericTutelaDAO, SingleDataObjectDAO):
     query_file = "saidas.sql"
     columns = [
         "saidas",
@@ -49,7 +49,7 @@ class SaidasDAO(GenericTutelaDAO):
     serializer = SaidasSerializer
 
 
-class EntradasDAO(GenericTutelaDAO):
+class EntradasDAO(GenericTutelaDAO, SingleDataObjectDAO):
     query_file = "entradas.sql"
     columns = [
         "nr_entradas_hoje",
@@ -133,7 +133,7 @@ class ListaProcessosDAO(GenericTutelaDAO):
     serializer = ListaProcessosSerializer
 
 
-class RadarPerformanceDAO(GenericTutelaDAO):
+class RadarPerformanceDAO(GenericTutelaDAO, SingleDataObjectDAO):
     query_file = "radar_performance.sql"
     columns = [
         "cod_pct",
@@ -176,7 +176,7 @@ class RadarPerformanceDAO(GenericTutelaDAO):
 
     @classmethod
     def serialize(cls, result_set):
-        ser_data = super().serialize(result_set)[0]
+        ser_data = super().serialize(result_set)
 
         format_fields = [
             "nm_max_arquivamentos", "nm_max_indeferimentos",
