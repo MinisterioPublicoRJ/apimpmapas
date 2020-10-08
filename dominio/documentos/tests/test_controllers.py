@@ -57,6 +57,13 @@ class TestBaseDocumentoController(TestCase):
             self.http_response
         )
 
+    @freeze_time("2020-1-1")
+    def test_data_hoje(self):
+        data_hoje = self.controller.data_hoje
+        expected = "01 de janeiro de 2020"
+
+        self.assertEqual(data_hoje, expected)
+
 
 class TestMinutaPrescricaoController(TestCase):
     def setUp(self):
