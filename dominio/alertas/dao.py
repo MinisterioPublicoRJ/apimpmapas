@@ -4,6 +4,10 @@ from dominio.dao import GenericDAO
 from dominio.db_connectors import get_hbase_table, run_query
 from dominio.alertas import serializers
 from dominio.alertas.helper import ordem as alrt_ordem
+from dominio.alertas.exceptions import (
+    APIInvalidOverlayType,
+    APIMissingOverlayType,
+)
 
 
 class FiltraAlertasDispensadosMixin:
@@ -154,3 +158,46 @@ class AlertaComprasDAO(FiltraAlertasDispensadosMixin, AlertasDAO):
     orgao_kwarg = "id_orgao"
     alerta_id_kwarg = "contrato_iditem"
     sigla_kwarg = "sigla"
+
+
+# ------ DAOs relativos ao Overlay do Alerta
+
+class AlertaOverlayPrescricaoDAO(AlertasDAO):
+    query_file = "alerta_overlay_prescricao.sql"
+    columns = [
+        'tipo_penal',
+        'nm_investigado',
+        'max_pena',
+        'delitos_multiplicadores',
+        'fator_pena',
+        'max_pena_fatorado',
+        'dt_inicio_prescricao',
+        'dt_fim_prescricao'
+    ]
+    serializer = serializers.AlertaOverlayPrescricaoSerializer
+    table_namespaces = {
+        "schema_exadata": settings.EXADATA_NAMESPACE,
+        "schema": settings.TABLE_NAMESPACE
+    }
+
+
+class AlertasOverlayDAO:
+    _type_switcher = {
+        'prescricao': AlertaOverlayPrescricaoDAO
+    }
+
+    @classmethod
+    def get(cls, docu_dk, request):
+        tipo = request.GET.get("tipo")
+
+        if not tipo:
+            raise APIMissingOverlayType
+
+        DAO = cls.switcher(tipo)
+        return DAO.get(docu_dk=docu_dk, request=request)
+
+    @classmethod
+    def switcher(cls, tipo):
+        if tipo not in cls._type_switcher:
+            raise APIInvalidOverlayType
+        return cls._type_switcher[tipo]

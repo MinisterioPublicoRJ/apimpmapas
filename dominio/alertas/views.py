@@ -116,3 +116,12 @@ class RetornarAlertaView(JWTAuthMixin, APIView):
             data={"detail": "Alerta retornado com sucesso"},
             status=200
         )
+
+
+class AlertasOverlayView(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = 'ALERTAS_OVERLAY_CACHE_TIMEOUT'
+
+    def get(self, request, *args, **kwargs):
+        docu_dk = int(kwargs.get('docu_dk'))
+        data = dao.AlertasOverlayDAO.get(docu_dk=docu_dk, request=request)
+        return Response(data=data)
