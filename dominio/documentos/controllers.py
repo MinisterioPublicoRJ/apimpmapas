@@ -7,7 +7,8 @@ from docxtpl import DocxTemplate
 from dominio.documentos.dao import (
     DadosAssuntoDAO,
     DadosPromotorDAO,
-    MinutaPrescricaoDAO
+    MinutaPrescricaoDAO,
+    ProrrogacaoICDAO,
 )
 from dominio.documentos.helpers import formata_lista, formata_pena, traduz_mes
 
@@ -19,6 +20,10 @@ class BaseDocumentoController(metaclass=abc.ABCMeta):
         self.orgao_id = orgao_id
         self.docu_dk = docu_dk
         self.cpf = cpf
+
+    @property
+    def data_hoje(self):
+        return traduz_mes(date.today().strftime("%d de %B de %Y"))
 
     @abc.abstractproperty
     def context(self):
@@ -78,9 +83,7 @@ class MinutaPrescricaoController(BaseDocumentoController):
 
     @cached_property
     def context(self):
-        context = {
-            "data_hoje": traduz_mes(date.today().strftime("%d de %B de %Y"))
-        }
+        context = {"data_hoje": self.data_hoje}
         context.update(MinutaPrescricaoDAO.get(docu_dk=self.docu_dk))
         context.update(self.delitos)
         context.update(self.responsavel)
@@ -98,4 +101,7 @@ class MinutaPrescricaoController(BaseDocumentoController):
 class ProrrogacaoICController(BaseDocumentoController):
     @cached_property
     def context(self):
-        return {"context": 1}
+        contexto = {"data_hoje": self.data_hoje}
+        contexto.update(DadosPromotorDAO.get(cpf=self.cpf))
+        contexto.update(ProrrogacaoICDAO.get(docu_dk=self.docu_dk))
+        return contexto

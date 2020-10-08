@@ -13,6 +13,7 @@ from dominio.documentos.dao import (
     DadosAssuntoDAO,
     DadosPromotorDAO,
     MinutaPrescricaoDAO,
+    ProrrogacaoICDAO,
 )
 
 
@@ -269,8 +270,37 @@ class TestModeloProrrogacaoProcedimento(TestCase):
             self.cpf,
         )
 
-        self.expected_context = {"context": 1}
+        self.num_procedimento = "12345"
+        self.nome_promotor = "Nome"
+        self.matricula_promotor = "012345"
 
+        self.dao_docu_get_patcher = mock.patch.object(ProrrogacaoICDAO, "get")
+        self.dao_docu_get_mock = self.dao_docu_get_patcher.start()
+        self.dao_docu_get_mock.return_value = {
+            "num_procedimento": self.num_procedimento,
+        }
+
+        self.dao_promotor_get_patcher = mock.patch.object(
+            DadosPromotorDAO, "get"
+        )
+        self.dao_promotor_get_mock = self.dao_promotor_get_patcher.start()
+        self.dao_promotor_get_mock.return_value = {
+            "nome_promotor": self.nome_promotor,
+            "matricula_promotor": self.matricula_promotor,
+        }
+
+        self.expected_context = {
+            "num_procedimento": self.num_procedimento,
+            "data_hoje": "01 de janeiro de 2020",
+            "nome_promotor": self.nome_promotor,
+            "matricula_promotor": self.matricula_promotor,
+        }
+
+    def tearDown(self):
+        self.dao_docu_get_patcher.stop()
+        self.dao_promotor_get_patcher.stop()
+
+    @freeze_time("2020-1-1")
     def test_get_context(self):
         context = self.controller.context
 
