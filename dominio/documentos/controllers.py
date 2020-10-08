@@ -99,6 +99,8 @@ class MinutaPrescricaoController(BaseDocumentoController):
 
 
 class ProrrogacaoICController(BaseDocumentoController):
+    template = "dominio/documentos/doc_templates/prorrogacao_de_IC.docx"
+
     @cached_property
     def context(self):
         contexto = {"data_hoje": self.data_hoje}
