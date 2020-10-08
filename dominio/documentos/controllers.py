@@ -1,3 +1,4 @@
+import abc
 from datetime import date
 
 from cached_property import cached_property
@@ -11,13 +12,26 @@ from dominio.documentos.dao import (
 from dominio.documentos.helpers import formata_lista, formata_pena, traduz_mes
 
 
-class MinutaPrescricaoController:
-    template = "dominio/documentos/doc_templates/minuta_prescricao.docx"
+class BaseDocumentoController(metaclass=abc.ABCMeta):
+    template = None
 
     def __init__(self, orgao_id, docu_dk, cpf):
         self.orgao_id = orgao_id
         self.docu_dk = docu_dk
         self.cpf = cpf
+
+    @abc.abstractproperty
+    def context(self):
+        pass
+
+    def render(self, response):
+        doc = DocxTemplate(self.template)
+        doc.render(self.context)
+        doc.save(response)
+
+
+class MinutaPrescricaoController(BaseDocumentoController):
+    template = "dominio/documentos/doc_templates/minuta_prescricao.docx"
 
     def get_preposicao(self, comarca):
         preposicoes = {
@@ -80,7 +94,3 @@ class MinutaPrescricaoController:
 
         return context
 
-    def render(self, response):
-        doc = DocxTemplate(self.template)
-        doc.render(self.context)
-        doc.save(response)
