@@ -42,7 +42,7 @@ class MinutaPrescricaoView(BaseDocumentoViewMixin, JWTAuthMixin, View):
         response = self.create_response()
         try:
             controller.render(response)
-        except APIEmptyResultError as e:
+        except APIEmptyResultError:
             raise Http404
 
         return response
@@ -64,7 +64,7 @@ class ProrrogacaoICView(BaseDocumentoViewMixin, JWTAuthMixin, View):
         )
         try:
             controller.render(response)
-        except APIEmptyResultError as e:
+        except APIEmptyResultError:
             raise Http404
 
         return response
