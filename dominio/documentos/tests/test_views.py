@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from dominio.documentos.views import BaseDocumentoViewMixin
+from dominio.exceptions import APIEmptyResultError
 from dominio.tests.testconf import NoJWTTestCase
 
 
@@ -36,19 +37,29 @@ class TestBaseDocumentoViewMixin(TestCase):
 
 
 class TestDownloadMinutaPrescricao(NoJWTTestCase, TestCase):
-    @mock.patch("dominio.documentos.views.MinutaPrescricaoController")
-    def test_correct_response(self, _controller):
-        minuta_controller_mock = mock.Mock()
-        _controller.return_value = minuta_controller_mock
-
-        orgao_id = 56789
-        docu_dk = 12345
-        cpf = "1234567890"
-        url = reverse(
+    def setUp(self):
+        super().setUp()
+        self.orgao_id = 56789
+        self.cpf = "1234567890"
+        self.docu_dk = 12345
+        self.url = reverse(
             "dominio:minuta-prescricao",
-            args=(orgao_id, cpf, docu_dk)
+            args=(self.orgao_id, self.cpf, self.docu_dk)
         )
-        resp = self.client.get(url)
+
+        self.cont_patcher = mock.patch(
+            "dominio.documentos.views.MinutaPrescricaoController"
+        )
+        self.controller_mock = self.cont_patcher.start()
+        self.minuta_controller_mock = mock.Mock()
+        self.controller_mock.return_value = self.minuta_controller_mock
+
+    def tearDown(self):
+        super().tearDown()
+        self.cont_patcher.stop()
+
+    def test_correct_response(self):
+        resp = self.client.get(self.url)
 
         expected_cont_type = (
             "Content-Type",
@@ -57,17 +68,23 @@ class TestDownloadMinutaPrescricao(NoJWTTestCase, TestCase):
         )
 
         self.assertEqual(resp.status_code, 200)
-        _controller.assert_called_once_with(
-            orgao_id=orgao_id,
-            cpf=cpf,
-            docu_dk=docu_dk,
+        self.controller_mock.assert_called_once_with(
+            orgao_id=self.orgao_id,
+            cpf=self.cpf,
+            docu_dk=self.docu_dk,
         )
-        minuta_controller_mock.render.assert_called_once()
+        self.minuta_controller_mock.render.assert_called_once()
         self.assertIsInstance(
-            minuta_controller_mock.render.call_args_list[0][0][0],
+            self.minuta_controller_mock.render.call_args_list[0][0][0],
             HttpResponse
         )
         self.assertEqual(resp._headers["content-type"], expected_cont_type)
+
+    def test_404_for_empty_db_response(self):
+        self.minuta_controller_mock.render.side_effect = APIEmptyResultError
+        resp = self.client.get(self.url)
+
+        self.assertEqual(resp.status_code, 404)
 
 
 class TestProrrogacaoIC(NoJWTTestCase, TestCase):
@@ -107,3 +124,9 @@ class TestProrrogacaoIC(NoJWTTestCase, TestCase):
             self.controller_mock.render.call_args_list[0][0][0],
             HttpResponse
         )
+
+    def test_404_for_empty_db_response(self):
+        self.controller_mock.render.side_effect = APIEmptyResultError
+        resp = self.client.get(self.url)
+
+        self.assertEqual(resp.status_code, 404)

@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from django.shortcuts import Http404
 from django.views.generic import View
 
 from dominio.documentos.controllers import (
@@ -6,6 +7,7 @@ from dominio.documentos.controllers import (
     ProrrogacaoICController,
 )
 
+from dominio.exceptions import APIEmptyResultError
 from dominio.mixins import JWTAuthMixin
 
 
@@ -38,7 +40,11 @@ class MinutaPrescricaoView(BaseDocumentoViewMixin, JWTAuthMixin, View):
             cpf=cpf
         )
         response = self.create_response()
-        controller.render(response)
+        try:
+            controller.render(response)
+        except APIEmptyResultError as e:
+            raise Http404
+
         return response
 
 
@@ -56,5 +62,9 @@ class ProrrogacaoICView(BaseDocumentoViewMixin, JWTAuthMixin, View):
             cpf=cpf,
             docu_dk=docu_dk,
         )
-        controller.render(response)
+        try:
+            controller.render(response)
+        except APIEmptyResultError as e:
+            raise Http404
+
         return response
