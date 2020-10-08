@@ -169,7 +169,11 @@ class DetalheAlertaCompraDAO(SingleDataObjectDAO):
     QUERIES_DIR = settings.BASE_DIR.child("dominio", "alertas", "queries")
 
     query_file = "detalhe_alerta_compra.sql"
-    columns = ["data_contratacao", "item_contratado"]
+    columns = [
+        "contratacao",
+        "data_contratacao",
+        "item_contratado",
+    ]
     table_namespaces = {
         "schema_alertas_compras": settings.SCHEMA_ALERTAS,
     }

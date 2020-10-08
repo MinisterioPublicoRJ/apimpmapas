@@ -412,3 +412,32 @@ class TestFiltraAlertasDispensadosTodosOrgaos(TestCase):
             filter=expected_hbase_query
         )
         self.assertEqual(resp, self.expected_filtrados)
+
+
+class TestDetalheAlertaCompras(TestCase):
+    def setUp(self):
+        self.alerta_id = "abc1234"
+        self.query_exec_patcher = mock.patch.object(
+            dao.DetalheAlertaCompraDAO, "execute"
+        )
+        self.query_exec_mock = self.query_exec_patcher.start()
+        self.query_exec_mock.return_value = (
+            (
+                "12345",
+                "01/01/2020",
+                "56789",
+            ),
+        )
+        self.expected_data = {
+            "contratacao": "12345",
+            "data_contratacao": "01/01/2020",
+            "item_contratado": "56789",
+        }
+
+    def tearDown(self):
+        self.query_exec_patcher.stop()
+
+    def test_get_detalhe_alerta(self):
+        data = dao.DetalheAlertaCompraDAO.get(alerta_id=self.alerta_id)
+
+        self.assertEqual(data, self.expected_data)
