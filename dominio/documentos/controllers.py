@@ -16,10 +16,10 @@ from dominio.documentos.helpers import formata_lista, formata_pena, traduz_mes
 class BaseDocumentoController(metaclass=abc.ABCMeta):
     template = None
 
-    def __init__(self, orgao_id, docu_dk, cpf):
+    def __init__(self, orgao_id, cpf, docu_dk):
         self.orgao_id = orgao_id
-        self.docu_dk = docu_dk
         self.cpf = cpf
+        self.docu_dk = docu_dk
 
     @property
     def data_hoje(self):

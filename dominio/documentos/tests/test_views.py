@@ -56,8 +56,8 @@ class TestDownloadMinutaPrescricao(NoJWTTestCase, TestCase):
         self.assertEqual(resp.status_code, 200)
         _controller.assert_called_once_with(
             orgao_id=orgao_id,
+            cpf=cpf,
             docu_dk=docu_dk,
-            cpf=cpf
         )
         minuta_controller_mock.render.assert_called_once()
         self.assertIsInstance(
@@ -65,3 +65,42 @@ class TestDownloadMinutaPrescricao(NoJWTTestCase, TestCase):
             HttpResponse
         )
         self.assertEqual(resp._headers["content-type"], expected_cont_type)
+
+
+class TestProrrogacaoIC(NoJWTTestCase, TestCase):
+    def setUp(self):
+        super().setUp()
+
+        self.orgao_id = 12345
+        self.docu_dk = 4567
+        self.cpf = "0000000"
+        self.url = reverse(
+            "dominio:prorrogacao-ic",
+            args=(self.orgao_id, self.cpf, self.docu_dk)
+        )
+
+        self.cont_prorrogacao_patcher = mock.patch(
+            "dominio.documentos.views.ProrrogacaoICController"
+        )
+        self.controller_mock = mock.Mock()
+        self.cont_prorrogacao_mock = self.cont_prorrogacao_patcher.start()
+        self.cont_prorrogacao_mock.return_value = self.controller_mock
+
+    def tearDown(self):
+        super().tearDown()
+        self.cont_prorrogacao_patcher.stop()
+
+    def test_correct_response(self):
+        resp = self.client.get(self.url)
+
+        self.cont_prorrogacao_mock.assert_called_once_with(
+            orgao_id=self.orgao_id,
+            cpf=self.cpf,
+            docu_dk=self.docu_dk,
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.controller_mock.render_assert_called()
+        self.assertIsInstance(
+            self.controller_mock.render.call_args_list[0][0][0],
+            HttpResponse
+        )

@@ -29,9 +29,9 @@ class TestBaseDocumentoController(TestCase):
                 return {"context": 1}
 
         self.controller = ChildController(
-            self.orgao_id,
-            self.docu_dk,
-            self.cpf,
+            orgao_id=self.orgao_id,
+            cpf=self.cpf,
+            docu_dk=self.docu_dk,
         )
 
         self.http_response = HttpResponse()
@@ -74,9 +74,9 @@ class TestMinutaPrescricaoController(TestCase):
         self.matricula = "12345678"
         self.nome = "fulano de tal"
         self.controller = MinutaPrescricaoController(
-            self.orgao_id,
-            self.docu_dk,
-            self.cpf,
+            orgao_id=self.orgao_id,
+            cpf=self.cpf,
+            docu_dk=self.docu_dk,
         )
 
         # Dados DAO assunto
@@ -187,7 +187,9 @@ class TestResponsavelMinuta(TestCase):
         self.cpf = "1234567890"
 
         self.controller = MinutaPrescricaoController(
-            self.orgao_id, self.docu_dk, self.cpf
+            orgao_id=self.orgao_id,
+            cpf=self.cpf,
+            docu_dk=self.docu_dk,
         )
 
         self.dados_promotor_patcher = mock.patch.object(
@@ -221,7 +223,9 @@ class TestDelitosMinuta(TestCase):
         self.cpf = "1234567890"
 
         self.controller = MinutaPrescricaoController(
-            self.orgao_id, self.docu_dk, self.cpf
+            orgao_id=self.orgao_id,
+            cpf=self.cpf,
+            docu_dk=self.docu_dk,
         )
 
         self.dados_assunto_patcher = mock.patch.object(
@@ -272,9 +276,9 @@ class TestModeloProrrogacaoProcedimento(TestCase):
         self.docu_dk = "12345"
         self.cpf = "1234567890"
         self.controller = ProrrogacaoICController(
-            self.orgao_id,
-            self.docu_dk,
-            self.cpf,
+            orgao_id=self.orgao_id,
+            cpf=self.cpf,
+            docu_dk=self.docu_dk,
         )
 
         self.num_procedimento = "12345"
