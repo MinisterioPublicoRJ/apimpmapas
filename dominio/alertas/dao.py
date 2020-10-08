@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from dominio.dao import GenericDAO
+from dominio.dao import GenericDAO, SingleDataObjectDAO
 from dominio.db_connectors import get_hbase_table, run_query
 from dominio.alertas import serializers
 from dominio.alertas.helper import ordem as alrt_ordem
@@ -163,3 +163,13 @@ class AlertaComprasDAO(FiltraAlertasDispensadosMixin, AlertasDAO):
     orgao_kwarg = "id_orgao"
     alerta_id_kwarg = "contrato_iditem"
     sigla_kwarg = "sigla"
+
+
+class DetalheAlertaCompraDAO(SingleDataObjectDAO):
+    QUERIES_DIR = settings.BASE_DIR.child("dominio", "alertas", "queries")
+
+    query_file = "detalhe_alerta_compra.sql"
+    columns = ["data_contratacao", "item_contratado"]
+    table_namespaces = {
+        "schema_alertas_compras": settings.SCHEMA_ALERTAS,
+    }

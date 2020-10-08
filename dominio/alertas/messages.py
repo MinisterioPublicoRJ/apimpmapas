@@ -1,6 +1,8 @@
 from cached_property import cached_property
 from django.template import Context, Template
 
+from dominio.alertas.dao import DetalheAlertaCompraDAO
+
 
 class MensagemOuvidoriaCompras:
     alerta_sigla = "COMP"
@@ -12,9 +14,8 @@ class MensagemOuvidoriaCompras:
 
     @cached_property
     def context(self):
-        return Context(
-            {"orgao_id": self.orgao_id, "alerta_id": self.alerta_id}
-        )
+        detalhe_alerta = DetalheAlertaCompraDAO.get(alerta_id=self.alerta_id)
+        return Context(detalhe_alerta)
 
     def render(self):
         with open(self.template_name) as fobj:
