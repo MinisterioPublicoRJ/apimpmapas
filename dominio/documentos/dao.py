@@ -51,3 +51,8 @@ class DadosAssuntoDAO(GenericDAO):
         "max_pena",
         "multiplicador",
     ]
+
+
+class ProrrogacaoICDAO(DocumentosDAO):
+    query_file = "prorrogacao_ic.sql"
+    columns = ["num_procedimento"]
