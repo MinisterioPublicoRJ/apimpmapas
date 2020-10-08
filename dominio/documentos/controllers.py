@@ -94,3 +94,8 @@ class MinutaPrescricaoController(BaseDocumentoController):
 
         return context
 
+
+class ProrrogacaoICController(BaseDocumentoController):
+    @cached_property
+    def context(self):
+        return {"context": 1}

@@ -7,6 +7,7 @@ from freezegun import freeze_time
 from dominio.documentos.controllers import (
     BaseDocumentoController,
     MinutaPrescricaoController,
+    ProrrogacaoICController,
 )
 from dominio.documentos.dao import (
     DadosAssuntoDAO,
@@ -255,3 +256,22 @@ class TestDelitosMinuta(TestCase):
         delitos = self.controller.delitos
 
         self.assertEqual(delitos, self.expected_delitos)
+
+
+class TestModeloProrrogacaoProcedimento(TestCase):
+    def setUp(self):
+        self.orgao_id = "5678"
+        self.docu_dk = "12345"
+        self.cpf = "1234567890"
+        self.controller = ProrrogacaoICController(
+            self.orgao_id,
+            self.docu_dk,
+            self.cpf,
+        )
+
+        self.expected_context = {"context": 1}
+
+    def test_get_context(self):
+        context = self.controller.context
+
+        self.assertEqual(context, self.expected_context)
