@@ -4,35 +4,38 @@ from django.http import HttpResponse
 from django.test import TestCase
 from django.urls import reverse
 
-from dominio.documentos.views import MinutaPrescricaoView
+from dominio.documentos.views import BaseDocumentoViewMixin
 from dominio.tests.testconf import NoJWTTestCase
 
 
-class TestDownloadMinutaPrescricao(NoJWTTestCase, TestCase):
-
-    def setUp(self):
-        super().setUp()
-        self. expected_cont_type = (
+class TestBaseDocumentoViewMixin(TestCase):
+    def test_create_response(self):
+        expected_cont_type = (
             "Content-Type",
             'application/vnd.openxmlformats-officedocument.'
             'wordprocessingml.document'
         )
-        self.expected_disposition = (
+        attachment_name = "attachment.docx"
+        expected_disposition = (
             "Content-Disposition",
-            "attachment;filename=minuta-prescricao.docx"
+            f"attachment;filename={attachment_name}"
         )
 
-    def test_create_response(self):
-        resp = MinutaPrescricaoView().create_response()
+        class ChildClassView(BaseDocumentoViewMixin):
+            attachment_name = "attachment.docx"
+
+        resp = ChildClassView().create_response()
 
         headers = resp._headers
         self.assertIsInstance(resp, HttpResponse)
-        self.assertEqual(headers["content-type"], self.expected_cont_type)
+        self.assertEqual(headers["content-type"], expected_cont_type)
         self.assertEqual(
             headers["content-disposition"],
-            self.expected_disposition
+            expected_disposition
         )
 
+
+class TestDownloadMinutaPrescricao(NoJWTTestCase, TestCase):
     @mock.patch("dominio.documentos.views.MinutaPrescricaoController")
     def test_correct_response(self, _controller):
         minuta_controller_mock = mock.Mock()
