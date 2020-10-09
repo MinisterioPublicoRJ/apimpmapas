@@ -14,4 +14,14 @@ urlpatterns = [
         views.ProrrogacaoICView.as_view(),
         name="prorrogacao-ic"
     ),
+    path(
+        "conversao-pp-ic/<int:orgao_id>/<str:cpf>/<int:docu_dk>",
+        views.ConversaoPPICView.as_view(),
+        name="coversao-pp-ic"
+    ),
+    path(
+        "prorrogacao-pp/<int:orgao_id>/<str:cpf>/<int:docu_dk>",
+        views.ProrrogacaoPPView.as_view(),
+        name="prorrogacao-pp"
+    ),
 ]

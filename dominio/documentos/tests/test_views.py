@@ -130,3 +130,24 @@ class TestProrrogacaoIC(NoJWTTestCase, TestCase):
         resp = self.client.get(self.url)
 
         self.assertEqual(resp.status_code, 404)
+
+
+class TestProrrogacaoPp(NoJWTTestCase, TestCase):
+    def setUp(self):
+        super().setUp()
+        
+        self.orgao_id = 12345
+        self.docu_dk = 4567
+        self.cpf = "0000000"
+        self.url = reverse(
+            "dominio:prorrogacao-pp",
+            args=(self.orgao_id, self.cpf, self.docu_dk)
+        )
+
+    def tearDown(self):
+        pass
+    
+    def test_correct_response(self):
+        resp = self.client.get(self.url)
+
+        self.assertEqual(resp.status_code, 200)
