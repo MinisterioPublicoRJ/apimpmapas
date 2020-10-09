@@ -92,7 +92,17 @@ class SuaMesaDetalhePIPAISPDAO(RankingMixin, MetricsDetalheDocumentoOrgaoDAO):
 
 class SuaMesaDetalheTutelaInvestigacoesDAO(
         RankingPercentageMixin, MetricsDetalheDocumentoOrgaoDAO):
-    ranking_fields = ['variacao_acervo']
+    class RankingTutelaInvestigacoesAumentosDAO(RankingDAO):
+        query_file = "ranking_investigacoes_aumentos.sql"
+
+    class RankingTutelaInvestigacoesReducoesDAO(RankingDAO):
+        query_file = "ranking_investigacoes_reducoes.sql"
+
+    ranking_fields = ['aumento_acervo', 'reducao_acervo']
+    ranking_dao = [
+        RankingTutelaInvestigacoesAumentosDAO,
+        RankingTutelaInvestigacoesReducoesDAO
+    ]
 
 
 class SuaMesaDetalheTutelaProcessosDAO(RankingMixin, MetricsDataObjectDAO):
