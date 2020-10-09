@@ -21,10 +21,14 @@ Os seguintes alertas estão implementados:
 - Expedientes de Ouvidoria (EO) pendentes de recebimento;
 - Procedimento Preparatório fora do prazo;
 - PAs sem prorrogação por mais de um ano;
-- Processo possivelmente prescrito;
 - Vistas abertas em documentos já fechados;
 - Notícia de Fato a mais de 120 dias;
 - Movimento em processo de segunda instância.
+- Alertas de prescrição, divididos em 4 subtipos:
+    -- Todos os crimes prescritos;
+    -- Todos os crimes próximos de prescrever;
+    -- Algum crime prescrito;
+    -- Algum crime próximo de prescrever.
 
 Alguns outros alertas estão disponíveis, porém não estão "ativados" no código, já que ainda precisam ser revistos e testados:
 
@@ -141,9 +145,6 @@ Procedimento Preparatório fora do prazo
 PAs sem prorrogação por mais de um ano
     saeqwrasf
 
-Processo possivelmente prescrito
-    qwrqtqwt
-
 Vistas abertas em documentos já fechados
     teweyeryery
 
@@ -152,6 +153,81 @@ Notícia de Fato a mais de 120 dias
 
 Movimento em processo de segunda instância
     rwgsdgrt
+
+Alertas de prescrição
+    Este alerta possui várias etapas, de forma que elas serão descritas uma por uma.
+
+    1) Consideram-se os documentos que estão Em Andamento e que não foram cancelados, cuja data de cadastro no sistema seja maior do que 2010-01-01. Apenas são considerados os documentos associados a PIPs.
+    Buscam-se então os assuntos destes documentos e, utilizando-se de uma tabela feita manualmente com as penas de cada delito, temos os documentos e seus crimes associados às suas penas máximas. Os assuntos que ainda não tem pena máxima preenchida são descartados, assim como aqueles que já atingiram sua data de fim no sistema.
+
+    Outro ponto importante nesta etapa é que, para os cálculos subsequentes, caso a data do fato não exista, ou caso ela seja maior do que a data de cadastro do documento no sistema, então a data de cadastro do documento será utilizado como data do fato. Por isso, ao falarmos sobre "data do fato" nas próximas etapas, tenha em mente que ela pode ser tanto a data do fato tal qual registrada, ou a data de cadastro, vistas estas condições.
+
+    2) Com os documentos/crimes e suas penas em mãos, é necessário ver se, dentre estes crimes, há algum que funcione como multiplicador. Ou seja, um crime que apenas aumente/diminua a pena dos outros crimes do mesmo documento. Caso haja, será calculado um "fator da pena", que servirá para recalcular a pena máxima. Esse fator é multiplicativo, relativo a todos os crimes multiplicadores presentes no documento.
+
+    Ex.1: Em um documento, há um crime de "Homicídio Qualificado", cuja pena máxima é de 30 anos. No mesmo documento, no entanto, também está associado o crime de "Crime Tentado", que funciona como um multiplicador com valor de 2/3. A pena máxima fatorada, para o crime de "Homicídio Qualificado" neste documento, será, portanto, de 20 anos.
+    
+    Ex.2: Em outro documento, há o mesmo crime, "Homicídio Qualificado". No entanto, neste documento, por algum motivo, o crime de "Crime Tentado" está associado 2 vezes. Neste caso, o cálculo será feito com um fator de valor 2/3 * 2/3 = 4/9. Ou seja, a pena máxima, que inicialmente é de 30 anos, irá para 13,33 anos.
+
+    3) Com a pena máxima fatorada, é possível, então, calcular o tempo de prescrição do documento, seguindo a seguinte regra:
+
+        max_pena_fatorado < 1, tempo de prescrição = 3
+        max_pena_fatorado < 2, tempo de prescrição = 4
+        max_pena_fatorado < 4, tempo de prescrição = 8
+        max_pena_fatorado < 8, tempo de prescrição = 12
+        max_pena_fatorado < 12, tempo de prescrição = 16
+        Senão, tempo de prescrição = 20
+
+    4) Com o tempo de prescrição em mãos, será calculado um fator do tempo de prescrição, a partir dos personagens investigados do documento. Basicamente, para cada investigado do documento, serão calculadas as datas de aniversário de 21 anos e de 70 anos. Com essas datas, verificamos:
+        
+        - Se o investigado tem mais do que 70 anos (inclusive);
+        - Se o investigado tinha menos do que 21 anos na data do fato (ou data de cadastro como explicado anteriormente).
+    
+    Caso uma destas condições seja verdadeira, o tempo de prescrição de cada um dos crimes, para aquele investigado, é cortado pela metade. O tempo de prescrição para os demais investigados não é afetado, a não ser que os outros investigados também cumpram essas condições.
+
+    ++tipos de personagens de investigados: (290, 7, 21, 317, 20, 14, 32, 345, 40, 5, 24), colocar numa tabela melhor formatado
+
+    Pessoas físicas com nome "MP" também são descartados, caso apareçam como investigadas no documento.
+
+    5) Calculado o tempo de prescrição fatorado para cada crime e cada personagem, a próxima etapa será calcular a data inicial da prescrição. Ela será escolhida com a seguinte ordem de prioridade:
+
+        - Se um crime for classificado como abuso de menor, e a vítima tiver menos de 18 anos na data do fato, então a prescrição começará a contar a partir da data de aniversário de 18 anos da vítima. Caso haja mais de uma vítima menor de idade na data do fato, será utilizada a data de aniversário da mais nova (ou seja, a maior data de aniversário de 18 anos);
+        - Se tiver ocorrido um andamento de Rescisão de Acordo de Não Persecução Penal (stao_tppr_dk = 7920 ++Botar isso numa tabelinha mais detalhado++), a data inicial da prescrição será a data do andamento de rescisão;
+        - Senão, utiliza-se a data do fato (ou data cadastro, nas condições em que não houver data do fato, ou se ela for maior do que a data de cadastro).
+
+    ++ Tipos de personagem de vítimas: (3, 13, 18, 6, 248, 290), colocar numa tabelinha
+
+    6) Ao chegar nesta etapa, teremos informações sobre as datas inicias de prescrição, assim como o tempo de prescrição, para cada investigado e crime, em cada documento. Aqui, iremos apenas somar a data inicial de prescrição, com o tempo de prescrição, para obter a data final da prescrição. Também será calculada a diferença entre a data de hoje, e a data final da prescrição, obtendo o número de dias desde (ou para) a prescrição (ou seja, podendo ser positivo ou negativo).
+
+    7) A etapa final, consiste em utilizar esses valores calculados, do número de dias desde/para a prescrição do crime para aquele investigado, para identificar em qual subtipo de alerta o documento se encaixa. Isso é feito da seguinte maneira:
+
+    - Caso o número de dias seja maior do que 0, dá-se o status "2" ao crime (indicando que já passou da prescrição);
+    - Caso o número de dias esteja entre 0 e 90 (inclusive), dá-se o status "1" ao crime (indicando que está próximo de prescrever);
+    - Senão, dá-se o status "0" ao crime (não prescreveu, nem está próximo).
+
+    Então, com o status de cada crime em mãos, fazemos para cada documento:
+
+    - Se o status mínimo do documento for "2", quer dizer que todos os crimes estão prescritos para todos os investigados, e ele é então colocado no alerta PRCR1 (todos os crimes prescritos);
+    - Se o status mínimo do documento for "1", quer dizer que todos os crimes estão próximos de prescrever, para todos os investigados. Pode haver alguns crimes com status "2", mas se o mínimo do status naquele documento é "1", então todos os restantes estão próximos, e ele é então colocado no alerta PRCR2 (todos os crimes próximos de prescrever).
+    - Se o status máximo do documento for "2", quer dizer que algum crime está prescrito (mas não todos). Nota-se que, para chegar nesta condição, as duas primeiras precisam necessariamente ser falsas. Ou seja, o status mínimo do documento tem de ser "0". Isso indica que um ou mais crimes prescreveram, e um ou mais crimes não estão próximos de prescrever. Alguns podem ter status "1", estando próximos, mas como não são todos, o documento deve ser colocado no alerta PRCR3 (algum crime prescrito).
+    - Finalmente, se o status máximo do documento for "1" (e, novamente, o status mínimo necessariamente é "0", para ter chegado nesta etapa), quer dizer que não há crimes prescritos, mas alguns estão próximos de prescrever, enquanto outros não estão próximos. Isso faz com que este documento seja colocado no alerta PRCR4 (algum crime próximo de prescrever).
+
+    E com isso, temos, para cada documento, o tipo de alerta em que ele se encontra.
+
+    Um exemplo do que pode acontecer para ilustrar:
+
+    Há um procedimento com um único investigado, e 3 crimes:
+	- Ameaça
+	- Estupro de Vulnerável (abuso_menor = 1)
+	- Atentado Violento ao Pudor (abuso_menor = 1)
+	Ou seja, 2 crimes classificados como abuso de menor, e 1 que não é abuso de menor.
+
+	Nesse exemplo, a data do fato é 2016-06-01. Mas a vítima, de acordo com o sistema, era menor de idade, e a data de 18 anos dela é 2020-07-17.
+	Então, a data inicial de prescrição será feita dessa forma:
+	- Ameaça -> Data Inicial de Prescrição 2016-06-01
+	- Estupro de Vulnerável -> Data Inicial de Prescrição 2020-07-17
+	- Atentado Violento ao Pudor -> Data Inicial de Prescrição 2020-07-17
+
+	E então, dessa forma, haverá um crime com data final de prescrição em 2019-06-01 (o de Ameaça, 3 anos a partir da data inicial dele em 2016-06-01) e os outros dois com data final de prescrição em 2036-07-17 (Atentado ao Pudor, 16 anos a partir do aniversário de 18 da vítima), e 2040-07-17 (Estupro de Vulnerável, 20 anos a partir do aniversário de 18 da vítima). Se estivermos olhando para este documento no dia 2020-10-01, nesta data há um crime prescrito (o de Ameaça) e dois crimes ainda não-prescritos. Por conta disso, ele é colocado no alerta PRCR3, porque algum crime está prescrito, mas não todos.
 
 
 Estrutura do Código
@@ -235,6 +311,10 @@ PRCR
 
 - se data do fato não existir ou for maior que data de cadastro usa data de cadastro
 - se pena for nula desconsidera
+- se o documento não estiver Em Andamento, ou tiver sido cancelado, descarta
+- consideram-se apenas documentos com data de cadastro depois de 2010-01-01
+- apenas pacotes de PIPs
+- se o asdo_dt_fim estiver definido para um assunto, desconsidera (assunto cancelado)
 - se alguma pena no documento for de assunto multiplicador multiplica tudo pelo fator
 - se o cara tiver menos de 21 ou >= 70 na data do fato ou data atual divide tempo de prescrição por 2 (usando os mesmos tipos de personagens que definimos pros investigados da PIP)
 - data inicial de prescrição com a hierarquia de: 
@@ -242,10 +322,9 @@ PRCR
     - se tiver acordo de não persecução penal e tiver rescisão, usa a data do andamento de rescisão do ANPP
     - senão, usa data do fato (ou data de cadastro nas condições lá)
 - data final de prescrição = data inicial + tempo de prescrição
-- O alerta, por enquanto, é ativado apenas uma vez por documento (não por assunto), e é usada a data final de prescrição mais antiga dos assuntos (então se eu tenho um documento com duas prescrições, uma em 2018 e outra em 2019, ele vai ativar uma única vez, indicando que o trigger do alerta já tem 720 dias - referente à prescrição de 2018 que é a mais antiga)
+- Alerta é dividido em 4 subtipos: PRCR1 (todos os crimes prescritos - para todos os investigados), PRCR2 (todos os crimes próximos de prescrever - para todos os investigados), PRCR3 (algum crime prescrito), PRCR4 (algum crime próximo de prescrever).
 
-Ah, e claro, os tipos de personagem pra identificar os menores é aquilo que eu te mandei no outro dia: Adolescente, Adolescente Carente, Adolescente/Criança em Situação de Risco, Autor do Fato/Vítima, Menor, Vítima.
-Esses 6 tipos. Em alguns casos a gente pode acabar considerando o autor do fato como vítima, mas se ele não tiver menos de 18 anos não vai fazer diferença na data inicial de prescrição. E se tiver, bom, é uma possível prescrição, então não acho que pode dar problema
+Também é gerada uma tabela de detalhes do alerta PRCR, com os metadados do cálculo.
 
 
 .. _Jobs: https://github.com/MinisterioPublicoRJ/alertas/blob/develop/src/alertas/jobs.py
