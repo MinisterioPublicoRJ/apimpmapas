@@ -201,6 +201,7 @@ HBASE_TIMEOUT = config("HBASE_TIMEOUT", cast=int, default=300000)
 EXADATA_DETRAN_PHOTO_ORIGIN = config("EXADATA_DETRAN_PHOTO_ORIGIN")
 
 HBASE_DISPENSAR_ALERTAS_TABLE = config("HBASE_DISPENSAR_ALERTAS_TABLE")
+HBASE_ALERTAS_OUVIDORIA_TABLE = config("HBASE_ALERTAS_OUVIDORIA_TABLE")
 
 EXADATA_DETRAN_DATA_ORIGIN = config("EXADATA_DETRAN_DATA_ORIGIN")
 
@@ -242,6 +243,21 @@ ZOOKEEPER_SERVER = config("ZOOKEEPER_SERVER", default="zookeeper")
 PLACAS_SOLR_COLLECTION = config("PLACAS_SOLR_COLLECTION", default="placas")
 PLACAS_SOLR_MAX_ROWS = config("PLACAS_SOLR_MAX_ROWS", cast=int, default=1_000)
 
+#EMAIL
+EMAIL_SMTP_SERVER = config("EMAIL_SMTP_SERVER")
+EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+EMAIL_OUVIDORIA = config("EMAIL_OUVIDORIA")
+EMAIL_SUBJECT_OUVIDORIA = config("EMAIL_SUBJECT_OUVIDORIA")
+
 #KERBEROS AUTH
 KERBEROS_USER = config("KERBEROS_USER")
 KERBEROS_SERVICE_NAME = config("KERBEROS_SERVICE_NAME")
+
+URL_PAINEL_COMPRAS = config(
+    "URL_PAINEL_COMPRAS",
+    default="https://tableau2020.mprj.mp.br/t/MPMAPAS/views/"
+    "TESTE-COVID-19GATE/CONUnidadeGestora?"
+    ":isGuestRedirectFromVizportal=y&:embed=y&:linktarget=_self"
+    "&:tabs=no&:tollbar=yes&contrato_iditem=${contrato_iditem}"
+    "&CONTRATACAO=${contratacao}"
+)
