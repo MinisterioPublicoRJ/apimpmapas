@@ -135,7 +135,7 @@ class TestProrrogacaoIC(NoJWTTestCase, TestCase):
 class TestProrrogacaoPp(NoJWTTestCase, TestCase):
     def setUp(self):
         super().setUp()
-        
+
         self.orgao_id = 12345
         self.docu_dk = 4567
         self.cpf = "0000000"
@@ -146,7 +146,7 @@ class TestProrrogacaoPp(NoJWTTestCase, TestCase):
 
     def tearDown(self):
         pass
-    
+
     def test_correct_response(self):
         resp = self.client.get(self.url)
 

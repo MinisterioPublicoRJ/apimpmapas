@@ -69,13 +69,14 @@ class ProrrogacaoICView(BaseDocumentoViewMixin, JWTAuthMixin, View):
 
         return response
 
+
 class ConversaoPPICView(BaseDocumentoViewMixin, JWTAuthMixin, View):
     attachment_name = ""
+
 
 class ProrrogacaoPPView(BaseDocumentoViewMixin, JWTAuthMixin, View):
     attachment_name = "prorrogacao-pp.docx"
 
-       
     def get(self, request, *args, **kwargs):
         response = self.create_response()
 
