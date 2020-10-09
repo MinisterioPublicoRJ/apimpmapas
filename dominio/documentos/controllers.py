@@ -1,3 +1,4 @@
+import abc
 from datetime import date
 
 from cached_property import cached_property
@@ -6,18 +7,36 @@ from docxtpl import DocxTemplate
 from dominio.documentos.dao import (
     DadosAssuntoDAO,
     DadosPromotorDAO,
-    MinutaPrescricaoDAO
+    MinutaPrescricaoDAO,
+    ProrrogacaoICDAO,
 )
 from dominio.documentos.helpers import formata_lista, formata_pena, traduz_mes
 
 
-class MinutaPrescricaoController:
-    template = "dominio/documentos/doc_templates/minuta_prescricao.docx"
+class BaseDocumentoController(metaclass=abc.ABCMeta):
+    template = None
 
-    def __init__(self, orgao_id, docu_dk, cpf):
+    def __init__(self, orgao_id, cpf, docu_dk):
         self.orgao_id = orgao_id
-        self.docu_dk = docu_dk
         self.cpf = cpf
+        self.docu_dk = docu_dk
+
+    @property
+    def data_hoje(self):
+        return traduz_mes(date.today().strftime("%d de %B de %Y"))
+
+    @abc.abstractproperty
+    def context(self):
+        pass
+
+    def render(self, response):
+        doc = DocxTemplate(self.template)
+        doc.render(self.context)
+        doc.save(response)
+
+
+class MinutaPrescricaoController(BaseDocumentoController):
+    template = "dominio/documentos/doc_templates/minuta_prescricao.docx"
 
     def get_preposicao(self, comarca):
         preposicoes = {
@@ -64,9 +83,7 @@ class MinutaPrescricaoController:
 
     @cached_property
     def context(self):
-        context = {
-            "data_hoje": traduz_mes(date.today().strftime("%d de %B de %Y"))
-        }
+        context = {"data_hoje": self.data_hoje}
         context.update(MinutaPrescricaoDAO.get(docu_dk=self.docu_dk))
         context.update(self.delitos)
         context.update(self.responsavel)
@@ -80,7 +97,13 @@ class MinutaPrescricaoController:
 
         return context
 
-    def render(self, response):
-        doc = DocxTemplate(self.template)
-        doc.render(self.context)
-        doc.save(response)
+
+class ProrrogacaoICController(BaseDocumentoController):
+    template = "dominio/documentos/doc_templates/prorrogacao_de_IC.docx"
+
+    @cached_property
+    def context(self):
+        contexto = {"data_hoje": self.data_hoje}
+        contexto.update(DadosPromotorDAO.get(cpf=self.cpf))
+        contexto.update(ProrrogacaoICDAO.get(docu_dk=self.docu_dk))
+        return contexto

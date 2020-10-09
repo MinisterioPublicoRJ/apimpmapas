@@ -4,12 +4,65 @@ from unittest import TestCase, mock
 from django.http import HttpResponse
 from freezegun import freeze_time
 
-from dominio.documentos.controllers import MinutaPrescricaoController
+from dominio.documentos.controllers import (
+    BaseDocumentoController,
+    MinutaPrescricaoController,
+    ProrrogacaoICController,
+)
 from dominio.documentos.dao import (
     DadosAssuntoDAO,
     DadosPromotorDAO,
     MinutaPrescricaoDAO,
+    ProrrogacaoICDAO,
 )
+
+
+class TestBaseDocumentoController(TestCase):
+    def setUp(self):
+        self.orgao_id = "5678"
+        self.docu_dk = "12345"
+        self.cpf = "1234567890"
+
+        class ChildController(BaseDocumentoController):
+            @property
+            def context(self):
+                return {"context": 1}
+
+        self.controller = ChildController(
+            orgao_id=self.orgao_id,
+            cpf=self.cpf,
+            docu_dk=self.docu_dk,
+        )
+
+        self.http_response = HttpResponse()
+
+        self.mock_docx_patcher = mock.patch(
+            "dominio.documentos.controllers.DocxTemplate"
+        )
+        self.mock_docx = self.mock_docx_patcher.start()
+        self.mock_docx_template = mock.Mock()
+        self.mock_docx.return_value = self.mock_docx_template
+
+    def tearDown(self):
+        self.mock_docx_patcher.stop()
+
+    def test_render_document(self):
+        self.controller.render(self.http_response)
+
+        self.mock_docx.assert_called_once_with(self.controller.template)
+        self.mock_docx_template.render.assert_called_once_with(
+            self.controller.context
+        )
+        self.mock_docx_template.save.assert_called_once_with(
+            self.http_response
+        )
+
+    @freeze_time("2020-1-1")
+    def test_data_hoje(self):
+        data_hoje = self.controller.data_hoje
+        expected = "01 de janeiro de 2020"
+
+        self.assertEqual(data_hoje, expected)
 
 
 class TestMinutaPrescricaoController(TestCase):
@@ -21,9 +74,9 @@ class TestMinutaPrescricaoController(TestCase):
         self.matricula = "12345678"
         self.nome = "fulano de tal"
         self.controller = MinutaPrescricaoController(
-            self.orgao_id,
-            self.docu_dk,
-            self.cpf,
+            orgao_id=self.orgao_id,
+            cpf=self.cpf,
+            docu_dk=self.docu_dk,
         )
 
         # Dados DAO assunto
@@ -74,15 +127,6 @@ class TestMinutaPrescricaoController(TestCase):
             }
         )
 
-        self.http_response = HttpResponse()
-
-        self.mock_docx_patcher = mock.patch(
-            "dominio.documentos.controllers.DocxTemplate"
-        )
-        self.mock_docx = self.mock_docx_patcher.start()
-        self.mock_docx_template = mock.Mock()
-        self.mock_docx.return_value = self.mock_docx_template
-
         self.dao_get_patcher = mock.patch.object(
             MinutaPrescricaoDAO, "get"
         )
@@ -102,21 +146,9 @@ class TestMinutaPrescricaoController(TestCase):
         self.mock_promotor_dao_get.return_value = self.expected_promotor_data
 
     def tearDown(self):
-        self.mock_docx_patcher.stop()
         self.dao_get_patcher.stop()
         self.assunto_dao_patcher.stop()
         self.promotor_dao_patcher.stop()
-
-    def test_render_document(self):
-        self.controller.render(self.http_response)
-
-        self.mock_docx.assert_called_once_with(self.controller.template)
-        self.mock_docx_template.render.assert_called_once_with(
-            self.controller.context
-        )
-        self.mock_docx_template.save.assert_called_once_with(
-            self.http_response
-        )
 
     @freeze_time('2020-01-01')
     def test_get_context_data(self):
@@ -155,7 +187,9 @@ class TestResponsavelMinuta(TestCase):
         self.cpf = "1234567890"
 
         self.controller = MinutaPrescricaoController(
-            self.orgao_id, self.docu_dk, self.cpf
+            orgao_id=self.orgao_id,
+            cpf=self.cpf,
+            docu_dk=self.docu_dk,
         )
 
         self.dados_promotor_patcher = mock.patch.object(
@@ -189,7 +223,9 @@ class TestDelitosMinuta(TestCase):
         self.cpf = "1234567890"
 
         self.controller = MinutaPrescricaoController(
-            self.orgao_id, self.docu_dk, self.cpf
+            orgao_id=self.orgao_id,
+            cpf=self.cpf,
+            docu_dk=self.docu_dk,
         )
 
         self.dados_assunto_patcher = mock.patch.object(
@@ -232,3 +268,51 @@ class TestDelitosMinuta(TestCase):
         delitos = self.controller.delitos
 
         self.assertEqual(delitos, self.expected_delitos)
+
+
+class TestModeloProrrogacaoProcedimento(TestCase):
+    def setUp(self):
+        self.orgao_id = "5678"
+        self.docu_dk = "12345"
+        self.cpf = "1234567890"
+        self.controller = ProrrogacaoICController(
+            orgao_id=self.orgao_id,
+            cpf=self.cpf,
+            docu_dk=self.docu_dk,
+        )
+
+        self.num_procedimento = "12345"
+        self.nome_promotor = "Nome"
+        self.matricula_promotor = "012345"
+
+        self.dao_docu_get_patcher = mock.patch.object(ProrrogacaoICDAO, "get")
+        self.dao_docu_get_mock = self.dao_docu_get_patcher.start()
+        self.dao_docu_get_mock.return_value = {
+            "num_procedimento": self.num_procedimento,
+        }
+
+        self.dao_promotor_get_patcher = mock.patch.object(
+            DadosPromotorDAO, "get"
+        )
+        self.dao_promotor_get_mock = self.dao_promotor_get_patcher.start()
+        self.dao_promotor_get_mock.return_value = {
+            "nome_promotor": self.nome_promotor,
+            "matricula_promotor": self.matricula_promotor,
+        }
+
+        self.expected_context = {
+            "num_procedimento": self.num_procedimento,
+            "data_hoje": "01 de janeiro de 2020",
+            "nome_promotor": self.nome_promotor,
+            "matricula_promotor": self.matricula_promotor,
+        }
+
+    def tearDown(self):
+        self.dao_docu_get_patcher.stop()
+        self.dao_promotor_get_patcher.stop()
+
+    @freeze_time("2020-1-1")
+    def test_get_context(self):
+        context = self.controller.context
+
+        self.assertEqual(context, self.expected_context)

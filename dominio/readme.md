@@ -603,6 +603,30 @@ GET /dominio/alertas/list/<id_orgao>
 ]
 ```
 
+# Documentos .DOCX
+
+## Minuta de Prescrição
+
+```
+GET /dominio/documentos/minuta-prescricao/<orgao_id>/<cpf>/<docu_dk>
+
+Retorna resposta HTTP:
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+
+Abrirá caixa de download com documento Word.
+```
+
+## Prorrogação de Inquérito Civil (IC)
+
+```
+GET /dominio/documentos/prorrogacao-ic/<orgao_id>/<cpf>/<docu_dk>
+
+Retorna resposta HTTP:
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+
+Abrirá caixa de download com documento Word.
+```
+
 ## Lista Processos da Promotoria
 
 ```
