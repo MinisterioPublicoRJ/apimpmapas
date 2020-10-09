@@ -133,6 +133,24 @@ class ListaProcessosDAO(GenericTutelaDAO):
     serializer = ListaProcessosSerializer
 
 
+class ListaInvestigacoesDAO(GenericTutelaDAO):
+    query_file = "lista_investigacoes.sql"
+    columns = [
+        "id_orgao",
+        "classe_documento",
+        "docu_nr_mp",
+        "docu_nr_externo",
+        "docu_etiqueta",
+        "docu_personagens",
+        "dt_ultimo_andamento",
+        "ultimo_andamento",
+        "url_tjrj"
+    ]
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
+    # Mesmo formato de dados que a Lista de Processos
+    serializer = ListaProcessosSerializer
+
+
 class RadarPerformanceDAO(GenericTutelaDAO, SingleDataObjectDAO):
     query_file = "radar_performance.sql"
     columns = [
