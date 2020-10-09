@@ -211,7 +211,6 @@ class TestDispensarAlertasCompras(NoJWTTestCase, TestCase):
     def setUp(self):
         super().setUp()
         self.orgao_id = "12345"
-        self.alerta_sigla = "COMP"
         self.url = reverse(
             "dominio:dispensar_alerta",
             args=(self.orgao_id,),
@@ -246,7 +245,6 @@ class TestRetornaAlertasCompras(NoJWTTestCase, TestCase):
     def setUp(self):
         super().setUp()
         self.orgao_id = "12345"
-        self.alerta_sigla = "COMP"
         self.url = reverse(
             "dominio:retornar_alerta",
             args=(self.orgao_id,),
