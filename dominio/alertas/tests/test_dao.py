@@ -1,8 +1,13 @@
 from unittest import mock
+import pytest
 
 from django.test import TestCase
 
 from dominio.alertas import dao
+from dominio.alertas.exceptions import (
+    APIInvalidOverlayType,
+    APIMissingOverlayType,
+)
 
 
 class ResumoAlertasComprasDAOTest(TestCase):
@@ -311,3 +316,76 @@ class TestFiltraAlertasDispensados(TestCase):
             row_prefix=f"{self.orgao_id}".encode()
         )
         self.assertEqual(resp, self.expected_filtrados)
+
+
+class TestAlertasOverlayDAO(TestCase):
+    @mock.patch.object(dao.AlertasOverlayDAO, "switcher")
+    def test_get_result_OK(self, _switcher):
+        mock_DAO = mock.MagicMock()
+        mock_DAO.get.return_value = [{'data': 1}]
+        _switcher.return_value = mock_DAO
+
+        mock_request = mock.MagicMock()
+        mock_request.GET = {'tipo': 'teste_tipo'}
+
+        expected_output = [{'data': 1}]
+        docu_dk = 10
+
+        output = dao.AlertasOverlayDAO.get(docu_dk, mock_request)
+
+        _switcher.assert_called_once_with('teste_tipo')
+        mock_DAO.get.assert_called_once_with(
+            docu_dk=docu_dk,
+            request=mock_request
+        )
+        self.assertEqual(output, expected_output)
+
+    def test_get_no_type(self):
+        mock_request = mock.MagicMock()
+        mock_request.GET = {}
+
+        docu_dk = 10
+
+        with pytest.raises(APIMissingOverlayType):
+            dao.AlertasOverlayDAO.get(docu_dk, mock_request)
+
+    def test_get_invalid_type(self):
+        mock_request = mock.MagicMock()
+        mock_request.GET = {'tipo': 'teste_tipo'}
+
+        docu_dk = 10
+
+        with pytest.raises(APIInvalidOverlayType):
+            dao.AlertasOverlayDAO.get(docu_dk, mock_request)
+
+    def test_overlay_prescricao(self):
+        pass
+        # _execute.return_value = [
+        #     ('Crime1', 'Nome1', '1.0', 'Nomes',
+        #      '0.5', '0.5', '2020-01-01', '2020-01-02'),
+        #     ('Crime2', 'Nome1', '1.0', 'Nomes',
+        #      '0.5', '0.5', '2020-02-01', '2020-02-02'),
+        # ]
+
+        # alertas_expected = [
+        #     {
+        #         'tipo_penal': 'Crime1',
+        #         'nm_investigado': 'Nome1',
+        #         'max_pena': 1.0,
+        #         'delitos_multiplicadores': 'Nomes',
+        #         'fator_pena': 0.5,
+        #         'max_pena_fatorado': 0.5,
+        #         'dt_inicio_prescricao': '2020-01-01',
+        #         'dt_fim_prescricao': '2020-01-02'
+        #     },
+        #     {
+        #         'tipo_penal': 'Crime2',
+        #         'nm_investigado': 'Nome1',
+        #         'max_pena': 1.0,
+        #         'delitos_multiplicadores': 'Nomes',
+        #         'fator_pena': 0.5,
+        #         'max_pena_fatorado': 0.5,
+        #         'dt_inicio_prescricao': '2020-02-01',
+        #         'dt_fim_prescricao': '2020-02-02'
+        #     },
+        # ]

@@ -302,3 +302,23 @@ class TestRetornaAlertasCompras(NoJWTTestCase, TestCase):
         resp = self.client.post(self.url)
 
         self.assertEqual(resp.status_code, 400)
+
+
+class AlertasOverlayTest(NoJWTTestCase, NoCacheTestCase, TestCase):
+
+    @mock.patch.object(dao.AlertasOverlayDAO, "get")
+    def test_alert_overlay(self, _get):
+        docu_dk = '12345'
+
+        _get.return_value = [{'data': 1}]
+
+        alertas_expected = [{'data': 1}]
+
+        url = reverse(
+            'dominio:overlay_alertas',
+            args=(docu_dk,)
+        )
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, alertas_expected)
