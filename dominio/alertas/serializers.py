@@ -33,3 +33,14 @@ class AlertasComprasSerializer(serializers.Serializer):
 
 class IdentificadorAlertaSerializer(serializers.Serializer):
     alerta_id = serializers.CharField()
+
+
+class AlertaOverlayPrescricaoSerializer(serializers.Serializer):
+    tipo_penal = serializers.CharField()
+    nm_investigado = serializers.CharField()
+    max_pena = serializers.FloatField()
+    delitos_multiplicadores = serializers.CharField()
+    fator_pena = serializers.FloatField()
+    max_pena_fatorado = serializers.FloatField()
+    dt_inicio_prescricao = serializers.CharField()
+    dt_fim_prescricao = serializers.CharField()

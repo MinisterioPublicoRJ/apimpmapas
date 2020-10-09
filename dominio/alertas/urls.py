@@ -29,4 +29,9 @@ urlpatterns = [
         views.AlertasComprasView.as_view(),
         name='compras_alertas'
     ),
+    path(
+        'overlay/<str:docu_dk>',
+        views.AlertasOverlayView.as_view(),
+        name='overlay_alertas'
+    )
 ]
