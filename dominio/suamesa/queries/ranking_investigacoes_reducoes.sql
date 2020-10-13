@@ -6,7 +6,6 @@ AND cod_pct IN (
     SELECT cod_pct
     FROM {schema}.atualizacao_pj_pacote
     WHERE id_orgao = :orgao_id)
-AND variacao_acervo IS NOT NULL
 AND variacao_acervo < 0
 ORDER BY variacao_acervo ASC
 LIMIT :n
