@@ -163,6 +163,7 @@ class TestInstauracaoICDAO(TestImpalaExecuteMixin, TestCase):
         codigo_assunto = 12345
         atribuicao = "ATRIBUICAO"
         ementa = "EMENTA"
+        investigados = "INVESTIGADOS"
         self._impala_execute.return_value = (
             (
                 num_procedimento,
@@ -172,6 +173,7 @@ class TestInstauracaoICDAO(TestImpalaExecuteMixin, TestCase):
                 codigo_assunto,
                 atribuicao,
                 ementa,
+                investigados,
             ),
         )
 
@@ -184,6 +186,7 @@ class TestInstauracaoICDAO(TestImpalaExecuteMixin, TestCase):
             "codigo_assunto": codigo_assunto,
             "atribuicao": atribuicao,
             "ementa": ementa,
+            "investigados": investigados,
         }
 
         self.assertEqual(data, expected)

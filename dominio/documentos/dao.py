@@ -83,4 +83,5 @@ class InstauracaoICDAO(DocumentosDAO):
         "codigo_assunto",
         "atribuicao",
         "ementa",
+        "investigados",
     ]

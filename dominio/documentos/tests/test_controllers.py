@@ -394,6 +394,7 @@ class TestInstauracaoIC(TestCase):
         self.codigo_assunto = 12345
         self.atribuicao = "Atribuicao"
         self.ementa = "EMENTA"
+        self.investigados = "INVESTIGADOS"
 
         self.nome_promotor = "Nome"
         self.matricula_promotor = "012345"
@@ -408,6 +409,7 @@ class TestInstauracaoIC(TestCase):
             "codigo_assunto": self.codigo_assunto,
             "atribuicao": self.atribuicao,
             "ementa": self.ementa,
+            "investigados": self.investigados,
         }
 
         self.dao_promotor_get_patcher = mock.patch.object(
@@ -427,6 +429,7 @@ class TestInstauracaoIC(TestCase):
             "codigo_assunto": self.codigo_assunto,
             "atribuicao": self.atribuicao,
             "ementa": self.ementa,
+            "investigados": self.investigados,
             "data_hoje": "01 de janeiro de 2020",
             "nome_promotor": self.nome_promotor,
             "matricula_promotor": self.matricula_promotor,
