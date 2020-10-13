@@ -5,6 +5,7 @@ from django.views.generic import View
 from dominio.documentos.controllers import (
     MinutaPrescricaoController,
     ProrrogacaoICController,
+    ProrrogacaoPPController,
 )
 
 from dominio.exceptions import APIEmptyResultError
@@ -79,5 +80,18 @@ class ProrrogacaoPPView(BaseDocumentoViewMixin, JWTAuthMixin, View):
 
     def get(self, request, *args, **kwargs):
         response = self.create_response()
+
+        orgao_id = kwargs.get(self.orgao_url_kwarg)
+        docu_dk = kwargs.get("docu_dk")
+        cpf = kwargs.get("cpf")
+        controller = ProrrogacaoPPController(
+            orgao_id=orgao_id,
+            cpf=cpf,
+            docu_dk=docu_dk,
+        )
+        try:
+            controller.render(response)
+        except APIEmptyResultError:
+            raise Http404
 
         return response

@@ -144,10 +144,33 @@ class TestProrrogacaoPp(NoJWTTestCase, TestCase):
             args=(self.orgao_id, self.cpf, self.docu_dk)
         )
 
+        self.cont_prorrogacao_patcher = mock.patch(
+            "dominio.documentos.views.ProrrogacaoPPController"
+        )
+        self.controller_mock = mock.Mock()
+        self.cont_prorrogacao_mock = self.cont_prorrogacao_patcher.start()
+        self.cont_prorrogacao_mock.return_value = self.controller_mock
+
     def tearDown(self):
         super().tearDown()
+        self.cont_prorrogacao_patcher.stop()
 
     def test_correct_response(self):
         resp = self.client.get(self.url)
 
         self.assertEqual(resp.status_code, 200)
+        self.cont_prorrogacao_mock.assert_called_once_with(
+            orgao_id=self.orgao_id,
+            cpf=self.cpf,
+            docu_dk=self.docu_dk,
+        )
+        self.assertIsInstance(
+            self.controller_mock.render.call_args_list[0][0][0],
+            HttpResponse
+        )
+
+    def test_404_for_empty_db_response(self):
+        self.controller_mock.render.side_effect = APIEmptyResultError
+        resp = self.client.get(self.url)
+
+        self.assertEqual(resp.status_code, 404)

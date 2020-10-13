@@ -9,6 +9,7 @@ from dominio.documentos.dao import (
     DadosPromotorDAO,
     MinutaPrescricaoDAO,
     ProrrogacaoICDAO,
+    ProrrogacaoPPDAO,
 )
 
 
@@ -126,6 +127,18 @@ class TestProrrogacaoICDAO(TestImpalaExecuteMixin, TestCase):
         self._impala_execute.return_value = ((num_procedimento,),)
 
         data = ProrrogacaoICDAO.get(docu_dk=docu_dk)
+        expected = {"num_procedimento": num_procedimento}
+
+        self.assertEqual(data, expected)
+
+
+class TestProrrogacaoPPDAO(TestImpalaExecuteMixin, TestCase):
+    def test_get_prorrogacao_data(self):
+        docu_dk = "1234"
+        num_procedimento = "1111.2222.3333"
+        self._impala_execute.return_value = ((num_procedimento,),)
+
+        data = ProrrogacaoPPDAO.get(docu_dk=docu_dk)
         expected = {"num_procedimento": num_procedimento}
 
         self.assertEqual(data, expected)

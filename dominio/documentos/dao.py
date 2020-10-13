@@ -56,3 +56,8 @@ class DadosAssuntoDAO(GenericDAO):
 class ProrrogacaoICDAO(DocumentosDAO):
     query_file = "prorrogacao_ic.sql"
     columns = ["num_procedimento"]
+
+
+class ProrrogacaoPPDAO(DocumentosDAO):
+    query_file = "prorrogacao_pp.sql"
+    columns = ["num_procedimento"]
