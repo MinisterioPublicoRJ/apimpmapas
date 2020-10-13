@@ -145,7 +145,7 @@ class TestProrrogacaoPp(NoJWTTestCase, TestCase):
         )
 
     def tearDown(self):
-        pass
+        super().tearDown()
 
     def test_correct_response(self):
         resp = self.client.get(self.url)
