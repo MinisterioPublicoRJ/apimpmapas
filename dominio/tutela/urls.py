@@ -11,6 +11,7 @@ from .views import (
     SuaMesaVistasListaView,
     TempoTramitacaoView,
     ListaProcessosView,
+    ListaInvestigacoesView,
 )
 
 
@@ -62,6 +63,11 @@ urlpatterns = [
         "lista/processos/<str:orgao_id>",
         ListaProcessosView.as_view(),
         name="lista-processos"
+    ),
+    path(
+        "lista/investigacoes/<str:orgao_id>",
+        ListaInvestigacoesView.as_view(),
+        name="lista-investigacoes"
     ),
     path(
         "comparador-radares/<str:orgao_id>",
