@@ -19,6 +19,7 @@ from dominio.suamesa.serializers import (
 )
 from dominio.suamesa.dao_rankings import (
     RankingDAO,
+    RankingPercentageDAO,
     RankingMixin,
     RankingPercentageMixin,
 )
@@ -92,10 +93,10 @@ class SuaMesaDetalhePIPAISPDAO(RankingMixin, MetricsDetalheDocumentoOrgaoDAO):
 
 class SuaMesaDetalheTutelaInvestigacoesDAO(
         RankingPercentageMixin, MetricsDetalheDocumentoOrgaoDAO):
-    class RankingTutelaInvestigacoesAumentosDAO(RankingDAO):
+    class RankingTutelaInvestigacoesAumentosDAO(RankingPercentageDAO):
         query_file = "ranking_investigacoes_aumentos.sql"
 
-    class RankingTutelaInvestigacoesReducoesDAO(RankingDAO):
+    class RankingTutelaInvestigacoesReducoesDAO(RankingPercentageDAO):
         query_file = "ranking_investigacoes_reducoes.sql"
 
     ranking_fields = ['aumento_acervo', 'reducao_acervo']
