@@ -6,6 +6,7 @@ from freezegun import freeze_time
 
 from dominio.documentos.controllers import (
     BaseDocumentoController,
+    InstauracaoICController,
     MinutaPrescricaoController,
     ProrrogacaoICController,
     ProrrogacaoPPController,
@@ -13,6 +14,7 @@ from dominio.documentos.controllers import (
 from dominio.documentos.dao import (
     DadosAssuntoDAO,
     DadosPromotorDAO,
+    InstauracaoICDAO,
     MinutaPrescricaoDAO,
     ProrrogacaoICDAO,
     ProrrogacaoPPDAO,
@@ -284,6 +286,7 @@ class TestModeloProrrogacaoIC(TestCase):
         )
 
         self.num_procedimento = "12345"
+        self.comarca = "COMARCA"
         self.nome_promotor = "Nome"
         self.matricula_promotor = "012345"
 
@@ -291,6 +294,7 @@ class TestModeloProrrogacaoIC(TestCase):
         self.dao_docu_get_mock = self.dao_docu_get_patcher.start()
         self.dao_docu_get_mock.return_value = {
             "num_procedimento": self.num_procedimento,
+            "comarca": self.comarca,
         }
 
         self.dao_promotor_get_patcher = mock.patch.object(
@@ -304,6 +308,7 @@ class TestModeloProrrogacaoIC(TestCase):
 
         self.expected_context = {
             "num_procedimento": self.num_procedimento,
+            "comarca": self.comarca,
             "data_hoje": "01 de janeiro de 2020",
             "nome_promotor": self.nome_promotor,
             "matricula_promotor": self.matricula_promotor,
@@ -332,6 +337,7 @@ class TestModeloProrrogacaoPP(TestCase):
         )
 
         self.num_procedimento = "12345"
+        self.comarca = "COMARCA"
         self.nome_promotor = "Nome"
         self.matricula_promotor = "012345"
 
@@ -339,6 +345,7 @@ class TestModeloProrrogacaoPP(TestCase):
         self.dao_docu_get_mock = self.dao_docu_get_patcher.start()
         self.dao_docu_get_mock.return_value = {
             "num_procedimento": self.num_procedimento,
+            "comarca": self.comarca,
         }
 
         self.dao_promotor_get_patcher = mock.patch.object(
@@ -352,6 +359,74 @@ class TestModeloProrrogacaoPP(TestCase):
 
         self.expected_context = {
             "num_procedimento": self.num_procedimento,
+            "comarca": self.comarca,
+            "data_hoje": "01 de janeiro de 2020",
+            "nome_promotor": self.nome_promotor,
+            "matricula_promotor": self.matricula_promotor,
+        }
+
+    def tearDown(self):
+        self.dao_docu_get_patcher.stop()
+        self.dao_promotor_get_patcher.stop()
+
+    @freeze_time("2020-1-1")
+    def test_get_context(self):
+        context = self.controller.context
+
+        self.assertEqual(context, self.expected_context)
+
+
+class TestInstauracaoIC(TestCase):
+    def setUp(self):
+        self.orgao_id = "5678"
+        self.docu_dk = "12345"
+        self.cpf = "1234567890"
+        self.controller = InstauracaoICController(
+            orgao_id=self.orgao_id,
+            cpf=self.cpf,
+            docu_dk=self.docu_dk,
+        )
+
+        self.num_procedimento = "12345"
+        self.nome_promotoria = "PROMOTORIA"
+        self.comarca = "COMARCA"
+        self.objeto = "OBJETO"
+        self.codigo_assunto = 12345
+        self.atribuicao = "Atribuicao"
+        self.ementa = "EMENTA"
+
+        self.nome_promotor = "Nome"
+        self.matricula_promotor = "012345"
+
+        self.dao_docu_get_patcher = mock.patch.object(InstauracaoICDAO, "get")
+        self.dao_docu_get_mock = self.dao_docu_get_patcher.start()
+        self.dao_docu_get_mock.return_value = {
+            "num_procedimento": self.num_procedimento,
+            "nome_promotoria": self.nome_promotoria,
+            "comarca": self.comarca,
+            "objeto": self.objeto,
+            "codigo_assunto": self.codigo_assunto,
+            "atribuicao": self.atribuicao,
+            "ementa": self.ementa,
+        }
+
+        self.dao_promotor_get_patcher = mock.patch.object(
+            DadosPromotorDAO, "get"
+        )
+        self.dao_promotor_get_mock = self.dao_promotor_get_patcher.start()
+        self.dao_promotor_get_mock.return_value = {
+            "nome_promotor": self.nome_promotor,
+            "matricula_promotor": self.matricula_promotor,
+        }
+
+        self.expected_context = {
+            "num_procedimento": self.num_procedimento,
+            "nome_promotoria": self.nome_promotoria,
+            "comarca": self.comarca,
+            "objeto": self.objeto,
+            "codigo_assunto": self.codigo_assunto,
+            "atribuicao": self.atribuicao,
+            "ementa": self.ementa,
             "data_hoje": "01 de janeiro de 2020",
             "nome_promotor": self.nome_promotor,
             "matricula_promotor": self.matricula_promotor,
