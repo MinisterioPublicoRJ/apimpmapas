@@ -67,3 +67,20 @@ class ProrrogacaoPPDAO(DocumentosDAO):
         "num_procedimento",
         "comarca",
     ]
+
+
+class InstauracaoICDAO(DocumentosDAO):
+    table_namespaces = {
+        "schema": settings.EXADATA_NAMESPACE,
+        "schema_aux": settings.TABLE_NAMESPACE,
+    }
+    query_file = "instauracao_ic.sql"
+    columns = [
+        "num_procedimento",
+        "nome_promotoria",
+        "comarca",
+        "objeto",
+        "codigo_assunto",
+        "atribuicao",
+        "ementa",
+    ]

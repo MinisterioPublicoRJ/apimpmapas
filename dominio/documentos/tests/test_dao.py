@@ -7,6 +7,7 @@ from django.test import TestCase
 from dominio.documentos.dao import (
     DadosAssuntoDAO,
     DadosPromotorDAO,
+    InstauracaoICDAO,
     MinutaPrescricaoDAO,
     ProrrogacaoICDAO,
     ProrrogacaoPPDAO,
@@ -147,6 +148,42 @@ class TestProrrogacaoPPDAO(TestImpalaExecuteMixin, TestCase):
         expected = {
             "num_procedimento": num_procedimento,
             "comarca": comarca,
+        }
+
+        self.assertEqual(data, expected)
+
+
+class TestInstauracaoICDAO(TestImpalaExecuteMixin, TestCase):
+    def test_get_instauracao_data(self):
+        docu_dk = "1234"
+        num_procedimento = "1111.2222.3333"
+        nome_promotoria = "PROMOTORIA"
+        comarca = "COMARCA"
+        objeto = "objeto"
+        codigo_assunto = 12345
+        atribuicao = "ATRIBUICAO"
+        ementa = "EMENTA"
+        self._impala_execute.return_value = (
+            (
+                num_procedimento,
+                nome_promotoria,
+                comarca,
+                objeto,
+                codigo_assunto,
+                atribuicao,
+                ementa,
+            ),
+        )
+
+        data = InstauracaoICDAO.get(docu_dk=docu_dk)
+        expected = {
+            "num_procedimento": num_procedimento,
+            "nome_promotoria": nome_promotoria,
+            "comarca": comarca,
+            "objeto": objeto,
+            "codigo_assunto": codigo_assunto,
+            "atribuicao": atribuicao,
+            "ementa": ementa,
         }
 
         self.assertEqual(data, expected)
