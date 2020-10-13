@@ -15,9 +15,9 @@ urlpatterns = [
         name="prorrogacao-ic"
     ),
     path(
-        "conversao-pp-ic/<int:orgao_id>/<str:cpf>/<int:docu_dk>",
-        views.ConversaoPPICView.as_view(),
-        name="coversao-pp-ic"
+        "instauracao-ic/<int:orgao_id>/<str:cpf>/<int:docu_dk>",
+        views.InstauracaoICView.as_view(),
+        name="instauracao-ic"
     ),
     path(
         "prorrogacao-pp/<int:orgao_id>/<str:cpf>/<int:docu_dk>",
