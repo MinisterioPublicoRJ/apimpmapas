@@ -181,7 +181,8 @@ class AlertaOverlayPrescricaoDAO(AlertasDAO):
         'fator_pena',
         'max_pena_fatorado',
         'dt_inicio_prescricao',
-        'dt_fim_prescricao'
+        'dt_fim_prescricao',
+        'adpr_chave'
     ]
     serializer = serializers.AlertaOverlayPrescricaoSerializer
     table_namespaces = {
