@@ -44,3 +44,4 @@ class AlertaOverlayPrescricaoSerializer(serializers.Serializer):
     max_pena_fatorado = serializers.FloatField()
     dt_inicio_prescricao = serializers.CharField()
     dt_fim_prescricao = serializers.CharField()
+    adpr_chave = serializers.CharField()
