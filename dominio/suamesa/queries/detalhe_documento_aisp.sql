@@ -12,7 +12,9 @@ FROM (
         SELECT DISTINCT a2.pip_codigo
         FROM {schema}.tb_pip_aisp a1
         JOIN {schema}.tb_pip_aisp a2 ON a1.aisp_codigo = a2.aisp_codigo
+        JOIN {schema}.atualizacao_pj_pacote pct ON pct.id_orgao = a2.pip_codigo
         WHERE a1.pip_codigo = :orgao_id
+        AND cod_pct IN (SELECT cod_pct FROM {schema}.atualizacao_pj_pacote WHERE id_orgao = :orgao_id)
         ) t ON pip_codigo = vist_orgi_orga_dk
     WHERE tipo_detalhe IN ('pip_inqueritos', 'pip_pics')
     AND intervalo = :intervalo
