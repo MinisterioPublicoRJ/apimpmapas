@@ -12,6 +12,8 @@ SELECT
     assuntos,
     fsdc_ds_fase,
     dt_ultimo_andamento,
-    desc_ultimo_andamento
+    desc_ultimo_andamento,
+    status_personagem,
+    pers_dk
 FROM {schema}.tb_pip_investigados_procedimentos
 WHERE representante_dk = :dk
