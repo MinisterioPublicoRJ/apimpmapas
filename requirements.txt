@@ -26,7 +26,7 @@ python-decouple
 redis
 requests
 responses
-vine==1.3.0
+vine==5.0.0
 zeep==3.4.0
 Unipath==1.1
 
