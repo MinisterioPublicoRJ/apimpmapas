@@ -215,12 +215,14 @@ class AlertasOverlayDAO:
 
 class DetalheAlertaCompraDAO(SingleDataObjectDAO):
     QUERIES_DIR = settings.BASE_DIR.child("dominio", "alertas", "queries")
+    serializer = serializers.DetalheAlertaSerializer
 
     query_file = "detalhe_alerta_compra.sql"
     columns = [
         "contratacao",
         "data_contratacao",
         "item_contratado",
+        "var_perc",
     ]
     table_namespaces = {
         "schema_alertas_compras": settings.SCHEMA_ALERTAS,

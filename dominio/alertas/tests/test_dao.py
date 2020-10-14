@@ -426,12 +426,14 @@ class TestDetalheAlertaCompras(TestCase):
                 "12345",
                 "01/01/2020",
                 "56789",
+                123.34,
             ),
         )
         self.expected_data = {
             "contratacao": "12345",
             "data_contratacao": "01/01/2020",
             "item_contratado": "56789",
+            "var_perc": "123,34"
         }
 
     def tearDown(self):
