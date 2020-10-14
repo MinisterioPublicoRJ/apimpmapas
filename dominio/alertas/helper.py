@@ -1,5 +1,9 @@
 ordem = [
     'PRCR',
+    'PRCR1',
+    'PRCR2',
+    'PRCR3',
+    'PRCR4',
     'COMP',
     'GATE',
     'MCSI',

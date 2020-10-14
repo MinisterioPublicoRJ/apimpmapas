@@ -1,9 +1,13 @@
 from django.conf import settings
 
-from dominio.dao import GenericDAO
+from dominio.dao import GenericDAO, SingleDataObjectDAO
 from dominio.db_connectors import get_hbase_table, run_query
 from dominio.alertas import serializers
 from dominio.alertas.helper import ordem as alrt_ordem
+from dominio.alertas.exceptions import (
+    APIInvalidOverlayType,
+    APIMissingOverlayType,
+)
 
 
 class FiltraAlertasDispensadosMixin:
@@ -11,6 +15,15 @@ class FiltraAlertasDispensadosMixin:
     alerta_id_kwarg = None
     sigla_kwarg = None
     col_family = "dados_alertas:"
+
+    @classmethod
+    def prepara_hbase_query(cls, orgao_id):
+        return (
+            "SingleColumnValueFilter('dados_alertas', 'orgao', =,"
+            f" 'binary:{orgao_id}')"
+            " OR SingleColumnValueFilter('dados_alertas', 'orgao', =,"
+            " 'binary:ALL')"
+        ).encode()
 
     @classmethod
     def prepara_dados_hbase(cls, dados):
@@ -35,7 +48,7 @@ class FiltraAlertasDispensadosMixin:
     def filtra(cls, orgao_id, result_set):
         table = cls.get_table()
         dispensados = cls.prepara_dados_hbase(
-            table.scan(row_prefix=f"{orgao_id}".encode())
+            table.scan(filter=cls.prepara_hbase_query(orgao_id))
         )
 
         filtrados = []
@@ -154,3 +167,61 @@ class AlertaComprasDAO(FiltraAlertasDispensadosMixin, AlertasDAO):
     orgao_kwarg = "id_orgao"
     alerta_id_kwarg = "contrato_iditem"
     sigla_kwarg = "sigla"
+
+
+# ------ DAOs relativos ao Overlay do Alerta
+
+class AlertaOverlayPrescricaoDAO(AlertasDAO):
+    query_file = "alerta_overlay_prescricao.sql"
+    columns = [
+        'tipo_penal',
+        'nm_investigado',
+        'max_pena',
+        'delitos_multiplicadores',
+        'fator_pena',
+        'max_pena_fatorado',
+        'dt_inicio_prescricao',
+        'dt_fim_prescricao',
+        'adpr_chave'
+    ]
+    serializer = serializers.AlertaOverlayPrescricaoSerializer
+    table_namespaces = {
+        "schema_exadata": settings.EXADATA_NAMESPACE,
+        "schema": settings.TABLE_NAMESPACE
+    }
+
+
+class AlertasOverlayDAO:
+    _type_switcher = {
+        'prescricao': AlertaOverlayPrescricaoDAO
+    }
+
+    @classmethod
+    def get(cls, docu_dk, request):
+        tipo = request.GET.get("tipo")
+
+        if not tipo:
+            raise APIMissingOverlayType
+
+        DAO = cls.switcher(tipo)
+        return DAO.get(docu_dk=docu_dk, request=request)
+
+    @classmethod
+    def switcher(cls, tipo):
+        if tipo not in cls._type_switcher:
+            raise APIInvalidOverlayType
+        return cls._type_switcher[tipo]
+
+
+class DetalheAlertaCompraDAO(SingleDataObjectDAO):
+    QUERIES_DIR = settings.BASE_DIR.child("dominio", "alertas", "queries")
+
+    query_file = "detalhe_alerta_compra.sql"
+    columns = [
+        "contratacao",
+        "data_contratacao",
+        "item_contratado",
+    ]
+    table_namespaces = {
+        "schema_alertas_compras": settings.SCHEMA_ALERTAS,
+    }
