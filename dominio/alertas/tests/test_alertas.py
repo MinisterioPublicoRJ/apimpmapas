@@ -4,7 +4,7 @@ from unittest import mock
 from django.test import TestCase
 from django.urls import reverse
 
-from dominio.alertas import controllers, dao
+from dominio.alertas import dao
 from dominio.alertas.tests.testconf import (
     RemoveFiltroAlertasDispensadosTestCase,
 )
@@ -216,10 +216,12 @@ class TestDispensarAlertasCompras(NoJWTTestCase, TestCase):
             args=(self.orgao_id,),
         )
 
-        self.dispensa_patcher = mock.patch.object(
-            controllers.DispensaAlertaComprasController, "dispensa_para_orgao"
+        self.dispensa_patcher = mock.patch(
+            "dominio.alertas.views.DispensaAlertaComprasController"
         )
+        self.controller_obj_mock = mock.Mock()
         self.dispensa_controller_mock = self.dispensa_patcher.start()
+        self.dispensa_controller_mock.return_value = self.controller_obj_mock
 
     def tearDown(self):
         super().tearDown()
@@ -233,6 +235,7 @@ class TestDispensarAlertasCompras(NoJWTTestCase, TestCase):
         self.dispensa_controller_mock.assert_called_once_with(
             self.orgao_id, alerta_id
         )
+        self.controller_obj_mock.dispensa_para_orgao.assert_called_once_with()
         self.assertEqual(resp.status_code, 201)
 
     def test_bad_request_missing_alerta_id(self):
@@ -250,16 +253,18 @@ class TestRetornaAlertasCompras(NoJWTTestCase, TestCase):
             args=(self.orgao_id,),
         )
 
-        self.dispensa_patcher = mock.patch.object(
-            controllers.DispensaAlertaComprasController, "retorna_para_orgao"
+        self.dispensa_patcher = mock.patch(
+            "dominio.alertas.views.DispensaAlertaComprasController"
         )
+        self.controller_obj_mock = mock.Mock()
         self.dispensa_controller_mock = self.dispensa_patcher.start()
+        self.dispensa_controller_mock.return_value = self.controller_obj_mock
 
     def tearDown(self):
         super().tearDown()
         self.dispensa_patcher.stop()
 
-    def test_post_dispensa_alerta_compra(self):
+    def test_post_retorna_alerta_compra(self):
         alerta_id = "abc123"
         self.url += f"?alerta_id={alerta_id}"
         resp = self.client.post(self.url)
@@ -267,6 +272,7 @@ class TestRetornaAlertasCompras(NoJWTTestCase, TestCase):
         self.dispensa_controller_mock.assert_called_once_with(
             self.orgao_id, alerta_id
         )
+        self.controller_obj_mock.retorna_para_orgao.assert_called_once_with()
         self.assertEqual(resp.status_code, 200)
 
     def test_bad_request_missing_alerta_id(self):
@@ -285,8 +291,7 @@ class TestEnviarAlertasComprasOuvidoria(NoJWTTestCase, TestCase):
         )
 
         self.controller_patcher = mock.patch(
-            "dominio.alertas.views.controllers"
-            ".EnviaAlertaComprasOuvidoriaController"
+            "dominio.alertas.views.EnviaAlertaComprasOuvidoriaController"
         )
         self.controller_mock = self.controller_patcher.start()
 
