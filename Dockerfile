@@ -1,4 +1,4 @@
-FROM openshift/python:cadg
+FROM https://docker-registry-default.devcloud.mprj.mp.br/openshift/python:cadg
 
 USER root
 
