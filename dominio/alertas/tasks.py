@@ -5,7 +5,7 @@ from dominio.alertas.mail import envia_email_ouvidoria
 from mprj_api.celeryconfig import app
 
 
-class CustomTaskClass(celery.task.Task):
+class CustomTaskClass(celery.Task):
 
     def after_return(self, status, retval, task_id, args, kwargs, einfo=None):
         if status == "FAILURE":
