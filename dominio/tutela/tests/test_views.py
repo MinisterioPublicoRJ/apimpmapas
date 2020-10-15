@@ -72,6 +72,32 @@ class ListaProcessosViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         self.assertEqual(response_2.data, expected_response_page_2)
 
 
+class ListaInvestigacoesViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
+    @mock.patch(
+        'dominio.tutela.views.ListaInvestigacoesView.INVESTIGACOES_SIZE'
+    )
+    @mock.patch('dominio.tutela.views.ListaInvestigacoesDAO.get')
+    def test_lista_investigacoes_result(self, _get_data, _INVESTIGACOES_SIZE):
+        _INVESTIGACOES_SIZE.return_value = 1
+        _get_data.return_value = [{"data": 1}, {"data": 2}, {"data": 3}]
+
+        response_1 = self.client.get(reverse(
+            'dominio:lista-investigacoes',
+            args=('1')) + '?page=1')
+        response_2 = self.client.get(reverse(
+            'dominio:lista-investigacoes',
+            args=('1')) + '?page=2')
+
+        expected_response_page_1 = [{"data": 1}]
+        expected_response_page_2 = [{"data": 2}]
+
+        _get_data.assert_called_with(orgao_id=1)
+        self.assertEqual(response_1.status_code, 200)
+        self.assertEqual(response_2.status_code, 200)
+        self.assertEqual(response_1.data, expected_response_page_1)
+        self.assertEqual(response_2.data, expected_response_page_2)
+
+
 class TestTempoTramitacao(NoJWTTestCase, TestCase):
     @mock.patch('dominio.tutela.dao.TempoTramitacaoDAO.get')
     def test_correct_response(self, _get_data):

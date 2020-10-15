@@ -33,3 +33,25 @@ class AlertasComprasSerializer(serializers.Serializer):
 
 class IdentificadorAlertaSerializer(serializers.Serializer):
     alerta_id = serializers.CharField()
+
+
+class AlertaOverlayPrescricaoSerializer(serializers.Serializer):
+    tipo_penal = serializers.CharField()
+    nm_investigado = serializers.CharField()
+    max_pena = serializers.FloatField()
+    delitos_multiplicadores = serializers.CharField()
+    fator_pena = serializers.FloatField()
+    max_pena_fatorado = serializers.FloatField()
+    dt_inicio_prescricao = serializers.CharField()
+    dt_fim_prescricao = serializers.CharField()
+    adpr_chave = serializers.CharField()
+
+
+class DetalheAlertaSerializer(serializers.Serializer):
+    contratacao = serializers.CharField()
+    data_contratacao = serializers.DateTimeField()
+    item_contratado = serializers.CharField()
+    var_perc = serializers.SerializerMethodField()
+
+    def get_var_perc(self, obj):
+        return str(obj.get("var_perc", "")).replace(".", ",")

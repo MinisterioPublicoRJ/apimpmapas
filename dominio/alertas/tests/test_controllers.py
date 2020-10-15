@@ -140,7 +140,7 @@ class TestEnviaAlertaComprasOuvidoriaController(TestCase):
         }
         self.expected_status = 201
         self.expected_row_key = (
-            f"{self.orgao_id}_{self.alerta_sigla}_{self.alerta_id}"
+            f"{self.alerta_sigla}_{self.alerta_id}"
         ).encode()
         cf = self.controller.hbase_cf
         self.expected_data = {
@@ -189,11 +189,6 @@ class TestEnviaAlertaComprasOuvidoriaController(TestCase):
             {"detail": "Este alerta já foi enviado para ouvidoria"}
         )
         self.assertEqual(status, 409)
-
-    def test_get_row_key(self):
-        row_key = self.controller.get_row_key(self.orgao_id, self.alerta_id)
-
-        self.assertEqual(row_key, self.expected_row_key)
 
     def test_rollback_em_caso_de_erro(self):
         self.controller.rollback()

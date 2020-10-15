@@ -2,7 +2,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from dominio.mixins import CacheMixin, PaginatorMixin, JWTAuthMixin
-from dominio.alertas import controllers, dao
+from dominio.alertas import dao
+from dominio.alertas.controllers import (
+    DispensaAlertaComprasController,
+    EnviaAlertaComprasOuvidoriaController,
+)
 
 from .serializers import AlertasListaSerializer, IdentificadorAlertaSerializer
 
@@ -64,9 +68,11 @@ class DispensarAlertaView(JWTAuthMixin, APIView):
         orgao_id = self.kwargs.get(self.orgao_url_kwarg)
         alerta_id = self.get_alerta_id()
 
-        controllers.DispensaAlertaComprasController.dispensa_para_orgao(
-            orgao_id, alerta_id
+        controller = DispensaAlertaComprasController(
+            orgao_id,
+            alerta_id
         )
+        controller.dispensa_para_orgao()
         return Response(
             data={"detail": "Alerta dispensado com sucesso"},
             status=201
@@ -85,14 +91,25 @@ class RetornarAlertaView(JWTAuthMixin, APIView):
         orgao_id = self.kwargs.get(self.orgao_url_kwarg)
         alerta_id = self.get_alerta_id()
 
-        controllers.DispensaAlertaComprasController.retorna_para_orgao(
-            orgao_id, alerta_id
+        controller = DispensaAlertaComprasController(
+            orgao_id,
+            alerta_id,
         )
+        controller.retorna_para_orgao()
 
         return Response(
             data={"detail": "Alerta retornado com sucesso"},
             status=200
         )
+
+
+class AlertasOverlayView(JWTAuthMixin, CacheMixin, APIView):
+    cache_config = 'ALERTAS_OVERLAY_CACHE_TIMEOUT'
+
+    def get(self, request, *args, **kwargs):
+        docu_dk = int(kwargs.get('docu_dk'))
+        data = dao.AlertasOverlayDAO.get(docu_dk=docu_dk, request=request)
+        return Response(data=data)
 
 
 class EnviarAlertaComprasOuvidoriaView(JWTAuthMixin, APIView):
@@ -107,7 +124,7 @@ class EnviarAlertaComprasOuvidoriaView(JWTAuthMixin, APIView):
         orgao_id = self.kwargs.get(self.orgao_url_kwarg)
         alerta_id = self.get_alerta_id()
 
-        controller = controllers.EnviaAlertaComprasOuvidoriaController(
+        controller = EnviaAlertaComprasOuvidoriaController(
             orgao_id,
             alerta_id
         )

@@ -63,8 +63,7 @@ class EnviaAlertaComprasOuvidoriaController(BaseController):
     hbase_table_name = settings.HBASE_ALERTAS_OUVIDORIA_TABLE
 
     def rollback(self):
-        row_key = self.get_row_key(self.orgao_id, self.alerta_id)
-        self.get_table.delete(row_key)
+        self.get_table.delete(self.row_key)
 
     def success(self):
         dispensa_controller = DispensaAlertaComprasController(
@@ -75,7 +74,7 @@ class EnviaAlertaComprasOuvidoriaController(BaseController):
 
     @property
     def row_key(self):
-        return self.get_row_key(self.orgao_id, self.alerta_id)
+        return f"{self.alerta_sigla}_{self.alerta_id}".encode()
 
     @property
     def row_data(self):
