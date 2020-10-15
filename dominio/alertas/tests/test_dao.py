@@ -373,37 +373,45 @@ class TestAlertasOverlayDAO(TestCase):
         with pytest.raises(APIInvalidOverlayType):
             dao.AlertasOverlayDAO.get(docu_dk, mock_request)
 
-    def test_overlay_prescricao(self):
-        pass
-        # _execute.return_value = [
-        #     ('Crime1', 'Nome1', '1.0', 'Nomes',
-        #      '0.5', '0.5', '2020-01-01', '2020-01-02'),
-        #     ('Crime2', 'Nome1', '1.0', 'Nomes',
-        #      '0.5', '0.5', '2020-02-01', '2020-02-02'),
-        # ]
+    @mock.patch("dominio.dao.impala_execute")
+    def test_overlay_prescricao(self, _execute):
+        _execute.return_value = [
+            ('Crime1', 'Nome1', '1.0', 'Nomes',
+             '0.5', '0.5', '2020-01-01', '2020-01-02'),
+            ('Crime2', 'Nome1', '1.0', 'Nomes',
+             '0.5', '0.5', '2020-02-01', '2020-02-02'),
+        ]
 
-        # alertas_expected = [
-        #     {
-        #         'tipo_penal': 'Crime1',
-        #         'nm_investigado': 'Nome1',
-        #         'max_pena': 1.0,
-        #         'delitos_multiplicadores': 'Nomes',
-        #         'fator_pena': 0.5,
-        #         'max_pena_fatorado': 0.5,
-        #         'dt_inicio_prescricao': '2020-01-01',
-        #         'dt_fim_prescricao': '2020-01-02'
-        #     },
-        #     {
-        #         'tipo_penal': 'Crime2',
-        #         'nm_investigado': 'Nome1',
-        #         'max_pena': 1.0,
-        #         'delitos_multiplicadores': 'Nomes',
-        #         'fator_pena': 0.5,
-        #         'max_pena_fatorado': 0.5,
-        #         'dt_inicio_prescricao': '2020-02-01',
-        #         'dt_fim_prescricao': '2020-02-02'
-        #     },
-        # ]
+        alertas_expected = [
+            {
+                'tipo_penal': 'Crime1',
+                'nm_investigado': 'Nome1',
+                'max_pena': 1.0,
+                'delitos_multiplicadores': 'Nomes',
+                'fator_pena': 0.5,
+                'max_pena_fatorado': 0.5,
+                'dt_inicio_prescricao': '2020-01-01',
+                'dt_fim_prescricao': '2020-01-02'
+            },
+            {
+                'tipo_penal': 'Crime2',
+                'nm_investigado': 'Nome1',
+                'max_pena': 1.0,
+                'delitos_multiplicadores': 'Nomes',
+                'fator_pena': 0.5,
+                'max_pena_fatorado': 0.5,
+                'dt_inicio_prescricao': '2020-02-01',
+                'dt_fim_prescricao': '2020-02-02'
+            },
+        ]
+
+        docu_dk = 10
+        mock_request = mock.MagicMock()
+
+        data = dao.AlertaOverlayPrescricaoDAO.get(
+            docu_dk=docu_dk, request=mock_request
+        )
+        self.assertEqual(data, alertas_expected)
 
 
 class TestFiltraAlertasDispensadosTodosOrgaos(TestCase):
