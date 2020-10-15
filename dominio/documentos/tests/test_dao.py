@@ -7,8 +7,10 @@ from django.test import TestCase
 from dominio.documentos.dao import (
     DadosAssuntoDAO,
     DadosPromotorDAO,
+    InstauracaoICDAO,
     MinutaPrescricaoDAO,
     ProrrogacaoICDAO,
+    ProrrogacaoPPDAO,
 )
 
 
@@ -123,9 +125,68 @@ class TestProrrogacaoICDAO(TestImpalaExecuteMixin, TestCase):
     def test_get_prorrogacao_data(self):
         docu_dk = "1234"
         num_procedimento = "1111.2222.3333"
-        self._impala_execute.return_value = ((num_procedimento,),)
+        comarca = "COMARCA"
+        self._impala_execute.return_value = ((num_procedimento, comarca),)
 
         data = ProrrogacaoICDAO.get(docu_dk=docu_dk)
-        expected = {"num_procedimento": num_procedimento}
+        expected = {
+            "num_procedimento": num_procedimento,
+            "comarca": comarca,
+        }
+
+        self.assertEqual(data, expected)
+
+
+class TestProrrogacaoPPDAO(TestImpalaExecuteMixin, TestCase):
+    def test_get_prorrogacao_data(self):
+        docu_dk = "1234"
+        num_procedimento = "1111.2222.3333"
+        comarca = "COMARCA"
+        self._impala_execute.return_value = ((num_procedimento, comarca),)
+
+        data = ProrrogacaoPPDAO.get(docu_dk=docu_dk)
+        expected = {
+            "num_procedimento": num_procedimento,
+            "comarca": comarca,
+        }
+
+        self.assertEqual(data, expected)
+
+
+class TestInstauracaoICDAO(TestImpalaExecuteMixin, TestCase):
+    def test_get_instauracao_data(self):
+        docu_dk = "1234"
+        num_procedimento = "1111.2222.3333"
+        nome_promotoria = "PROMOTORIA"
+        comarca = "COMARCA"
+        objeto = "objeto"
+        codigo_assunto = 12345
+        atribuicao = "ATRIBUICAO"
+        ementa = "EMENTA"
+        investigados = "INVESTIGADOS"
+        self._impala_execute.return_value = (
+            (
+                num_procedimento,
+                nome_promotoria,
+                comarca,
+                objeto,
+                codigo_assunto,
+                atribuicao,
+                ementa,
+                investigados,
+            ),
+        )
+
+        data = InstauracaoICDAO.get(docu_dk=docu_dk)
+        expected = {
+            "num_procedimento": num_procedimento,
+            "nome_promotoria": nome_promotoria,
+            "comarca": comarca,
+            "objeto": objeto,
+            "codigo_assunto": codigo_assunto,
+            "atribuicao": atribuicao,
+            "ementa": ementa,
+            "investigados": investigados,
+        }
 
         self.assertEqual(data, expected)
