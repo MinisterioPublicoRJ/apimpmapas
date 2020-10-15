@@ -5,8 +5,6 @@ from lupa.cache import (
     _remove_from_cache
 )
 
-from mprj_api.celeryconfig import app
-
 
 def asynch_repopulate_cache_entity(key_prefix, queryset):
     _repopulate_cache_entity(key_prefix, queryset)
