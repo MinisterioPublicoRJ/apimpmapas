@@ -68,6 +68,12 @@ class SuaMesaDetalheAISPSerializer(serializers.Serializer):
 class SuaMesaDetalheTutelaProcessosSerializer(serializers.Serializer):
     orgao_id = serializers.IntegerField()
     nm_orgao = serializers.CharField()
-    nr_acoes_ultimos_60_dias = serializers.IntegerField(min_value=0)
+    nr_acoes_12_meses_anterior = serializers.IntegerField(min_value=0)
+    nr_acoes_12_meses_atual = serializers.IntegerField(min_value=0)
     variacao_12_meses = serializers.FloatField()
+    nr_acoes_60_dias_anterior = serializers.IntegerField(min_value=0)
+    nr_acoes_ultimos_60_dias = serializers.IntegerField(min_value=0)
+    variacao_60_dias = serializers.FloatField()
+    nr_acoes_30_dias_anterior = serializers.IntegerField(min_value=0)
     nr_acoes_ultimos_30_dias = serializers.IntegerField(min_value=0)
+    variacao_30_dias = serializers.FloatField()
