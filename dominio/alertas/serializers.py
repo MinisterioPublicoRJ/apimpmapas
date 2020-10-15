@@ -45,3 +45,13 @@ class AlertaOverlayPrescricaoSerializer(serializers.Serializer):
     dt_inicio_prescricao = serializers.CharField()
     dt_fim_prescricao = serializers.CharField()
     adpr_chave = serializers.CharField()
+
+
+class DetalheAlertaSerializer(serializers.Serializer):
+    contratacao = serializers.CharField()
+    data_contratacao = serializers.DateTimeField()
+    item_contratado = serializers.CharField()
+    var_perc = serializers.SerializerMethodField()
+
+    def get_var_perc(self, obj):
+        return str(obj.get("var_perc", "")).replace(".", ",")
