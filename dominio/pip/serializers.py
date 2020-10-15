@@ -49,6 +49,8 @@ class PIPPrincipaisInvestigadosListaSerializer(serializers.Serializer):
     fase_documento = serializers.CharField()
     dt_ultimo_andamento = serializers.DateTimeField()
     desc_ultimo_andamento = serializers.CharField()
+    status_personagem = serializers.CharField()
+    pers_dk = serializers.CharField()
 
 
 class PIPIndicadoresSucessoParser(serializers.Serializer):

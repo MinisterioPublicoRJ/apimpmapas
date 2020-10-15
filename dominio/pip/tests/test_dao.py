@@ -351,7 +351,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "Assunto 1 --- Assunto 2",
                 "FaseDoc",
                 datetime(2020, 4, 22, 13, 36, 6, 668000),
-                "Andamento 1"
+                "Andamento 1",
+                "Status 1",
+                "Pers 1",
             ),
         ]
         ser_data = PIPPrincipaisInvestigadosListaDAO.serialize(result_set)
@@ -369,7 +371,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
             "assuntos": ["Assunto 1", "Assunto 2"],
             "fase_documento": "FaseDoc",
             "dt_ultimo_andamento": '2020-04-22T13:36:06.668000Z',
-            "desc_ultimo_andamento": "Andamento 1"
+            "desc_ultimo_andamento": "Andamento 1",
+            "status_personagem": "Status 1",
+            "pers_dk": "Pers 1",
         }]
         assert ser_data == expected_data
 
@@ -390,7 +394,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "Assunto 1 --- Assunto 2",
                 "FaseDoc",
                 datetime(2020, 4, 22, 13, 36, 6, 668000),
-                "Andamento 1"
+                "Andamento 1",
+                "Status 1",
+                "Pers 1",
             ),
             (
                 16,
@@ -406,7 +412,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "Assunto 1 --- Assunto 2",
                 "FaseDoc",
                 datetime(2020, 4, 22, 13, 36, 6, 668000),
-                "Andamento 1"
+                "Andamento 1",
+                "Status 1",
+                "Pers 1",
             )
         ]
         expected = [
@@ -424,7 +432,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "assuntos": ["Assunto 1", "Assunto 2"],
                 "fase_documento": "FaseDoc",
                 "dt_ultimo_andamento": '2020-04-22T13:36:06.668000Z',
-                "desc_ultimo_andamento": "Andamento 1"
+                "desc_ultimo_andamento": "Andamento 1",
+                "status_personagem": "Status 1",
+                "pers_dk": "Pers 1",
             }
         ]
         output = PIPPrincipaisInvestigadosListaDAO.get(
@@ -449,7 +459,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "Assunto 1 --- Assunto 2",
                 "FaseDoc",
                 datetime(2020, 4, 22, 13, 36, 6, 668000),
-                "Andamento 1"
+                "Andamento 1",
+                "Status 1",
+                "Pers 1",
             ),
             (
                 16,
@@ -465,7 +477,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "Assunto 1 --- Assunto 2",
                 "FaseDoc",
                 datetime(2020, 4, 22, 13, 36, 6, 668000),
-                "Andamento 1"
+                "Andamento 1",
+                "Status 1",
+                "Pers 1",
             )
         ]
         expected = [
@@ -483,7 +497,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "assuntos": ["Assunto 1", "Assunto 2"],
                 "fase_documento": "FaseDoc",
                 "dt_ultimo_andamento": '2020-04-22T13:36:06.668000Z',
-                "desc_ultimo_andamento": "Andamento 1"
+                "desc_ultimo_andamento": "Andamento 1",
+                "status_personagem": "Status 1",
+                "pers_dk": "Pers 1",
             },
             {
                 "representante_dk": 16,
@@ -499,7 +515,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "assuntos": ["Assunto 1", "Assunto 2"],
                 "fase_documento": "FaseDoc",
                 "dt_ultimo_andamento": '2020-04-22T13:36:06.668000Z',
-                "desc_ultimo_andamento": "Andamento 1"
+                "desc_ultimo_andamento": "Andamento 1",
+                "status_personagem": "Status 1",
+                "pers_dk": "Pers 1",
             }
         ]
         output = PIPPrincipaisInvestigadosListaDAO.get(representante_dk=16)
