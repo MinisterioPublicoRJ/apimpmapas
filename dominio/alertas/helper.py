@@ -8,6 +8,7 @@ ordem = [
     'GATE',
     'MCSI',
     'MVVD',
+    'RO',
     'IC1A',
     'PA1A',
     'PPFP',
