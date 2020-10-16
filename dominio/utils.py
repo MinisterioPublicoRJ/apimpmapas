@@ -1,3 +1,4 @@
+import re
 from ast import literal_eval
 
 
@@ -104,3 +105,19 @@ def hbase_decode_row(data, encoding='utf-8'):
         for key, value in data[1].items()
     }
     return decoded_key, decoded_data
+
+
+def is_valid_cpf(cpf):
+    """Recebe um CPF e diz se ele é um número válido. Precisa ser string!"""
+    if isinstance(cpf, str):
+        cleaned_cpf = re.sub('[^0-9]', '', cpf)
+        return len(cleaned_cpf) == 11 and cleaned_cpf != '00000000000'
+    return False
+
+
+def is_valid_rg(rg):
+    """Recebe um RG e diz se ele é um número válido. Precisa ser string!"""
+    if isinstance(rg, str):
+        cleaned_rg = re.sub('[^0-9]', '', rg)
+        return len(cleaned_rg) == 9 and cleaned_rg != '000000000'
+    return False

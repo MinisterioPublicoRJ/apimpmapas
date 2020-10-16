@@ -7,6 +7,8 @@ from dominio.utils import (
     check_literal_eval,
     hbase_encode_row,
     hbase_decode_row,
+    is_valid_cpf,
+    is_valid_rg,
 )
 
 
@@ -119,3 +121,19 @@ class UtilsTest(TestCase):
         decoded_data = hbase_decode_row(encoded_data)
 
         self.assertEqual(data, decoded_data)
+
+    def test_is_valid_cpf(self):
+        self.assertEqual(is_valid_cpf('00000000000'), False)
+        self.assertEqual(is_valid_cpf(None), False)
+        self.assertEqual(is_valid_cpf('12345678901'), True)
+        self.assertEqual(is_valid_cpf('123.456.789-01'), True)
+        self.assertEqual(is_valid_cpf('12345'), False)
+        self.assertEqual(is_valid_cpf('12345-78901'), False)
+
+    def test_is_valid_rg(self):
+        self.assertEqual(is_valid_rg('000000000'), False)
+        self.assertEqual(is_valid_rg(None), False)
+        self.assertEqual(is_valid_rg('123456789'), True)
+        self.assertEqual(is_valid_rg('12.345.678-9'), True)
+        self.assertEqual(is_valid_rg('12345'), False)
+        self.assertEqual(is_valid_rg('12345.789'), False)

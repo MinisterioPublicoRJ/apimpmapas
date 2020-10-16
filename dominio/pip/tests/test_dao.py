@@ -569,3 +569,45 @@ class TestPIPPrincipaisInvestigadosPerfilDAO:
             "cnpj": "123456"
         }]
         assert ser_data == expected_data
+
+    def test_get_header_info(self):
+        data = [
+            {
+                "pess_dk": 1,
+                "nm_investigado": "FULANO DE TAL",
+                "nm_mae": "CICLANA DE TAL",
+                "cpf": "1234",
+                "rg": "62718558-0",
+                "dt_nasc": None
+            },
+            {
+                "pess_dk": 2,
+                "nm_investigado": "FULANO DE T",
+                "nm_mae": "CICLANA DE TAL",
+                "cpf": None,
+                "rg": "1234",
+                "dt_nasc": "1970-01-01T00:00:00Z"
+            },
+            {
+                "pess_dk": 3,
+                "nm_investigado": "FULANO DE TAL",
+                "nm_mae": "CICLANA DE TAL",
+                "cpf": "123.456.789-01",
+                "rg": None,
+                "dt_nasc": "1970-01-01T00:00:00Z"
+            },
+        ]
+        expected_output = {
+            "pess_dk": None,
+            "nm_investigado": "FULANO DE TAL",
+            "nm_mae": "CICLANA DE TAL",
+            "cpf": "123.456.789-01",
+            "rg": "62718558-0",
+            "dt_nasc": "1970-01-01T00:00:00Z"
+        }
+        output = PIPPrincipaisInvestigadosPerfilDAO.get_header_info(data)
+        assert output == expected_output
+
+    def test_get_header_info_no_data(self):
+        output = PIPPrincipaisInvestigadosPerfilDAO.get_header_info([])
+        assert output == {}
