@@ -108,10 +108,13 @@ class TestPIPPrincipaisInvestigadosView(
 
 class TestPIPPrincipaisInvestigadosListaView(
         NoJWTTestCase, NoCacheTestCase, TestCase):
+    @mock.patch("dominio.pip.views."
+                "PIPPrincipaisInvestigadosPerfilDAO.get_header_info")
     @mock.patch("dominio.pip.views.PIPPrincipaisInvestigadosPerfilDAO.get")
     @mock.patch("dominio.pip.views.PIPPrincipaisInvestigadosListaDAO.get")
-    def test_correct_response(self, _get_procedimentos, _get_perfil):
+    def test_correct_response(self, _get_procedimentos, _get_perfil, _header):
         _get_perfil.return_value = [{"data": 1}]
+        _header.return_value = {"data": 1}
         _get_procedimentos.return_value = [{"data": 1}, {"data": 2}]
         expected_output = {
             "perfil": {"data": 1},

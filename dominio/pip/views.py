@@ -80,7 +80,7 @@ class PIPPrincipaisInvestigadosListaView(
         pess_dk = int(request.GET.get("pess_dk", 0))
 
         similares = PIPPrincipaisInvestigadosPerfilDAO.get(dk=representante_dk)
-        perfil = similares[0] if similares else {}
+        perfil = PIPPrincipaisInvestigadosPerfilDAO.get_header_info(similares)
         procedimentos = PIPPrincipaisInvestigadosListaDAO.get(
             dk=representante_dk, pess_dk=pess_dk
         )

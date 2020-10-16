@@ -16,6 +16,7 @@ from dominio.pip.serializers import (
     PIPPrincipaisInvestigadosPerfilSerializer,
 )
 
+from dominio.utils import is_valid_cpf, is_valid_rg
 from dominio.dao import GenericDAO
 
 
@@ -247,6 +248,26 @@ class PIPPrincipaisInvestigadosPerfilDAO(GenericPIPDAO):
         ]
 
         return ser_data
+
+    @classmethod
+    def get_header_info(cls, data):
+        if not data:
+            return {}
+
+        header = data[0].copy()
+        header['pess_dk'] = None
+        header['cpf'] = header['cpf'] if is_valid_cpf(header['cpf']) else None
+        header['rg'] = header['rg'] if is_valid_rg(header['rg']) else None
+        for profile in data:
+            if not header['nm_mae']:
+                header['nm_mae'] = profile['nm_mae']
+            if not header['dt_nasc']:
+                header['dt_nasc'] = profile['dt_nasc']
+            if not header['cpf'] and is_valid_cpf(profile['cpf']):
+                header['cpf'] = profile['cpf']
+            if not header['rg'] and is_valid_rg(profile['rg']):
+                header['rg'] = profile['rg']
+        return header
 
 
 class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
