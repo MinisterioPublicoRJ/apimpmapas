@@ -7,4 +7,4 @@ JOIN {schema}.orgi_foro_orgao ofo ON docto.docu_orgi_orga_dk_responsavel = ofo.f
 JOIN {schema}.orgi_foro foro ON foro.cofo_dk = ofo.forg_cofo_dk
 JOIN {schema}.orgi_comarca coma ON foro.cofo_cmrc_dk = coma.cmrc_dk
 WHERE docu_dk = :docu_dk
-    AND docu_cldc_dk = 392 -- Apenas IC
+    AND docu_cldc_dk = 395 -- Apenas PP

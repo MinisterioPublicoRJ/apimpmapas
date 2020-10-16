@@ -351,7 +351,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "Assunto 1 --- Assunto 2",
                 "FaseDoc",
                 datetime(2020, 4, 22, 13, 36, 6, 668000),
-                "Andamento 1"
+                "Andamento 1",
+                "Status 1",
+                "Pers 1",
             ),
         ]
         ser_data = PIPPrincipaisInvestigadosListaDAO.serialize(result_set)
@@ -369,7 +371,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
             "assuntos": ["Assunto 1", "Assunto 2"],
             "fase_documento": "FaseDoc",
             "dt_ultimo_andamento": '2020-04-22T13:36:06.668000Z',
-            "desc_ultimo_andamento": "Andamento 1"
+            "desc_ultimo_andamento": "Andamento 1",
+            "status_personagem": "Status 1",
+            "pers_dk": "Pers 1",
         }]
         assert ser_data == expected_data
 
@@ -390,7 +394,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "Assunto 1 --- Assunto 2",
                 "FaseDoc",
                 datetime(2020, 4, 22, 13, 36, 6, 668000),
-                "Andamento 1"
+                "Andamento 1",
+                "Status 1",
+                "Pers 1",
             ),
             (
                 16,
@@ -406,7 +412,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "Assunto 1 --- Assunto 2",
                 "FaseDoc",
                 datetime(2020, 4, 22, 13, 36, 6, 668000),
-                "Andamento 1"
+                "Andamento 1",
+                "Status 1",
+                "Pers 1",
             )
         ]
         expected = [
@@ -424,7 +432,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "assuntos": ["Assunto 1", "Assunto 2"],
                 "fase_documento": "FaseDoc",
                 "dt_ultimo_andamento": '2020-04-22T13:36:06.668000Z',
-                "desc_ultimo_andamento": "Andamento 1"
+                "desc_ultimo_andamento": "Andamento 1",
+                "status_personagem": "Status 1",
+                "pers_dk": "Pers 1",
             }
         ]
         output = PIPPrincipaisInvestigadosListaDAO.get(
@@ -449,7 +459,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "Assunto 1 --- Assunto 2",
                 "FaseDoc",
                 datetime(2020, 4, 22, 13, 36, 6, 668000),
-                "Andamento 1"
+                "Andamento 1",
+                "Status 1",
+                "Pers 1",
             ),
             (
                 16,
@@ -465,7 +477,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "Assunto 1 --- Assunto 2",
                 "FaseDoc",
                 datetime(2020, 4, 22, 13, 36, 6, 668000),
-                "Andamento 1"
+                "Andamento 1",
+                "Status 1",
+                "Pers 1",
             )
         ]
         expected = [
@@ -483,7 +497,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "assuntos": ["Assunto 1", "Assunto 2"],
                 "fase_documento": "FaseDoc",
                 "dt_ultimo_andamento": '2020-04-22T13:36:06.668000Z',
-                "desc_ultimo_andamento": "Andamento 1"
+                "desc_ultimo_andamento": "Andamento 1",
+                "status_personagem": "Status 1",
+                "pers_dk": "Pers 1",
             },
             {
                 "representante_dk": 16,
@@ -499,7 +515,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "assuntos": ["Assunto 1", "Assunto 2"],
                 "fase_documento": "FaseDoc",
                 "dt_ultimo_andamento": '2020-04-22T13:36:06.668000Z',
-                "desc_ultimo_andamento": "Andamento 1"
+                "desc_ultimo_andamento": "Andamento 1",
+                "status_personagem": "Status 1",
+                "pers_dk": "Pers 1",
             }
         ]
         output = PIPPrincipaisInvestigadosListaDAO.get(representante_dk=16)
@@ -551,3 +569,45 @@ class TestPIPPrincipaisInvestigadosPerfilDAO:
             "cnpj": "123456"
         }]
         assert ser_data == expected_data
+
+    def test_get_header_info(self):
+        data = [
+            {
+                "pess_dk": 1,
+                "nm_investigado": "FULANO DE TAL",
+                "nm_mae": "CICLANA DE TAL",
+                "cpf": "1234",
+                "rg": "62718558-0",
+                "dt_nasc": None
+            },
+            {
+                "pess_dk": 2,
+                "nm_investigado": "FULANO DE T",
+                "nm_mae": "CICLANA DE TAL",
+                "cpf": None,
+                "rg": "1234",
+                "dt_nasc": "1970-01-01T00:00:00Z"
+            },
+            {
+                "pess_dk": 3,
+                "nm_investigado": "FULANO DE TAL",
+                "nm_mae": "CICLANA DE TAL",
+                "cpf": "123.456.789-01",
+                "rg": None,
+                "dt_nasc": "1970-01-01T00:00:00Z"
+            },
+        ]
+        expected_output = {
+            "pess_dk": None,
+            "nm_investigado": "FULANO DE TAL",
+            "nm_mae": "CICLANA DE TAL",
+            "cpf": "123.456.789-01",
+            "rg": "62718558-0",
+            "dt_nasc": "1970-01-01T00:00:00Z"
+        }
+        output = PIPPrincipaisInvestigadosPerfilDAO.get_header_info(data)
+        assert output == expected_output
+
+    def test_get_header_info_no_data(self):
+        output = PIPPrincipaisInvestigadosPerfilDAO.get_header_info([])
+        assert output == {}

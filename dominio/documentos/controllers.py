@@ -7,8 +7,10 @@ from docxtpl import DocxTemplate
 from dominio.documentos.dao import (
     DadosAssuntoDAO,
     DadosPromotorDAO,
+    InstauracaoICDAO,
     MinutaPrescricaoDAO,
     ProrrogacaoICDAO,
+    ProrrogacaoPPDAO,
 )
 from dominio.documentos.helpers import formata_lista, formata_pena, traduz_mes
 
@@ -106,4 +108,26 @@ class ProrrogacaoICController(BaseDocumentoController):
         contexto = {"data_hoje": self.data_hoje}
         contexto.update(DadosPromotorDAO.get(cpf=self.cpf))
         contexto.update(ProrrogacaoICDAO.get(docu_dk=self.docu_dk))
+        return contexto
+
+
+class ProrrogacaoPPController(BaseDocumentoController):
+    template = "dominio/documentos/doc_templates/prorrogacao_de_PP.docx"
+
+    @cached_property
+    def context(self):
+        contexto = {"data_hoje": self.data_hoje}
+        contexto.update(DadosPromotorDAO.get(cpf=self.cpf))
+        contexto.update(ProrrogacaoPPDAO.get(docu_dk=self.docu_dk))
+        return contexto
+
+
+class InstauracaoICController(BaseDocumentoController):
+    template = "dominio/documentos/doc_templates/instauracao_IC.docx"
+
+    @cached_property
+    def context(self):
+        contexto = {"data_hoje": self.data_hoje}
+        contexto.update(DadosPromotorDAO.get(cpf=self.cpf))
+        contexto.update(InstauracaoICDAO.get(docu_dk=self.docu_dk))
         return contexto

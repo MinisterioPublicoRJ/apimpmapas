@@ -1,7 +1,7 @@
 SELECT 
     acervo_inicio,
     acervo_fim,
-    CASE acervo_inicio WHEN 0 THEN NULL ELSE (acervo_fim - acervo_inicio)/acervo_inicio END as variacao_acervo,
+    CASE WHEN (acervo_fim - acervo_inicio) = 0 THEN 0 ELSE (acervo_fim - acervo_inicio)/acervo_inicio END as variacao_acervo,
     aisp_nomes
 FROM (
     SELECT 

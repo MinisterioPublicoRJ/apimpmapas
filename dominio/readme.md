@@ -627,6 +627,28 @@ Retorna resposta HTTP:
 Abrirá caixa de download com documento Word.
 ```
 
+## Prorrogação de Procedimento Preparatório (PP)
+
+```
+GET /dominio/documentos/prorrogacao-pp/<orgao_id>/<cpf>/<docu_dk>
+
+Retorna resposta HTTP:
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+
+Abrirá caixa de download com documento Word.
+```
+
+## Instauração de Inquérito Civil (IC)
+
+```
+GET /dominio/documentos/instauracao-ic/<orgao_id>/<cpf>/<docu_dk>
+
+Retorna resposta HTTP:
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+
+Abrirá caixa de download com documento Word.
+```
+
 ## Lista Processos da Promotoria
 
 ```
