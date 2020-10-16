@@ -377,9 +377,9 @@ class TestAlertasOverlayDAO(TestCase):
     def test_overlay_prescricao(self, _execute):
         _execute.return_value = [
             ('Crime1', 'Nome1', '1.0', 'Nomes',
-             '0.5', '0.5', '2020-01-01', '2020-01-02'),
+             '0.5', '0.5', '2020-01-01', '2020-01-02', '1_2_3'),
             ('Crime2', 'Nome1', '1.0', 'Nomes',
-             '0.5', '0.5', '2020-02-01', '2020-02-02'),
+             '0.5', '0.5', '2020-02-01', '2020-02-02', '4_5_6'),
         ]
 
         alertas_expected = [
@@ -391,7 +391,8 @@ class TestAlertasOverlayDAO(TestCase):
                 'fator_pena': 0.5,
                 'max_pena_fatorado': 0.5,
                 'dt_inicio_prescricao': '2020-01-01',
-                'dt_fim_prescricao': '2020-01-02'
+                'dt_fim_prescricao': '2020-01-02',
+                'adpr_chave': '1_2_3'
             },
             {
                 'tipo_penal': 'Crime2',
@@ -401,7 +402,8 @@ class TestAlertasOverlayDAO(TestCase):
                 'fator_pena': 0.5,
                 'max_pena_fatorado': 0.5,
                 'dt_inicio_prescricao': '2020-02-01',
-                'dt_fim_prescricao': '2020-02-02'
+                'dt_fim_prescricao': '2020-02-02',
+                'adpr_chave': '4_5_6'
             },
         ]
 
