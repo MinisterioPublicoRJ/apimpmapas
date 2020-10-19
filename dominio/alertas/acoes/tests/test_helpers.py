@@ -1,6 +1,9 @@
 from unittest import TestCase
 
-from dominio.alertas.acoes.helpers import lista_procs_ausentes
+from dominio.alertas.acoes.helpers import (
+    formata_ros_ausentes,
+    lista_procs_ausentes,
+)
 
 
 class TestListaROsAusentes(TestCase):
@@ -22,3 +25,25 @@ class TestListaROsAusentes(TestCase):
         numeros_ausentes = lista_procs_ausentes(self.lista_procs)
 
         self.assertEqual(numeros_ausentes, self.expected_proc_numeros)
+
+
+class TestFormataListaROs(TestCase):
+    def setUp(self):
+        self.numeros_ausentes = [1, 10, 100]
+        self.num_delegacia = 12
+        self.ano = 2020
+
+        self.expected_ros = [
+            "012-00001/2020",
+            "012-00010/2020",
+            "012-00100/2020",
+        ]
+
+    def test_formata_numeros_ros_ausentes(self):
+        ros_formatados = formata_ros_ausentes(
+            self.numeros_ausentes,
+            self.num_delegacia,
+            self.ano
+        )
+
+        self.assertEqual(ros_formatados, self.expected_ros)
