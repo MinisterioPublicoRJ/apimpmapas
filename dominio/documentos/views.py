@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import FileResponse, HttpResponse
 from django.shortcuts import Http404
 from django.views.generic import View
 
@@ -8,6 +8,8 @@ from dominio.documentos.controllers import (
     ProrrogacaoICController,
     ProrrogacaoPPController,
 )
+from dominio.documentos.dao import ListaROsAusentesDAO
+from dominio.documentos.helpers import gera_planilha_excel, ros_ausentes
 
 from dominio.exceptions import APIEmptyResultError
 from dominio.mixins import JWTAuthMixin
@@ -114,3 +116,20 @@ class InstauracaoICView(BaseDocumentoViewMixin, JWTAuthMixin, View):
             raise Http404
 
         return response
+
+
+class ListaROsAusentesView(JWTAuthMixin, View):
+    def get(self, request, *args, **kwargs):
+        num_delegacia = kwargs.get("num_delegacia")
+        header = ["id", "Número procedimento"]
+
+        lista_ros = ListaROsAusentesDAO.get(num_delegacia=num_delegacia)
+        return FileResponse(
+            gera_planilha_excel(
+                ros_ausentes(lista_ros, num_delegacia),
+                header=header,
+                sheet_title="ROs Ausentes"
+            ),
+            filename="ros-ausentes.xlsx",
+            as_attachment=True
+        )

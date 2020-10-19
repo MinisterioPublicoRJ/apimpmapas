@@ -24,4 +24,9 @@ urlpatterns = [
         views.ProrrogacaoPPView.as_view(),
         name="prorrogacao-pp"
     ),
+    path(
+        "ros-ausentes/<int:num_delegacia>",
+        views.ListaROsAusentesView.as_view(),
+        name="ros-ausentes"
+    ),
 ]
