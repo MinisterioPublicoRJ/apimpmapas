@@ -1,4 +1,7 @@
 from datetime import date
+from io import BytesIO
+
+from openpyxl import Workbook
 
 
 def lista_procs_ausentes(lista_procs, key_name="proc_numero_serial"):
@@ -22,3 +25,18 @@ def ros_ausentes(lista_numeros, num_delegacia, ano=None):
         num_delegacia=num_delegacia,
         ano=ano
     )
+
+
+def gera_planilha_excel(rows, header, sheet_title):
+    workbook = Workbook()
+    sheet = workbook[workbook.sheetnames[0]]
+    sheet.title = sheet_title
+    # Escreve cabeçalho
+    sheet.append(header)
+    for row in rows:
+        sheet.append(row)
+
+    buffer_ = BytesIO()
+    workbook.save(buffer_)
+    buffer_.seek(0)
+    return buffer_

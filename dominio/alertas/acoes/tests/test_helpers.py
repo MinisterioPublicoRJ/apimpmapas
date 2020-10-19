@@ -1,9 +1,11 @@
 from unittest import TestCase
 
+import openpyxl
 from freezegun import freeze_time
 
 from dominio.alertas.acoes.helpers import (
     formata_ros_ausentes,
+    gera_planilha_excel,
     lista_procs_ausentes,
     ros_ausentes,
 )
@@ -89,3 +91,40 @@ class TestListaROsAusentes(TestCase):
         )
 
         self.assertEqual(ros, self.expected_ros)
+
+
+class TestCriaArquivoCSVROsAusentes(TestCase):
+    def setUp(self):
+        self.ros = [
+            (1, "012-00002/2020"),
+            (2, "012-00004/2020"),
+            (3, "012-00005/2020"),
+        ]
+        self.header = ["id", "Número Procedimento"]
+        self.sheet_title = "ROs ausentes"
+        self.expected_data = [
+            self.header,
+            [1, "012-00002/2020"],
+            [2, "012-00004/2020"],
+            [3, "012-00005/2020"],
+        ]
+
+    def open_excel_file(self, file_obj):
+        xlsx_file = openpyxl.load_workbook(file_obj)
+        sheet = xlsx_file[xlsx_file.sheetnames[0]]
+        rows = []
+        for row in sheet.rows:
+            rows.append([row[0].value, row[1].value])
+
+        return rows
+
+    def test_gera_arquivo_excel(self):
+        excel_obj = gera_planilha_excel(
+            self.ros,
+            self.header,
+            self.sheet_title
+        )
+
+        excel_data = self.open_excel_file(excel_obj)
+
+        self.assertEqual(excel_data, self.expected_data)
