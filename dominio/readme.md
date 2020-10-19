@@ -649,6 +649,17 @@ Retorna resposta HTTP:
 Abrirá caixa de download com documento Word.
 ```
 
+## Lista de ROs não enviados ao MPRJ
+
+```
+GET /dominio/documentos/ros-ausentes/<numero_delegacia>
+
+Retorna resposta HTTP:
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+Abrirá caixa de download com documento Word.
+```
+
 ## Lista Processos da Promotoria
 
 ```
