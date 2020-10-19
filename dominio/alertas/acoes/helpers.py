@@ -14,8 +14,8 @@ def formata_ros_ausentes(lista_numeros, num_delegacia, ano=None):
         ano = date.today().year
 
     return [
-        f"{str(num_delegacia).zfill(3)}-{str(num).zfill(5)}/{ano}"
-        for num in lista_numeros
+        (id_, f"{str(num_delegacia).zfill(3)}-{str(num).zfill(5)}/{ano}")
+        for id_, num in enumerate(lista_numeros, 1)
     ]
 
 
