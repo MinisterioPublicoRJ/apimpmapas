@@ -130,6 +130,6 @@ class ListaROsAusentesView(JWTAuthMixin, View):
                 header=header,
                 sheet_title="ROs Ausentes"
             ),
-            filename="ros-ausentes.xlsx",
+            filename=f"dp-{num_delegacia}-ros-ausentes.xlsx",
             as_attachment=True
         )

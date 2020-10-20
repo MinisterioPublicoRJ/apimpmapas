@@ -257,6 +257,7 @@ class TestListaROsAusentes(NoJWTTestCase, TestCase):
             headers["content-disposition"],
             (
                 'Content-Disposition',
-                'attachment; filename="ros-ausentes.xlsx"'
+                'attachment; '
+                f'filename="dp-{self.num_delegacia}-ros-ausentes.xlsx"'
             )
         )
