@@ -218,3 +218,46 @@ class TestInstauracaoIC(NoJWTTestCase, TestCase):
         resp = self.client.get(self.url)
 
         self.assertEqual(resp.status_code, 404)
+
+
+class TestListaROsAusentes(NoJWTTestCase, TestCase):
+    def setUp(self):
+        super().setUp()
+        self.num_delegacia = 12
+        self.url = reverse("dominio:ros-ausentes", args=(self.num_delegacia,))
+
+        self.dao_exec_patcher = mock.patch(
+            "dominio.documentos.views.ListaROsAusentesDAO.execute"
+        )
+        self.dao_exec_mock = self.dao_exec_patcher.start()
+        self.dao_exec_mock.return_value = [
+            (1,),
+            (2,),
+            (5,),
+        ]
+
+    def tearDown(self):
+        super().tearDown()
+        self.dao_exec_mock.stop()
+
+    def test_correct_response(self):
+        resp = self.client.get(self.url)
+
+        headers = resp._headers
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            headers["content-type"],
+            (
+                "Content-Type",
+                "application/vnd.openxmlformats-officedocument"
+                ".spreadsheetml.sheet"
+            )
+        )
+        self.assertEqual(
+            headers["content-disposition"],
+            (
+                'Content-Disposition',
+                'attachment; '
+                f'filename="dp-{self.num_delegacia}-ros-ausentes.xlsx"'
+            )
+        )
