@@ -21,6 +21,7 @@ class TestFormataPena(TestCase):
             {"input": 25.049999999999997, "output": "25 anos e 1 mês"},
             {"input": 16.7, "output": "16 anos e 9 meses"},
             {"input": 10.0, "output": "10 anos"},
+            {"input": 0.5, "output": "6 meses"},
         ]
 
         for info in penas_info:
