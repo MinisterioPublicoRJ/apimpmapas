@@ -35,22 +35,22 @@ class PIPPrincipaisInvestigadosPerfilSerializer(serializers.Serializer):
 
 
 class PIPPrincipaisInvestigadosListaSerializer(serializers.Serializer):
-    representante_dk = serializers.IntegerField()
+    # representante_dk = serializers.IntegerField()
     pess_dk = serializers.IntegerField()
     coautores = serializers.CharField()
-    tipo_personagem = serializers.CharField()
-    orgao_id = serializers.IntegerField()
+    # tipo_personagem = serializers.CharField()
+    # orgao_id = serializers.IntegerField()
     documento_nr_mp = serializers.CharField()
-    documento_dt_cadastro = serializers.DateTimeField()
-    documento_classe = serializers.CharField()
+    # documento_dt_cadastro = serializers.DateTimeField()
+    # documento_classe = serializers.CharField()
     nm_orgao = serializers.CharField()
-    etiqueta = serializers.CharField()
+    # etiqueta = serializers.CharField()
     assuntos = serializers.ListField(serializers.CharField())
     fase_documento = serializers.CharField()
     dt_ultimo_andamento = serializers.DateTimeField()
     desc_ultimo_andamento = serializers.CharField()
-    status_personagem = serializers.CharField()
-    pers_dk = serializers.CharField()
+    # status_personagem = serializers.CharField()
+    # pers_dk = serializers.CharField()
 
 
 class PIPIndicadoresSucessoParser(serializers.Serializer):

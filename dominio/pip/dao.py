@@ -175,18 +175,20 @@ class PIPPrincipaisInvestigadosDAO(GenericPIPDAO):
         # Flags e dados precisam estar juntos para o front
         for row in data:
             investigado_dk = row["representante_dk"]
-            row["is_pinned"] = (
-                hbase_flags[investigado_dk]["is_pinned"]
-                if investigado_dk in hbase_flags
-                and "is_pinned" in hbase_flags[investigado_dk]
-                else False
-            )
-            row["is_removed"] = (
-                hbase_flags[investigado_dk]["is_removed"]
-                if investigado_dk in hbase_flags
-                and "is_removed" in hbase_flags[investigado_dk]
-                else False
-            )
+            if investigado_dk in hbase_flags:
+                row["is_pinned"] = (
+                    hbase_flags[investigado_dk]["is_pinned"]
+                    if "is_pinned" in hbase_flags[investigado_dk]
+                    else False
+                )
+                row["is_removed"] = (
+                    hbase_flags[investigado_dk]["is_removed"]
+                    if "is_removed" in hbase_flags[investigado_dk]
+                    else False
+                )
+            else:
+                row["is_pinned"] = False
+                row["is_removed"] = False
 
         # Nomes que foram removidos não precisam ser entregues
         data = [row for row in data if not row["is_removed"]]
@@ -273,22 +275,22 @@ class PIPPrincipaisInvestigadosPerfilDAO(GenericPIPDAO):
 class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
     query_file = "pip_principais_investigados_lista.sql"
     columns = [
-        "representante_dk",
+        # "representante_dk",
         "pess_dk",
         "coautores",
-        "tipo_personagem",
-        "orgao_id",
+        # "tipo_personagem",
+        # "orgao_id",
         "documento_nr_mp",
-        "documento_dt_cadastro",
-        "documento_classe",
+        # "documento_dt_cadastro",
+        # "documento_classe",
         "nm_orgao",
-        "etiqueta",
+        # "etiqueta",
         "assuntos",
         "fase_documento",
         "dt_ultimo_andamento",
         "desc_ultimo_andamento",
-        "status_personagem",
-        "pers_dk",
+        # "status_personagem",
+        # "pers_dk",
     ]
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
     serializer = PIPPrincipaisInvestigadosListaSerializer
