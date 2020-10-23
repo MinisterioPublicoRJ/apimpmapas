@@ -2,6 +2,10 @@ import os
 
 from celery import Celery
 from decouple import config
+from kombu.serialization import enable_insecure_serializers
+
+
+enable_insecure_serializers(["pickle"])
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mprj_api.settings')
 
