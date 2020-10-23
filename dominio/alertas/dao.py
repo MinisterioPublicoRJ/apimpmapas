@@ -84,7 +84,9 @@ class AlertaMaxPartitionDAO(AlertasDAO):
         data = cache.get(cls.cache_prefix, default=None)
         if not data:
             data = cls.execute()
-            data = data[0][0] if data else '-1'
+            if not data:
+                return '-1'
+            data = data[0][0]
             cache.set(cls.cache_prefix, data, timeout=settings.CACHE_TIMEOUT)
         return data
 

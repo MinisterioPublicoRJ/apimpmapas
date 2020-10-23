@@ -19,16 +19,11 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         alertas_return = [
             {
                 'sigla': 'mock',
-                'descricao': 'mock',
                 'doc_dk': 0000,
                 'num_doc': 'mock',
-                'num_ext': 'mock',
-                'etiqueta': 'mock',
-                'classe_doc': 'mock',
                 'data_alerta': datetime(2020, 1, 1),
                 'orgao': int(orgao_id),
                 'id_alerta': 'id_alrt',
-                'classe_hier': 'mock',
                 'dias_passados': -1
             },
         ]
@@ -36,16 +31,11 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         alertas_expected = [
             {
                 'sigla': 'mock',
-                'descricao': 'mock',
                 'doc_dk': 0,
                 'num_doc': 'mock',
-                'num_ext': 'mock',
-                'etiqueta': 'mock',
-                'classe_doc': 'mock',
                 'data_alerta': '2020-01-01T00:00:00Z',
                 'orgao': 0,
                 'id_alerta': 'id_alrt',
-                'classe_hier': 'mock',
                 'dias_passados': -1
             }
         ]
@@ -69,16 +59,11 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         alertas_return = [
             {
                 'sigla': 'mock',
-                'descricao': 'mock',
                 'doc_dk': 0000,
                 'num_doc': 'mock',
-                'num_ext': 'mock',
-                'etiqueta': 'mock',
-                'classe_doc': 'mock',
                 'data_alerta': datetime(2020, 1, 1),
                 'orgao': int(orgao_id),
                 'id_alerta': 'id_alrt',
-                'classe_hier': 'mock',
                 'dias_passados': -1
             },
         ]
@@ -86,16 +71,11 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         alertas_expected = [
             {
                 'sigla': 'mock',
-                'descricao': 'mock',
                 'doc_dk': 0,
                 'num_doc': 'mock',
-                'num_ext': 'mock',
-                'etiqueta': 'mock',
-                'classe_doc': 'mock',
                 'data_alerta': '2020-01-01T00:00:00Z',
                 'orgao': 0,
                 'id_alerta': 'id_alrt',
-                'classe_hier': 'mock',
                 'dias_passados': -1
             }
         ]
@@ -114,43 +94,45 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
 class AlertaResumoTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
-    @mock.patch.object(dao.ResumoAlertasMGPDAO, "execute")
-    @mock.patch.object(dao.ResumoAlertasComprasDAO, "execute")
-    def test_alert_resumo(self, _execute_compras_dao, _execute_mgp_dao):
+    # @mock.patch.object(dao.ResumoAlertasMGPDAO, "execute")
+    # @mock.patch.object(dao.ResumoAlertasComprasDAO, "execute")
+    @mock.patch.object(dao.AlertaMaxPartitionDAO, "execute")
+    @mock.patch.object(dao.AlertasDAO, "execute")
+    def test_alert_resumo(self, _execute_resumo_dao, _execute_max_dt):
         orgao_id = '12345'
 
-        _execute_compras_dao.return_value = [
-            ("COMP", "mock 1", int(orgao_id), 10),
-            ("COMP", "mock 2", int(orgao_id), 11),
-        ]
-        _execute_mgp_dao.return_value = [
-            ("OUVI", "mock 3", int(orgao_id), 12),
-            ("PRCR", "mock 4", int(orgao_id), 13),
+        # _execute_compras_dao.return_value = [
+        #     ("COMP", "mock 1", int(orgao_id), 10),
+        #     ("COMP", "mock 2", int(orgao_id), 11),
+        # ]
+        # _execute_mgp_dao.return_value = [
+        #     ("OUVI", "mock 3", int(orgao_id), 12),
+        #     ("PRCR", "mock 4", int(orgao_id), 13),
+        # ]
+        _execute_max_dt.return_value = [('20201010',)]
+
+        _execute_resumo_dao.return_value = [
+            ("COMP", 10),
+            ("COMP", 11),
+            ("OUVI", 12),
+            ("PRCR", 13),
         ]
 
         alertas_expected = [
             {
                 'sigla': 'PRCR',
-                'descricao': 'mock 4',
-                'orgao': 12345,
                 'count': 13,
             },
             {
                 'sigla': 'COMP',
-                'descricao': 'mock 1',
-                'orgao': 12345,
                 'count': 10,
             },
             {
                 'sigla': 'COMP',
-                'descricao': 'mock 2',
-                'orgao': 12345,
                 'count': 11
             },
             {
                 'sigla': 'OUVI',
-                'descricao': 'mock 3',
-                'orgao': 12345,
                 'count': 12,
             },
         ]
