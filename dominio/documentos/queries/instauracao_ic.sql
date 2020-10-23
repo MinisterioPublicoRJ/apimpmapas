@@ -8,7 +8,7 @@ SELECT
     COALESCE(group_concat(DISTINCT replace(replace(arvore_assunto.hierarquia, split_part(arvore_assunto.hierarquia, '>', 1), ''), '>', ''), ';'), '') AS ementa,
     COALESCE(group_concat(DISTINCT pessoa.pess_nm_pessoa), '') AS investigados
 FROM
-    exadata_dev.mcpr_documento docto
+    {schema}.mcpr_documento docto
     JOIN {schema}.orgi_foro_orgao ofo ON docto.docu_orgi_orga_dk_responsavel = ofo.forg_orgi_dk
     JOIN {schema}.orgi_foro foro ON foro.cofo_dk = ofo.forg_cofo_dk
     JOIN {schema}.orgi_comarca coma ON foro.cofo_cmrc_dk = coma.cmrc_dk
