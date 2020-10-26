@@ -28,6 +28,7 @@ from dominio.suamesa.dao_metrics import (
     MetricsDetalheDocumentoOrgaoDAO,
     MetricsDetalheDocumentoOrgaoCPFDAO,
 )
+from dominio.pip.utils import get_orgaos_same_aisps
 
 
 class SuaMesaDAO:
@@ -83,12 +84,20 @@ class SuaMesaDetalhePIPAISPDAO(RankingMixin, MetricsDetalheDocumentoOrgaoDAO):
     columns = [
         'acervo_inicio',
         'acervo_fim',
-        'variacao_acervo',
-        'aisp_nomes'
+        'variacao_acervo'
     ]
     serializer = SuaMesaDetalheAISPSerializer
     ranking_fields = ['acervo_fim']
     ranking_dao = RankingAISPDAO
+
+    @classmethod
+    def get(cls, **kwargs):
+        orgao_id = kwargs['orgao_id']
+        _, orgaos = get_orgaos_same_aisps(orgao_id)
+
+        kwargs['orgaos_aisp'] = tuple(orgaos)
+
+        super().get(**kwargs)
 
 
 class SuaMesaDetalheTutelaInvestigacoesDAO(
@@ -145,5 +154,13 @@ class SuaMesaDetalheFactoryDAO(SuaMesaDAO):
         if not tipo:
             raise APIMissingSuaMesaType
 
+        kwargs = {
+            'orgao_id': orgao_id,
+            'tipo_detalhe': tipo,
+            'cpf': request.GET.get('cpf'),
+            'n': int(request.GET.get('n', 3)),
+            'intervalo': request.GET.get('intervalo', 'mes')
+        }
+
         DAO = cls.switcher(tipo)
-        return DAO.get(orgao_id=orgao_id, request=request)
+        return DAO.get(**kwargs)

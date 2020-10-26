@@ -65,15 +65,9 @@ class RankingMixin:
     ranking_dao = RankingDAO
 
     @classmethod
-    def get_ranking_data(cls, orgao_id, request, accept_empty=True):
-        kwargs = {
-            'orgao_id': orgao_id,
-            'tipo_detalhe': request.GET.get('tipo'),
-            'n': int(request.GET.get('n', 3)),
-            'intervalo': request.GET.get('intervalo', 'mes')
-        }
-
+    def get_ranking_data(cls, accept_empty=True, **kwargs):
         data = []
+        
         # ranking_dao pode ser uma lista, um dao para cada ranking_field
         # Caso tenha mais fields do que DAOs, o zip irá excluir um desses
         # fields. O componente no front atualmente só pega os 2 primeiros
@@ -91,13 +85,12 @@ class RankingMixin:
         return data
 
     @classmethod
-    def get(cls, orgao_id, request):
+    def get(cls, **kwargs):
         data = super().get(
             accept_empty=True,
-            orgao_id=orgao_id,
-            request=request
+            **kwargs
         )
-        ranking_data = cls.get_ranking_data(orgao_id, request)
+        ranking_data = cls.get_ranking_data(**kwargs)
 
         # Intuito do Mixin simplesmente adicionar novos dados, verificação
         # do que existe ficaria mais pra frente. Mas pra ganhar tempo,
