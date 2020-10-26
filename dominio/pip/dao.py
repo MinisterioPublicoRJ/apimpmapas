@@ -256,17 +256,27 @@ class PIPPrincipaisInvestigadosPerfilDAO(GenericPIPDAO):
 
         header = data[0].copy()
         header['pess_dk'] = None
-        header['cpf'] = header['cpf'] if is_valid_cpf(header['cpf']) else None
-        header['rg'] = header['rg'] if is_valid_rg(header['rg']) else None
-        for profile in data:
-            if not header['nm_mae']:
-                header['nm_mae'] = profile['nm_mae']
-            if not header['dt_nasc']:
-                header['dt_nasc'] = profile['dt_nasc']
-            if not header['cpf'] and is_valid_cpf(profile['cpf']):
-                header['cpf'] = profile['cpf']
-            if not header['rg'] and is_valid_rg(profile['rg']):
-                header['rg'] = profile['rg']
+        if 'cpf' in header:
+            header['cpf'] = (
+                header['cpf'] if is_valid_cpf(header['cpf'])
+                else None
+            )
+            header['rg'] = header['rg'] if is_valid_rg(header['rg']) else None
+            for profile in data:
+                if not header['nm_mae']:
+                    header['nm_mae'] = profile['nm_mae']
+                if not header['dt_nasc']:
+                    header['dt_nasc'] = profile['dt_nasc']
+                if not header['cpf'] and is_valid_cpf(profile['cpf']):
+                    header['cpf'] = profile['cpf']
+                if not header['rg'] and is_valid_rg(profile['rg']):
+                    header['rg'] = profile['rg']
+        else:
+            for profile in data:
+                if not header['cnpj']:
+                    header['cnpj'] = profile['cnpj']
+                if not header['nm_pesj']:
+                    header['nm_pesj'] = profile['nm_pesj']
         return header
 
 
