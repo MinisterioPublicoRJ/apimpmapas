@@ -110,13 +110,17 @@ class ResumoAlertasDAO(AlertasDAO):
     def get_all(cls, id_orgao):
         resumo = []
         dt_partition = AlertaMaxPartitionDAO.get()
-        resumo = super().get(id_orgao=id_orgao, dt_partition=dt_partition, accept_empty=True)
-        
+        resumo = super().get(
+            id_orgao=id_orgao,
+            dt_partition=dt_partition,
+            accept_empty=True
+        )
+
         return cls.ordena_resumo(resumo)
 
     @classmethod
     def ordena_resumo(cls, resumo):
-        ordem_dict = {s: i for i,s in enumerate(alrt_ordem)}
+        ordem_dict = {s: i for i, s in enumerate(alrt_ordem)}
         return sorted(resumo, key=lambda x: ordem_dict[x["sigla"]])
 
 
@@ -135,7 +139,7 @@ class AlertaMGPDAO(AlertasDAO):
 
     @classmethod
     def ordena_alertas(cls, alertas):
-        ordem_dict = {s: i for i,s in enumerate(alrt_ordem)}
+        ordem_dict = {s: i for i, s in enumerate(alrt_ordem)}
         return sorted(alertas, key=lambda x: ordem_dict[x["sigla"]])
 
     @classmethod

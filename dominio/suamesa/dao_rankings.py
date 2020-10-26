@@ -67,7 +67,7 @@ class RankingMixin:
     @classmethod
     def get_ranking_data(cls, accept_empty=True, **kwargs):
         data = []
-        
+
         # ranking_dao pode ser uma lista, um dao para cada ranking_field
         # Caso tenha mais fields do que DAOs, o zip irá excluir um desses
         # fields. O componente no front atualmente só pega os 2 primeiros
