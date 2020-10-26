@@ -257,7 +257,10 @@ class PIPPrincipaisInvestigadosPerfilDAO(GenericPIPDAO):
         header = data[0].copy()
         header['pess_dk'] = None
         if 'cpf' in header:
-            header['cpf'] = header['cpf'] if is_valid_cpf(header['cpf']) else None
+            header['cpf'] = (
+                header['cpf'] if is_valid_cpf(header['cpf'])
+                else None
+            )
             header['rg'] = header['rg'] if is_valid_rg(header['rg']) else None
             for profile in data:
                 if not header['nm_mae']:
