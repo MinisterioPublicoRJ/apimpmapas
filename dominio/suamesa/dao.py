@@ -97,7 +97,7 @@ class SuaMesaDetalhePIPAISPDAO(RankingMixin, MetricsDetalheDocumentoOrgaoDAO):
 
         kwargs['orgaos_aisp'] = tuple(orgaos)
 
-        super().get(**kwargs)
+        return super().get(**kwargs)
 
 
 class SuaMesaDetalheTutelaInvestigacoesDAO(
