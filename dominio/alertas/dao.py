@@ -71,6 +71,11 @@ class FiltraAlertasDispensadosMixin:
 class AlertasDAO(GenericDAO):
     QUERIES_DIR = settings.BASE_DIR.child("dominio", "alertas", "queries")
 
+    @classmethod
+    def ordena_alertas(cls, alertas):
+        ordem_dict = {s: i for i, s in enumerate(alrt_ordem)}
+        return sorted(alertas, key=lambda x: ordem_dict[x["sigla"]])
+
 
 class AlertaMaxPartitionDAO(AlertasDAO):
     query_file = "alerta_max_dt_partition.sql"
@@ -108,7 +113,6 @@ class ResumoAlertasDAO(AlertasDAO):
 
     @classmethod
     def get_all(cls, id_orgao):
-        resumo = []
         dt_partition = AlertaMaxPartitionDAO.get()
         resumo = super().get(
             id_orgao=id_orgao,
@@ -116,12 +120,7 @@ class ResumoAlertasDAO(AlertasDAO):
             accept_empty=True
         )
 
-        return cls.ordena_resumo(resumo)
-
-    @classmethod
-    def ordena_resumo(cls, resumo):
-        ordem_dict = {s: i for i, s in enumerate(alrt_ordem)}
-        return sorted(resumo, key=lambda x: ordem_dict[x["sigla"]])
+        return cls.ordena_alertas(resumo)
 
 
 class AlertaMGPDAO(AlertasDAO):
@@ -136,11 +135,6 @@ class AlertaMGPDAO(AlertasDAO):
         "id_alerta",
         "sigla",
     ]
-
-    @classmethod
-    def ordena_alertas(cls, alertas):
-        ordem_dict = {s: i for i, s in enumerate(alrt_ordem)}
-        return sorted(alertas, key=lambda x: ordem_dict[x["sigla"]])
 
     @classmethod
     def execute(cls, **kwargs):
