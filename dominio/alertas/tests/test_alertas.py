@@ -93,9 +93,6 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
 
 class AlertaResumoTest(NoJWTTestCase, NoCacheTestCase, TestCase):
-
-    # @mock.patch.object(dao.ResumoAlertasMGPDAO, "execute")
-    # @mock.patch.object(dao.ResumoAlertasComprasDAO, "execute")
     @mock.patch.object(dao.AlertaMaxPartitionDAO, "execute")
     @mock.patch.object(dao.AlertasDAO, "execute")
     def test_alert_resumo(self, _execute_resumo_dao, _execute_max_dt):
