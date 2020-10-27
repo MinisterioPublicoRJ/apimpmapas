@@ -6,7 +6,7 @@ from dominio.db_connectors import run_query
 from dominio.utils import get_top_n_orderby_value_as_dict
 
 
-@lru_cache()
+@lru_cache(maxsize=None)
 def get_aisps():
     """Retorna as AISPs de cada PIP, na seguinte ordem:
     (codigo_pip, codigo_aisp, nome_aisp)
@@ -21,6 +21,7 @@ def get_aisps():
     return run_query(query)
 
 
+@lru_cache(maxsize=None)
 def get_orgaos_same_aisps(orgao_id):
     """Retorna os órgãos que pertencem às mesmas AISPs de orgao_id, por AISP.
 

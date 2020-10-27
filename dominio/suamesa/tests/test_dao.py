@@ -76,7 +76,10 @@ class TestSuaMesaDetalheFactoryDAO(NoJWTTestCase, NoCacheTestCase, TestCase):
         _switcher.assert_called_once_with('teste_tipo')
         mock_DAO.get.assert_called_once_with(
             orgao_id=orgao_id,
-            request=mock_request
+            tipo_detalhe='teste_tipo',
+            cpf=None,
+            n=3,
+            intervalo='mes'
         )
         self.assertEqual(output, expected_output)
 

@@ -98,18 +98,15 @@ class TestRankingMixin(NoJWTTestCase, NoCacheTestCase, TestCase):
         ]
         _ranking_dao.return_value = dao_mock
 
-        mock_request = mock.MagicMock()
-        mock_request.GET = {'tipo': 'teste'}
-
-        orgao_id = 10
         kwargs = {
-            'orgao_id': orgao_id,
+            'orgao_id': 10,
             'tipo_detalhe': 'teste',
             'n': 3,
-            'intervalo': 'mes'
+            'intervalo': 'mes',
+            'cpf': None
         }
 
-        output = RankingMixin.get_ranking_data(orgao_id, mock_request)
+        output = RankingMixin.get_ranking_data(**kwargs)
         expected_output = [
             {
                 'ranking_fieldname': 'campo_teste',
@@ -138,18 +135,15 @@ class TestRankingMixin(NoJWTTestCase, NoCacheTestCase, TestCase):
         dao_mock_created.get.return_value = []
         _ranking_dao.return_value = dao_mock
 
-        mock_request = mock.MagicMock()
-        mock_request.GET = {'tipo': 'teste'}
-
-        orgao_id = 10
         kwargs = {
-            'orgao_id': orgao_id,
+            'orgao_id': 10,
             'tipo_detalhe': 'teste',
             'n': 3,
-            'intervalo': 'mes'
+            'intervalo': 'mes',
+            'cpf': None
         }
 
-        output = RankingMixin.get_ranking_data(orgao_id, mock_request)
+        output = RankingMixin.get_ranking_data(**kwargs)
         expected_output = []
         self.assertEqual(output, expected_output)
         dao_mock_created.get.assert_called_once_with(
@@ -165,11 +159,15 @@ class TestRankingMixin(NoJWTTestCase, NoCacheTestCase, TestCase):
         _get_ranking_data.return_value = [{'data': 1}]
         super_mock.get.return_value = {'metrics': {'data': 1}}
 
-        orgao_id = 10
-        mock_request = mock.MagicMock()
-        mock_request.GET = {}
+        kwargs = {
+            'orgao_id': 10,
+            'tipo_detalhe': 'teste',
+            'n': 3,
+            'intervalo': 'mes',
+            'cpf': None
+        }
 
-        output = RankingMixin.get(orgao_id, mock_request)
+        output = RankingMixin.get(**kwargs)
         expected_output = {
             'metrics': {'data': 1},
             'rankings': [{'data': 1}],
@@ -186,9 +184,13 @@ class TestRankingMixin(NoJWTTestCase, NoCacheTestCase, TestCase):
         _get_ranking_data.return_value = []
         super_mock.get.return_value = {'metrics': {}}
 
-        orgao_id = 10
-        mock_request = mock.MagicMock()
-        mock_request.GET = {}
+        kwargs = {
+            'orgao_id': 10,
+            'tipo_detalhe': 'teste',
+            'n': 3,
+            'intervalo': 'mes',
+            'cpf': None
+        }
 
         with pytest.raises(APIEmptyResultError):
-            RankingMixin.get(orgao_id, mock_request)
+            RankingMixin.get(**kwargs)
