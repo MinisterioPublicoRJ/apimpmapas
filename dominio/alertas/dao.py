@@ -103,7 +103,7 @@ class ResumoAlertasDAO(AlertasDAO):
     que herdam dela.
     """
 
-    query_file = "resumo_alertas_mgp.sql"
+    query_file = "resumo_alertas.sql"
     columns = ["sigla", "count"]
     table_namespaces = {
         "schema": settings.TABLE_NAMESPACE,
