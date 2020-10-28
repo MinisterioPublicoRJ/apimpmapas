@@ -39,3 +39,4 @@ LEFT JOIN {schema}.mcpr_personagem personagem ON docu_dk = pers_docu_dk
 LEFT JOIN {schema}.mcpr_pessoa pessoa ON pessoa.pess_dk = personagem.pers_pess_dk
     AND pessoa.pess_nm_pessoa not rlike '(MP.*|MINIST[EÉ]RIO\\s+P[UÚ]BLICO.*|DEFENSORIA\\\\s\\+P[UÚ]BLICA.*|MINSTERIO PUBLICO|MPRJ|MINITÉRIO PÚBLICO)'
 GROUP BY num_procedimento, nome_promotoria, docu_dt_cadastro, comarca, objeto
+ORDER BY num_procedimento
