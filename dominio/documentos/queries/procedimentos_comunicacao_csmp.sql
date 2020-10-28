@@ -7,13 +7,13 @@ SELECT
     docu_tx_etiqueta
 FROM {schema}.mcpr_documento
 WHERE docu_cldc_dk IN (51219, 51220, 51221, 51222, 51223, 392, 395)
-    AND datediff(now(), docu_dt_cadastro) / 365.2425 > 1
+    AND datediff(last_day(now()), docu_dt_cadastro) / 365.2425 > 1
     AND docu_dt_cancelamento IS NULL
     AND docu_fsdc_dk = 1
     AND NOT docu_tpst_dk = 11
     AND (
         date_part('year', now()) = 2020 AND date_part('month', now()) = 11
-        OR date_part('month', now()) = 10
+        OR date_part('month', now()) = 4
     )
     AND docu_orgi_orga_dk_responsavel = :id_orgao
 )
