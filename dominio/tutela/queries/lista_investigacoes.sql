@@ -4,6 +4,7 @@ docu_nr_mp,
 docu_nr_externo,
 docu_tx_etiqueta,
 personagens,
+representante_dk,
 dt_ultimo_andamento,
 ultimo_andamento,
 url_tjrj

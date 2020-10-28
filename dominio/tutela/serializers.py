@@ -59,6 +59,7 @@ class ListaProcessosSerializer(serializers.Serializer):
     docu_nr_externo = serializers.CharField()
     docu_etiqueta = serializers.CharField()
     docu_personagens = serializers.CharField()
+    representante_dk = serializers.IntegerField()
     dt_ultimo_andamento = serializers.CharField()
     ultimo_andamento = serializers.CharField()
     url_tjrj = serializers.CharField()
