@@ -31,7 +31,7 @@ urlpatterns = [
     ),
     path(
         "procedimentos-csmp/<int:orgao_id>/<str:cpf>",
-        views.ComunicacaoCSMView.as_view(),
+        views.ComunicacaoCSMPView.as_view(),
         name="procedimentos-csmp"
     ),
 ]

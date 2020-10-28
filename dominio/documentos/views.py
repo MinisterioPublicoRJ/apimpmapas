@@ -136,7 +136,7 @@ class ListaROsAusentesView(JWTAuthMixin, View):
         )
 
 
-class ComunicacaoCSMView(BaseDocumentoViewMixin, JWTAuthMixin, View):
+class ComunicacaoCSMPView(BaseDocumentoViewMixin, JWTAuthMixin, View):
     attachment_name = "comunicacao_csmp.docx"
 
     def get(self, request, *args, **kwargs):
