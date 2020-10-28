@@ -6,3 +6,4 @@ flag_multipromotoria,
 flag_top50
 FROM {schema}.tb_pip_investigados
 WHERE pip_codigo = :orgao_id
+AND orgao_last_digit = :digit
