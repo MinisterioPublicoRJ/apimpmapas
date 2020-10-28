@@ -1,10 +1,11 @@
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 from unittest import mock
 
 from django.test import TestCase
 
 from dominio.documentos.dao import (
+    ComunicacaoCSMPDAO,
     DadosAssuntoDAO,
     DadosPromotorDAO,
     InstauracaoICDAO,
@@ -219,3 +220,61 @@ class TestROsAusentes(TestCase):
         data = ListaROsAusentesDAO.get(num_delegacia=self.num_delegacia)
 
         self.assertEqual(data, self.expected_data)
+
+
+class TestComunicacaoCSMPDAO(TestImpalaExecuteMixin, TestCase):
+    def test_get_comunicado_data(self):
+        id_orgao = "abc122"
+        nome_promotoria = ["PROMOTORIA", "PROMOTORIA"]
+        num_procedimento = ["12345", "6789"]
+        comarca = ["COMARCA", "COMARCA"]
+        ementa = ["EMENTA 1", "EMENTA 2"]
+        objeto = ["OBJETO 1", "OBJETO 2"]
+        data_cadastro = [date(2020, 1, 1), date(2019, 1, 1)]
+        investigados = ["INVESTIGADOS", ""]
+        self._impala_execute.return_value = (
+            (
+                nome_promotoria[0],
+                num_procedimento[0],
+                data_cadastro[0],
+                comarca[0],
+                objeto[0],
+                ementa[0],
+                investigados[0],
+            ),
+            (
+                nome_promotoria[1],
+                num_procedimento[1],
+                data_cadastro[1],
+                comarca[1],
+                objeto[1],
+                ementa[1],
+                investigados[1],
+            ),
+        )
+
+        expected_dt_cadastro = ["01/01/2020", "01/01/2019"]
+        expected_tempo_curso = ["9 meses e 27 dias", "1 ano 9 meses e 27 dias"]
+        data = ComunicacaoCSMPDAO.get(id_orgao=id_orgao)
+        expected = [
+            {
+                "num_procedimento": num_procedimento[0],
+                "nome_promotoria": nome_promotoria[0],
+                "data_cadastro": expected_dt_cadastro[0],
+                "tempo_em_curso": expected_tempo_curso[0],
+                "comarca": comarca[0],
+                "ementa": ementa[0],
+                "investigados": investigados[0],
+            },
+            {
+                "num_procedimento": num_procedimento[1],
+                "nome_promotoria": nome_promotoria[1],
+                "data_cadastro": expected_dt_cadastro[1],
+                "tempo_em_curso": expected_tempo_curso[1],
+                "comarca": comarca[1],
+                "ementa": ementa[1],
+                "investigados": investigados[1],
+            },
+        ]
+
+        self.assertEqual(data, expected)
