@@ -109,7 +109,6 @@ class ComunicacaoCSMPDAO(GenericDAO):
         "num_procedimento",
         "data_cadastro",
         "comarca",
-        "tempo_em_curso",
         "objeto",
         "ementa",
         "investigados"

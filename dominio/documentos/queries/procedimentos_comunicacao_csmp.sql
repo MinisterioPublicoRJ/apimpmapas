@@ -22,7 +22,6 @@ SELECT
     docu_nr_mp AS num_procedimento,
     docu_dt_cadastro,
     coma.cmrc_nm_comarca as comarca,
-    datediff(now(), docu_dt_cadastro) / 365.2425 AS tempo_em_curso,
     COALESCE(procs.docu_tx_etiqueta, '') as objeto,
     COALESCE(group_concat(DISTINCT replace(replace(arvore_assunto.hierarquia, split_part(arvore_assunto.hierarquia, '>', 1), ''), '>', ''), ';'), '') AS ementa,
     COALESCE(group_concat(DISTINCT pessoa.pess_nm_pessoa), '') AS investigados
