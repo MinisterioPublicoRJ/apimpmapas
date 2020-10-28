@@ -110,7 +110,6 @@ class PermissoesUsuarioRegular(PermissaoUsuario):
     type = "regular"
     permissoes_dao = [
         DAO_WRAPPER(dao.ListaOrgaosDAO, {"accept_empty": False}),
-        DAO_WRAPPER(dao.ListaOrgaosPessoalDAO, {"accept_empty": True}),
     ]
 
 
@@ -118,7 +117,6 @@ class PermissoesUsuarioAdmin(PermissaoUsuario):
     type = "admin"
     permissoes_dao = [
         DAO_WRAPPER(dao.ListaOrgaosDAO, {"accept_empty": True}),
-        DAO_WRAPPER(dao.ListaOrgaosPessoalDAO, {"accept_empty": True}),
     ]
 
     def __init__(self, username):

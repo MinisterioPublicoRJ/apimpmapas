@@ -24,11 +24,6 @@ class ListaOrgaosDAO(GenericDAO):
         return oracle_access(cls.query(), kwargs)
 
 
-class ListaOrgaosPessoalDAO(ListaOrgaosDAO):
-    query_file = "lista_orgaos_pessoal.sql"
-    serializer = serializers.ListaOrgaosSerializer
-
-
 class ListaTodosOrgaosDAO(GenericDAO):
     QUERIES_DIR = settings.BASE_DIR.child("dominio", "login", "queries")
     query_file = "lista_todos_orgaos.sql"
