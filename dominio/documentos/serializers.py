@@ -1,6 +1,8 @@
+from datetime import date
+
 from rest_framework import serializers
 
-from dominio.documentos.helpers import formata_pena
+from dominio.documentos.helpers import formata_diff_data
 
 
 class ComunicacaoCSMPSerializer(serializers.Serializer):
@@ -16,7 +18,7 @@ class ComunicacaoCSMPSerializer(serializers.Serializer):
         return obj["data_cadastro"].strftime("%d/%m/%Y")
 
     def get_tempo_em_curso(self, obj):
-        return formata_pena(obj["tempo_em_curso"])
+        return formata_diff_data(date.today(), obj["data_cadastro"])
 
     def get_ementa(self, obj):
         ementa = obj["ementa"]
