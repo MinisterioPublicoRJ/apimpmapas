@@ -1,6 +1,7 @@
 from django.conf import settings
 
 from dominio.dao import GenericDAO, SingleDataObjectDAO
+from dominio.documentos.serializers import ComunicacaoCSMPSerializer
 
 
 class DocumentosDAO(SingleDataObjectDAO):
@@ -88,11 +89,29 @@ class InstauracaoICDAO(DocumentosDAO):
 
 
 class ListaROsAusentesDAO(GenericDAO):
-    QUERIES_DIR = settings.BASE_DIR.child(
-        "dominio", "documentos", "queries"
-    )
+    QUERIES_DIR = settings.BASE_DIR.child("dominio", "documentos", "queries")
     query_file = "lista_ros_ausentes.sql"
     columns = ["proc_numero_serial"]
     table_namespaces = {
         "schema_opengeo": settings.SCHEMA_OPENGEO_BDA
     }
+
+
+class ComunicacaoCSMPDAO(GenericDAO):
+    QUERIES_DIR = settings.BASE_DIR.child("dominio", "documentos", "queries")
+    query_file = "procedimentos_comunicacao_csmp.sql"
+    table_namespaces = {
+        "schema": settings.EXADATA_NAMESPACE,
+        "schema_aux": settings.TABLE_NAMESPACE,
+    }
+    columns = [
+        "nome_promotoria",
+        "num_procedimento",
+        "data_cadastro",
+        "comarca",
+        "tempo_em_curso",
+        "objeto",
+        "ementa",
+        "investigados"
+    ]
+    serializer = ComunicacaoCSMPSerializer

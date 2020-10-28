@@ -3,6 +3,7 @@ from django.shortcuts import Http404
 from django.views.generic import View
 
 from dominio.documentos.controllers import (
+    ComunicacaoCSMPController,
     InstauracaoICController,
     MinutaPrescricaoController,
     ProrrogacaoICController,
@@ -133,3 +134,23 @@ class ListaROsAusentesView(JWTAuthMixin, View):
             filename=f"dp-{num_delegacia}-ros-ausentes.xlsx",
             as_attachment=True
         )
+
+
+class ComunicacaoCSMView(BaseDocumentoViewMixin, JWTAuthMixin, View):
+    attachment_name = "comunicacao_csmp.docx"
+
+    def get(self, request, *args, **kwargs):
+        response = self.create_response()
+
+        orgao_id = kwargs.get(self.orgao_url_kwarg)
+        cpf = kwargs.get("cpf")
+        controller = ComunicacaoCSMPController(
+            orgao_id=orgao_id,
+            cpf=cpf,
+        )
+        try:
+            controller.render(response)
+        except APIEmptyResultError:
+            raise Http404
+
+        return response
