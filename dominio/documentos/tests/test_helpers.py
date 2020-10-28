@@ -196,6 +196,10 @@ class TestFormataDiferencaDatas(TestCase):
     def test_relative_date_diff(self):
         dts = (
             (date(2020, 10, 10), date(2019, 1, 1), "1 ano 9 meses e 9 dias"),
+            (date(2020, 10, 10), date(2020, 10, 5), "5 dias"),
+            (date(2020, 9, 10), date(2020, 10, 10), "1 mês"),
+            (date(2010, 9, 10), date(2020, 10, 10), "10 anos e 1 mês"),
+            (date(2020, 10, 10), date(2018, 10, 8), "2 anos e 2 dias"),
         )
 
         with self.subTest():
