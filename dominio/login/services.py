@@ -17,6 +17,17 @@ DAO_WRAPPER = namedtuple("PermissaoDao", ["handler", "kwargs"])
 
 # deveria ser abstrata?
 class PermissaoUsuario:
+    cd_pips_especializadas = (
+        "29941099",
+        "29941140",
+        "29941222",
+        "29941251",
+        "29941368",
+        "30061803",
+        "30070783",
+        "30070806",
+    )
+
     def __init__(self, username):
         self._username = username
 
@@ -39,6 +50,7 @@ class PermissaoUsuario:
 
         lista_orgaos = self._classifica_orgaos(lista_orgaos)
         lista_orgaos = self._adiciona_cisps(lista_orgaos)
+        lista_orgaos = self._classifica_pips_especializadas(lista_orgaos)
         return lista_orgaos
 
     @cached_property
@@ -86,6 +98,20 @@ class PermissaoUsuario:
 
         return lista_orgaos_copy
 
+    def _classifica_pips_especializadas(self, lista_orgaos):
+        for orgao in lista_orgaos:
+            orgao["pip_especializada"] = None
+            if (
+                orgao["cdorgao"] in self.pip_validas
+                and orgao["cdorgao"] in self.cd_pips_especializadas
+            ):
+                orgao["pip_especializada"] = True
+            elif orgao["cdorgao"] in self.pip_validas:
+                orgao["pip_especializada"] = False
+
+        return lista_orgaos
+
+
     @cached_property
     def pip_validas(self):
         return [r["id_orgao"] for r in dao.PIPValidasDAO.get()]
@@ -126,7 +152,8 @@ class PermissoesUsuarioAdmin(PermissaoUsuario):
     def todos_orgaos(self):
         lista_orgaos = dao.ListaTodosOrgaosDAO.get()
         lista_orgaos = self._classifica_orgaos(lista_orgaos)
-        return self._adiciona_cisps(lista_orgaos)
+        lista_orgaos = self._adiciona_cisps(lista_orgaos)
+        return self._classifica_pips_especializadas(lista_orgaos)
 
     @property
     def orgaos_validos(self):
