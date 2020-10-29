@@ -47,7 +47,7 @@ class ResumoAlertasDAOTest(TestCase):
         ]
         self.exec_max_partition_dao_patcher = mock.patch.object(
             dao.AlertaMaxPartitionDAO,
-            "execute"
+            "get"
         )
         self.max_pt_dao_mock = self.exec_max_partition_dao_patcher.start()
         self.max_pt_dao_mock.return_value = '20201010'
@@ -278,8 +278,9 @@ class TestFiltraAlertasDispensados(TestCase):
 
 
 class TestAlertasOverlayDAO(TestCase):
+    @mock.patch.object(dao.AlertaMaxPartitionDAO, "get")
     @mock.patch.object(dao.AlertasOverlayDAO, "switcher")
-    def test_get_result_OK(self, _switcher):
+    def test_get_result_OK(self, _switcher, _dt_partition):
         mock_DAO = mock.MagicMock()
         mock_DAO.get.return_value = [{'data': 1}]
         _switcher.return_value = mock_DAO
@@ -290,12 +291,14 @@ class TestAlertasOverlayDAO(TestCase):
         expected_output = [{'data': 1}]
         docu_dk = 10
 
+        _dt_partition.return_value = '20201010'
+
         output = dao.AlertasOverlayDAO.get(docu_dk, mock_request)
 
         _switcher.assert_called_once_with('teste_tipo')
         mock_DAO.get.assert_called_once_with(
             docu_dk=docu_dk,
-            request=mock_request
+            dt_partition='20201010'
         )
         self.assertEqual(output, expected_output)
 

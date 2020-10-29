@@ -188,20 +188,61 @@ class AlertaOverlayPrescricaoDAO(AlertasDAO):
     }
 
 
+class AlertaOverlayIC1ADAO(AlertasDAO, SingleDataObjectDAO):
+    query_file = "alerta_overlay_ic1a.sql"
+    columns = [
+        'dt_fim_prazo',
+        'dt_movimento',
+        'desc_movimento'
+    ]
+    table_namespaces = {
+        "schema": settings.TABLE_NAMESPACE
+    }
+
+
+class AlertaOverlayPA1ADAO(AlertasDAO, SingleDataObjectDAO):
+    query_file = "alerta_overlay_pa1a.sql"
+    columns = [
+        'dt_fim_prazo',
+        'docu_dt_cadastro'
+    ]
+    table_namespaces = {
+        "schema_exadata": settings.EXADATA_NAMESPACE,
+        "schema": settings.TABLE_NAMESPACE
+    }
+
+
+class AlertaOverlayPPFPDAO(AlertasDAO, SingleDataObjectDAO):
+    query_file = "alerta_overlay_ppfp.sql"
+    columns = [
+        'docu_dt_cadastro'
+    ]
+    table_namespaces = {
+        "schema_exadata": settings.EXADATA_NAMESPACE
+    }
+
+
 class AlertasOverlayDAO:
     _type_switcher = {
-        'prescricao': AlertaOverlayPrescricaoDAO
+        'prescricao': AlertaOverlayPrescricaoDAO,
+        'pa1a': AlertaOverlayPA1ADAO,
+        'ic1a': AlertaOverlayIC1ADAO,
+        'ppfp': AlertaOverlayPPFPDAO
     }
 
     @classmethod
     def get(cls, docu_dk, request):
         tipo = request.GET.get("tipo")
-
         if not tipo:
             raise APIMissingOverlayType
 
+        dt_partition = AlertaMaxPartitionDAO.get()
+
         DAO = cls.switcher(tipo)
-        return DAO.get(docu_dk=docu_dk, request=request)
+        return DAO.get(
+            docu_dk=docu_dk,
+            dt_partition=dt_partition
+        )
 
     @classmethod
     def switcher(cls, tipo):
