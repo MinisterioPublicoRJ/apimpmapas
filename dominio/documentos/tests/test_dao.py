@@ -3,6 +3,7 @@ from decimal import Decimal
 from unittest import mock
 
 from django.test import TestCase
+from freezegun import freeze_time
 
 from dominio.documentos.dao import (
     ComunicacaoCSMPDAO,
@@ -223,6 +224,7 @@ class TestROsAusentes(TestCase):
 
 
 class TestComunicacaoCSMPDAO(TestImpalaExecuteMixin, TestCase):
+    @freeze_time("2020-10-28")
     def test_get_comunicado_data(self):
         id_orgao = "abc122"
         nome_promotoria = ["PROMOTORIA", "PROMOTORIA"]
