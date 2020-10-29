@@ -169,7 +169,7 @@ class PIPPrincipaisInvestigadosDAO(GenericPIPDAO):
         cache_key = '{}_DATA_{}'.format(cls.cache_prefix, orgao_id)
         data = cache.get(cache_key, default=None)
         if not data:
-            digit = int(orgao_id[-1:])
+            digit = int(orgao_id[-1])
             data = super().get(orgao_id=int(orgao_id), digit=digit)
             cache.set(cache_key, data, timeout=settings.CACHE_TIMEOUT)
 
