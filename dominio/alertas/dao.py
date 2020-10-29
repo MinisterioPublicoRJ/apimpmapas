@@ -236,9 +236,9 @@ class AlertasOverlayDAO:
         if not tipo:
             raise APIMissingOverlayType
 
-        dt_partition = AlertaMaxPartitionDAO.get()
-
         DAO = cls.switcher(tipo)
+
+        dt_partition = AlertaMaxPartitionDAO.get()
         return DAO.get(
             docu_dk=docu_dk,
             dt_partition=dt_partition
