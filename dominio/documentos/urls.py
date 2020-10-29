@@ -29,4 +29,9 @@ urlpatterns = [
         views.ListaROsAusentesView.as_view(),
         name="ros-ausentes"
     ),
+    path(
+        "procedimentos-csmp/<int:orgao_id>/<str:cpf>",
+        views.ComunicacaoCSMPView.as_view(),
+        name="procedimentos-csmp"
+    ),
 ]

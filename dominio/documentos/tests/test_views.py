@@ -261,3 +261,45 @@ class TestListaROsAusentes(NoJWTTestCase, TestCase):
                 f'filename="dp-{self.num_delegacia}-ros-ausentes.xlsx"'
             )
         )
+
+
+class TestComunicacaoCSMP(NoJWTTestCase, TestCase):
+    def setUp(self):
+        super().setUp()
+
+        self.orgao_id = 12345
+        self.cpf = "0000000"
+        self.url = reverse(
+            "dominio:procedimentos-csmp",
+            args=(self.orgao_id, self.cpf)
+        )
+
+        self.cont_instauracao_patcher = mock.patch(
+            "dominio.documentos.views.ComunicacaoCSMPController"
+        )
+        self.controller_mock = mock.Mock()
+        self.cont_instauracao_mock = self.cont_instauracao_patcher.start()
+        self.cont_instauracao_mock.return_value = self.controller_mock
+
+    def tearDown(self):
+        super().tearDown()
+        self.cont_instauracao_patcher.stop()
+
+    def test_correct_response(self):
+        resp = self.client.get(self.url)
+
+        self.assertEqual(resp.status_code, 200)
+        self.cont_instauracao_mock.assert_called_once_with(
+            orgao_id=self.orgao_id,
+            cpf=self.cpf
+        )
+        self.assertIsInstance(
+            self.controller_mock.render.call_args_list[0][0][0],
+            HttpResponse
+        )
+
+    def test_404_for_empty_db_response(self):
+        self.controller_mock.render.side_effect = APIEmptyResultError
+        resp = self.client.get(self.url)
+
+        self.assertEqual(resp.status_code, 404)

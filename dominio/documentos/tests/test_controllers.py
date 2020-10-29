@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from unittest import TestCase, mock
 
 from django.http import HttpResponse
@@ -6,12 +6,14 @@ from freezegun import freeze_time
 
 from dominio.documentos.controllers import (
     BaseDocumentoController,
+    ComunicacaoCSMPController,
     InstauracaoICController,
     MinutaPrescricaoController,
     ProrrogacaoICController,
     ProrrogacaoPPController,
 )
 from dominio.documentos.dao import (
+    ComunicacaoCSMPDAO,
     DadosAssuntoDAO,
     DadosPromotorDAO,
     InstauracaoICDAO,
@@ -437,6 +439,80 @@ class TestInstauracaoIC(TestCase):
 
     def tearDown(self):
         self.dao_docu_get_patcher.stop()
+        self.dao_promotor_get_patcher.stop()
+
+    @freeze_time("2020-1-1")
+    def test_get_context(self):
+        context = self.controller.context
+
+        self.assertEqual(context, self.expected_context)
+
+
+class TestComunicacaoCSMPController(TestCase):
+    def setUp(self):
+        self.orgao_id = "5678"
+        self.cpf = "1234567890"
+        self.controller = ComunicacaoCSMPController(
+            orgao_id=self.orgao_id,
+            cpf=self.cpf,
+        )
+
+        self.nome_promotoria = ["PROMOTORIA", "PROMOTORIA"]
+        self.num_procedimento = ["12345", "67890"]
+        self.data_cadastro = [date(2020, 10, 1), date(2019, 10, 1)]
+        self.comarca = ["COMARCA", "COMARCA"]
+        self.objeto = ["OBJETO 1", "OBJETO 2"]
+        self.ementa = ["EMENTA 1", "EMENTA 2"]
+        self.investigados = ["INVESTIGADOS", ""]
+
+        self.nome_promotor = "Nome"
+        self.matricula_promotor = "012345"
+
+        self.dao_procs_get_patcher = mock.patch.object(
+            ComunicacaoCSMPDAO,
+            "get"
+        )
+        self.dao_procs_get_mock = self.dao_procs_get_patcher.start()
+        self.dao_procs_get_mock.return_value = [
+            {
+                "nome_promotoria": self.nome_promotoria[0],
+                "num_procedimento": self.num_procedimento[0],
+                "data_cadastro": self.data_cadastro[0],
+                "comarca": self.comarca[0],
+                "objeto": self.objeto[0],
+                "ementa": self.ementa[0],
+                "investigados": self.investigados[0],
+            },
+            {
+                "nome_promotoria": self.nome_promotoria[1],
+                "num_procedimento": self.num_procedimento[1],
+                "data_cadastro": self.data_cadastro[1],
+                "comarca": self.comarca[1],
+                "objeto": self.objeto[1],
+                "ementa": self.ementa[1],
+                "investigados": self.investigados[1],
+            },
+        ]
+
+        self.dao_promotor_get_patcher = mock.patch.object(
+            DadosPromotorDAO, "get"
+        )
+        self.dao_promotor_get_mock = self.dao_promotor_get_patcher.start()
+        self.dao_promotor_get_mock.return_value = {
+            "nome_promotor": self.nome_promotor,
+            "matricula_promotor": self.matricula_promotor,
+        }
+
+        self.expected_context = {
+            "nome_promotor": self.nome_promotor,
+            "matricula_promotor": self.matricula_promotor,
+            "data_hoje": "01 de janeiro de 2020",
+            "ano": 2020,
+            "procs": self.dao_procs_get_mock.return_value
+        }
+
+    def tearDown(self):
+        self.dao_procs_get_patcher.stop()
         self.dao_promotor_get_patcher.stop()
 
     @freeze_time("2020-1-1")

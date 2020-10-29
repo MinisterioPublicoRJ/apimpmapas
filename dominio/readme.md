@@ -660,6 +660,17 @@ Retorna resposta HTTP:
 Abrirá caixa de download com documento Word.
 ```
 
+## Procedimentos que têm mais de 1 ano para comunicar ao CSMP
+
+```
+GET /dominio/documentos/procedimentos-csmp/<orgao_id>/<cpf>
+
+Retorna resposta HTTP:
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+
+Abrirá caixa de download com documento Word.
+```
+
 ## Lista Processos da Promotoria
 
 ```
