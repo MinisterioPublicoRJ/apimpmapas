@@ -64,17 +64,6 @@ class TestBuildLoginResponse(TestCase):
                     "PESS_DK 2",
                 ),
             ),
-            (
-                (
-                    "1234",
-                    "PROMOTORIA TUTELA COLETIVA",
-                    "MATRICULA 3",
-                    "CPF 3",
-                    "NOME 3",
-                    "X",
-                    "PESS_DK 3",
-                ),
-            ),  # result set do lista orgao pessoal
         ]
         self.expected_response = {
             "username": self.username,
@@ -89,7 +78,7 @@ class TestBuildLoginResponse(TestCase):
             "sexo": "X",
             "token": "auth-token",
             "tipo_permissao": "regular",
-            "ids_orgaos_lotados_validos": ["098765", "1234"],
+            "ids_orgaos_lotados_validos": ["098765"],
             "orgao_selecionado":
             {
                 "cpf": "CPF 1",
@@ -125,17 +114,6 @@ class TestBuildLoginResponse(TestCase):
                     "cdorgao": "1234",
                     "dps": ""
                 },
-                {
-                    "cpf": "CPF 3",
-                    "matricula": "MATRICULA 3",
-                    "pess_dk": "PESS_DK 3",
-                    "nome": "NOME 3",
-                    "sexo": "X",
-                    "nm_org": "PROMOTORIA TUTELA COLETIVA",
-                    "tipo": 1,
-                    "cdorgao": "1234",
-                    "dps": ""
-                },
             ],
             "orgaos_validos": [
                 {
@@ -148,17 +126,6 @@ class TestBuildLoginResponse(TestCase):
                     "tipo": 2,
                     "cdorgao": "098765",
                     "dps": "1,2,3"
-                },
-                {
-                    "cpf": "CPF 3",
-                    "matricula": "MATRICULA 3",
-                    "pess_dk": "PESS_DK 3",
-                    "nome": "NOME 3",
-                    "sexo": "X",
-                    "nm_org": "PROMOTORIA TUTELA COLETIVA",
-                    "tipo": 1,
-                    "cdorgao": "1234",
-                    "dps": ""
                 },
             ],
         }
@@ -277,20 +244,8 @@ class TestPermissoesUsuarioRegular(TestCase):
                 "PESS_DK 2",
             ),
         )
-        self.oracle_return_lista_orgao_pessoal = (
-            (
-                "9999",
-                "PROMOTORIA TUTELA COLETIVA",
-                "MATRICULA 3",
-                "CPF 3",
-                "NOME 3",
-                "X",
-                "PESS_DK 3",
-            ),
-        )
         self.mock_oracle_access.side_effect = [
             self.oracle_return_lista_orgao,
-            self.oracle_return_lista_orgao_pessoal,
             self.oracle_return_dados_usuario,
         ]
         self.expected = [
@@ -316,17 +271,6 @@ class TestPermissoesUsuarioRegular(TestCase):
                 "tipo": 0,
                 "dps": ""
             },
-            {
-                "cpf": "CPF 3",
-                "pess_dk": "PESS_DK 3",
-                "nome": "NOME 3",
-                "matricula": "MATRICULA 3",
-                "sexo": "X",
-                "cdorgao": "9999",
-                "nm_org": "PROMOTORIA TUTELA COLETIVA",
-                "tipo": 1,
-                "dps": ""
-            },
         ]
         self.permissoes = services.PermissoesUsuarioRegular(
             username=self.username
@@ -342,7 +286,7 @@ class TestPermissoesUsuarioRegular(TestCase):
 
     def test_retorna_ids_orgaos_lotados_validos(self):
         ids_orgaos_lotados_validos = self.permissoes.ids_orgaos_lotados_validos
-        expected_ids = ["098765", "9999"]
+        expected_ids = ["098765"]
 
         self.assertEqual(ids_orgaos_lotados_validos, expected_ids)
 
@@ -356,7 +300,6 @@ class TestPermissoesUsuarioRegular(TestCase):
     def test_ListOrgaoDao_NAO_pode_estar_vazio(self):
         self.mock_oracle_access.side_effect = [
             [],
-            self.oracle_return_lista_orgao_pessoal,
         ]
 
         with pytest.raises(exceptions.UserHasNoOfficeInformation):
@@ -365,12 +308,10 @@ class TestPermissoesUsuarioRegular(TestCase):
     def test_ListOrgaoPessoalDao_pode_estar_vazio(self):
         self.mock_oracle_access.side_effect = [
             self.oracle_return_lista_orgao,
-            [],
             self.oracle_return_dados_usuario,
         ]
         lista_orgaos = self.permissoes.orgaos_lotados
 
-        self.expected.pop(-1)  # remove resposta vazia
         self.assertEqual(lista_orgaos, self.expected)
 
     def test_classifica_orgaos(self):
@@ -381,7 +322,6 @@ class TestPermissoesUsuarioRegular(TestCase):
         expected = self.expected.copy()
         expected[0]["tipo"] = 2
         expected[1]["tipo"] = 0
-        expected[2]["tipo"] = 1
 
         self.assertEqual(tipos_promotorias, expected)
 
@@ -389,7 +329,6 @@ class TestPermissoesUsuarioRegular(TestCase):
         lista_orgaos = self.expected.copy()
         lista_orgaos[0]["tipo"] = 2
         lista_orgaos[1]["tipo"] = 0
-        lista_orgaos[2]["tipo"] = 1
 
         tipos_promotorias = self.permissoes._filtra_orgaos_invalidos(
             lista_orgaos
@@ -404,7 +343,6 @@ class TestPermissoesUsuarioRegular(TestCase):
         lista_orgaos = self.expected.copy()
         del lista_orgaos[0]['dps']
         del lista_orgaos[1]['dps']
-        del lista_orgaos[2]['dps']
         cisps_promotorias = self.permissoes._adiciona_cisps(lista_orgaos)
 
         self.assertEqual(cisps_promotorias, self.expected)
@@ -426,12 +364,39 @@ class TestPermissoesUsuarioRegular(TestCase):
         self.assertEqual(response, expected)
 
     def test_filtra_pip_invalida(self):
+        novo_nome_promotoria = "PRMOTORIA TUTELA COLETIVA"
+        oracle_return_lista_orgao = (
+            (
+                "098765",
+                "PROMOTORIA INVESTIGAÇÃO PENAL",
+                "MATRICULA 1",
+                "CPF 1",
+                "NOME 1",
+                "X",
+                "PESS_DK 1",
+
+            ),  # Esta pip será removida pois id orgao nao está na lista
+            (
+                "1234",
+                novo_nome_promotoria,
+                "MATRICULA 2",
+                "CPF 2",
+                "NOME 2",
+                "X",
+                "PESS_DK 2",
+            ),
+        )
+        self.mock_oracle_access.side_effect = [
+            oracle_return_lista_orgao
+        ]
         self.pip_validos_mock.return_value = (("another id",),)
 
         lista_orgaos = self.permissoes.orgaos_validos
-        self.expected = [self.expected[2]]
+        expected = [self.expected[1]]
+        expected[0]["nm_org"] = novo_nome_promotoria
+        expected[0]["tipo"] = 1
 
-        self.assertEqual(lista_orgaos, self.expected)
+        self.assertEqual(lista_orgaos, expected)
 
     def test_erro_se_resposta_do_banco_nao_conter_dados_do_usuario(self):
         # Resposa da query ListaOrgao não possui órgão válido, portanto
@@ -740,7 +705,6 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "X",
                 "pess_dk 2",
             ),),
-            (),
             self.oracle_return_lista_todos_orgaos,
         ]
 
