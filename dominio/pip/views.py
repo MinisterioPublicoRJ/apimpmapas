@@ -93,7 +93,7 @@ class PIPPrincipaisInvestigadosListaView(
         digit = int(str(representante_dk)[-1])
 
         similares = PIPPrincipaisInvestigadosPerfilDAO.get(
-            dk=representante_dk, digit=digit)
+            dk=representante_dk, pcts=pcts, digit=digit)
         perfil = PIPPrincipaisInvestigadosPerfilDAO.get_header_info(similares)
         procedimentos = PIPPrincipaisInvestigadosListaDAO.get(
             dk=representante_dk, pess_dk=pess_dk, pcts=pcts, digit=digit
