@@ -127,9 +127,12 @@ class TestPIPPrincipaisInvestigadosListaView(
             args=("12345",)
         )
         resp = self.client.get(url)
+        pcts = (200, 201, 202, 203, 204, 205, 206, 207, 208, 209)
 
-        _get_perfil.assert_called_once_with(dk=12345)
-        _get_procedimentos.assert_called_once_with(dk=12345, pess_dk=0)
+        _get_perfil.assert_called_once_with(dk=12345, digit=5)
+        _get_procedimentos.assert_called_once_with(
+            dk=12345, pess_dk=0, digit=5, pcts=pcts
+        )
         assert resp.status_code == 200
         assert resp.data == expected_output
 

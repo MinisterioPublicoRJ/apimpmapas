@@ -8,4 +8,6 @@ SELECT
     dt_ultimo_andamento,
     desc_ultimo_andamento
 FROM {schema}.tb_pip_investigados_procedimentos
-WHERE representante_dk = :dk
+WHERE representante_dk = :dk AND rep_last_digit = :digit
+AND cod_pct IN :pcts
+ORDER BY orgi_nm_orgao

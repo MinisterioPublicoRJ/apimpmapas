@@ -8,5 +8,5 @@ SELECT
     pess_pesj_nm_pessoa_juridica,
     pess_pesj_cnpj
 FROM {schema}.tb_pip_investigados_representantes
-WHERE representante_dk = :dk
+WHERE representante_dk = :dk AND rep_last_digit = :digit
 ORDER BY pess_dk

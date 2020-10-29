@@ -125,6 +125,7 @@ class ListaProcessosDAO(GenericTutelaDAO):
         "docu_nr_externo",
         "docu_etiqueta",
         "docu_personagens",
+        "representante_dk",
         "dt_ultimo_andamento",
         "ultimo_andamento",
         "url_tjrj"
@@ -142,6 +143,7 @@ class ListaInvestigacoesDAO(GenericTutelaDAO):
         "docu_nr_externo",
         "docu_etiqueta",
         "docu_personagens",
+        "representante_dk",
         "dt_ultimo_andamento",
         "ultimo_andamento",
         "url_tjrj"
