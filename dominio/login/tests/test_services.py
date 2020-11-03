@@ -89,7 +89,8 @@ class TestBuildLoginResponse(TestCase):
                 "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
                 "tipo": 2,
                 "cdorgao": "098765",
-                "dps": "1,2,3"
+                "dps": "1,2,3",
+                "pip_especializada": False,
             },
             "orgaos_lotados": [
                 {
@@ -101,7 +102,8 @@ class TestBuildLoginResponse(TestCase):
                     "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
                     "tipo": 2,
                     "cdorgao": "098765",
-                    "dps": "1,2,3"
+                    "dps": "1,2,3",
+                    "pip_especializada": False,
                 },
                 {
                     "cpf": "CPF 2",
@@ -112,7 +114,8 @@ class TestBuildLoginResponse(TestCase):
                     "nm_org": "PROMOTORIA DIFERENTE",
                     "tipo": 0,
                     "cdorgao": "1234",
-                    "dps": ""
+                    "dps": "",
+                    "pip_especializada": None,
                 },
             ],
             "orgaos_validos": [
@@ -125,7 +128,8 @@ class TestBuildLoginResponse(TestCase):
                     "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
                     "tipo": 2,
                     "cdorgao": "098765",
-                    "dps": "1,2,3"
+                    "dps": "1,2,3",
+                    "pip_especializada": False,
                 },
             ],
         }
@@ -258,7 +262,8 @@ class TestPermissoesUsuarioRegular(TestCase):
                 "cdorgao": "098765",
                 "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
                 "tipo": 2,
-                "dps": "1,2,3"
+                "dps": "1,2,3",
+                "pip_especializada": False,
             },
             {
                 "cpf": "CPF 2",
@@ -269,7 +274,8 @@ class TestPermissoesUsuarioRegular(TestCase):
                 "cdorgao": "1234",
                 "nm_org": "PROMOTORIA DIFERENTE",
                 "tipo": 0,
-                "dps": ""
+                "dps": "",
+                "pip_especializada": None,
             },
         ]
         self.permissoes = services.PermissoesUsuarioRegular(
@@ -395,6 +401,7 @@ class TestPermissoesUsuarioRegular(TestCase):
         expected = [self.expected[1]]
         expected[0]["nm_org"] = novo_nome_promotoria
         expected[0]["tipo"] = 1
+        expected[0]["pip_especializada"] = None
 
         self.assertEqual(lista_orgaos, expected)
 
@@ -602,7 +609,8 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "cdorgao": "cdorgao 1",
                 "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
                 "tipo": 2,
-                "dps": "1,2,3"
+                "dps": "1,2,3",
+                "pip_especializada": False,
             },
             {
                 "cpf": "cpf 2",
@@ -613,7 +621,8 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "cdorgao": "cdorgao 2",
                 "nm_org": "PROMOTORIA DIFERENTE",
                 "tipo": 0,
-                "dps": ""
+                "dps": "",
+                "pip_especializada": None,
             },
             {
                 "cpf": "cpf 3",
@@ -624,7 +633,8 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "cdorgao": "cdorgao 3",
                 "nm_org": "PROMOTORIA TUTELA COLETIVA",
                 "tipo": 1,
-                "dps": ""
+                "dps": "",
+                "pip_especializada": None,
             },
             {
                 "cpf": "cpf 4",
@@ -635,7 +645,8 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "cdorgao": "cdorgao 4",
                 "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
                 "tipo": 2,
-                "dps": "1,2,3"
+                "dps": "1,2,3",
+                "pip_especializada": None,
             },
         ]
         self.permissoes = services.PermissoesUsuarioAdmin(
@@ -667,6 +678,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
 
         lista_orgaos = self.permissoes.orgaos_validos
         self.expected = self.expected[2:4]
+        self.expected[1]["pip_especializada"] = False
 
         self.assertEqual(lista_orgaos, self.expected)
 
@@ -678,16 +690,17 @@ class TesPermissoesUsuarioAdmin(TestCase):
             self.oracle_return_lista_todos_orgaos,
         ]
         expected = {
-                "cpf": "cpf 5",
-                "pess_dk": "pess_dk 5",
-                "nome": "nome 5",
-                "matricula": "matricula 5",
-                "sexo": "X",
-                "cdorgao": "cdorgao 5",
-                "nm_org": "PROMOTORIA TUTELA COLETIVA",
-                "tipo": 1,
-                "dps": ""
-            }
+            "cpf": "cpf 5",
+            "pess_dk": "pess_dk 5",
+            "nome": "nome 5",
+            "matricula": "matricula 5",
+            "sexo": "X",
+            "cdorgao": "cdorgao 5",
+            "nm_org": "PROMOTORIA TUTELA COLETIVA",
+            "tipo": 1,
+            "dps": "",
+            "pip_especializada": None,
+        }
 
         orgao_selecionado = self.permissoes.orgao_selecionado
 
@@ -711,3 +724,40 @@ class TesPermissoesUsuarioAdmin(TestCase):
         orgao_selecionado = self.permissoes.orgao_selecionado
 
         self.assertEqual(orgao_selecionado, self.expected[0])
+
+    def test_classifica_pips_especializadas(self):
+        self.permissoes.cd_pips_especializadas = ["cdorgao 1"]
+        self.oracle_return_lista_todos_orgaos = (
+            (
+                "cdorgao 1",
+                "PROMOTORIA INVESTIGAÇÃO PENAL",
+                "matricula 1",
+                "cpf 1",
+                "nome 1",
+                "X",
+                "pess_dk 1",
+            ),
+            (
+                "cdorgao 2",
+                "PROMOTORIA DIFERENTE",
+                "matricula 2",
+                "cpf 2",
+                "nome 2",
+                "X",
+                "pess_dk 2",
+            ),
+            (
+                "cdorgao 3",
+                "PROMOTORIA TUTELA COLETIVA",
+                "matricula 3",
+                "cpf 3",
+                "nome 3",
+                "X",
+                "pess_dk 3",
+            ),
+        )
+
+        orgaos = self.permissoes.todos_orgaos
+        self.expected[0]["pip_especializada"] = True
+
+        self.assertEqual(orgaos, self.expected)
