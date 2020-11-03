@@ -111,7 +111,6 @@ class PermissaoUsuario:
 
         return lista_orgaos
 
-
     @cached_property
     def pip_validas(self):
         return [r["id_orgao"] for r in dao.PIPValidasDAO.get()]
