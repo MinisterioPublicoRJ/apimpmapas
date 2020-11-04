@@ -13,7 +13,12 @@ def get_jwt_from_get(request):
 
 
 def tipo_orgao(nome_orgao):
-    tutela_deny_list = ["idoso", "infância", "centro de apoio operacional"]
+    tutela_deny_list = [
+        "idoso",
+        "infância",
+        "centro de apoio operacional",
+        "promotoria de justiça de tutela coletiva do núcleo belford roxo",
+    ]
     nome_orgao = nome_orgao.lower()
     if "investigação penal" in nome_orgao:
         orgao = 2

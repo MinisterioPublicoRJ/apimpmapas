@@ -62,7 +62,6 @@ class SuaMesaDetalheAISPSerializer(serializers.Serializer):
     acervo_inicio = serializers.IntegerField(min_value=0)
     acervo_fim = serializers.IntegerField(min_value=0)
     variacao_acervo = serializers.FloatField()
-    aisp_nomes = serializers.CharField()
 
 
 class SuaMesaDetalheTutelaProcessosSerializer(serializers.Serializer):

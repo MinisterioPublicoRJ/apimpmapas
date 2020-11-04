@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.cache import cache
 
 from dominio.dao import GenericDAO, SingleDataObjectDAO
 from dominio.db_connectors import get_hbase_table, run_query
@@ -70,47 +71,56 @@ class FiltraAlertasDispensadosMixin:
 class AlertasDAO(GenericDAO):
     QUERIES_DIR = settings.BASE_DIR.child("dominio", "alertas", "queries")
 
+    @classmethod
+    def ordena_alertas(cls, alertas):
+        ordem_dict = {s: i for i, s in enumerate(alrt_ordem)}
+        return sorted(alertas, key=lambda x: ordem_dict[x["sigla"]])
 
-class ResumoAlertasDAO:
+
+class AlertaMaxPartitionDAO(AlertasDAO):
+    query_file = "alerta_max_dt_partition.sql"
+    table_namespaces = {
+        "schema": settings.TABLE_NAMESPACE,
+    }
+    cache_prefix = 'ALERTA_MAX_DT_PARTITION'
+
+    @classmethod
+    def get(cls):
+        data = cache.get(cls.cache_prefix, default=None)
+        if not data:
+            data = cls.execute()
+            if not data:
+                return '-1'
+            data = data[0][0]
+            cache.set(cls.cache_prefix, data, timeout=settings.CACHE_TIMEOUT)
+        return data
+
+
+class ResumoAlertasDAO(AlertasDAO):
     """
     Classe principal do Resumo dos Alertas.
     Esta classe executa todos os outros DAOs de resumo de alertas
     que herdam dela.
     """
 
-    columns = ["sigla", "descricao", "orgao", "count"]
-    serializer = serializers.AlertasResumoSerializer
-
-    @classmethod
-    def get_all(cls, id_orgao):
-        resumo = []
-        for ResumoDAOClass in cls.__subclasses__():
-            resumo.extend(
-                ResumoDAOClass.get(id_orgao=id_orgao, accept_empty=True)
-            )
-        return cls.ordena_resumo(resumo)
-
-    @classmethod
-    def ordena_resumo(cls, resumo):
-        return [
-            res_alerta
-            for sigla in alrt_ordem
-            for res_alerta in resumo
-            if res_alerta["sigla"] == sigla
-        ]
-
-
-class ResumoAlertasMGPDAO(ResumoAlertasDAO, AlertasDAO):
-    query_file = "resumo_alertas_mgp.sql"
-    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
-
-
-class ResumoAlertasComprasDAO(ResumoAlertasDAO, AlertasDAO):
-    query_file = "resumo_alertas_compras.sql"
+    query_file = "resumo_alertas.sql"
+    columns = ["sigla", "count"]
     table_namespaces = {
         "schema": settings.TABLE_NAMESPACE,
         "schema_alertas_compras": settings.SCHEMA_ALERTAS,
     }
+    serializer = serializers.AlertasResumoSerializer
+
+    @classmethod
+    def get_all(cls, id_orgao):
+        dt_partition = AlertaMaxPartitionDAO.get()
+        resumo = super().get(
+            id_orgao=id_orgao,
+            dt_partition=dt_partition,
+            accept_empty=True
+        )
+
+        return cls.ordena_alertas(resumo)
 
 
 class AlertaMGPDAO(AlertasDAO):
@@ -119,26 +129,12 @@ class AlertaMGPDAO(AlertasDAO):
     columns = [
         "doc_dk",
         "num_doc",
-        "num_ext",
-        "etiqueta",
-        "classe_doc",
         "data_alerta",
         "orgao",
-        "classe_hier",
         "dias_passados",
         "id_alerta",
-        "descricao",
         "sigla",
     ]
-
-    @classmethod
-    def ordena_alertas(cls, alertas):
-        return [
-            res_alerta
-            for sigla in alrt_ordem
-            for res_alerta in alertas
-            if res_alerta["sigla"] == sigla
-        ]
 
     @classmethod
     def execute(cls, **kwargs):
@@ -151,6 +147,7 @@ class AlertaMGPDAO(AlertasDAO):
         else:
             cls.query_file = "validos_por_orgao_base.sql"
 
+        kwargs['dt_partition'] = AlertaMaxPartitionDAO.get()
         result_set = super().get(accept_empty=accept_empty, **kwargs)
         return cls.ordena_alertas(result_set)
 
@@ -191,20 +188,61 @@ class AlertaOverlayPrescricaoDAO(AlertasDAO):
     }
 
 
+class AlertaOverlayIC1ADAO(AlertasDAO, SingleDataObjectDAO):
+    query_file = "alerta_overlay_ic1a.sql"
+    columns = [
+        'dt_fim_prazo',
+        'dt_movimento',
+        'desc_movimento'
+    ]
+    table_namespaces = {
+        "schema": settings.TABLE_NAMESPACE
+    }
+
+
+class AlertaOverlayPA1ADAO(AlertasDAO, SingleDataObjectDAO):
+    query_file = "alerta_overlay_pa1a.sql"
+    columns = [
+        'dt_fim_prazo',
+        'docu_dt_cadastro'
+    ]
+    table_namespaces = {
+        "schema_exadata": settings.EXADATA_NAMESPACE,
+        "schema": settings.TABLE_NAMESPACE
+    }
+
+
+class AlertaOverlayPPFPDAO(AlertasDAO, SingleDataObjectDAO):
+    query_file = "alerta_overlay_ppfp.sql"
+    columns = [
+        'docu_dt_cadastro'
+    ]
+    table_namespaces = {
+        "schema_exadata": settings.EXADATA_NAMESPACE
+    }
+
+
 class AlertasOverlayDAO:
     _type_switcher = {
-        'prescricao': AlertaOverlayPrescricaoDAO
+        'prescricao': AlertaOverlayPrescricaoDAO,
+        'pa1a': AlertaOverlayPA1ADAO,
+        'ic1a': AlertaOverlayIC1ADAO,
+        'ppfp': AlertaOverlayPPFPDAO
     }
 
     @classmethod
     def get(cls, docu_dk, request):
         tipo = request.GET.get("tipo")
-
         if not tipo:
             raise APIMissingOverlayType
 
         DAO = cls.switcher(tipo)
-        return DAO.get(docu_dk=docu_dk, request=request)
+
+        dt_partition = AlertaMaxPartitionDAO.get()
+        return DAO.get(
+            docu_dk=docu_dk,
+            dt_partition=dt_partition
+        )
 
     @classmethod
     def switcher(cls, tipo):

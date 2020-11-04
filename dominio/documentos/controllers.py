@@ -5,6 +5,7 @@ from cached_property import cached_property
 from docxtpl import DocxTemplate
 
 from dominio.documentos.dao import (
+    ComunicacaoCSMPDAO,
     DadosAssuntoDAO,
     DadosPromotorDAO,
     InstauracaoICDAO,
@@ -130,4 +131,20 @@ class InstauracaoICController(BaseDocumentoController):
         contexto = {"data_hoje": self.data_hoje}
         contexto.update(DadosPromotorDAO.get(cpf=self.cpf))
         contexto.update(InstauracaoICDAO.get(docu_dk=self.docu_dk))
+        return contexto
+
+
+class ComunicacaoCSMPController(BaseDocumentoController):
+    template = "dominio/documentos/doc_templates/comunicacao_csmp.docx"
+
+    def __init__(self, orgao_id, cpf):
+        self.orgao_id = orgao_id
+        self.cpf = cpf
+
+    @cached_property
+    def context(self):
+        contexto = {"data_hoje": self.data_hoje}
+        contexto["ano"] = date.today().year
+        contexto.update(DadosPromotorDAO.get(cpf=self.cpf))
+        contexto["procs"] = ComunicacaoCSMPDAO.get(id_orgao=self.orgao_id)
         return contexto

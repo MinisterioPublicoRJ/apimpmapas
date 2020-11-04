@@ -1,9 +1,11 @@
+from datetime import date
 from unittest import TestCase
 
 import openpyxl
 from freezegun import freeze_time
 
 from dominio.documentos.helpers import (
+    formata_diff_data,
     formata_lista,
     formata_pena,
     formata_ros_ausentes,
@@ -188,3 +190,19 @@ class TestCriaArquivoCSVROsAusentes(TestCase):
         excel_data = self.open_excel_file(excel_obj)
 
         self.assertEqual(excel_data, self.expected_data)
+
+
+class TestFormataDiferencaDatas(TestCase):
+    def test_relative_date_diff(self):
+        dts = (
+            (date(2020, 10, 10), date(2019, 1, 1), "1 ano 9 meses e 9 dias"),
+            (date(2020, 10, 10), date(2020, 10, 5), "5 dias"),
+            (date(2020, 9, 10), date(2020, 10, 10), "1 mês"),
+            (date(2010, 9, 10), date(2020, 10, 10), "10 anos e 1 mês"),
+            (date(2020, 10, 10), date(2018, 10, 8), "2 anos e 2 dias"),
+        )
+
+        with self.subTest():
+            for (dt1, dt2, expected) in dts:
+                dt_diff = formata_diff_data(dt1, dt2)
+                self.assertEqual(dt_diff, expected)

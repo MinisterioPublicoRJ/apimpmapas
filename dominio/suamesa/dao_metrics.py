@@ -14,23 +14,15 @@ class MetricsDataObjectDAO(SingleDataObjectDAO):
     required_parameters = []
 
     @classmethod
-    def check_required_parameters(cls, request):
+    def check_required_parameters(cls, **kwargs):
         for parameter in cls.required_parameters:
-            if parameter not in request.GET:
+            if parameter not in kwargs:
                 e = "Parâmetro '{}' não foi dado!".format(parameter)
                 raise APIMissingRequestParameterSuaMesa(e)
 
     @classmethod
-    def get(cls, orgao_id, request, accept_empty=True):
-        cls.check_required_parameters(request)
-
-        kwargs = {
-            'orgao_id': orgao_id,
-            'tipo_detalhe': request.GET.get('tipo'),
-            'cpf': request.GET.get('cpf'),
-            'intervalo': request.GET.get('intervalo', 'mes')
-        }
-
+    def get(cls, accept_empty=True, **kwargs):
+        cls.check_required_parameters(**kwargs)
         data = super().get(accept_empty=accept_empty, **kwargs)
 
         return {'metrics': data}

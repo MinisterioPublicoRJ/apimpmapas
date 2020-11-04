@@ -76,25 +76,40 @@ class PIPPrincipaisInvestigadosListaView(
 
     def get(self, request, *args, **kwargs):
         representante_dk = int(kwargs.get("representante_dk"))
-        page = int(request.GET.get("page", 1))
+        # page = int(request.GET.get("page", 1))
         pess_dk = int(request.GET.get("pess_dk", 0))
+        tipo_orgao = request.GET.get("orgao_type", "pip")
 
-        similares = PIPPrincipaisInvestigadosPerfilDAO.get(dk=representante_dk)
+        # Filtra os procedimentos por determinados pacotes
+        # No futuro, isso poderá ser retirado
+        if tipo_orgao == "pip":
+            pcts = (200, 201, 202, 203, 204, 205, 206, 207, 208, 209)
+        elif tipo_orgao == "tutela":
+            pcts = (20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33)
+        else:
+            pcts = (-1,)
+
+        # Usado para acessar a partição correta
+        digit = int(str(representante_dk)[-1])
+
+        similares = PIPPrincipaisInvestigadosPerfilDAO.get(
+            dk=representante_dk, pcts=pcts, digit=digit)
         perfil = PIPPrincipaisInvestigadosPerfilDAO.get_header_info(similares)
         procedimentos = PIPPrincipaisInvestigadosListaDAO.get(
-            dk=representante_dk, pess_dk=pess_dk
+            dk=representante_dk, pess_dk=pess_dk, pcts=pcts, digit=digit
         )
 
-        page_data = self.paginate(
-            procedimentos,
-            page=page,
-            page_size=self.PRINCIPAIS_INVESTIGADOS_PROCEDIMENTOS_SIZE
-        )
+        # Tirar a paginação por enquanto
+        # procedimentos = self.paginate(
+        #     procedimentos,
+        #     page=page,
+        #     page_size=self.PRINCIPAIS_INVESTIGADOS_PROCEDIMENTOS_SIZE
+        # )
 
         data = {
             'perfil': perfil,
             'similares': similares,
-            'procedimentos': page_data
+            'procedimentos': procedimentos
         }
 
         return Response(data)

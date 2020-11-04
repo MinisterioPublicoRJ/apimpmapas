@@ -2,7 +2,35 @@ from datetime import date
 from io import BytesIO
 from math import ceil
 
+from dateutil import relativedelta
 from openpyxl import Workbook
+
+
+def formata_diff_data(dt1, dt2):
+    diff = relativedelta.relativedelta(dt1, dt2)
+    years = abs(diff.years)
+    months = abs(diff.months)
+    days = abs(diff.days)
+
+    str_data = ""
+    if years > 0:
+        str_data += f"{years}" + (" anos" if years > 1 else " ano")
+
+    if months > 0:
+        space_e = ""
+        if str_data != "" and days == 0:
+            space_e = " e "
+        elif str_data != "":
+            space_e = " "
+        str_data += f"{space_e}{months}" + (" meses" if months > 1 else " mês")
+
+    if days > 0:
+        e_ = ""
+        if str_data != "":
+            e_ = " e "
+        str_data += f"{e_}{days}" + (" dias" if days > 1 else " dia")
+
+    return str_data
 
 
 def formata_pena(pena):
