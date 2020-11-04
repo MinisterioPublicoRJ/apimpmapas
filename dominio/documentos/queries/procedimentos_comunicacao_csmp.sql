@@ -18,9 +18,8 @@ SELECT
     docu_nr_mp AS num_procedimento,
     docu_dt_cadastro,
     coma.cmrc_nm_comarca as comarca,
-    COALESCE(procs.docu_tx_etiqueta, '') as objeto,
-    COALESCE(group_concat(DISTINCT replace(replace(arvore_assunto.hierarquia, split_part(arvore_assunto.hierarquia, '>', 1), ''), '>', ''), ';'), '') AS ementa,
-    COALESCE(group_concat(DISTINCT pessoa.pess_nm_pessoa), '') AS investigados
+    COALESCE(group_concat(replace(replace(arvore_assunto.hierarquia, split_part(arvore_assunto.hierarquia, '>', 1), ''), '>', ''), ';'), '') AS ementa,
+    COALESCE(group_concat(pessoadistinta.pess_nm_pessoa), '') AS investigados
 FROM procedimentos procs
 JOIN {schema}.orgi_foro_orgao ofo ON procs.docu_orgi_orga_dk_responsavel = ofo.forg_orgi_dk
 JOIN {schema}.orgi_foro foro ON foro.cofo_dk = ofo.forg_cofo_dk
@@ -29,9 +28,13 @@ LEFT JOIN {schema}.mcpr_assunto_documento assunto_docto ON  assunto_docto.asdo_d
 LEFT JOIN {schema_aux}.mmps_assunto_docto arvore_assunto ON asdo_assu_dk = id
 INNER JOIN {schema_aux}.atualizacao_pj_pacote pacote
     ON procs.docu_orgi_orga_dk_responsavel = pacote.id_orgao
-LEFT JOIN {schema}.mcpr_personagem personagem ON docu_dk = pers_docu_dk
-    AND personagem.pers_tppe_dk IN (290, 7, 21, 317, 20, 14, 32, 345, 40, 5, 24)
+LEFT JOIN
+    (SELECT DISTINCT pers_docu_dk, pess_nm_pessoa
+    FROM {schema}.mcpr_personagem personagem
 LEFT JOIN {schema}.mcpr_pessoa pessoa ON pessoa.pess_dk = personagem.pers_pess_dk
-    AND pessoa.pess_nm_pessoa not rlike '(^MP$|MINIST[EÉ]RIO\\s+P[UÚ]BLICO|DEFENSORIA\\s+P[UÚ]BLICA.*|MINSTERIO PUBLICO|MPRJ|MINITÉRIO PÚBLICO|JUSTI[ÇC]A P[UÚ]BLICA)'
-GROUP BY num_procedimento, nome_promotoria, docu_dt_cadastro, comarca, objeto
+    AND pessoa.pess_nm_pessoa
+        NOT rlike '(^MP$|MINIST[EÉ]RIO\\s+P[UÚ]BLICO|DEFENSORIA\\s+P[UÚ]BLICA.*|MINSTERIO PUBLICO|MPRJ|MINITÉRIO PÚBLICO|JUSTI[ÇC]A P[UÚ]BLICA)'
+    where  personagem.pers_tppe_dk IN (290, 7, 21, 317, 20, 14, 32, 345, 40, 5, 24)
+    ) as pessoadistinta ON docu_dk = pessoadistinta.pers_docu_dk
+GROUP BY num_procedimento, nome_promotoria, docu_dt_cadastro, comarca
 ORDER BY num_procedimento

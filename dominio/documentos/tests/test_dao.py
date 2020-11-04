@@ -231,7 +231,6 @@ class TestComunicacaoCSMPDAO(TestImpalaExecuteMixin, TestCase):
         num_procedimento = ["12345", "6789"]
         comarca = ["COMARCA", "COMARCA"]
         ementa = ["EMENTA 1", "EMENTA 2"]
-        objeto = ["OBJETO 1", "OBJETO 2"]
         data_cadastro = [date(2020, 1, 1), date(2019, 1, 1)]
         investigados = ["INVESTIGADOS", ""]
         self._impala_execute.return_value = (
@@ -240,7 +239,6 @@ class TestComunicacaoCSMPDAO(TestImpalaExecuteMixin, TestCase):
                 num_procedimento[0],
                 data_cadastro[0],
                 comarca[0],
-                objeto[0],
                 ementa[0],
                 investigados[0],
             ),
@@ -249,7 +247,6 @@ class TestComunicacaoCSMPDAO(TestImpalaExecuteMixin, TestCase):
                 num_procedimento[1],
                 data_cadastro[1],
                 comarca[1],
-                objeto[1],
                 ementa[1],
                 investigados[1],
             ),
