@@ -85,7 +85,8 @@ class PIPPrincipaisInvestigadosListaView(
         if tipo_orgao == "pip":
             pcts = (200, 201, 202, 203, 204, 205, 206, 207, 208, 209)
         elif tipo_orgao == "tutela":
-            pcts = (20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33)
+            pcts = (20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
+                    180, 181, 182, 183)
         else:
             pcts = (-1,)
 
