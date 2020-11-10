@@ -20,6 +20,7 @@ Welcome to Promotron's documentation!
    Alertas.rst
    ListaProcessos.rst
    TempoDeTramitacao.rst
+   PrincipaisInvestigados.rst
 
 
 
