@@ -22,7 +22,7 @@ Atualmente, as seguintes regras são definidas:
 Tutela Coletiva - Inquéritos Civis
 ----------------------------------
 
-Nesta regra, são considerados os pacotes de Tutela Coletiva (pacotes de 20 a 33). O tempo mínimo entre o cadastro e o andamento finalizador deve ser de 5 dias. Finalizações que tenham ocorrido com menos de 5 dias são excluídas, pois são consideradas como um erro.
+Nesta regra, são considerados os pacotes de Tutela Coletiva (pacotes de 20 a 33, e 180 a 183). O tempo mínimo entre o cadastro e o andamento finalizador deve ser de 5 dias. Finalizações que tenham ocorrido com menos de 5 dias são excluídas, pois são consideradas como um erro.
 
 Classes de documentos consideradas:
 
@@ -186,7 +186,7 @@ Andamentos considerados como finalizadores:
 Tutela Coletiva - Ações até a Sentença
 --------------------------------------
 
-Nesta regra, são considerados os pacotes de Tutela Coletiva (pacotes de 20 a 33). O tempo mínimo entre o cadastro e o andamento finalizador deve ser de 5 dias. Finalizações que tenham ocorrido com menos de 5 dias são excluídas, pois são consideradas como um erro.
+Nesta regra, são considerados os pacotes de Tutela Coletiva (pacotes de 20 a 33, e 180 a 183). O tempo mínimo entre o cadastro e o andamento finalizador deve ser de 5 dias. Finalizações que tenham ocorrido com menos de 5 dias são excluídas, pois são consideradas como um erro.
 
 Classes de documentos consideradas:
 
@@ -261,7 +261,7 @@ Andamentos considerados como finalizadores:
 Tutela Coletiva - Ações até o trânsito em julgado
 -------------------------------------------------
 
-Nesta regra, são considerados os pacotes de Tutela Coletiva (pacotes de 20 a 33). O tempo mínimo entre o cadastro e o andamento finalizador deve ser de 5 dias. Finalizações que tenham ocorrido com menos de 5 dias são excluídas, pois são consideradas como um erro.
+Nesta regra, são considerados os pacotes de Tutela Coletiva (pacotes de 20 a 33, e 180 a 183). O tempo mínimo entre o cadastro e o andamento finalizador deve ser de 5 dias. Finalizações que tenham ocorrido com menos de 5 dias são excluídas, pois são consideradas como um erro.
 
 Classes de documentos consideradas:
 

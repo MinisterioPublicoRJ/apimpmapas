@@ -67,6 +67,8 @@ Um órgão pode possuir apenas um pacote de atribuição. No entanto, alguns
 o caso das PIPs - para elas, foram criados códigos especialmente para
 comportá-las).
 
+Estes pacotes são gerados inicialmente a partir dos dados de pacote de atribuição vindo da APMOD. No entanto, algumas modificações manuais são feitas para adaptá-los às necessidades do Promotron.
+
 As Tutelas Coletivas correspondem aos seguintes pacotes:
 
 +---------+-------------------------------------------------------+
@@ -99,6 +101,17 @@ As Tutelas Coletivas correspondem aos seguintes pacotes:
 | 32      | Tutela Coletiva - Saúde                               |
 +---------+-------------------------------------------------------+
 | 33      | Tutela Coletiva - Sem Ranking Específico              |
++---------+-------------------------------------------------------+
+| 180     | Tutela Coletiva - Sistema Prisional e                 |
+|         | Estabelecimentos de Aplicação de Medidas              |
+|         | Socioeducativas                                       |
++---------+-------------------------------------------------------+
+| 181     | Tutela Coletiva - Proteção do Idoso e da Pessoa com   |
+|         | Deficiência                                           |
++---------+-------------------------------------------------------+
+| 182     | Tutela Coletiva - Prestacionais                       |
++---------+-------------------------------------------------------+
+| 183     | Tutela Coletiva - Meio Ambiente, Consumidor e Saúde   |
 +---------+-------------------------------------------------------+
 
 Já as PIPs estão divididas da seguinte maneira:
