@@ -1,3 +1,5 @@
+import math
+
 from django.db import connections
 from django.db.models import F
 from django.http import Http404
@@ -173,8 +175,13 @@ class ListaProcessosView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
             page=page,
             page_size=self.PROCESSOS_SIZE
         )
+        nb_pages = math.ceil(len(data)/self.PROCESSOS_SIZE)
+        response = {
+            'procedimentos': page_data,
+            'nr_paginas': nb_pages
+        }
 
-        return Response(data=page_data)
+        return Response(data=response)
 
 
 class ListaInvestigacoesView(
@@ -193,8 +200,13 @@ class ListaInvestigacoesView(
             page=page,
             page_size=self.INVESTIGACOES_SIZE
         )
+        nb_pages = math.ceil(len(data)/self.INVESTIGACOES_SIZE)
+        response = {
+            'procedimentos': page_data,
+            'nr_paginas': nb_pages
+        }
 
-        return Response(data=page_data)
+        return Response(data=response)
 
 
 class RadarView(JWTAuthMixin, CacheMixin, APIView):
