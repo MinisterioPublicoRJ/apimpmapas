@@ -50,12 +50,12 @@ class EntradasViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
 class ListaProcessosViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
     @mock.patch(
-        'dominio.tutela.views.ListaProcessosView.PROCESSOS_SIZE',
+        'dominio.tutela.views.ListaProcessosView.PAGE_SIZE',
         new_callable=mock.PropertyMock
     )
     @mock.patch('dominio.tutela.views.ListaProcessosDAO.get')
-    def test_lista_processos_result(self, _get_data, _PROCESSOS_SIZE):
-        _PROCESSOS_SIZE.return_value = 1
+    def test_lista_processos_result(self, _get_data, _PAGE_SIZE):
+        _PAGE_SIZE.return_value = 1
         _get_data.return_value = [{"data": 1}, {"data": 2}, {"data": 3}]
 
         response_1 = self.client.get(reverse(
@@ -83,12 +83,12 @@ class ListaProcessosViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
 class ListaInvestigacoesViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
     @mock.patch(
-        'dominio.tutela.views.ListaInvestigacoesView.INVESTIGACOES_SIZE',
+        'dominio.tutela.views.ListaInvestigacoesView.PAGE_SIZE',
         new_callable=mock.PropertyMock
     )
     @mock.patch('dominio.tutela.views.ListaInvestigacoesDAO.get')
-    def test_lista_investigacoes_result(self, _get_data, _INVESTIGACOES_SIZE):
-        _INVESTIGACOES_SIZE.return_value = 1
+    def test_lista_investigacoes_result(self, _get_data, _PAGE_SIZE):
+        _PAGE_SIZE.return_value = 1
         _get_data.return_value = [{"data": 1}, {"data": 2}, {"data": 3}]
 
         response_1 = self.client.get(reverse(
