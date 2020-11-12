@@ -1,3 +1,5 @@
+import math
+
 from decouple import config
 from django.conf import settings
 from django.core.paginator import EmptyPage, Paginator
@@ -8,6 +10,10 @@ from login.jwtlogin import unpack_jwt
 
 
 class PaginatorMixin:
+    PAGE_SIZE = None
+
+    def get_n_pages(self, data):
+        return math.ceil(len(data)/self.PAGE_SIZE)
 
     def paginate(self, model_response, page, page_size):
         paginator = Paginator(model_response, page_size)

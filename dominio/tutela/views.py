@@ -160,7 +160,7 @@ class DesarquivamentosView(JWTAuthMixin, CacheMixin, APIView):
 
 class ListaProcessosView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
     cache_config = 'LISTA_PROCESSOS_CACHE_TIMEOUT'
-    PROCESSOS_SIZE = 20
+    PAGE_SIZE = 20
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs.get(self.orgao_url_kwarg))
@@ -171,16 +171,20 @@ class ListaProcessosView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
         page_data = self.paginate(
             data,
             page=page,
-            page_size=self.PROCESSOS_SIZE
+            page_size=self.PAGE_SIZE
         )
+        response = {
+            'procedimentos': page_data,
+            'nr_paginas': self.get_n_pages(data)
+        }
 
-        return Response(data=page_data)
+        return Response(data=response)
 
 
 class ListaInvestigacoesView(
         JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
     cache_config = 'LISTA_INVESTIGACOES_CACHE_TIMEOUT'
-    INVESTIGACOES_SIZE = 20
+    PAGE_SIZE = 20
 
     def get(self, request, *args, **kwargs):
         orgao_id = int(self.kwargs.get(self.orgao_url_kwarg))
@@ -191,10 +195,14 @@ class ListaInvestigacoesView(
         page_data = self.paginate(
             data,
             page=page,
-            page_size=self.INVESTIGACOES_SIZE
+            page_size=self.PAGE_SIZE
         )
+        response = {
+            'procedimentos': page_data,
+            'nr_paginas': self.get_n_pages(data)
+        }
 
-        return Response(data=page_data)
+        return Response(data=response)
 
 
 class RadarView(JWTAuthMixin, CacheMixin, APIView):

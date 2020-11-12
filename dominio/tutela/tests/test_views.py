@@ -49,10 +49,13 @@ class EntradasViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
 
 class ListaProcessosViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
-    @mock.patch('dominio.tutela.views.ListaProcessosView.PROCESSOS_SIZE')
+    @mock.patch(
+        'dominio.tutela.views.ListaProcessosView.PAGE_SIZE',
+        new_callable=mock.PropertyMock
+    )
     @mock.patch('dominio.tutela.views.ListaProcessosDAO.get')
-    def test_lista_processos_result(self, _get_data, _PROCESSOS_SIZE):
-        _PROCESSOS_SIZE.return_value = 1
+    def test_lista_processos_result(self, _get_data, _PAGE_SIZE):
+        _PAGE_SIZE.return_value = 1
         _get_data.return_value = [{"data": 1}, {"data": 2}, {"data": 3}]
 
         response_1 = self.client.get(reverse(
@@ -62,8 +65,14 @@ class ListaProcessosViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
             'dominio:lista-processos',
             args=('1')) + '?page=2')
 
-        expected_response_page_1 = [{"data": 1}]
-        expected_response_page_2 = [{"data": 2}]
+        expected_response_page_1 = {
+            'procedimentos': [{"data": 1}],
+            'nr_paginas': 3
+        }
+        expected_response_page_2 = {
+            'procedimentos': [{"data": 2}],
+            'nr_paginas': 3
+        }
 
         _get_data.assert_called_with(orgao_id=1)
         self.assertEqual(response_1.status_code, 200)
@@ -74,11 +83,12 @@ class ListaProcessosViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 
 class ListaInvestigacoesViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
     @mock.patch(
-        'dominio.tutela.views.ListaInvestigacoesView.INVESTIGACOES_SIZE'
+        'dominio.tutela.views.ListaInvestigacoesView.PAGE_SIZE',
+        new_callable=mock.PropertyMock
     )
     @mock.patch('dominio.tutela.views.ListaInvestigacoesDAO.get')
-    def test_lista_investigacoes_result(self, _get_data, _INVESTIGACOES_SIZE):
-        _INVESTIGACOES_SIZE.return_value = 1
+    def test_lista_investigacoes_result(self, _get_data, _PAGE_SIZE):
+        _PAGE_SIZE.return_value = 1
         _get_data.return_value = [{"data": 1}, {"data": 2}, {"data": 3}]
 
         response_1 = self.client.get(reverse(
@@ -88,8 +98,14 @@ class ListaInvestigacoesViewTest(NoJWTTestCase, NoCacheTestCase, TestCase):
             'dominio:lista-investigacoes',
             args=('1')) + '?page=2')
 
-        expected_response_page_1 = [{"data": 1}]
-        expected_response_page_2 = [{"data": 2}]
+        expected_response_page_1 = {
+            'procedimentos': [{"data": 1}],
+            'nr_paginas': 3
+        }
+        expected_response_page_2 = {
+            'procedimentos': [{"data": 2}],
+            'nr_paginas': 3
+        }
 
         _get_data.assert_called_with(orgao_id=1)
         self.assertEqual(response_1.status_code, 200)
