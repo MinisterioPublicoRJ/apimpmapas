@@ -22,3 +22,19 @@ ordem = [
     'DORD',
     'DNTJ',
 ]
+
+alertas_tempo = [
+    "PPPV",
+    "PPFP",
+    "ICP1",
+    "NF30",
+    "OFFP",
+    "IC1A",
+    "PRCR1",
+    "PRCR2",
+    "PRCR3",
+    "PRCR4",
+    "CTAC",
+    "ABR1",
+    "BDPA",
+]
