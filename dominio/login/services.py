@@ -209,7 +209,7 @@ def build_login_response(permissoes):
 
     # Informações dos órgãos
     response["orgao_selecionado"] = permissoes.orgao_selecionado
-    response["orgaos_lotados"] = permissoes.orgaos_lotados
+    response["orgaos_lotados"] = permissoes.orgaos_lotados # TODO Verificar se pode ser removido
     response["orgaos_validos"] = permissoes.orgaos_validos
 
     # Update last_login
