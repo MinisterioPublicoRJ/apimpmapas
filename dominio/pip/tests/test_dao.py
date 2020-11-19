@@ -428,16 +428,6 @@ class TestPIPPrincipaisInvestigadosListaDAO:
         ]
         expected = [
             {
-                "pess_dk": 16,
-                "coautores": "Nome",
-                "documento_nr_mp": "123456",
-                "nm_orgao": "5ª Promotoria de Justiça",
-                "assuntos": ["Assunto 1", "Assunto 2"],
-                "fase_documento": "FaseDoc",
-                "dt_ultimo_andamento": '2020-04-22T13:36:06.668000Z',
-                "desc_ultimo_andamento": "Andamento 1",
-            },
-            {
                 "pess_dk": 1,
                 "coautores": "Nome",
                 "documento_nr_mp": "123456",
