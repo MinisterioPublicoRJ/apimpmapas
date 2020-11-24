@@ -5,6 +5,7 @@ ordem = [
     'PRCR3',
     'PRCR4',
     'COMP',
+    'ISPS',
     'GATE',
     'MCSI',
     'MVVD',
