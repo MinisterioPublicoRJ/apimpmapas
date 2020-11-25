@@ -330,6 +330,8 @@ class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
         pess_dk = kwargs.get("pess_dk")
         if pess_dk:
             data = [x for x in data if x['pess_dk'] == pess_dk]
+        else:
+            data = list({x['documento_nr_mp']: x for x in data}.values())
         return data
 
 
