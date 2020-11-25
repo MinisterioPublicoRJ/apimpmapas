@@ -29,6 +29,7 @@ Os seguintes alertas estão implementados:
     -- Todos os crimes próximos de prescrever;
     -- Algum crime prescrito;
     -- Algum crime próximo de prescrever.
+- Alerta de indicadores de saneamento em vermelho.
 
 Alguns outros alertas estão disponíveis, porém não estão "ativados" no código, já que ainda precisam ser revistos e testados:
 
@@ -281,6 +282,50 @@ Alertas de prescrição
 
 	E então, dessa forma, haverá um crime com data final de prescrição em 2019-06-01 (o de Ameaça, 3 anos a partir da data inicial dele em 2016-06-01) e os outros dois com data final de prescrição em 2036-07-17 (Atentado ao Pudor, 16 anos a partir do aniversário de 18 da vítima), e 2040-07-17 (Estupro de Vulnerável, 20 anos a partir do aniversário de 18 da vítima). Se estivermos olhando para este documento no dia 2020-10-01, nesta data há um crime prescrito (o de Ameaça) e dois crimes ainda não-prescritos. Por conta disso, ele é colocado no alerta PRCR3, porque algum crime está prescrito, mas não todos.
 
+
+Alerta de indicadores de saneamento em vermelho
+    Os seguintes indicadores são levados em consideração na construção deste alerta:
+
+    Água 
+    in009 - Índice de Hidrometação (Quanto maior melhor) 
+    in013 - Índice de Perdas de Faturamento (Quanto menor melhor) 
+    in023 - Índice de Atendimento Urbano de Água (Quanto maior melhor) 
+    in049 - Índice de Perdas na Distribuição (Quanto menor melhor) 
+
+    Esgoto 
+    in015 - Índice de Coleta de Esgoto (Quanto maior melhor) 
+    in016 - Índice de Tratamento de Esgoto (Quanto maior melhor) 
+    in024 - Índice de Atendimento Urbano de Esgoto Referido (Quanto maior melhor)
+    in046 - Índice de Esgoto Tratado Referido à Água Consumida (Quanto maior melhor)
+
+    Drenagem 
+    in040 - Parcela de Domicílios em Situação de Risco de Inundação (Quanto menor melhor) 
+    in041 - Parcela da População Impactada por Eventos Hidrológicos (Quanto menor melhor) 
+    in021 - Taxa de Cobertura de Vias Públicas com Redes ou Canais Pluviais Subterrâneos na Área Urbana (Quanto menor melhor) 
+    in020 - Taxa de Cobertura de Pavimentação e Meio-Fio na Área Urbana do Município (Quanto maior melhor) 
+
+    Alguns indicadores estão marcados como "quanto maior melhor". Isso quer dizer que, caso o valor deste indicador no município seja menor do que o valor do índice no estado, então o indicador estará vermelho, e acenderá o alerta. Da mesma forma, os indicadores marcados como "quanto menor melhor" irão acender o alerta caso estejam maiores do que o indicador no nível do estado.
+
+    As seguintes tabelas do OpenGeo são utilizadas para gerar os alertas:
+
+    - plataforma.amb_saneamento_snis_info_indic_agua
+    - plataforma.amb_saneamento_snis_info_indic_esgoto
+    - plataforma.amb_saneamento_snis_info_indic_drenagem
+    - meio_ambiente.amb_saneamento_snis_drenagem_info_indic_2018
+    - institucional.orgaos_meio_ambiente
+
+    As duas primeiras tabelas, de água e de esgoto, possuem dados separados por prestador, e também dados agregados por município, e os dados do estado, de forma que o alerta desses dois eixos consegue ser gerado a partir dessas tabelas exclusivamente.
+    A tabela análoga de drenagem (a terceira da lista) não possui os dados do estado (que são a referência para definir se um município está no vermelho ou não). Por isso a tabela meio_ambiente.amb_saneamento_snis_drenagem_info_indic_2018, que possui os dados de base usados para calcular os índices, é utilizada. Isso permite fazer o cálculo dos indicadores para o estado e permitir a comparação. 
+
+    A tabela institucional.orgaos_meio_ambiente guarda as informações de quais órgãos seriam de meio ambiente, assim como suas respectivas comarcas. Os órgãos dessa tabela são cruzados com os pacotes do promotron para decidir quais devem receber os alertas. Os pacotes considerados válidos para receber este alerta no Promotron são os pacotes 20, 21, 22, 24, 28 e 183. Em outras palavras, pacotes de Tutela Coletiva Ampla, e de Tutela Coletiva de Meio Ambiente (misto ou não).
+
+    Tendo calculado quais indicadores estão em vermelho em quais municípios, e sabendo quais órgãos são válidos para recepção deste alerta, só resta conectar os órgãos aos municípios que eles olham. Isto é feito a partir das informações de comarca presentes, novamente, na tabela institucional.orgaos_meio_ambiente do OpenGeo. Como o nome da comarca presente nestas tabelas bate exatamente com o nome dos municípios presente nas tabelas que contêm as informações dos indicadores, é possível juntar os dois lados a partir desta informação.
+
+    Ao final, obtemos, portanto, um conjunto de alertas, onde cada alerta individual diz respeito a um órgão, município, e indicador. Um órgão pode ter alertas para mais de um indicador no mesmo município, e também pode ter alertas para o mesmo indicador em municípios diferentes.
+
+    Como os dados deste alerta são anuais, não é necessário refazer o cálculo diariamente. Isso representaria um custo a mais diário para o sistema. Assim, foi montada uma estrutura utilizando uma tabela auxiliar que permite salvar os resultados do cálculo do último ano disponível, e consultar os resultados diretamente desta tabela auxiliar caso eles existam.
+
+    Disclaimer: Atualmente, ainda não sabemos como os dados de saneamento do próximo ano serão guardados, se as mesmas tabelas serão atualizadas, ou se novas tabelas deverão ser utilizadas. Consequentemente, é possível que este alerta requeira alterações mais à frente com o intuito de adaptá-lo às possíveis mudanças de estrutura.
 
 Estrutura do Código
 ~~~~~~~~~~~~~~~~~~~
