@@ -97,6 +97,15 @@ class ListaROsAusentesDAO(GenericDAO):
     }
 
 
+class ListaProcessosBaixaDPDAO(GenericDAO):
+    QUERIES_DIR = settings.BASE_DIR.child("dominio", "documentos", "queries")
+    query_file = "lista_processos_baixa_dp.sql"
+    columns = ["processo", "orgao", "data"]
+    table_namespaces = {
+        "schema": settings.EXADATA_NAMESPACE,
+    }
+
+
 class ComunicacaoCSMPDAO(GenericDAO):
     QUERIES_DIR = settings.BASE_DIR.child("dominio", "documentos", "queries")
     query_file = "procedimentos_comunicacao_csmp.sql"

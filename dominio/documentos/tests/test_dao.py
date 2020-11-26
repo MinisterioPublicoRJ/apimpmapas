@@ -10,6 +10,7 @@ from dominio.documentos.dao import (
     DadosAssuntoDAO,
     DadosPromotorDAO,
     InstauracaoICDAO,
+    ListaProcessosBaixaDPDAO,
     ListaROsAusentesDAO,
     MinutaPrescricaoDAO,
     ProrrogacaoICDAO,
@@ -219,6 +220,34 @@ class TestROsAusentes(TestCase):
 
     def test_get_data(self):
         data = ListaROsAusentesDAO.get(num_delegacia=self.num_delegacia)
+
+        self.assertEqual(data, self.expected_data)
+
+
+class TestListaProcessosBaixaDP(TestCase):
+    def setUp(self):
+        self.orgao_id = "12345"
+        self.query_exec_patcher = mock.patch.object(
+            ListaProcessosBaixaDPDAO, "execute"
+        )
+        self.query_exec_mock = self.query_exec_patcher.start()
+        self.result_set = (
+            ("numero processo 1", "orgao baixa 1"),
+            ("numero processo 2", "orgao baixa 2"),
+            ("numero processo 3", "orgao baixa 3"),
+        )
+        self.query_exec_mock.return_value = self.result_set
+        self.expected_data = [
+            {"processo": "numero processo 1", "orgao": "orgao baixa 1"},
+            {"processo": "numero processo 2", "orgao": "orgao baixa 2"},
+            {"processo": "numero processo 3", "orgao": "orgao baixa 3"},
+        ]
+
+    def tearDown(self):
+        self.query_exec_patcher.stop()
+
+    def test_get_data(self):
+        data = ListaProcessosBaixaDPDAO.get(num_delegacia=self.orgao_id)
 
         self.assertEqual(data, self.expected_data)
 
