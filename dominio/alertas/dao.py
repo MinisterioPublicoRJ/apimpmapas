@@ -74,6 +74,7 @@ class AlertasDAO(GenericDAO):
     @classmethod
     def ordena_alertas(cls, alertas):
         ordem_dict = {s: i for i, s in enumerate(alrt_ordem)}
+        alertas = [x for x in alertas if x["sigla"] in ordem_dict]
         return sorted(alertas, key=lambda x: ordem_dict[x["sigla"]])
 
 
