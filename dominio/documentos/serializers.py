@@ -27,3 +27,12 @@ class ComunicacaoCSMPSerializer(serializers.Serializer):
             ementa = ementa[1:]
 
         return ementa
+
+
+class ListaProcessosBaixaDPSerializer(serializers.Serializer):
+    processo = serializers.CharField()
+    orgao = serializers.CharField()
+    data = serializers.SerializerMethodField()
+
+    def get_data(self, obj):
+        return obj["data"].strftime("%d/%m/%Y")

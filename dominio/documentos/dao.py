@@ -1,7 +1,10 @@
 from django.conf import settings
 
 from dominio.dao import GenericDAO, SingleDataObjectDAO
-from dominio.documentos.serializers import ComunicacaoCSMPSerializer
+from dominio.documentos.serializers import (
+    ComunicacaoCSMPSerializer,
+    ListaProcessosBaixaDPSerializer,
+)
 
 
 class DocumentosDAO(SingleDataObjectDAO):
@@ -104,6 +107,7 @@ class ListaProcessosBaixaDPDAO(GenericDAO):
     table_namespaces = {
         "schema": settings.EXADATA_NAMESPACE,
     }
+    serializer = ListaProcessosBaixaDPSerializer
 
 
 class ComunicacaoCSMPDAO(GenericDAO):

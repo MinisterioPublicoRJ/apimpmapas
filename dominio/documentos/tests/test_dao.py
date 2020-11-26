@@ -232,15 +232,27 @@ class TestListaProcessosBaixaDP(TestCase):
         )
         self.query_exec_mock = self.query_exec_patcher.start()
         self.result_set = (
-            ("numero processo 1", "orgao baixa 1"),
-            ("numero processo 2", "orgao baixa 2"),
-            ("numero processo 3", "orgao baixa 3"),
+            ("numero processo 1", "orgao baixa 1", datetime(2020, 1, 1)),
+            ("numero processo 2", "orgao baixa 2", datetime(2020, 1, 2)),
+            ("numero processo 3", "orgao baixa 3", datetime(2020, 1, 3)),
         )
         self.query_exec_mock.return_value = self.result_set
         self.expected_data = [
-            {"processo": "numero processo 1", "orgao": "orgao baixa 1"},
-            {"processo": "numero processo 2", "orgao": "orgao baixa 2"},
-            {"processo": "numero processo 3", "orgao": "orgao baixa 3"},
+            {
+                "processo": "numero processo 1",
+                "orgao": "orgao baixa 1",
+                "data": "01/01/2020",
+            },
+            {
+                "processo": "numero processo 2",
+                "orgao": "orgao baixa 2",
+                "data": "02/01/2020",
+            },
+            {
+                "processo": "numero processo 3",
+                "orgao": "orgao baixa 3",
+                "data": "03/01/2020",
+            },
         ]
 
     def tearDown(self):
