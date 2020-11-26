@@ -30,6 +30,11 @@ urlpatterns = [
         name="ros-ausentes"
     ),
     path(
+        "baixa-dp/<int:orgao_id>",
+        views.ListaProcessosBaixaDPView.as_view(),
+        name="baixa-dp"
+    ),
+    path(
         "procedimentos-csmp/<int:orgao_id>/<str:cpf>",
         views.ComunicacaoCSMPView.as_view(),
         name="procedimentos-csmp"

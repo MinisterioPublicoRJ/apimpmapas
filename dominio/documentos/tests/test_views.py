@@ -1,3 +1,4 @@
+from datetime import datetime
 from unittest import mock
 
 from django.http import HttpResponse
@@ -259,6 +260,49 @@ class TestListaROsAusentes(NoJWTTestCase, TestCase):
                 'Content-Disposition',
                 'attachment; '
                 f'filename="dp-{self.num_delegacia}-ros-ausentes.xlsx"'
+            )
+        )
+
+
+class TestListaProcessosBaixaDP(NoJWTTestCase, TestCase):
+    def setUp(self):
+        super().setUp()
+        self.orgao_id = 12345
+        self.url = reverse("dominio:baixa-dp", args=(self.orgao_id,))
+
+        self.dao_exec_patcher = mock.patch(
+            "dominio.documentos.views.ListaProcessosBaixaDPDAO.execute"
+        )
+        self.dao_exec_mock = self.dao_exec_patcher.start()
+        self.dao_exec_mock.return_value = [
+            ("numero processo 1", "orgao baixa 1", datetime(2020, 1, 1)),
+            ("numero processo 2", "orgao baixa 2", datetime(2020, 1, 2)),
+            ("numero processo 3", "orgao baixa 3", datetime(2020, 1, 3)),
+        ]
+
+    def tearDown(self):
+        super().tearDown()
+        self.dao_exec_mock.stop()
+
+    def test_correct_response(self):
+        resp = self.client.get(self.url)
+
+        headers = resp._headers
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            headers["content-type"],
+            (
+                "Content-Type",
+                "application/vnd.openxmlformats-officedocument"
+                ".spreadsheetml.sheet"
+            )
+        )
+        self.assertEqual(
+            headers["content-disposition"],
+            (
+                'Content-Disposition',
+                'attachment; '
+                f'filename="processos-com-baixa-dp.xlsx"'
             )
         )
 

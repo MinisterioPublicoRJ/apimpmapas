@@ -9,7 +9,10 @@ from dominio.documentos.controllers import (
     ProrrogacaoICController,
     ProrrogacaoPPController,
 )
-from dominio.documentos.dao import ListaROsAusentesDAO
+from dominio.documentos.dao import (
+    ListaROsAusentesDAO,
+    ListaProcessosBaixaDPDAO,
+)
 from dominio.documentos.helpers import gera_planilha_excel, ros_ausentes
 
 from dominio.exceptions import APIEmptyResultError
@@ -132,6 +135,26 @@ class ListaROsAusentesView(JWTAuthMixin, View):
                 sheet_title="ROs Ausentes"
             ),
             filename=f"dp-{num_delegacia}-ros-ausentes.xlsx",
+            as_attachment=True
+        )
+
+
+class ListaProcessosBaixaDPView(JWTAuthMixin, View):
+    def get(self, request, *args, **kwargs):
+        orgao_id = kwargs.get("orgao_id")
+        header = ["processo", "orgao", "data"]
+
+        lista_baixa_dp = [
+            list(d.values()) for d in
+            ListaProcessosBaixaDPDAO.get(orgao_id=orgao_id)
+        ]
+        return FileResponse(
+            gera_planilha_excel(
+                lista_baixa_dp,
+                header=header,
+                sheet_title="Baixa DP"
+            ),
+            filename=f"processos-com-baixa-dp.xlsx",
             as_attachment=True
         )
 
