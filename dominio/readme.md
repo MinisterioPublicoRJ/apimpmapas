@@ -657,7 +657,18 @@ GET /dominio/documentos/ros-ausentes/<numero_delegacia>
 Retorna resposta HTTP:
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
-Abrirá caixa de download com documento Word.
+Abrirá caixa de download com documento Excel.
+```
+
+## Lista de Processos com Baixa à DP
+
+```
+GET /dominio/documentos/baixa-dp/<orgao_id>
+
+Retorna resposta HTTP:
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+Abrirá caixa de download com documento Excel.
 ```
 
 ## Procedimentos que têm mais de 1 ano para comunicar ao CSMP
