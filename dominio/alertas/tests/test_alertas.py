@@ -24,7 +24,9 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'data_alerta': datetime(2020, 1, 1),
                 'orgao': int(orgao_id),
                 'id_alerta': 'id_alrt',
-                'dias_passados': -1
+                'dias_passados': -1,
+                'descricao': 'desc1',
+                'classe_hierarquia': 'classe1'
             },
         ]
 
@@ -36,7 +38,9 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'data_alerta': '2020-01-01T00:00:00Z',
                 'orgao': 0,
                 'id_alerta': 'id_alrt',
-                'dias_passados': -1
+                'dias_passados': -1,
+                'descricao': 'desc1',
+                'classe_hierarquia': 'classe1'
             }
         ]
 
@@ -64,7 +68,9 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'data_alerta': datetime(2020, 1, 1),
                 'orgao': int(orgao_id),
                 'id_alerta': 'id_alrt',
-                'dias_passados': -1
+                'dias_passados': -1,
+                'descricao': 'desc1',
+                'classe_hierarquia': 'classe1'
             },
         ]
 
@@ -76,7 +82,9 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'data_alerta': '2020-01-01T00:00:00Z',
                 'orgao': 0,
                 'id_alerta': 'id_alrt',
-                'dias_passados': -1
+                'dias_passados': -1,
+                'descricao': 'desc1',
+                'classe_hierarquia': 'classe1'
             }
         ]
 

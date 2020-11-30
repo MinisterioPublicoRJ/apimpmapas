@@ -9,6 +9,8 @@ class AlertasListaSerializer(serializers.Serializer):
     data_alerta = serializers.DateTimeField()
     orgao = serializers.IntegerField()
     dias_passados = serializers.IntegerField()
+    descricao = serializers.CharField()
+    classe_hierarquia = serializers.CharField()
 
 
 class AlertasResumoSerializer(serializers.Serializer):

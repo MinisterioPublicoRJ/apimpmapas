@@ -135,6 +135,8 @@ class AlertaMGPDAO(AlertasDAO):
         "dias_passados",
         "id_alerta",
         "sigla",
+        "descricao",
+        "classe_hierarquia"
     ]
 
     @classmethod
