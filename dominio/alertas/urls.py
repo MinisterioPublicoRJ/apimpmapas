@@ -33,5 +33,10 @@ urlpatterns = [
         'overlay/<str:docu_dk>',
         views.AlertasOverlayView.as_view(),
         name='overlay_alertas'
+    ),
+    path(
+        'baixar/<str:orgao_id>',
+        views.BaixarAlertasView.as_view(),
+        name='baixar_alertas'
     )
 ]

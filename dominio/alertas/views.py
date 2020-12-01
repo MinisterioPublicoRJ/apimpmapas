@@ -1,3 +1,6 @@
+from datetime import date
+
+from django.http import FileResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -7,6 +10,9 @@ from dominio.alertas.controllers import (
     DispensaAlertaComprasController,
     EnviaAlertaComprasOuvidoriaController,
 )
+from dominio.alertas.helper import list_columns
+from dominio.alertas.exceptions import APIAlertTypeListNotConfigured
+from dominio.documentos.helpers import gera_planilha_excel
 
 from .serializers import AlertasListaSerializer, IdentificadorAlertaSerializer
 
@@ -130,3 +136,37 @@ class EnviarAlertaComprasOuvidoriaView(JWTAuthMixin, APIView):
         )
         resp, status = controller.envia()
         return Response(data=resp, status=status)
+
+
+class BaixarAlertasView(JWTAuthMixin, APIView):
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
+        tipo_alerta = request.GET.get("tipo_alerta", None)
+
+        try:
+            data_columns, header = list_columns[tipo_alerta]
+        except KeyError:
+            raise APIAlertTypeListNotConfigured
+
+        if tipo_alerta == 'COMP':
+            data = dao.AlertaComprasDAO.get(
+                id_orgao=orgao_id,
+                accept_empty=False
+            )
+        else:
+            data = dao.AlertaMGPDAO.get(
+                orgao_id=orgao_id,
+                tipo_alerta=tipo_alerta,
+                accept_empty=False
+            )
+        data = [tuple(x[c] for c in data_columns) for x in data]
+
+        return FileResponse(
+            gera_planilha_excel(
+                data,
+                header=header,
+                sheet_title=f"Alertas {tipo_alerta}"
+            ),
+            filename=f"Alerta-{tipo_alerta}-{date.today()}.xlsx",
+            as_attachment=True
+        )
