@@ -60,7 +60,7 @@ class ListaProcessosSerializer(serializers.Serializer):
     docu_etiqueta = serializers.CharField()
     docu_personagens = serializers.CharField()
     representante_dk = serializers.IntegerField()
-    dt_ultimo_andamento = serializers.CharField()
+    dt_ultimo_andamento = serializers.DateTimeField(format="%Y-%m-%d")
     ultimo_andamento = serializers.CharField()
     url_tjrj = serializers.CharField()
 
