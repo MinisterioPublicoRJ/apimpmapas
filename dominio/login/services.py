@@ -56,7 +56,9 @@ class PermissaoUsuario:
 
     @cached_property
     def atribuicoes_orgaos(self):
-        ids_orgaos_lotados = [o.get("cdorgao") for o in self.orgaos_lotados]
+        ids_orgaos_lotados = [
+            int(o.get("cdorgao")) for o in self.orgaos_lotados
+        ]
         return dao.AtribuicoesOrgaosDAO.get(
             ids_orgaos=ids_orgaos_lotados,
             accept_empty=True

@@ -436,6 +436,10 @@ class TestPermissoesUsuarioRegular(TestCase):
         atribuicoes = self.permissoes.atribuicoes_orgaos
 
         self.assertEqual(atribuicoes, self.expected_atribuicao)
+        self.assertEqual(
+            self.impala_execute_mock.call_args_list[0][0][1],
+            {'id_orgao_0': 98765, 'id_orgao_1': 1234}
+        )
 
     def test_retorna_orgaos_VALIDOS_de_usuario(self):
         """Retorna orgaos validos (do ponto de vista do Promotron).

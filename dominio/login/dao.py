@@ -88,6 +88,10 @@ class AtribuicoesOrgaosDAO(SingleDataObjectDAO):
 
     @classmethod
     def execute(cls, **kwargs):
-        prep_ids_orgaos = f"({','.join(kwargs.get('ids_orgaos'))})"
-        query = cls.query().replace(":ids_orgaos", prep_ids_orgaos)
-        return impala_execute(query, kwargs)
+        ids_orgaos = kwargs.get("ids_orgaos")
+        prep_stat = {f"id_orgao_{i}": v for i, v in enumerate(ids_orgaos)}
+        kwargs["ids_orgaos"] = prep_stat
+
+        params = ",".join([f":id_orgao_{i}" for i in range(len(ids_orgaos))])
+        query = cls.query().replace(":ids_orgaos", params)
+        return impala_execute(query, prep_stat)

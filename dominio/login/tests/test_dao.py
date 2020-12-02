@@ -7,7 +7,7 @@ from dominio.login.dao import AtribuicoesOrgaosDAO
 
 class TestAtribuicaoDAO(TestCase):
     def setUp(self):
-        self.ids_orgaos = ['1234', '5678']
+        self.ids_orgaos = [1234, 5678]
 
         self.impala_execute_patcher = mock.patch(
             "dominio.login.dao.impala_execute"
@@ -21,12 +21,16 @@ class TestAtribuicaoDAO(TestCase):
         self.dao_query_mock = self.dao_query_patcher.start()
         self.dao_query_mock.return_value = """
             SELECT * FROM foo
-            WHERE id_orgao in :ids_orgaos
+            WHERE id_orgao in (:ids_orgaos)
         """
         self.expected_query = """
             SELECT * FROM foo
-            WHERE id_orgao in (1234,5678)
+            WHERE id_orgao in (:id_orgao_0,:id_orgao_1)
         """
+        self.expected_perp_statment = {
+            "id_orgao_0": 1234,
+            "id_orgao_1": 5678,
+        }
 
     def tearDown(self):
         self.impala_execute_patcher.stop()
@@ -37,5 +41,5 @@ class TestAtribuicaoDAO(TestCase):
 
         self.impala_execute_mock.assert_called_once_with(
             self.expected_query,
-            {"ids_orgaos": self.ids_orgaos}
+            self.expected_perp_statment,
         )
