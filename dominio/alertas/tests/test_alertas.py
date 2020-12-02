@@ -1,8 +1,9 @@
-from datetime import datetime
+from datetime import datetime, date
 from unittest import mock
 
 from django.test import TestCase
 from django.urls import reverse
+from django.core.cache import cache
 
 from dominio.alertas import dao
 from dominio.alertas.tests.testconf import (
@@ -26,7 +27,8 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'id_alerta': 'id_alrt',
                 'dias_passados': -1,
                 'descricao': 'desc1',
-                'classe_hierarquia': 'classe1'
+                'classe_hierarquia': 'classe1',
+                'num_externo': 'ext1234'
             },
         ]
 
@@ -40,7 +42,8 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'id_alerta': 'id_alrt',
                 'dias_passados': -1,
                 'descricao': 'desc1',
-                'classe_hierarquia': 'classe1'
+                'classe_hierarquia': 'classe1',
+                'num_externo': 'ext1234'
             }
         ]
 
@@ -70,7 +73,8 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'id_alerta': 'id_alrt',
                 'dias_passados': -1,
                 'descricao': 'desc1',
-                'classe_hierarquia': 'classe1'
+                'classe_hierarquia': 'classe1',
+                'num_externo': 'ext1234'
             },
         ]
 
@@ -84,7 +88,8 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'id_alerta': 'id_alrt',
                 'dias_passados': -1,
                 'descricao': 'desc1',
-                'classe_hierarquia': 'classe1'
+                'classe_hierarquia': 'classe1',
+                'num_externo': 'ext1234'
             }
         ]
 
@@ -325,3 +330,98 @@ class TestEnviarAlertasComprasOuvidoria(NoJWTTestCase, TestCase):
         resp = self.client.post(self.url)
 
         self.assertEqual(resp.status_code, 400)
+
+
+class TestBaixarAlertas(
+        RemoveFiltroAlertasDispensadosTestCase,
+        NoJWTTestCase,
+        TestCase
+):
+    def setUp(self):
+        super().setUp()
+        self.orgao_id = 10
+        self.url_comp = (
+            reverse("dominio:baixar_alertas", args=(self.orgao_id,)) +
+            '?tipo_alerta=COMP'
+        )
+        self.tipo_alerta_mgp = 'PRCR'
+        self.url_mgp = (
+            reverse("dominio:baixar_alertas", args=(self.orgao_id,)) +
+            f'?tipo_alerta={self.tipo_alerta_mgp}'
+        )
+        self.url_notype = reverse(
+            "dominio:baixar_alertas",
+            args=(self.orgao_id,)
+        )
+
+        self.dao_mgp_exec_patcher = mock.patch(
+            "dominio.alertas.dao.AlertaMGPDAO.execute"
+        )
+        self.dao_mgp_exec_mock = self.dao_mgp_exec_patcher.start()
+        self.dao_mgp_exec_mock.return_value = [
+            ('mck', 0, 'nr1', 'mck', 10, 'id', -1, 'dsc1', 'cls1', 'ext1'),
+            ('mck', 0, 'nr2', 'mck', 10, 'id', -1, 'dsc2', 'cls2', 'ext2'),
+        ]
+
+        self.dao_comp_exec_patcher = mock.patch(
+            "dominio.alertas.dao.AlertaComprasDAO.execute"
+        )
+        self.dao_comp_exec_mock = self.dao_comp_exec_patcher.start()
+        self.dao_comp_exec_mock.return_value = [
+            ('COMP', 'Contrato 1', '98765', 'Contrato ID 1', 'ITEM 1'),
+            ('COMP', 'Contrato 1', '98765', 'Contrato ID 1', 'ITEM 1')
+        ]
+
+    def tearDown(self):
+        super().tearDown()
+        cache.clear()
+        self.dao_mgp_exec_patcher.stop()
+        self.dao_comp_exec_patcher.stop()
+
+    def test_correct_response_mgp(self):
+        resp = self.client.get(self.url_mgp)
+
+        headers = resp._headers
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            headers["content-type"],
+            (
+                "Content-Type",
+                "application/vnd.openxmlformats-officedocument"
+                ".spreadsheetml.sheet"
+            )
+        )
+        self.assertEqual(
+            headers["content-disposition"],
+            (
+                'Content-Disposition',
+                'attachment; '
+                f'filename="Alerta-{self.tipo_alerta_mgp}-{date.today()}.xlsx"'
+            )
+        )
+
+    def test_correct_response_comp(self):
+        resp = self.client.get(self.url_comp)
+
+        headers = resp._headers
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            headers["content-type"],
+            (
+                "Content-Type",
+                "application/vnd.openxmlformats-officedocument"
+                ".spreadsheetml.sheet"
+            )
+        )
+        self.assertEqual(
+            headers["content-disposition"],
+            (
+                'Content-Disposition',
+                'attachment; '
+                f'filename="Alerta-COMP-{date.today()}.xlsx"'
+            )
+        )
+
+    def test_no_alert_type(self):
+        resp = self.client.get(self.url_notype)
+        self.assertEqual(resp.status_code, 404)

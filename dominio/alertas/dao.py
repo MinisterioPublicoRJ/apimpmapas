@@ -136,7 +136,8 @@ class AlertaMGPDAO(AlertasDAO):
         "id_alerta",
         "sigla",
         "descricao",
-        "classe_hierarquia"
+        "classe_hierarquia",
+        "num_externo"
     ]
 
     @classmethod

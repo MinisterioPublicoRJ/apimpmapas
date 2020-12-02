@@ -11,6 +11,7 @@ class AlertasListaSerializer(serializers.Serializer):
     dias_passados = serializers.IntegerField()
     descricao = serializers.CharField()
     classe_hierarquia = serializers.CharField()
+    num_externo = serializers.CharField()
 
 
 class AlertasResumoSerializer(serializers.Serializer):
