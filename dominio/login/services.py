@@ -55,6 +55,14 @@ class PermissaoUsuario:
         return lista_orgaos
 
     @cached_property
+    def atribuicoes_orgaos(self):
+        ids_orgaos_lotados = [o.get("cdorgao") for o in self.orgaos_lotados]
+        return dao.AtribuicoesOrgaosDAO.get(
+            ids_orgaos=ids_orgaos_lotados,
+            accept_empty=True
+        ).get("atribuicao")
+
+    @cached_property
     def orgaos_validos(self):
         lista_orgaos_validos = self._filtra_orgaos_invalidos(
             self.orgaos_lotados
@@ -195,8 +203,9 @@ def build_login_response(permissoes):
 
     try:
         # Informações dos órgãos
-        response["orgao_selecionado"] = permissoes.orgao_selecionado
         response["orgaos_lotados"] = permissoes.orgaos_lotados
+        response["atribuicao"] = permissoes.atribuicoes_orgaos
+        response["orgao_selecionado"] = permissoes.orgao_selecionado
         response["orgaos_validos"] = permissoes.orgaos_validos
         response["ids_orgaos_lotados_validos"] = (
             permissoes.ids_orgaos_lotados_validos

@@ -1,6 +1,7 @@
 from django.conf import settings
 
 from dominio.dao import GenericDAO, SingleDataObjectDAO
+from dominio.db_connectors import execute as impala_execute
 from dominio.login import serializers
 from lupa.db_connectors import oracle_access
 
@@ -77,3 +78,16 @@ class ListaDPsPIPsDAO(GenericDAO):
     columns = ["id_orgao", "dps"]
     serializer = serializers.DPsPIPSerializer
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
+
+
+class AtribuicoesOrgaosDAO(SingleDataObjectDAO):
+    QUERIES_DIR = settings.BASE_DIR.child("dominio", "login", "queries")
+    query_file = "get_atribuicoes_orgaos.sql"
+    columns = ["atribuicao"]
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
+
+    @classmethod
+    def execute(cls, **kwargs):
+        prep_ids_orgaos = f"({','.join(kwargs.get('ids_orgaos'))})"
+        query = cls.query().replace(":ids_orgaos", prep_ids_orgaos)
+        return impala_execute(query, kwargs)
