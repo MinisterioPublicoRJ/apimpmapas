@@ -671,6 +671,17 @@ Retorna resposta HTTP:
 Abrirá caixa de download com documento Word.
 ```
 
+## Lista de Alertas de um órgão
+
+```
+GET /dominio/alertas/baixar/<orgao_id>?tipo_alerta=<tipo_alerta>
+
+Retorna resposta HTTP:
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+Abrirá caixa de download com documento Excel.
+```
+
 ## Lista Processos da Promotoria
 
 ```
