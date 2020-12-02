@@ -332,7 +332,11 @@ class TestEnviarAlertasComprasOuvidoria(NoJWTTestCase, TestCase):
         self.assertEqual(resp.status_code, 400)
 
 
-class TestBaixarAlertas(NoJWTTestCase, TestCase):
+class TestBaixarAlertas(
+        RemoveFiltroAlertasDispensadosTestCase,
+        NoJWTTestCase,
+        TestCase
+):
     def setUp(self):
         super().setUp()
         self.orgao_id = 10
