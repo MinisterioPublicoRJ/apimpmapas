@@ -21,7 +21,7 @@ class MensagemOuvidoria:
         with open(self.template_name) as fobj:
             template = Template(fobj.read())
 
-        return template.render(context=self.context)
+        return template.render(context=Context(self.context))
 
 
 class MensagemOuvidoriaCompras(MensagemOuvidoria):
@@ -39,4 +39,4 @@ class MensagemOuvidoriaCompras(MensagemOuvidoria):
         detalhe_alerta["link_painel"] = self.get_link_painel(
             detalhe_alerta["contratacao"]
         )
-        return Context(detalhe_alerta)
+        return detalhe_alerta

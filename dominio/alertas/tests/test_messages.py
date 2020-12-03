@@ -37,9 +37,9 @@ class TestMensagemAlertaComprasOuvidoria(TestCase):
             f"url.com?VAL={self.alerta_id}&CONT={self.contratacao}"
         )
 
-        self.expected_context = Context(
-            {**self.dao_data, **{"link_painel": self.expected_link_painel}}
-        )
+        self.expected_context = {
+            **self.dao_data, **{"link_painel": self.expected_link_painel}
+        }
 
     def tearDown(self):
         self.template_patcher.stop()
@@ -67,6 +67,6 @@ class TestMensagemAlertaComprasOuvidoria(TestCase):
 
         self.template_mock.assert_called()
         self.template_obj_mock.render.assert_called_once_with(
-            context=self.messager.context
+            context=Context(self.messager.context)
         )
         self.assertEqual(msg, self.expected_message)
