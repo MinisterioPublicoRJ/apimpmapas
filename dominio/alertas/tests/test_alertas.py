@@ -372,11 +372,19 @@ class TestBaixarAlertas(
             ('COMP', 'Contrato 1', '98765', 'Contrato ID 1', 'ITEM 1')
         ]
 
+        self.dao_alerta_max_part_patcher = mock.patch(
+            "dominio.alertas.dao.AlertaMaxPartitionDAO.execute"
+        )
+        self.dao_alerta_max_part_mock =\
+            self.dao_alerta_max_part_patcher.start()
+        self.dao_alerta_max_part_mock.return_value = (("2020-1-1",),)
+
     def tearDown(self):
         super().tearDown()
         cache.clear()
         self.dao_mgp_exec_patcher.stop()
         self.dao_comp_exec_patcher.stop()
+        self.dao_alerta_max_part_patcher.stop()
 
     def test_correct_response_mgp(self):
         resp = self.client.get(self.url_mgp)
