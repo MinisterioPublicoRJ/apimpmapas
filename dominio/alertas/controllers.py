@@ -5,7 +5,7 @@ from dominio.alertas.tasks import async_envia_email_ouvidoria
 from dominio.db_connectors import get_hbase_table
 
 
-class BaseController:
+class HBaseAccessController:
     alerta_sigla = None
     hbase_cf = None
     hbase_table_name = None
@@ -33,11 +33,7 @@ class BaseController:
         }
 
 
-class DispensaAlertaComprasController(BaseController):
-    alerta_sigla = "COMP"
-    hbase_cf = "dados_alertas"
-    hbase_table_name = settings.HBASE_DISPENSAR_ALERTAS_TABLE
-
+class DispensaAlertaController(HBaseAccessController):
     def dispensa_para_orgao(self):
         row_key = self.get_row_key(self.orgao_id, self.alerta_id)
         data = self.get_row_data(self.orgao_id, self.alerta_id)
@@ -57,16 +53,21 @@ class DispensaAlertaComprasController(BaseController):
         self.get_table.put(row_key, data)
 
 
-class EnviaAlertaComprasOuvidoriaController(BaseController):
+class DispensaAlertaComprasController(DispensaAlertaController):
     alerta_sigla = "COMP"
     hbase_cf = "dados_alertas"
-    hbase_table_name = settings.HBASE_ALERTAS_OUVIDORIA_TABLE
+    hbase_table_name = settings.HBASE_DISPENSAR_ALERTAS_TABLE
+
+
+class EnviaAlertaOuvidoriaController(HBaseAccessController):
+    dispensa_controller_class = None
+    messager_class = None
 
     def rollback(self):
         self.get_table.delete(self.row_key)
 
     def success(self):
-        dispensa_controller = DispensaAlertaComprasController(
+        dispensa_controller = self.dispensa_controller_class(
             self.orgao_id,
             self.alerta_id
         )
@@ -101,7 +102,7 @@ class EnviaAlertaComprasOuvidoriaController(BaseController):
         async_envia_email_ouvidoria.delay(self)
 
     def render_message(self):
-        messager = MensagemOuvidoriaCompras(self.orgao_id, self.alerta_id)
+        messager = self.messager_class(self.orgao_id, self.alerta_id)
         return messager.render()
 
     def prepara_resposta(self, already_sent):
@@ -124,3 +125,12 @@ class EnviaAlertaComprasOuvidoriaController(BaseController):
             self.envia_email()
 
         return self.prepara_resposta(already_sent)
+
+
+class EnviaAlertaComprasOuvidoriaController(EnviaAlertaOuvidoriaController):
+    alerta_sigla = "COMP"
+    hbase_cf = "dados_alertas"
+    hbase_table_name = settings.HBASE_ALERTAS_OUVIDORIA_TABLE
+
+    dispensa_controller_class = DispensaAlertaComprasController
+    messager_class = MensagemOuvidoriaCompras
