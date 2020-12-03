@@ -48,7 +48,7 @@ class SuaMesaSerializer(serializers.Serializer):
 class SuaMesaListaVistasSerializer(serializers.Serializer):
     numero_mprj = serializers.CharField()
     numero_externo = serializers.CharField()
-    dt_abertura = serializers.DateField()
+    dt_abertura = serializers.DateField(format="%Y-%m-%d")
     classe = serializers.CharField()
 
 
