@@ -20,9 +20,9 @@ urlpatterns = [
         name="retornar_alerta"
     ),
     path(
-        "ouvidoria/<str:orgao_id>/comp",
-        views.EnviarAlertaComprasOuvidoriaView.as_view(),
-        name="alerta_compras_ouvidoria"
+        "ouvidoria/<str:orgao_id>/<str:sigla_alerta>",
+        views.EnviarAlertaOuvidoriaView.as_view(),
+        name="alerta_ouvidoria"
     ),
     path(
         'compras/<str:orgao_id>',

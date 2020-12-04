@@ -26,7 +26,7 @@ class MensagemOuvidoria:
 
 class MensagemOuvidoriaCompras(MensagemOuvidoria):
     alerta_sigla = "COMP"
-    template_name = "dominio/alertas/templates/email_ouvidoria.html"
+    template_name = "dominio/alertas/templates/email_ouvidoria_compras.html"
 
     def get_link_painel(self, contratacao):
         return settings.URL_PAINEL_COMPRAS\
@@ -40,3 +40,8 @@ class MensagemOuvidoriaCompras(MensagemOuvidoria):
             detalhe_alerta["contratacao"]
         )
         return detalhe_alerta
+
+
+class MensagemOuvidoriaISPS(MensagemOuvidoria):
+    alerta_sigla = "ISPS"
+    template_name = "dominio/alertas/templates/email_ouvidoria_isps.html"

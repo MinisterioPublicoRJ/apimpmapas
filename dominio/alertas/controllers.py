@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from dominio.alertas.messages import MensagemOuvidoriaCompras
+from dominio.alertas import messages
 from dominio.alertas.tasks import async_envia_email_ouvidoria
 from dominio.db_connectors import get_hbase_table
 
@@ -53,8 +53,15 @@ class DispensaAlertaController(HBaseAccessController):
         self.get_table.put(row_key, data)
 
 
+# Mudar de herança para composição
 class DispensaAlertaComprasController(DispensaAlertaController):
     alerta_sigla = "COMP"
+    hbase_cf = "dados_alertas"
+    hbase_table_name = settings.HBASE_DISPENSAR_ALERTAS_TABLE
+
+
+class DispensaAlertaISPSController(DispensaAlertaController):
+    alerta_sigla = "ISPS"
     hbase_cf = "dados_alertas"
     hbase_table_name = settings.HBASE_DISPENSAR_ALERTAS_TABLE
 
@@ -133,4 +140,13 @@ class EnviaAlertaComprasOuvidoriaController(EnviaAlertaOuvidoriaController):
     hbase_table_name = settings.HBASE_ALERTAS_OUVIDORIA_TABLE
 
     dispensa_controller_class = DispensaAlertaComprasController
-    messager_class = MensagemOuvidoriaCompras
+    messager_class = messages.MensagemOuvidoriaCompras
+
+
+class EnviaAlertaISPSOuvidoriaController(EnviaAlertaOuvidoriaController):
+    alerta_sigla = "ISPS"
+    hbase_cf = "dados_alertas"
+    hbase_table_name = settings.HBASE_ALERTAS_OUVIDORIA_TABLE
+
+    dispensa_controller_class = DispensaAlertaISPSController
+    messager_class = messages.MensagemOuvidoriaISPS
