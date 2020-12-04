@@ -12,7 +12,10 @@ from dominio.alertas.controllers import (
     EnviaAlertaISPSOuvidoriaController,
 )
 from dominio.alertas.helper import list_columns
-from dominio.alertas.exceptions import APIAlertTypeListNotConfigured
+from dominio.alertas.exceptions import (
+    APIAlertTypeListNotConfigured,
+    APIInvalidAlertaSigla,
+)
 from dominio.documentos.helpers import gera_planilha_excel
 
 from .serializers import AlertasListaSerializer, IdentificadorAlertaSerializer
@@ -123,10 +126,15 @@ class EnviarAlertaOuvidoriaView(JWTAuthMixin, APIView):
     # TODO: get_object que retorna 404 se alerta não existir
 
     def controller_router(self, sigla_alerta):
-        return {
+        sigla_alerta = sigla_alerta.lower()
+        controllers = {
             "comp": EnviaAlertaComprasOuvidoriaController,
             "isps": EnviaAlertaISPSOuvidoriaController,
-        }[sigla_alerta.lower()]
+        }
+        if sigla_alerta not in controllers:
+            raise APIInvalidAlertaSigla
+
+        return controllers[sigla_alerta]
 
     def get_alerta_id(self):
         ser = IdentificadorAlertaSerializer(data=self.request.GET)

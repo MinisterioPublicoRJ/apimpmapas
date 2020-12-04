@@ -338,6 +338,8 @@ class TestEnviarAlertasISPSOuvidoria(NoJWTTestCase, TestCase):
         super().setUp()
         self.orgao_id = "12345"
         self.alerta_sigla = "ISPS"
+        self.alerta_id = "abc12345"
+
         self.url = reverse(
             "dominio:alerta_ouvidoria",
             args=(self.orgao_id, self.alerta_sigla)
@@ -359,16 +361,25 @@ class TestEnviarAlertasISPSOuvidoria(NoJWTTestCase, TestCase):
         self.controller_patcher.stop()
 
     def test_envia_alerta_compras_para_ouvidoria(self):
-        alerta_id = "abc12345"
-        self.url += f"?alerta_id={alerta_id}"
+        self.url += f"?alerta_id={self.alerta_id}"
         resp = self.client.post(self.url)
 
         self.controller_obj_mock.envia.assert_called_once_with()
-        self.controller_mock.assert_called_once_with(self.orgao_id, alerta_id)
+        self.controller_mock.assert_called_once_with(
+            self.orgao_id,
+            self.alerta_id
+        )
         self.assertEqual(resp.status_code, self.status)
 
     def test_bad_request_alerta_id_nao_informado(self):
         resp = self.client.post(self.url)
+
+        self.assertEqual(resp.status_code, 400)
+
+    def test_bad_request_alerta_sigla_invalida(self):
+        url = reverse("dominio:alerta_ouvidoria", args=(self.orgao_id, "AAA"))
+        url += f"?alerta_id={self.alerta_id}"
+        resp = self.client.post(url)
 
         self.assertEqual(resp.status_code, 400)
 
