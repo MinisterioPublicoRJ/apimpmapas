@@ -198,21 +198,12 @@ def build_login_response(permissoes):
     response["cpf"] = permissoes.dados_usuario["cpf"]
     response["nome"] = permissoes.dados_usuario["nome"]
     response["matricula"] = permissoes.dados_usuario["matricula"]
-
-    token = jwt.encode(
-        response, settings.JWT_SECRET, algorithm="HS256",
-    )
+    response["tipo_permissao"] = permissoes.type
 
     try:
-        # Informações dos órgãos
-        response["orgaos_lotados"] = permissoes.orgaos_lotados
-        response["atribuicao"] = permissoes.atribuicoes_orgaos
-        response["orgao_selecionado"] = permissoes.orgao_selecionado
-        response["orgaos_validos"] = permissoes.orgaos_validos
         response["ids_orgaos_lotados_validos"] = (
             permissoes.ids_orgaos_lotados_validos
         )
-
         usuario, created = Usuario.objects.get_or_create(
             username=permissoes.username
         )
@@ -223,7 +214,15 @@ def build_login_response(permissoes):
         response["first_login_today"] = (
             created or usuario.get_first_login_today()
         )
-        response["tipo_permissao"] = permissoes.type
+        token = jwt.encode(
+            response, settings.JWT_SECRET, algorithm="HS256",
+        )
+
+        # Informações dos órgãos
+        response["orgaos_lotados"] = permissoes.orgaos_lotados
+        response["atribuicao"] = permissoes.atribuicoes_orgaos
+        response["orgao_selecionado"] = permissoes.orgao_selecionado
+        response["orgaos_validos"] = permissoes.orgaos_validos
 
         # Token de acesso
         response["token"] = token
