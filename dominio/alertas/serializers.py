@@ -6,7 +6,7 @@ class AlertasListaSerializer(serializers.Serializer):
     sigla = serializers.CharField()
     doc_dk = serializers.IntegerField()
     num_doc = serializers.CharField()
-    data_alerta = serializers.DateTimeField()
+    data_alerta = serializers.DateTimeField(format="%Y-%m-%d")
     orgao = serializers.IntegerField()
     dias_passados = serializers.IntegerField()
     descricao = serializers.CharField()
@@ -38,14 +38,14 @@ class AlertaOverlayPrescricaoSerializer(serializers.Serializer):
     delitos_multiplicadores = serializers.CharField()
     fator_pena = serializers.FloatField()
     max_pena_fatorado = serializers.FloatField()
-    dt_inicio_prescricao = serializers.CharField()
-    dt_fim_prescricao = serializers.CharField()
+    dt_inicio_prescricao = serializers.DateTimeField(format="%Y-%m-%d")
+    dt_fim_prescricao = serializers.DateTimeField(format="%Y-%m-%d")
     adpr_chave = serializers.CharField()
 
 
 class DetalheAlertaSerializer(serializers.Serializer):
     contratacao = serializers.CharField()
-    data_contratacao = serializers.DateTimeField()
+    data_contratacao = serializers.DateTimeField(format="%Y-%m-%d")
     item_contratado = serializers.CharField()
     var_perc = serializers.SerializerMethodField()
 
