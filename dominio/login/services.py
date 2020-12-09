@@ -199,6 +199,7 @@ def build_login_response(permissoes):
     response["nome"] = permissoes.dados_usuario["nome"]
     response["matricula"] = permissoes.dados_usuario["matricula"]
     response["tipo_permissao"] = permissoes.type
+    response["atribuicao"] = permissoes.atribuicoes_orgaos
 
     try:
         response["ids_orgaos_lotados_validos"] = (
@@ -220,7 +221,6 @@ def build_login_response(permissoes):
 
         # Informações dos órgãos
         response["orgaos_lotados"] = permissoes.orgaos_lotados
-        response["atribuicao"] = permissoes.atribuicoes_orgaos
         response["orgao_selecionado"] = permissoes.orgao_selecionado
         response["orgaos_validos"] = permissoes.orgaos_validos
 
