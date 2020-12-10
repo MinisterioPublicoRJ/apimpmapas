@@ -139,6 +139,8 @@ class EnviaAlertaComprasOuvidoriaController(EnviaAlertaOuvidoriaController):
     hbase_cf = "dados_alertas"
     hbase_table_name = settings.HBASE_ALERTAS_OUVIDORIA_TABLE
 
+    email_subject = settings.EMAIL_SUBJECT_OUVIDORIA_COMPRAS
+
     dispensa_controller_class = DispensaAlertaComprasController
     messager_class = messages.MensagemOuvidoriaCompras
 
@@ -147,6 +149,8 @@ class EnviaAlertaISPSOuvidoriaController(EnviaAlertaOuvidoriaController):
     alerta_sigla = "ISPS"
     hbase_cf = "dados_alertas"
     hbase_table_name = settings.HBASE_ALERTAS_OUVIDORIA_TABLE
+
+    email_subject = settings.EMAIL_SUBJECT_OUVIDORIA_SANEAMENTO
 
     dispensa_controller_class = DispensaAlertaISPSController
     messager_class = messages.MensagemOuvidoriaISPS

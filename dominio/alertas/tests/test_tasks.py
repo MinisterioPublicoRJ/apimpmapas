@@ -34,7 +34,10 @@ class TestEnviaEmailOuvidoria(TestCase):
 
     def test_envia_email(self):
         async_envia_email_ouvidoria.run(self.controller)
-        self.mail_mock.assert_called_once_with(self.expected_msg)
+        self.mail_mock.assert_called_once_with(
+            self.expected_msg,
+            self.controller.email_subject
+        )
 
     @mock.patch.object(async_envia_email_ouvidoria, "retry")
     def test_envia_email_erro(self, _retry):
@@ -42,5 +45,8 @@ class TestEnviaEmailOuvidoria(TestCase):
 
         async_envia_email_ouvidoria.run(self.controller)
 
-        self.mail_mock.assert_called_once_with(self.expected_msg)
+        self.mail_mock.assert_called_once_with(
+            self.expected_msg,
+            self.controller.email_subject
+        )
         _retry.assert_called()
