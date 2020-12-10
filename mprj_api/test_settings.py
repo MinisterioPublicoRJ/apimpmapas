@@ -262,3 +262,8 @@ URL_PAINEL_COMPRAS = config(
     "&:tabs=no&:tollbar=yes&contrato_iditem={contrato_iditem}"
     "&CONTRATACAO={contratacao}"
 )
+URL_PAINEL_SANEAMENTO = config(
+    "URL_PAINEL_SANEAMENTO",
+    "https://geo.mprj.mp.br/portal/apps/experiencebuilder/experience/"
+    "?id=35ae775b7f37418c9c65f47d62943d67"
+)
