@@ -31,7 +31,7 @@ FROM
     JOIN {schema}.orgi_comarca coma ON foro.cofo_cmrc_dk = coma.cmrc_dk
     LEFT JOIN {schema}.mcpr_assunto_documento assunto_docto ON  assunto_docto.asdo_docu_dk = docto.docu_dk
     LEFT JOIN {schema_aux}.mmps_assunto_docto arvore_assunto ON asdo_assu_dk = id
-    JOIN exadata_aux.atualizacao_pj_pacote pacote ON docto.docu_orgi_orga_dk_responsavel = pacote.id_orgao
+    JOIN {schema_aux}.atualizacao_pj_pacote pacote ON docto.docu_orgi_orga_dk_responsavel = pacote.id_orgao
     LEFT JOIN pessoas_investigadas p_invest ON docto.docu_dk = p_invest.pers_docu_dk
     LEFT JOIN tipos_assuntos t_assunt ON t_assunt.asdo_docu_dk = docto.docu_dk
 WHERE docto.docu_dk = :docu_dk
