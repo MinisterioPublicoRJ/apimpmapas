@@ -269,3 +269,16 @@ class DetalheAlertaCompraDAO(SingleDataObjectDAO):
     table_namespaces = {
         "schema_alertas_compras": settings.SCHEMA_ALERTAS,
     }
+
+
+class DetalheAlertaISPSDAO(SingleDataObjectDAO):
+    QUERIES_DIR = settings.BASE_DIR.child("dominio", "alertas", "queries")
+
+    query_file = "detalhe_alerta_isps.sql"
+    columns = [
+        "municipio",
+        "descricao",
+    ]
+    table_namespaces = {
+        "schema": settings.TABLE_NAMESPACE,
+    }

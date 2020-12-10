@@ -478,3 +478,30 @@ class TestDetalheAlertaCompras(TestCase):
         data = dao.DetalheAlertaCompraDAO.get(alerta_id=self.alerta_id)
 
         self.assertEqual(data, self.expected_data)
+
+
+class TestDetalheAlertaISPS(TestCase):
+    def setUp(self):
+        self.alerta_id = "abc1234"
+        self.query_exec_patcher = mock.patch.object(
+            dao.DetalheAlertaISPSDAO, "execute"
+        )
+        self.query_exec_mock = self.query_exec_patcher.start()
+        self.query_exec_mock.return_value = (
+            (
+                "NOME MUNICIPIO",
+                "DESCRIÇÃO",
+            ),
+        )
+        self.expected_data = {
+            "municipio": "NOME MUNICIPIO",
+            "descricao": "DESCRIÇÃO",
+        }
+
+    def tearDown(self):
+        self.query_exec_patcher.stop()
+
+    def test_get_detalhe_alerta(self):
+        data = dao.DetalheAlertaISPSDAO.get(alerta_id=self.alerta_id)
+
+        self.assertEqual(data, self.expected_data)
