@@ -294,6 +294,7 @@ class PIPPrincipaisInvestigadosListaDAO(GenericPIPDAO):
         "fase_documento",
         "dt_ultimo_andamento",
         "desc_ultimo_andamento",
+        "documento_nr_externo",
     ]
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
     serializer = PIPPrincipaisInvestigadosListaSerializer
