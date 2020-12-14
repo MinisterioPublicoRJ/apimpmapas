@@ -8,8 +8,8 @@ before_install:
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   - sudo apt update -y
   - sudo apt install g++-7 -y
-  - sudo update-alternatives -y --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7
-  - sudo update-alternatives -y --config gcc
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7
+  - sudo update-alternatives --config gcc
   - gcc --version
 services:
   - postgresql
