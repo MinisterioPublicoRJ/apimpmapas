@@ -29,6 +29,7 @@ from dominio.suamesa.dao_metrics import (
     MetricsDetalheDocumentoOrgaoCPFDAO,
 )
 from dominio.pip.utils import get_orgaos_same_aisps
+from dominio.db_connectors import execute as impala_execute
 
 
 class SuaMesaDAO:
@@ -91,13 +92,17 @@ class SuaMesaDetalhePIPAISPDAO(RankingMixin, MetricsDetalheDocumentoOrgaoDAO):
     ranking_dao = RankingAISPDAO
 
     @classmethod
-    def get(cls, **kwargs):
+    def execute(cls, **kwargs):
         orgao_id = kwargs['orgao_id']
         _, orgaos = get_orgaos_same_aisps(orgao_id)
 
-        kwargs['orgaos_aisp'] = tuple(orgaos)
+        data = {f"orgao_aisp_{i}": v for i, v in enumerate(orgaos)}
+        kwargs.update(data)
 
-        return super().get(**kwargs)
+        params = ",".join([f":{k}" for k in data.keys()])
+        query = cls.query().replace(":orgaos_aisp", params)
+
+        return impala_execute(query, kwargs)
 
 
 class SuaMesaDetalheTutelaInvestigacoesDAO(
