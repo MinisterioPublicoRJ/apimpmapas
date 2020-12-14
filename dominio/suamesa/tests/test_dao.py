@@ -9,6 +9,7 @@ from dominio.suamesa.exceptions import (
     APIInvalidSuaMesaType,
     APIMissingSuaMesaType,
 )
+from dominio.suamesa.dao import SuaMesaDetalhePIPAISPDAO
 
 
 class TestSuaMesaDAO(NoJWTTestCase, NoCacheTestCase, TestCase):
@@ -91,3 +92,88 @@ class TestSuaMesaDetalheFactoryDAO(NoJWTTestCase, NoCacheTestCase, TestCase):
 
         with pytest.raises(APIMissingSuaMesaType):
             SuaMesaDetalheFactoryDAO.get(orgao_id, mock_request)
+
+
+class TestDetalheAISPDAO(TestCase):
+    def setUp(self):
+        self.kwargs = {
+            'orgao_id': 1234,
+            'tipo_detalhe': 'tipo',
+            'cpf': '0123',
+            'n': 3,
+            'intervalo': 'mes'
+        }
+
+        self.get_aisps_patcher = mock.patch(
+            "dominio.suamesa.dao.get_orgaos_same_aisps"
+        )
+        self.get_aisps_mock = self.get_aisps_patcher.start()
+        self.get_aisps_mock.return_value = (1, {1234})
+
+        self.impala_execute_patcher = mock.patch(
+            "dominio.suamesa.dao.impala_execute"
+        )
+        self.impala_execute_mock = self.impala_execute_patcher.start()
+
+        self.dao_query_patcher = mock.patch.object(
+            SuaMesaDetalhePIPAISPDAO,
+            "query"
+        )
+        self.dao_query_mock = self.dao_query_patcher.start()
+        self.dao_query_mock.return_value = (
+            """
+            -- Usando o codigo das pips diretamente (cacheado no back)"""
+            """, e não precisa retornar a lista de nomes
+            SELECT
+                acervo_inicio,
+                acervo_fim,
+                CASE WHEN (acervo_fim - acervo_inicio) = 0 THEN 0 ELSE """
+            """(acervo_fim - acervo_inicio)/acervo_inicio END """
+            """as variacao_acervo
+            FROM (
+                SELECT
+                    SUM(acervo_inicio) as acervo_inicio,
+                    SUM(acervo_fim) as acervo_fim
+                FROM {schema}.tb_detalhe_documentos_orgao
+                WHERE tipo_detalhe IN ('pip_inqueritos', 'pip_pics')
+                AND intervalo = :intervalo
+                AND vist_orgi_orga_dk IN (:orgaos_aisp)
+            ) t
+        """)
+        self.expected_query = (
+            """
+            -- Usando o codigo das pips diretamente (cacheado no back)"""
+            """, e não precisa retornar a lista de nomes
+            SELECT
+                acervo_inicio,
+                acervo_fim,
+                CASE WHEN (acervo_fim - acervo_inicio) = 0 THEN 0 ELSE """
+            """(acervo_fim - acervo_inicio)/acervo_inicio END """
+            """as variacao_acervo
+            FROM (
+                SELECT
+                    SUM(acervo_inicio) as acervo_inicio,
+                    SUM(acervo_fim) as acervo_fim
+                FROM {schema}.tb_detalhe_documentos_orgao
+                WHERE tipo_detalhe IN ('pip_inqueritos', 'pip_pics')
+                AND intervalo = :intervalo
+                AND vist_orgi_orga_dk IN (:orgao_aisp_0)
+            ) t
+        """)
+        self.expected_kwargs = {
+            "orgao_aisp_0": 1234
+        }
+        self.expected_kwargs.update(self.kwargs)
+
+    def tearDown(self):
+        self.get_aisps_patcher.stop()
+        self.impala_execute_patcher.stop()
+        self.dao_query_patcher.stop()
+
+    def test_prepare_ids_orgaos(self):
+        SuaMesaDetalhePIPAISPDAO.execute(**self.kwargs)
+
+        self.impala_execute_mock.assert_called_once_with(
+            self.expected_query,
+            self.expected_kwargs,
+        )

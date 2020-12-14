@@ -10,5 +10,5 @@ FROM (
     FROM {schema}.tb_detalhe_documentos_orgao
     WHERE tipo_detalhe IN ('pip_inqueritos', 'pip_pics')
     AND intervalo = :intervalo
-    AND vist_orgi_orga_dk IN :orgaos_aisp
+    AND vist_orgi_orga_dk IN (:orgaos_aisp)
 ) t
