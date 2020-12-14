@@ -44,6 +44,7 @@ sasl==0.2.1
 six==1.15.0
 thrift==0.9.3
 thrift-sasl==0.2.1
+thriftpy==0.3.9
 thriftpy2==0.4.8
 
 #solr
