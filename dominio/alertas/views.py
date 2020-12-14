@@ -22,7 +22,7 @@ from .serializers import AlertasListaSerializer, IdentificadorAlertaSerializer
 
 
 # TODO: criar um endpoint unificado?
-class AlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
+class AlertasView(JWTAuthMixin, PaginatorMixin, APIView):
     cache_config = 'ALERTAS_CACHE_TIMEOUT'
     # TODO: Mover constante para um lugar decente
     # ALERTAS_SIZE = 25
