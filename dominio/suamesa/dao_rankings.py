@@ -10,6 +10,7 @@ from dominio.suamesa.serializers import (
 from dominio.dao import GenericDAO
 from dominio.db_connectors import execute as impala_execute
 from dominio.utils import format_text
+from dominio.exceptions import APIEmptyResultError
 
 
 class RankingDAO(GenericDAO):
@@ -96,7 +97,7 @@ class RankingMixin:
         # do que existe ficaria mais pra frente. Mas pra ganhar tempo,
         # ficará assim por enquanto.
         if not data['metrics'] and not ranking_data:
-            cls.ranking_dao.raise_empty_result_error()
+            raise APIEmptyResultError
 
         data['rankings'] = ranking_data
         data['mapData'] = {}
