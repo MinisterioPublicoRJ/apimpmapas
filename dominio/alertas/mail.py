@@ -23,8 +23,7 @@ def envia_email(msg, from_, dest, subject):
     server.sendmail(from_, dest, msg_mime.as_string())
 
 
-def envia_email_ouvidoria(msg):
+def envia_email_ouvidoria(msg, subject):
     from_ = settings.EMAIL_HOST_USER
     dest = [settings.EMAIL_OUVIDORIA, from_]
-    subject = settings.EMAIL_SUBJECT_OUVIDORIA
     envia_email(msg, from_, dest, subject)

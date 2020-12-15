@@ -9,16 +9,20 @@ from dominio.alertas import dao
 from dominio.alertas.controllers import (
     DispensaAlertaComprasController,
     EnviaAlertaComprasOuvidoriaController,
+    EnviaAlertaISPSOuvidoriaController,
 )
 from dominio.alertas.helper import list_columns
-from dominio.alertas.exceptions import APIAlertTypeListNotConfigured
+from dominio.alertas.exceptions import (
+    APIAlertTypeListNotConfigured,
+    APIInvalidAlertaSigla,
+)
 from dominio.documentos.helpers import gera_planilha_excel
 
 from .serializers import AlertasListaSerializer, IdentificadorAlertaSerializer
 
 
 # TODO: criar um endpoint unificado?
-class AlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
+class AlertasView(JWTAuthMixin, PaginatorMixin, APIView):
     cache_config = 'ALERTAS_CACHE_TIMEOUT'
     # TODO: Mover constante para um lugar decente
     # ALERTAS_SIZE = 25
@@ -118,8 +122,19 @@ class AlertasOverlayView(JWTAuthMixin, CacheMixin, APIView):
         return Response(data=data)
 
 
-class EnviarAlertaComprasOuvidoriaView(JWTAuthMixin, APIView):
+class EnviarAlertaOuvidoriaView(JWTAuthMixin, APIView):
     # TODO: get_object que retorna 404 se alerta não existir
+
+    def controller_router(self, sigla_alerta):
+        sigla_alerta = sigla_alerta.lower()
+        controllers = {
+            "comp": EnviaAlertaComprasOuvidoriaController,
+            "isps": EnviaAlertaISPSOuvidoriaController,
+        }
+        if sigla_alerta not in controllers:
+            raise APIInvalidAlertaSigla
+
+        return controllers[sigla_alerta]
 
     def get_alerta_id(self):
         ser = IdentificadorAlertaSerializer(data=self.request.GET)
@@ -128,9 +143,10 @@ class EnviarAlertaComprasOuvidoriaView(JWTAuthMixin, APIView):
 
     def post(self, request, *args, **kwargs):
         orgao_id = self.kwargs.get(self.orgao_url_kwarg)
+        sigla_alerta = self.kwargs.get("sigla_alerta")
         alerta_id = self.get_alerta_id()
 
-        controller = EnviaAlertaComprasOuvidoriaController(
+        controller = self.controller_router(sigla_alerta)(
             orgao_id,
             alerta_id
         )

@@ -9,6 +9,9 @@ from dominio.alertas.exceptions import (
     APIInvalidOverlayType,
     APIMissingOverlayType,
 )
+from dominio.alertas.tests.testconf import (
+    RemoveFiltroAlertasDispensadosTestCase,
+)
 
 
 class AlertaMaxPartitionDAOTest(TestCase):
@@ -81,8 +84,9 @@ class ResumoAlertasDAOTest(TestCase):
         self.assertEqual(resumo, self.expected)
 
 
-class TestAlertaMGPDAO(TestCase):
+class TestAlertaMGPDAO(RemoveFiltroAlertasDispensadosTestCase, TestCase):
     def setUp(self):
+        super().setUp()
         self.exec_mgp_dao_patcher = mock.patch.object(
             dao.AlertaMGPDAO,
             "execute"
@@ -97,6 +101,7 @@ class TestAlertaMGPDAO(TestCase):
         self.max_pt_dao_mock.return_value = '20201010'
 
     def tearDown(self):
+        super().tearDown()
         self.exec_mgp_dao_patcher.stop()
         self.exec_max_partition_dao_patcher.stop()
 
@@ -261,6 +266,66 @@ class TestFiltraAlertasDispensados(TestCase):
         expected = [("COMP", "12345"), ("COMP", "bbbbb-12345")]
 
         self.assertEqual(prep_hbase, expected)
+
+    def test_prepara_dados_hbase_isps(self):
+        self.dados_hbase.append(
+            (
+                b"key 3",
+                {
+                    b"dados_alertas:alerta_id": b"12345_abc_1234",
+                    b"dados_alertas:orgao": self.orgao_id.encode(),
+                    b"dados_alertas:sigla": b"ISPS"
+                }
+            )
+        )
+        prep_hbase = dao.FiltraAlertasDispensadosMixin.prepara_dados_hbase(
+            self.dados_hbase
+        )
+        expected = [
+            ("COMP", "12345"),
+            ("COMP", "bbbbb-12345"),
+            ("ISPS", "abc_1234")
+        ]
+
+        self.assertEqual(prep_hbase, expected)
+
+    @mock.patch.object(
+        dao.FiltraAlertasDispensadosMixin,
+        "prepara_dados_hbase"
+    )
+    @mock.patch.object(dao.FiltraAlertasDispensadosMixin, "get_table")
+    def test_metodo_filtra_com_alerta_isps(self, m_get_table, m_prep_dados):
+        cls = dao.FiltraAlertasDispensadosMixin
+        cls.sigla_kwarg = "alrt_sigla"
+        cls.alerta_id_kwarg = "alrt_id"
+        result_set = [
+            {
+                f"{cls.sigla_kwarg}": "COMP",
+                f"{cls.alerta_id_kwarg}": "12345"
+            },
+            {
+                f"{cls.sigla_kwarg}": "COMP",
+                f"{cls.alerta_id_kwarg}": "67890"
+            },
+            {
+                f"{cls.sigla_kwarg}": "ISPS",
+                f"{cls.alerta_id_kwarg}": "12345_abc_1234"
+            },
+        ]
+        m_prep_dados.return_value = [
+            ("COMP", "12345"),
+            ("ISPS", "abc_1234")
+        ]
+
+        resp = cls.filtra(self.orgao_id, result_set)
+        expected = [
+            {
+                f"{cls.sigla_kwarg}": "COMP",
+                f"{cls.alerta_id_kwarg}": "67890"
+            },
+        ]
+
+        self.assertEqual(resp, expected)
 
     def test_filtra_alertas_dispensados(self):
         class AlertaMock(dao.FiltraAlertasDispensadosMixin, dao.AlertasDAO):
@@ -476,5 +541,32 @@ class TestDetalheAlertaCompras(TestCase):
 
     def test_get_detalhe_alerta(self):
         data = dao.DetalheAlertaCompraDAO.get(alerta_id=self.alerta_id)
+
+        self.assertEqual(data, self.expected_data)
+
+
+class TestDetalheAlertaISPS(TestCase):
+    def setUp(self):
+        self.alerta_id = "abc1234"
+        self.query_exec_patcher = mock.patch.object(
+            dao.DetalheAlertaISPSDAO, "execute"
+        )
+        self.query_exec_mock = self.query_exec_patcher.start()
+        self.query_exec_mock.return_value = (
+            (
+                "NOME MUNICIPIO",
+                "DESCRIÇÃO",
+            ),
+        )
+        self.expected_data = {
+            "municipio": "NOME MUNICIPIO",
+            "descricao": "DESCRIÇÃO",
+        }
+
+    def tearDown(self):
+        self.query_exec_patcher.stop()
+
+    def test_get_detalhe_alerta(self):
+        data = dao.DetalheAlertaISPSDAO.get(alerta_id=self.alerta_id)
 
         self.assertEqual(data, self.expected_data)

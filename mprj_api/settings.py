@@ -323,7 +323,12 @@ PLACAS_SOLR_MAX_ROWS = config("PLACAS_SOLR_MAX_ROWS", cast=int, default=1_000)
 EMAIL_SMTP_SERVER = config("EMAIL_SMTP_SERVER")
 EMAIL_HOST_USER = config("EMAIL_HOST_USER")
 EMAIL_OUVIDORIA = config("EMAIL_OUVIDORIA")
-EMAIL_SUBJECT_OUVIDORIA = config("EMAIL_SUBJECT_OUVIDORIA")
+
+
+EMAIL_SUBJECT_OUVIDORIA_COMPRAS = config("EMAIL_SUBJECT_OUVIDORIA_COMPRAS")
+EMAIL_SUBJECT_OUVIDORIA_SANEAMENTO = config(
+    "EMAIL_SUBJECT_OUVIDORIA_SANEAMENTO"
+)
 
 #KERBEROS AUTH
 KERBEROS_USER = config("KERBEROS_USER")
@@ -337,4 +342,9 @@ URL_PAINEL_COMPRAS = config(
     ":isGuestRedirectFromVizportal=y&:embed=y&:linktarget=_self"
     "&:tabs=no&:tollbar=yes&contrato_iditem={contrato_iditem}"
     "&CONTRATACAO={contratacao}"
+)
+URL_PAINEL_SANEAMENTO = config(
+    "URL_PAINEL_SANEAMENTO",
+    "https://geo.mprj.mp.br/portal/apps/experiencebuilder/experience/"
+    "?id=35ae775b7f37418c9c65f47d62943d67"
 )

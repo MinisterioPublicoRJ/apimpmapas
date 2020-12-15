@@ -297,9 +297,10 @@ class TestEnviarAlertasComprasOuvidoria(NoJWTTestCase, TestCase):
     def setUp(self):
         super().setUp()
         self.orgao_id = "12345"
+        self.alerta_sigla = "COMP"
         self.url = reverse(
-            "dominio:alerta_compras_ouvidoria",
-            args=(self.orgao_id,)
+            "dominio:alerta_ouvidoria",
+            args=(self.orgao_id, self.alerta_sigla)
         )
 
         self.controller_patcher = mock.patch(
@@ -328,6 +329,57 @@ class TestEnviarAlertasComprasOuvidoria(NoJWTTestCase, TestCase):
 
     def test_bad_request_alerta_id_nao_informado(self):
         resp = self.client.post(self.url)
+
+        self.assertEqual(resp.status_code, 400)
+
+
+class TestEnviarAlertasISPSOuvidoria(NoJWTTestCase, TestCase):
+    def setUp(self):
+        super().setUp()
+        self.orgao_id = "12345"
+        self.alerta_sigla = "ISPS"
+        self.alerta_id = "abc12345"
+
+        self.url = reverse(
+            "dominio:alerta_ouvidoria",
+            args=(self.orgao_id, self.alerta_sigla)
+        )
+
+        self.controller_patcher = mock.patch(
+            "dominio.alertas.views.EnviaAlertaISPSOuvidoriaController"
+        )
+        self.controller_mock = self.controller_patcher.start()
+
+        self.status = 201
+        self.resp = {"detail": "alerta enviado com sucesso para ouvidoria"}
+        self.controller_obj_mock = mock.Mock()
+        self.controller_obj_mock.envia.return_value = (self.resp, self.status)
+        self.controller_mock.return_value = self.controller_obj_mock
+
+    def tearDown(self):
+        super().tearDown()
+        self.controller_patcher.stop()
+
+    def test_envia_alerta_compras_para_ouvidoria(self):
+        self.url += f"?alerta_id={self.alerta_id}"
+        resp = self.client.post(self.url)
+
+        self.controller_obj_mock.envia.assert_called_once_with()
+        self.controller_mock.assert_called_once_with(
+            self.orgao_id,
+            self.alerta_id
+        )
+        self.assertEqual(resp.status_code, self.status)
+
+    def test_bad_request_alerta_id_nao_informado(self):
+        resp = self.client.post(self.url)
+
+        self.assertEqual(resp.status_code, 400)
+
+    def test_bad_request_alerta_sigla_invalida(self):
+        url = reverse("dominio:alerta_ouvidoria", args=(self.orgao_id, "AAA"))
+        url += f"?alerta_id={self.alerta_id}"
+        resp = self.client.post(url)
 
         self.assertEqual(resp.status_code, 400)
 

@@ -25,3 +25,9 @@ class APIAlertTypeListNotConfigured(APIException):
     default_detail = ("O parâmetro tipo_alerta recebido não está "
                       "configurado para retornar lista!")
     default_code = "api_alert_type_list_not_configured"
+
+
+class APIInvalidAlertaSigla(APIException):
+    status_code = 400
+    default_detail = "Parâmetro <sigla_alerta> inválido"
+    default_code = "api_alerta_ouvidoria_invalid_sigla_alerta"
