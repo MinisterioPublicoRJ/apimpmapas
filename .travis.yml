@@ -9,7 +9,7 @@ services:
 before_script:
   - psql -c 'create database apimpmapas;' -U postgres
 python:
-  - "3.6"
+  - "3.8"
 install:
   - pip install --upgrade pip
   - pip install -r dev-requirements.txt
