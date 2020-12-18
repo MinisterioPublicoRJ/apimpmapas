@@ -16,7 +16,8 @@ class VistaManager(models.Manager):
     def abertas(self):
         return self.get_queryset().filter(
             Q(data_fechamento=None) |
-            Q(data_fechamento__gt=date.today())
+            Q(data_fechamento__gt=date.today()),
+            documento__docu_fsdc_dk=1
         )
 
     def abertas_promotor(self, orgao_id, cpf):
@@ -91,17 +92,36 @@ class VistaManager(models.Manager):
 
 
 class InvestigacoesManager(models.Manager):
-    def em_curso(self, orgao_id, regras):
+    def em_curso(self, orgao_id, regras, regras_finalizacao):
         parametros = ",".join([f":regra{i}" for i in range(len(regras))])
+        finalizacoes = ",".join([f":andam{i}" for i in range(len(regras_finalizacao))])
         query = f"""
-            SELECT COUNT(DOCU_FSDC_DK) AS "__COUNT" FROM "MCPR_DOCUMENTO"
+            SELECT COUNT(DOCU_FSDC_DK) AS "__COUNT"
+            FROM "MCPR_DOCUMENTO"
+            LEFT JOIN (
+                    SELECT I.ITEM_DOCU_DK
+                    FROM "MCPR_ITEM_MOVIMENTACAO" I
+                    JOIN "MCPR_MOVIMENTACAO" M ON I.ITEM_MOVI_DK = M.MOVI_DK
+                    WHERE M.MOVI_ORGA_DK_DESTINO IN (200819, 100500)
+                ) T ON T.ITEM_DOCU_DK = "MCPR_DOCUMENTO"."DOCU_DK"
+            LEFT JOIN (
+                    SELECT vist_docu_dk
+                    FROM "MCPR_DOCUMENTO"
+                    JOIN "MCPR_VISTA" ON VIST_DOCU_DK = DOCU_DK
+                    JOIN "MCPR_ANDAMENTO" ON VIST_DK = PCAO_VIST_DK
+                    JOIN "MCPR_SUB_ANDAMENTO" ON STAO_PCAO_DK = PCAO_DK
+                    WHERE STAO_TPPR_DK IN ({finalizacoes})
+                ) A ON A.VIST_DOCU_DK = "MCPR_DOCUMENTO"."DOCU_DK"
             WHERE ("MCPR_DOCUMENTO"."DOCU_CLDC_DK" IN ({parametros})
+              AND T.ITEM_DOCU_DK IS NULL
+              AND A.VIST_DOCU_DK IS NULL
               AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
               AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" = :orgao_id
               AND NOT ("MCPR_DOCUMENTO"."DOCU_TPST_DK" = 11))
         """
         rs = [(0,)]
         prep_stat = {f"regra{i}": v for i, v in enumerate(regras)}
+        prep_stat.update({f"andam{i}": v for i, v in enumerate(regras_finalizacao)})
         prep_stat["orgao_id"] = orgao_id
         with connections["dominio_db"].cursor() as cursor:
             cursor.execute(query, prep_stat)
@@ -116,7 +136,7 @@ class InvestigacoesManager(models.Manager):
             docu_fsdc_dk=1
         ).exclude(docu_tpst_dk=11)
 
-    def em_curso_grupo(self, orgao_ids, regras):
+    def em_curso_grupo(self, orgao_ids, regras, regras_finalizacao):
         parametros = ",".join([f":regra{i}" for i in range(len(regras))])
         orgaos = ",".join([f":orgao{i}" for i in range(len(orgao_ids))])
         query = f"""
@@ -138,7 +158,7 @@ class InvestigacoesManager(models.Manager):
 
 
 class ProcessosManager(InvestigacoesManager):
-    def em_juizo(self, orgao_id, regras):
+    def em_juizo(self, orgao_id, regras, regras_finalizacao):
         """
         Para um documento estar em Juízo este precisa de um número do TJRJ.
         Para tal, o número 819 deve estar presente entre as posicoes 14⁻17
