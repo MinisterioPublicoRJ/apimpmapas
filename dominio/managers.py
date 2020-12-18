@@ -14,9 +14,13 @@ from django.db.models import (
 
 class VistaManager(models.Manager):
     def abertas(self):
+        TUTELA_INVESTIGACOES = [51219, 51220, 51221, 51222, 51223, 392, 395]
         return self.get_queryset().filter(
             Q(data_fechamento=None) |
             Q(data_fechamento__gt=date.today())
+        ).exclude(
+            Q(documento__docu_tpst_dk=3) &
+            Q(documento__docu_cldc_dk__in=TUTELA_INVESTIGACOES)
         )
 
     def abertas_promotor(self, orgao_id, cpf):
@@ -32,7 +36,7 @@ class VistaManager(models.Manager):
         """
         return self.abertas().filter(
             orgao=orgao_id,
-            responsavel__cpf=cpf
+            responsavel__cpf=cpf,
         )
 
     def abertas_por_data(self, orgao_id, cpf):
@@ -91,7 +95,7 @@ class VistaManager(models.Manager):
 
 
 class InvestigacoesManager(models.Manager):
-    def em_curso(self, orgao_id, regras):
+    def em_curso(self, orgao_id, regras, remove_out=False):
         parametros = ",".join([f":regra{i}" for i in range(len(regras))])
         query = f"""
             SELECT COUNT(DOCU_FSDC_DK) AS "__COUNT" FROM "MCPR_DOCUMENTO"
@@ -100,6 +104,8 @@ class InvestigacoesManager(models.Manager):
               AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" = :orgao_id
               AND NOT ("MCPR_DOCUMENTO"."DOCU_TPST_DK" = 11))
         """
+        if remove_out:
+            query += """ AND NOT ("MCPR_DOCUMENTO"."DOCU_TPST_DK" = 3)"""
         rs = [(0,)]
         prep_stat = {f"regra{i}": v for i, v in enumerate(regras)}
         prep_stat["orgao_id"] = orgao_id

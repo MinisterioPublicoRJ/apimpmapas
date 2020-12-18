@@ -55,7 +55,8 @@ class TestSuaMesaFunctions(NoJWTTestCase, NoCacheTestCase, TestCase):
 
         self.assertEqual(output, 1)
         _Documento.investigacoes.em_curso.assert_called_once_with(
-            orgao_id, [51219, 51220, 51221, 51222, 51223, 392, 395]
+            orgao_id, [51219, 51220, 51221, 51222, 51223, 392, 395],
+            remove_out=True
         )
 
     @mock.patch('dominio.suamesa.dao_functions.Documento')
