@@ -32,7 +32,8 @@ def get_tutela_investigacoes(orgao_id, request):
     return Documento.investigacoes.em_curso(
         orgao_id,
         TUTELA_INVESTIGACOES,
-        TUTELA_FINALIZACOES
+        TUTELA_FINALIZACOES,
+        remove_out=True
     )
 
 

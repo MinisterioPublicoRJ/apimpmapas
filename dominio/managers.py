@@ -92,7 +92,7 @@ class VistaManager(models.Manager):
 
 
 class InvestigacoesManager(models.Manager):
-    def em_curso(self, orgao_id, regras, regras_finalizacao):
+    def em_curso(self, orgao_id, regras, regras_finalizacao, remove_out=False):
         parametros = ",".join([f":regra{i}" for i in range(len(regras))])
         finalizacoes = ",".join([f":andam{i}" for i in range(len(regras_finalizacao))])
         query = f"""
@@ -119,6 +119,8 @@ class InvestigacoesManager(models.Manager):
               AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" = :orgao_id
               AND NOT ("MCPR_DOCUMENTO"."DOCU_TPST_DK" = 11))
         """
+        if remove_out:
+            query += """ AND NOT ("MCPR_DOCUMENTO"."DOCU_TPST_DK" = 3)"""
         rs = [(0,)]
         prep_stat = {f"regra{i}": v for i, v in enumerate(regras)}
         prep_stat.update({f"andam{i}": v for i, v in enumerate(regras_finalizacao)})
@@ -139,10 +141,28 @@ class InvestigacoesManager(models.Manager):
     def em_curso_grupo(self, orgao_ids, regras, regras_finalizacao):
         parametros = ",".join([f":regra{i}" for i in range(len(regras))])
         orgaos = ",".join([f":orgao{i}" for i in range(len(orgao_ids))])
+        finalizacoes = ",".join([f":andam{i}" for i in range(len(regras_finalizacao))])
         query = f"""
             SELECT /*+ PARALLEL,2 */
-            COUNT(DOCU_FSDC_DK) AS "__COUNT" FROM "MCPR_DOCUMENTO"
+            COUNT(DOCU_FSDC_DK) AS "__COUNT"
+            FROM "MCPR_DOCUMENTO"
+            LEFT JOIN (
+                    SELECT I.ITEM_DOCU_DK
+                    FROM "MCPR_ITEM_MOVIMENTACAO" I
+                    JOIN "MCPR_MOVIMENTACAO" M ON I.ITEM_MOVI_DK = M.MOVI_DK
+                    WHERE M.MOVI_ORGA_DK_DESTINO IN (200819, 100500)
+                ) T ON T.ITEM_DOCU_DK = "MCPR_DOCUMENTO"."DOCU_DK"
+            LEFT JOIN (
+                    SELECT vist_docu_dk
+                    FROM "MCPR_DOCUMENTO"
+                    JOIN "MCPR_VISTA" ON VIST_DOCU_DK = DOCU_DK
+                    JOIN "MCPR_ANDAMENTO" ON VIST_DK = PCAO_VIST_DK
+                    JOIN "MCPR_SUB_ANDAMENTO" ON STAO_PCAO_DK = PCAO_DK
+                    WHERE STAO_TPPR_DK IN ({finalizacoes})
+                ) A ON A.VIST_DOCU_DK = "MCPR_DOCUMENTO"."DOCU_DK"
             WHERE ("MCPR_DOCUMENTO"."DOCU_CLDC_DK" IN ({parametros})
+             AND T.ITEM_DOCU_DK IS NULL
+             AND A.VIST_DOCU_DK IS NULL
              AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
              AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" IN ({orgaos})
              AND NOT ("MCPR_DOCUMENTO"."DOCU_TPST_DK" = 11))
@@ -150,6 +170,7 @@ class InvestigacoesManager(models.Manager):
         rs = [(0,)]
         prep_stat = {f"regra{i}": v for i, v in enumerate(regras)}
         prep_stat.update({f"orgao{i}": v for i, v in enumerate(orgao_ids)})
+        prep_stat.update({f"andam{i}": v for i, v in enumerate(regras_finalizacao)})
         with connections["dominio_db"].cursor() as cursor:
             cursor.execute(query, prep_stat)
             rs = cursor.fetchall()
@@ -165,9 +186,27 @@ class ProcessosManager(InvestigacoesManager):
         e a string entre as posicoes 10-14 deve ser igual ao campo DOCU_ANO
         """
         parametros = ",".join([f":regra{i}" for i in range(len(regras))])
+        finalizacoes = ",".join([f":andam{i}" for i in range(len(regras_finalizacao))])
         query = f"""
-            SELECT COUNT(1) AS "__COUNT" FROM "MCPR_DOCUMENTO"
+            SELECT COUNT(1) AS "__COUNT"
+            FROM "MCPR_DOCUMENTO"
+            LEFT JOIN (
+                    SELECT I.ITEM_DOCU_DK
+                    FROM "MCPR_ITEM_MOVIMENTACAO" I
+                    JOIN "MCPR_MOVIMENTACAO" M ON I.ITEM_MOVI_DK = M.MOVI_DK
+                    WHERE M.MOVI_ORGA_DK_DESTINO IN (200819, 100500)
+                ) T ON T.ITEM_DOCU_DK = "MCPR_DOCUMENTO"."DOCU_DK"
+            LEFT JOIN (
+                    SELECT vist_docu_dk
+                    FROM "MCPR_DOCUMENTO"
+                    JOIN "MCPR_VISTA" ON VIST_DOCU_DK = DOCU_DK
+                    JOIN "MCPR_ANDAMENTO" ON VIST_DK = PCAO_VIST_DK
+                    JOIN "MCPR_SUB_ANDAMENTO" ON STAO_PCAO_DK = PCAO_DK
+                    WHERE STAO_TPPR_DK IN ({finalizacoes})
+                ) A ON A.VIST_DOCU_DK = "MCPR_DOCUMENTO"."DOCU_DK"
             WHERE ("MCPR_DOCUMENTO"."DOCU_CLDC_DK" IN ({parametros})
+              AND T.ITEM_DOCU_DK IS NULL
+              AND A.VIST_DOCU_DK IS NULL
               AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
               AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" = :orgao_id
               AND NOT ("MCPR_DOCUMENTO"."DOCU_TPST_DK" = 11)
@@ -177,6 +216,7 @@ class ProcessosManager(InvestigacoesManager):
         """
         rs = [(0,)]
         prep_stat = {f"regra{i}": v for i, v in enumerate(regras)}
+        prep_stat.update({f"andam{i}": v for i, v in enumerate(regras_finalizacao)})
         prep_stat["orgao_id"] = orgao_id
         with connections["dominio_db"].cursor() as cursor:
             cursor.execute(query, prep_stat)
