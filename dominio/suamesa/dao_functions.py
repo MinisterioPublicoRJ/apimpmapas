@@ -27,7 +27,7 @@ def get_tutela_investigacoes(orgao_id, request):
         392,                                # Inquérito Civil
         395                                 # Procedimento Preparatório
     ]
-    return Documento.investigacoes.em_curso(orgao_id, regras)
+    return Documento.investigacoes.em_curso(orgao_id, regras, remove_out=True)
 
 
 def get_tutela_processos(orgao_id, request):
