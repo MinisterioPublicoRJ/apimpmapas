@@ -205,8 +205,8 @@ class TestComparadorRadares(NoJWTTestCase, TestCase):
                 "2ª PROMOTORIA",
                 1.0,
                 0.0,
-                None,
                 0.7,
+                None,
                 None
             ),
             (
@@ -215,8 +215,8 @@ class TestComparadorRadares(NoJWTTestCase, TestCase):
                 "1ª PROMOTORIA",
                 1.0,
                 1.0,
-                None,
                 1.0,
+                None,
                 None
             )
         ]
@@ -229,8 +229,8 @@ class TestComparadorRadares(NoJWTTestCase, TestCase):
                 "orgi_nm_orgao": "2ª PROMOTORIA",
                 "perc_arquivamentos": 1.0,
                 "perc_indeferimentos": 0.0,
-                "perc_instauracoes": None,
                 "perc_tac": 0.7,
+                "perc_instauracoes": None,
                 "perc_acoes": None
             },
             {
@@ -239,8 +239,8 @@ class TestComparadorRadares(NoJWTTestCase, TestCase):
                 "orgi_nm_orgao": "1ª PROMOTORIA",
                 "perc_arquivamentos": 1.0,
                 "perc_indeferimentos": 1.0,
-                "perc_instauracoes": None,
                 "perc_tac": 1.0,
+                "perc_instauracoes": None,
                 "perc_acoes": None
             }
         ]
