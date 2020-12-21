@@ -32,6 +32,7 @@ class TestEnviaEmailOuvidoria(TestCase):
         self.email_login_mock.return_value = self.server_mock
 
         self.mime_string = "mime string"
+        self.subject = "subject"
 
         class CustomDict(dict):
             def as_string(self):
@@ -55,7 +56,7 @@ class TestEnviaEmailOuvidoria(TestCase):
         self.mime_patcher.stop()
 
     def test_envia_mensagem_por_email(self):
-        envia_email_ouvidoria(self.message)
+        envia_email_ouvidoria(self.message, self.subject)
         expected_from = settings.EMAIL_HOST_USER
         expected_dest = [settings.EMAIL_OUVIDORIA, settings.EMAIL_HOST_USER]
 

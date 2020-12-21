@@ -1,3 +1,6 @@
+from datetime import date
+
+from django.http import FileResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -6,13 +9,20 @@ from dominio.alertas import dao
 from dominio.alertas.controllers import (
     DispensaAlertaComprasController,
     EnviaAlertaComprasOuvidoriaController,
+    EnviaAlertaISPSOuvidoriaController,
 )
+from dominio.alertas.helper import list_columns
+from dominio.alertas.exceptions import (
+    APIAlertTypeListNotConfigured,
+    APIInvalidAlertaSigla,
+)
+from dominio.documentos.helpers import gera_planilha_excel
 
 from .serializers import AlertasListaSerializer, IdentificadorAlertaSerializer
 
 
 # TODO: criar um endpoint unificado?
-class AlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
+class AlertasView(JWTAuthMixin, PaginatorMixin, APIView):
     cache_config = 'ALERTAS_CACHE_TIMEOUT'
     # TODO: Mover constante para um lugar decente
     # ALERTAS_SIZE = 25
@@ -112,8 +122,19 @@ class AlertasOverlayView(JWTAuthMixin, CacheMixin, APIView):
         return Response(data=data)
 
 
-class EnviarAlertaComprasOuvidoriaView(JWTAuthMixin, APIView):
+class EnviarAlertaOuvidoriaView(JWTAuthMixin, APIView):
     # TODO: get_object que retorna 404 se alerta não existir
+
+    def controller_router(self, sigla_alerta):
+        sigla_alerta = sigla_alerta.lower()
+        controllers = {
+            "comp": EnviaAlertaComprasOuvidoriaController,
+            "isps": EnviaAlertaISPSOuvidoriaController,
+        }
+        if sigla_alerta not in controllers:
+            raise APIInvalidAlertaSigla
+
+        return controllers[sigla_alerta]
 
     def get_alerta_id(self):
         ser = IdentificadorAlertaSerializer(data=self.request.GET)
@@ -122,11 +143,46 @@ class EnviarAlertaComprasOuvidoriaView(JWTAuthMixin, APIView):
 
     def post(self, request, *args, **kwargs):
         orgao_id = self.kwargs.get(self.orgao_url_kwarg)
+        sigla_alerta = self.kwargs.get("sigla_alerta")
         alerta_id = self.get_alerta_id()
 
-        controller = EnviaAlertaComprasOuvidoriaController(
+        controller = self.controller_router(sigla_alerta)(
             orgao_id,
             alerta_id
         )
         resp, status = controller.envia()
         return Response(data=resp, status=status)
+
+
+class BaixarAlertasView(JWTAuthMixin, APIView):
+    def get(self, request, *args, **kwargs):
+        orgao_id = int(kwargs.get(self.orgao_url_kwarg))
+        tipo_alerta = request.GET.get("tipo_alerta", None)
+
+        try:
+            data_columns, header = list_columns[tipo_alerta]
+        except KeyError:
+            raise APIAlertTypeListNotConfigured
+
+        if tipo_alerta == 'COMP':
+            data = dao.AlertaComprasDAO.get(
+                id_orgao=orgao_id,
+                accept_empty=False
+            )
+        else:
+            data = dao.AlertaMGPDAO.get(
+                orgao_id=orgao_id,
+                tipo_alerta=tipo_alerta,
+                accept_empty=False
+            )
+        data = [tuple(x[c] for c in data_columns) for x in data]
+
+        return FileResponse(
+            gera_planilha_excel(
+                data,
+                header=header,
+                sheet_title=f"Alertas {tipo_alerta}"
+            ),
+            filename=f"Alerta-{tipo_alerta}-{date.today()}.xlsx",
+            as_attachment=True
+        )

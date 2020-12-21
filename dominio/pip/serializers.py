@@ -29,7 +29,7 @@ class PIPPrincipaisInvestigadosPerfilSerializer(serializers.Serializer):
     nm_mae = serializers.CharField()
     cpf = serializers.CharField()
     rg = serializers.CharField()
-    dt_nasc = serializers.DateTimeField()
+    dt_nasc = serializers.DateTimeField(format="%Y-%m-%d")
     nm_pesj = serializers.CharField()
     cnpj = serializers.CharField()
 
@@ -41,8 +41,9 @@ class PIPPrincipaisInvestigadosListaSerializer(serializers.Serializer):
     nm_orgao = serializers.CharField()
     assuntos = serializers.ListField(serializers.CharField())
     fase_documento = serializers.CharField()
-    dt_ultimo_andamento = serializers.DateTimeField()
+    dt_ultimo_andamento = serializers.DateTimeField(format="%Y-%m-%d")
     desc_ultimo_andamento = serializers.CharField()
+    documento_nr_externo = serializers.CharField()
 
 
 class PIPIndicadoresSucessoParser(serializers.Serializer):

@@ -216,8 +216,8 @@ class ComparadorRadaresDAO(GenericTutelaDAO):
         "orgi_nm_orgao",
         "perc_arquivamentos",
         "perc_indeferimentos",
-        "perc_instauracoes",
         "perc_tac",
+        "perc_instauracoes",
         "perc_acoes",
     ]
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}

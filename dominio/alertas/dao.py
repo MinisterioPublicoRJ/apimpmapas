@@ -32,9 +32,12 @@ class FiltraAlertasDispensadosMixin:
         id_key = f"{cls.col_family}alerta_id".encode()
         prep_dados = []
         for _, dado in dados:
-            prep_dados.append(
-                (dado[sigla_key].decode(), dado[id_key].decode())
-            )
+            alerta_sigla = dado[sigla_key].decode()
+            alerta_id = dado[id_key].decode()
+            if alerta_sigla == "ISPS":
+                alerta_id = "_".join(alerta_id.split("_")[1:])
+
+            prep_dados.append((alerta_sigla, alerta_id))
 
         return prep_dados
 
@@ -54,7 +57,12 @@ class FiltraAlertasDispensadosMixin:
 
         filtrados = []
         for row in result_set:
-            if (row[cls.sigla_kwarg], row[cls.alerta_id_kwarg]) in dispensados:
+            alerta_sigla = row[cls.sigla_kwarg]
+            alerta_id = row[cls.alerta_id_kwarg]
+            if alerta_sigla == "ISPS":
+                alerta_id = "_".join(alerta_id.split("_")[1:])
+
+            if (alerta_sigla, alerta_id) in dispensados:
                 continue
 
             filtrados.append(row)
@@ -124,7 +132,7 @@ class ResumoAlertasDAO(AlertasDAO):
         return cls.ordena_alertas(resumo)
 
 
-class AlertaMGPDAO(AlertasDAO):
+class AlertaMGPDAO(FiltraAlertasDispensadosMixin, AlertasDAO):
     query_file = None
     table_namespaces = {"schema": settings.TABLE_NAMESPACE}
     columns = [
@@ -136,8 +144,12 @@ class AlertaMGPDAO(AlertasDAO):
         "id_alerta",
         "sigla",
         "descricao",
-        "classe_hierarquia"
+        "classe_hierarquia",
+        "num_externo"
     ]
+    orgao_kwarg = "orgao_id"
+    alerta_id_kwarg = "id_alerta"
+    sigla_kwarg = "sigla"
 
     @classmethod
     def execute(cls, **kwargs):
@@ -267,4 +279,17 @@ class DetalheAlertaCompraDAO(SingleDataObjectDAO):
     ]
     table_namespaces = {
         "schema_alertas_compras": settings.SCHEMA_ALERTAS,
+    }
+
+
+class DetalheAlertaISPSDAO(SingleDataObjectDAO):
+    QUERIES_DIR = settings.BASE_DIR.child("dominio", "alertas", "queries")
+
+    query_file = "detalhe_alerta_isps.sql"
+    columns = [
+        "municipio",
+        "descricao",
+    ]
+    table_namespaces = {
+        "schema": settings.TABLE_NAMESPACE,
     }

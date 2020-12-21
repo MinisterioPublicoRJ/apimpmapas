@@ -8,6 +8,7 @@ from django.conf import settings
 from dominio.exceptions import APIEmptyResultError
 from dominio.models import Usuario
 from dominio.login import dao, exceptions
+from dominio.login.exceptions import UserHasNoValidOfficesError
 from login.jwtlogin import tipo_orgao
 
 
@@ -52,6 +53,16 @@ class PermissaoUsuario:
         lista_orgaos = self._adiciona_cisps(lista_orgaos)
         lista_orgaos = self._classifica_pips_especializadas(lista_orgaos)
         return lista_orgaos
+
+    @cached_property
+    def atribuicoes_orgaos(self):
+        ids_orgaos_lotados = [
+            int(o.get("cdorgao")) for o in self.orgaos_lotados
+        ]
+        return dao.AtribuicoesOrgaosDAO.get(
+            ids_orgaos=ids_orgaos_lotados,
+            accept_empty=True
+        ).get("atribuicao")
 
     @cached_property
     def orgaos_validos(self):
@@ -122,10 +133,7 @@ class PermissaoUsuario:
 
     @property
     def ids_orgaos_lotados_validos(self):
-        return [
-            o.get("cdorgao")
-            for o in self._filtra_orgaos_invalidos(self.orgaos_lotados)
-        ]
+        return [o.get("cdorgao") for o in self.orgaos_validos]
 
     def _get_cisps_from_orgao(self, id_orgao):
         return self.pip_cisps.get(id_orgao, '')
@@ -182,16 +190,7 @@ def permissoes_router(info):
 
 
 def build_login_response(permissoes):
-    usuario, created = Usuario.objects.get_or_create(
-        username=permissoes.username
-    )
-
     response = dict()
-    # Informações do login
-    response["username"] = usuario.username
-    response["first_login"] = created
-    response["first_login_today"] = created or usuario.get_first_login_today()
-    response["tipo_permissao"] = permissoes.type
 
     # Informações do usuário
     response["sexo"] = permissoes.dados_usuario["sexo"]
@@ -199,20 +198,40 @@ def build_login_response(permissoes):
     response["cpf"] = permissoes.dados_usuario["cpf"]
     response["nome"] = permissoes.dados_usuario["nome"]
     response["matricula"] = permissoes.dados_usuario["matricula"]
-    response["ids_orgaos_lotados_validos"] = (
-        permissoes.ids_orgaos_lotados_validos
-    )
+    response["tipo_permissao"] = permissoes.type
+    response["atribuicao"] = permissoes.atribuicoes_orgaos
 
-    response["token"] = jwt.encode(
-        response, settings.JWT_SECRET, algorithm="HS256",
-    )
+    try:
+        response["ids_orgaos_lotados_validos"] = (
+            permissoes.ids_orgaos_lotados_validos
+        )
+        usuario, created = Usuario.objects.get_or_create(
+            username=permissoes.username
+        )
 
-    # Informações dos órgãos
-    response["orgao_selecionado"] = permissoes.orgao_selecionado
-    response["orgaos_lotados"] = permissoes.orgaos_lotados
-    response["orgaos_validos"] = permissoes.orgaos_validos
+        # Informações do login
+        response["username"] = permissoes.username
+        response["first_login"] = created
+        response["first_login_today"] = (
+            created or usuario.get_first_login_today()
+        )
+        token = jwt.encode(
+            response, settings.JWT_SECRET, algorithm="HS256",
+        )
 
-    # Update last_login
-    usuario.save()
+        # Informações dos órgãos
+        response["orgaos_lotados"] = permissoes.orgaos_lotados
+        response["orgao_selecionado"] = permissoes.orgao_selecionado
+        response["orgaos_validos"] = permissoes.orgaos_validos
+
+        # Token de acesso
+        response["token"] = token
+
+        # Update last_login
+        usuario.save()
+    except UserHasNoValidOfficesError:
+        response["orgao_selecionado"] = None
+        response["orgaos_validos"] = None
+        response["ids_orgaos_lotados_validos"] = None
 
     return response

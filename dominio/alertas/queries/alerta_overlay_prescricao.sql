@@ -5,7 +5,7 @@ SELECT
     adpr_delitos_multiplicadores,
     adpr_fator_pena,
     adpr_max_pena_fatorado,
-    adpr_dt_inicial_prescricao,
+    cast(adpr_dt_inicial_prescricao as timestamp),
     adpr_dt_final_prescricao,
     concat_ws(
         '_',

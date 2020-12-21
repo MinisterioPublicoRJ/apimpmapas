@@ -346,6 +346,7 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "FaseDoc",
                 datetime(2020, 4, 22, 13, 36, 6, 668000),
                 "Andamento 1",
+                "1234",
             ),
         ]
         ser_data = PIPPrincipaisInvestigadosListaDAO.serialize(result_set)
@@ -356,8 +357,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
             "nm_orgao": "5ª Promotoria de Justiça",
             "assuntos": ["Assunto 1", "Assunto 2"],
             "fase_documento": "FaseDoc",
-            "dt_ultimo_andamento": '2020-04-22T13:36:06.668000Z',
+            "dt_ultimo_andamento": '2020-04-22',
             "desc_ultimo_andamento": "Andamento 1",
+            "documento_nr_externo": "1234",
         }]
         assert ser_data == expected_data
 
@@ -373,6 +375,7 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "FaseDoc",
                 datetime(2020, 4, 22, 13, 36, 6, 668000),
                 "Andamento 1",
+                "1234",
             ),
             (
                 1,
@@ -383,6 +386,7 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "FaseDoc",
                 datetime(2020, 4, 22, 13, 36, 6, 668000),
                 "Andamento 1",
+                "5678",
             )
         ]
         expected = [
@@ -393,8 +397,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "nm_orgao": "5ª Promotoria de Justiça",
                 "assuntos": ["Assunto 1", "Assunto 2"],
                 "fase_documento": "FaseDoc",
-                "dt_ultimo_andamento": '2020-04-22T13:36:06.668000Z',
+                "dt_ultimo_andamento": '2020-04-22',
                 "desc_ultimo_andamento": "Andamento 1",
+                "documento_nr_externo": "5678",
             }
         ]
         output = PIPPrincipaisInvestigadosListaDAO.get(
@@ -414,6 +419,7 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "FaseDoc",
                 datetime(2020, 4, 22, 13, 36, 6, 668000),
                 "Andamento 1",
+                "1234",
             ),
             (
                 1,
@@ -424,6 +430,7 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "FaseDoc",
                 datetime(2020, 4, 22, 13, 36, 6, 668000),
                 "Andamento 1",
+                "5678",
             )
         ]
         expected = [
@@ -434,8 +441,9 @@ class TestPIPPrincipaisInvestigadosListaDAO:
                 "nm_orgao": "5ª Promotoria de Justiça",
                 "assuntos": ["Assunto 1", "Assunto 2"],
                 "fase_documento": "FaseDoc",
-                "dt_ultimo_andamento": '2020-04-22T13:36:06.668000Z',
+                "dt_ultimo_andamento": '2020-04-22',
                 "desc_ultimo_andamento": "Andamento 1",
+                "documento_nr_externo": "5678",
             }
         ]
         output = PIPPrincipaisInvestigadosListaDAO.get(representante_dk=16)
@@ -463,7 +471,7 @@ class TestPIPPrincipaisInvestigadosPerfilDAO:
             "nm_mae": "Nome Mae",
             "cpf": None,
             "rg": "123456",
-            "dt_nasc": '2020-04-22T13:36:06.668000Z'
+            "dt_nasc": '2020-04-22'
         }]
         assert ser_data == expected_data
 

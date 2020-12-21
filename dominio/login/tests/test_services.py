@@ -15,6 +15,7 @@ class TestBuildLoginResponse(TestCase):
     def setUp(self):
         self.TEST_DATABASE_NAME = "default"
         self.username = "username"
+        self.atribuicao = "Atribuicao"
 
         self.pip_validos_dao_patcher = mock.patch.object(
             PIPValidasDAO,
@@ -65,6 +66,13 @@ class TestBuildLoginResponse(TestCase):
                 ),
             ),
         ]
+
+        self.impala_execute_patcher = mock.patch(
+            "dominio.login.dao.impala_execute"
+        )
+        self.impala_execute_mock = self.impala_execute_patcher.start()
+        self.impala_execute_mock.return_value = ((self.atribuicao,),)
+
         self.expected_response = {
             "username": self.username,
             "cpf": "123456789",
@@ -79,6 +87,7 @@ class TestBuildLoginResponse(TestCase):
             "token": "auth-token",
             "tipo_permissao": "regular",
             "ids_orgaos_lotados_validos": ["098765"],
+            "atribuicao": self.atribuicao,
             "orgao_selecionado":
             {
                 "cpf": "CPF 1",
@@ -143,6 +152,7 @@ class TestBuildLoginResponse(TestCase):
         self.pip_cisps_dao_patcher.stop()
         self.oracle_access_patcher.stop()
         self.jwt_patcher.stop()
+        self.impala_execute_patcher.stop()
 
     def test_build_login_response(self):
         response = services.build_login_response(self.permissoes)
@@ -199,6 +209,121 @@ class TestBuildLoginResponse(TestCase):
 
         user_db.refresh_from_db(using=self.TEST_DATABASE_NAME)
         self.assertEqual(user_db.last_login, date(2020, 1, 1))
+
+
+class TestBuildLoginResponseUserRegularNoAccess(TestCase):
+    def setUp(self):
+        self.TEST_DATABASE_NAME = "default"
+        self.username = "username"
+        self.atribuicao = "Atribuicao"
+
+        self.pip_validos_dao_patcher = mock.patch.object(
+            PIPValidasDAO,
+            "execute"
+        )
+        self.pip_validos_mock = self.pip_validos_dao_patcher.start()
+        # ids de pips validas
+        self.pip_validos_mock.return_value = (("098765",),)
+
+        self.pip_cisps_dao_patcher = mock.patch.object(
+            ListaDPsPIPsDAO,
+            "execute"
+        )
+        self.pip_cisps_mock = self.pip_cisps_dao_patcher.start()
+        self.pip_cisps_mock.return_value = [("098765", "1,2,3"), ]
+
+        self.jwt_patcher = mock.patch(
+            "dominio.login.services.jwt.encode", return_value="auth-token"
+        )
+        self.jwt_mock = self.jwt_patcher.start()
+        self.oracle_access_patcher = mock.patch(
+            "dominio.login.dao.oracle_access"
+        )
+        self.mock_oracle_access = self.oracle_access_patcher.start()
+        self.oracle_return_dados_usuario = (
+            ("12345", "123456789", "NOME FUNCIONARIO", "X", "4567"),
+        )
+        self.mock_oracle_access.side_effect = [
+            self.oracle_return_dados_usuario,
+            (
+                (
+                    "1234",
+                    "PROMOTORIA DIFERENTE",
+                    "MATRICULA 2",
+                    "CPF 2",
+                    "NOME 2",
+                    "X",
+                    "PESS_DK 2",
+                ),
+            ),
+        ]
+
+        self.impala_execute_patcher = mock.patch(
+            "dominio.login.dao.impala_execute"
+        )
+        self.impala_execute_mock = self.impala_execute_patcher.start()
+        self.impala_execute_mock.return_value = ((self.atribuicao,),)
+
+        self.expected_response = {
+            "username": self.username,
+            "cpf": "123456789",
+            "orgao": "098765",
+            "pess_dk": "4567",
+            "nome": "NOME FUNCIONARIO",
+            "tipo_orgao": 2,
+            "matricula": "12345",
+            "first_login": True,
+            "first_login_today": True,
+            "sexo": "X",
+            "token": "auth-token",
+            "tipo_permissao": "regular",
+            "ids_orgaos_lotados_validos": None,
+            "atribuicao": self.atribuicao,
+            "orgao_selecionado": None,
+            "orgaos_lotados": [
+                {
+                    "cpf": "CPF 2",
+                    "matricula": "MATRICULA 2",
+                    "pess_dk": "PESS_DK 2",
+                    "nome": "NOME 2",
+                    "sexo": "X",
+                    "nm_org": "PROMOTORIA DIFERENTE",
+                    "tipo": 0,
+                    "cdorgao": "1234",
+                    "dps": "",
+                    "pip_especializada": None,
+                },
+            ],
+            "orgaos_validos": None,
+        }
+        self.username = "username"
+        self.permissoes = services.PermissoesUsuarioRegular(
+            username=self.username
+        )
+
+    def tearDown(self):
+        self.pip_validos_dao_patcher.stop()
+        self.pip_cisps_dao_patcher.stop()
+        self.oracle_access_patcher.stop()
+        self.jwt_patcher.stop()
+
+    def test_build_login_response(self):
+        response = services.build_login_response(self.permissoes)
+
+        for key in response.keys():
+            with self.subTest():
+                self.assertEqual(
+                    response[key], self.expected_response[key], key
+                )
+
+    def test_nenhum_orgao_encontrado_no_mgp(self):
+        self.mock_oracle_access.side_effect = [
+            self.oracle_return_dados_usuario,
+            (),
+        ]
+
+        with pytest.raises(exceptions.UserHasNoOfficeInformation):
+            services.build_login_response(self.permissoes)
 
 
 class TestPermissoesUsuarioRegular(TestCase):
@@ -278,6 +403,16 @@ class TestPermissoesUsuarioRegular(TestCase):
                 "pip_especializada": None,
             },
         ]
+
+        self.impala_execute_patcher = mock.patch(
+            "dominio.login.dao.impala_execute"
+        )
+        self.impala_execute_mock = self.impala_execute_patcher.start()
+        self.impala_execute_return_value = (("Atribuicao",),)
+        self.impala_execute_mock.return_value =\
+            self.impala_execute_return_value
+        self.expected_atribuicao = "Atribuicao"
+
         self.permissoes = services.PermissoesUsuarioRegular(
             username=self.username
         )
@@ -286,6 +421,7 @@ class TestPermissoesUsuarioRegular(TestCase):
         self.oracle_access_patcher.stop()
         self.pip_validos_dao_patcher.stop()
         self.pip_cisps_dao_patcher.stop()
+        self.impala_execute_patcher.stop()
 
     def test_retorna_orgaos_de_usuario(self):
         self.assertEqual(self.permissoes.orgaos_lotados, self.expected)
@@ -295,6 +431,15 @@ class TestPermissoesUsuarioRegular(TestCase):
         expected_ids = ["098765"]
 
         self.assertEqual(ids_orgaos_lotados_validos, expected_ids)
+
+    def test_retorna_atribuicao_de_orgaos_lotados(self):
+        atribuicoes = self.permissoes.atribuicoes_orgaos
+
+        self.assertEqual(atribuicoes, self.expected_atribuicao)
+        self.assertEqual(
+            self.impala_execute_mock.call_args_list[0][0][1],
+            {'id_orgao_0': 98765, 'id_orgao_1': 1234}
+        )
 
     def test_retorna_orgaos_VALIDOS_de_usuario(self):
         """Retorna orgaos validos (do ponto de vista do Promotron).

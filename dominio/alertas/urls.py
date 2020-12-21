@@ -20,9 +20,9 @@ urlpatterns = [
         name="retornar_alerta"
     ),
     path(
-        "ouvidoria/<str:orgao_id>/comp",
-        views.EnviarAlertaComprasOuvidoriaView.as_view(),
-        name="alerta_compras_ouvidoria"
+        "ouvidoria/<str:orgao_id>/<str:sigla_alerta>",
+        views.EnviarAlertaOuvidoriaView.as_view(),
+        name="alerta_ouvidoria"
     ),
     path(
         'compras/<str:orgao_id>',
@@ -33,5 +33,10 @@ urlpatterns = [
         'overlay/<str:docu_dk>',
         views.AlertasOverlayView.as_view(),
         name='overlay_alertas'
+    ),
+    path(
+        'baixar/<str:orgao_id>',
+        views.BaixarAlertasView.as_view(),
+        name='baixar_alertas'
     )
 ]
