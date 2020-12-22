@@ -34,10 +34,23 @@ class VistaManager(models.Manager):
         Returns:
             List[Tuple] -- Lista com o resultado da query.
         """
-        return self.abertas().filter(
+        from dominio.suamesa.dao import DocumentosArquivadosDAO
+        docs_arquivados = DocumentosArquivadosDAO.get(orgao_id=orgao_id)
+
+        N = 1000
+        arquivados_chunks = [
+            docs_arquivados[i * N:(i + 1) * N]
+            for i in range((len(docs_arquivados) + N - 1) // N)
+        ]
+
+        qs = self.abertas().filter(
             orgao=orgao_id,
             responsavel__cpf=cpf,
         )
+        for chunk in arquivados_chunks:
+            qs = qs.exclude(documento__docu_dk__in=chunk)
+
+        return qs
 
     def abertas_por_data(self, orgao_id, cpf):
         """
@@ -98,7 +111,7 @@ class InvestigacoesManager(models.Manager):
     def em_curso(self, orgao_id, regras, remove_out=False):
         parametros = ",".join([f":regra{i}" for i in range(len(regras))])
         query = f"""
-            SELECT COUNT(DOCU_FSDC_DK) AS "__COUNT" FROM "MCPR_DOCUMENTO"
+            SELECT docu_dk FROM "MCPR_DOCUMENTO"
             WHERE ("MCPR_DOCUMENTO"."DOCU_CLDC_DK" IN ({parametros})
               AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
               AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" = :orgao_id
@@ -113,7 +126,10 @@ class InvestigacoesManager(models.Manager):
             cursor.execute(query, prep_stat)
             rs = cursor.fetchall()
 
-        return rs[0][0]
+        from dominio.suamesa.dao import DocumentosArquivadosDAO
+        docs_arquivados = DocumentosArquivadosDAO.get(orgao_id=orgao_id)
+
+        return len([r[0] for r in rs if r[0] not in docs_arquivados])
 
     def em_curso_pip_aisp(self, orgao_ids):
         return self.get_queryset().filter(
@@ -127,7 +143,7 @@ class InvestigacoesManager(models.Manager):
         orgaos = ",".join([f":orgao{i}" for i in range(len(orgao_ids))])
         query = f"""
             SELECT /*+ PARALLEL,2 */
-            COUNT(DOCU_FSDC_DK) AS "__COUNT" FROM "MCPR_DOCUMENTO"
+            docu_dk FROM "MCPR_DOCUMENTO"
             WHERE ("MCPR_DOCUMENTO"."DOCU_CLDC_DK" IN ({parametros})
              AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
              AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" IN ({orgaos})
@@ -140,7 +156,12 @@ class InvestigacoesManager(models.Manager):
             cursor.execute(query, prep_stat)
             rs = cursor.fetchall()
 
-        return rs[0][0]
+        from dominio.suamesa.dao import DocumentosArquivadosMultiplosOrgaosDAO
+        docs_arquivados = DocumentosArquivadosMultiplosOrgaosDAO.get(
+            ids_orgaos=orgao_ids
+        )
+
+        return len([r[0] for r in rs if r[0] not in docs_arquivados])
 
 
 class ProcessosManager(InvestigacoesManager):
@@ -152,7 +173,7 @@ class ProcessosManager(InvestigacoesManager):
         """
         parametros = ",".join([f":regra{i}" for i in range(len(regras))])
         query = f"""
-            SELECT COUNT(1) AS "__COUNT" FROM "MCPR_DOCUMENTO"
+            SELECT docu_dk FROM "MCPR_DOCUMENTO"
             WHERE ("MCPR_DOCUMENTO"."DOCU_CLDC_DK" IN ({parametros})
               AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
               AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" = :orgao_id
@@ -168,7 +189,10 @@ class ProcessosManager(InvestigacoesManager):
             cursor.execute(query, prep_stat)
             rs = cursor.fetchall()
 
-        return rs[0][0]
+        from dominio.suamesa.dao import DocumentosArquivadosDAO
+        docs_arquivados = DocumentosArquivadosDAO.get(orgao_id=orgao_id)
+
+        return len([r[0] for r in rs if r[0] not in docs_arquivados])
 
 
 class FinalizadosManager(models.Manager):
