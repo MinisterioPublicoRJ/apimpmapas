@@ -182,7 +182,7 @@ class DocumentosArquivadosDAO(GenericDAO):
 
     @classmethod
     def serialize(cls, result_set):
-        return [r[0] for r in result_set]
+        return [int(r[0]) for r in result_set]
 
 
 class DocumentosArquivadosMultiplosOrgaosDAO(GenericDAO):
@@ -200,3 +200,7 @@ class DocumentosArquivadosMultiplosOrgaosDAO(GenericDAO):
         params = ",".join([f":id_orgao_{i}" for i in range(len(ids_orgaos))])
         query = cls.query().replace(":ids_orgaos", params)
         return impala_execute(query, prep_stat)
+
+    @classmethod
+    def serialize(cls, result_set):
+        return [int(r[0]) for r in result_set]

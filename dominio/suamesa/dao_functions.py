@@ -17,7 +17,7 @@ def get_vistas(orgao_id, request):
     if not cpf:
         e = "Parâmetro 'cpf' não foi dado!"
         raise APIMissingRequestParameterSuaMesa(e)
-    return Vista.vistas.abertas_promotor(orgao_id, cpf).count()
+    return Vista.vistas.abertas_promotor(orgao_id, cpf)
 
 
 def get_tutela_investigacoes(orgao_id, request):

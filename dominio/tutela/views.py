@@ -1,9 +1,7 @@
 from django.db import connections
-from django.db.models import F
 from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 
 from dominio.tutela import suamesa
 from dominio.mixins import CacheMixin, PaginatorMixin, JWTAuthMixin
@@ -84,21 +82,12 @@ class SuaMesaVistasListaView(
             msg = "data_abertura inválida. "\
                   f"Opções são: {', '.join(lista_aberturas)}"
             return Response(data=msg, status=404)
-
-        data = Vista.vistas.abertas_por_data(orgao_id, cpf).filter(
-            **{abertura: 1}
-        ).order_by('-data_abertura').values(
-            numero_mprj=F("documento__docu_nr_mp"),
-            numero_externo=F("documento__docu_nr_externo"),
-            dt_abertura=F("data_abertura"),
-            classe=F("documento__classe__descricao")
-        )
+        data = Vista.vistas.abertas_por_data(orgao_id, cpf, abertura)
         page_data = self.paginate(
             data,
             page=page,
             page_size=suamesa.VISTAS_PAGE_SIZE
         )
-
         vistas_lista = SuaMesaListaVistasSerializer(page_data, many=True).data
 
         return Response(data=vistas_lista)
