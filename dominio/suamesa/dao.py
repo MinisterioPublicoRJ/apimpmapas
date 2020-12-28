@@ -8,6 +8,9 @@ Caso o tipo de dado não seja especificado, ou seja informado um tipo de dado
 não definido, o DAO irá levantar uma exceção.
 """
 
+from django.conf import settings
+
+from dominio.dao import GenericDAO
 from dominio.suamesa.exceptions import (
     APIInvalidSuaMesaType,
     APIMissingSuaMesaType,
@@ -169,3 +172,35 @@ class SuaMesaDetalheFactoryDAO(SuaMesaDAO):
 
         DAO = cls.switcher(tipo)
         return DAO.get(**kwargs)
+
+
+class DocumentosArquivadosDAO(GenericDAO):
+    QUERIES_DIR = settings.BASE_DIR.child("dominio", "suamesa", "queries")
+    query_file = "lista_documentos_arquivados.sql"
+    columns = ["docu_dk"]
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
+
+    @classmethod
+    def serialize(cls, result_set):
+        return [int(r[0]) for r in result_set]
+
+
+class DocumentosArquivadosMultiplosOrgaosDAO(GenericDAO):
+    QUERIES_DIR = settings.BASE_DIR.child("dominio", "suamesa", "queries")
+    query_file = "lista_documentos_arquivados_multiplos_orgaos.sql"
+    columns = ["docu_dk"]
+    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
+
+    @classmethod
+    def execute(cls, **kwargs):
+        ids_orgaos = kwargs.get("ids_orgaos")
+        prep_stat = {f"id_orgao_{i}": v for i, v in enumerate(ids_orgaos)}
+        kwargs["ids_orgaos"] = prep_stat
+
+        params = ",".join([f":id_orgao_{i}" for i in range(len(ids_orgaos))])
+        query = cls.query().replace(":ids_orgaos", params)
+        return impala_execute(query, prep_stat)
+
+    @classmethod
+    def serialize(cls, result_set):
+        return [int(r[0]) for r in result_set]
