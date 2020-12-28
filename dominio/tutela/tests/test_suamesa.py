@@ -8,7 +8,6 @@ from django.test import TestCase
 from dominio.tutela.suamesa import (
     get_regras,
     QUERY_REGRAS,
-    VISTAS_PAGE_SIZE,
 )
 
 from dominio.tests.testconf import NoJWTTestCase, NoCacheTestCase

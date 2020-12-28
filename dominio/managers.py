@@ -15,6 +15,7 @@ from django.db.models import (
 
 class VistaManager(models.Manager):
     def __filter_inactive(self, qs, orgao_id):
+        # Import em escopo interno para evitar erros de loop de import
         from dominio.suamesa.dao import DocumentosArquivadosDAO
         docs_arquivados = set(DocumentosArquivadosDAO.get(orgao_id=orgao_id))
 
