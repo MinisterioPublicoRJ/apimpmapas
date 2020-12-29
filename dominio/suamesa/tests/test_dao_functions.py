@@ -20,9 +20,7 @@ from dominio.suamesa.dao_functions import (
 class TestSuaMesaFunctions(NoJWTTestCase, NoCacheTestCase, TestCase):
     @mock.patch('dominio.suamesa.dao_functions.Vista')
     def test_get_vistas(self, _Vista):
-        manager_mock = mock.MagicMock()
-        manager_mock.count.return_value = 1
-        _Vista.vistas.abertas_promotor.return_value = manager_mock
+        _Vista.vistas.abertas_promotor.return_value = 1
 
         orgao_id = 10
         mock_request = mock.MagicMock()
@@ -34,7 +32,6 @@ class TestSuaMesaFunctions(NoJWTTestCase, NoCacheTestCase, TestCase):
         _Vista.vistas.abertas_promotor.assert_called_once_with(
             orgao_id, '1234'
         )
-        manager_mock.count.assert_called_once_with()
 
     def test_get_vistas_no_cpf(self):
         orgao_id = 10

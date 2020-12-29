@@ -1,5 +1,7 @@
 from datetime import date, timedelta
 
+from django.conf import settings
+from django.core.cache import cache
 from django.db import connections, models
 from django.db.models import (
     Case,
@@ -7,13 +9,19 @@ from django.db.models import (
     F,
     ExpressionWrapper,
     Value,
-    Sum,
     When,
 )
 
 
 class VistaManager(models.Manager):
-    def abertas(self):
+    def __filter_inactive(self, qs, orgao_id):
+        # Import em escopo interno para evitar erros de loop de import
+        from dominio.suamesa.dao import DocumentosArquivadosDAO
+        docs_arquivados = set(DocumentosArquivadosDAO.get(orgao_id=orgao_id))
+
+        return [x for x in qs if x['docu_dk'] not in docs_arquivados]
+
+    def __abertas_base(self):
         TUTELA_INVESTIGACOES = [51219, 51220, 51221, 51222, 51223, 392, 395]
         return self.get_queryset().filter(
             Q(data_fechamento=None) |
@@ -23,7 +31,7 @@ class VistaManager(models.Manager):
             Q(documento__docu_cldc_dk__in=TUTELA_INVESTIGACOES)
         )
 
-    def abertas_promotor(self, orgao_id, cpf):
+    def __abertas_promotor_base(self, orgao_id, cpf):
         """Busca o número de vistas abertas para um dado órgão e matrícula
         na base do Oracle.
 
@@ -34,12 +42,12 @@ class VistaManager(models.Manager):
         Returns:
             List[Tuple] -- Lista com o resultado da query.
         """
-        return self.abertas().filter(
+        return self.__abertas_base().filter(
             orgao=orgao_id,
             responsavel__cpf=cpf,
         )
 
-    def abertas_por_data(self, orgao_id, cpf):
+    def __abertas_por_data_base(self, orgao_id, cpf):
         """
         Busca o número de vistas abertas para um um dado órgão e matrícula
         agrupadas com a contagem de dias que estão abertas
@@ -49,7 +57,7 @@ class VistaManager(models.Manager):
             cpf {String} -- cpf do usuário detentor das vistas.
         """
 
-        queryset = self.abertas_promotor(orgao_id, cpf).annotate(
+        queryset = self.__abertas_promotor_base(orgao_id, cpf).annotate(
             dias_abertura=ExpressionWrapper(
                 date.today() - F('data_abertura'),
                 output_field=models.IntegerField())
@@ -76,29 +84,53 @@ class VistaManager(models.Manager):
         )
         return queryset
 
-    def agg_abertas_por_data(self, orgao_id, cpf):
-        return self.abertas_por_data(orgao_id, cpf).aggregate(
-            soma_ate_vinte=Sum('ate_vinte'),
-            soma_vinte_trinta=Sum('vinte_trinta'),
-            soma_trinta_mais=Sum('trinta_mais')
-        )
+    def __abertas_lista_filtrada(self, orgao_id, cpf):
+        cache_key = 'VISTAMANAGER_DATA_{}_{}'.format(orgao_id, cpf)
+        data = cache.get(cache_key, default=None)
+        if not data:
+            queryset = self.__abertas_por_data_base(orgao_id, cpf)\
+                .order_by('-data_abertura')\
+                .values(
+                    numero_mprj=F("documento__docu_nr_mp"),
+                    numero_externo=F("documento__docu_nr_externo"),
+                    dt_abertura=F("data_abertura"),
+                    classe=F("documento__classe__descricao"),
+                    docu_dk=F("documento__docu_dk"),
+                    ate_vinte=F("ate_vinte"),
+                    vinte_trinta=F("vinte_trinta"),
+                    trinta_mais=F("trinta_mais")
+                )
+            data = self.__filter_inactive(queryset, orgao_id)
+            cache.set(cache_key, data, timeout=settings.CACHE_TIMEOUT)
+        return data
 
-    def aberturas_30_dias_PIP(self, orgao_id, cpf):
-        # cldc_dk 590 = PIC, 3 e 494 = Inquerito Policial
-        return self.get_queryset().filter(
-            Q(data_abertura__gte=date.today() - timedelta(days=30)),
-            Q(data_abertura__lte=date.today()),
-            Q(documento__docu_cldc_dk__in=[3, 494, 590]),
-            orgao=orgao_id,
-            responsavel__cpf=cpf
-        )
+    def abertas_promotor(self, orgao_id, cpf):
+        return len(self.__abertas_lista_filtrada(orgao_id, cpf))
+
+    def abertas_por_data(self, orgao_id, cpf, abertura):
+        return self.__abertas_lista_filtrada(orgao_id, cpf)
+
+    def agg_abertas_por_data(self, orgao_id, cpf):
+        data = self.__abertas_lista_filtrada(orgao_id, cpf)
+
+        s1, s2, s3 = 0, 0, 0
+        for x in data:
+            s1 += x['ate_vinte']
+            s2 += x['vinte_trinta']
+            s3 += x['trinta_mais']
+
+        return {
+            'soma_ate_vinte': s1,
+            'soma_vinte_trinta': s2,
+            'soma_trinta_mais': s3
+        }
 
 
 class InvestigacoesManager(models.Manager):
     def em_curso(self, orgao_id, regras, remove_out=False):
         parametros = ",".join([f":regra{i}" for i in range(len(regras))])
         query = f"""
-            SELECT COUNT(DOCU_FSDC_DK) AS "__COUNT" FROM "MCPR_DOCUMENTO"
+            SELECT docu_dk FROM "MCPR_DOCUMENTO"
             WHERE ("MCPR_DOCUMENTO"."DOCU_CLDC_DK" IN ({parametros})
               AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
               AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" = :orgao_id
@@ -113,7 +145,10 @@ class InvestigacoesManager(models.Manager):
             cursor.execute(query, prep_stat)
             rs = cursor.fetchall()
 
-        return rs[0][0]
+        from dominio.suamesa.dao import DocumentosArquivadosDAO
+        docs_arquivados = DocumentosArquivadosDAO.get(orgao_id=orgao_id)
+
+        return len([r[0] for r in rs if r[0] not in docs_arquivados])
 
     def em_curso_pip_aisp(self, orgao_ids):
         return self.get_queryset().filter(
@@ -127,7 +162,7 @@ class InvestigacoesManager(models.Manager):
         orgaos = ",".join([f":orgao{i}" for i in range(len(orgao_ids))])
         query = f"""
             SELECT /*+ PARALLEL,2 */
-            COUNT(DOCU_FSDC_DK) AS "__COUNT" FROM "MCPR_DOCUMENTO"
+            docu_dk FROM "MCPR_DOCUMENTO"
             WHERE ("MCPR_DOCUMENTO"."DOCU_CLDC_DK" IN ({parametros})
              AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
              AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" IN ({orgaos})
@@ -140,7 +175,12 @@ class InvestigacoesManager(models.Manager):
             cursor.execute(query, prep_stat)
             rs = cursor.fetchall()
 
-        return rs[0][0]
+        from dominio.suamesa.dao import DocumentosArquivadosMultiplosOrgaosDAO
+        docs_arquivados = DocumentosArquivadosMultiplosOrgaosDAO.get(
+            ids_orgaos=orgao_ids
+        )
+
+        return len([r[0] for r in rs if r[0] not in docs_arquivados])
 
 
 class ProcessosManager(InvestigacoesManager):
@@ -152,7 +192,7 @@ class ProcessosManager(InvestigacoesManager):
         """
         parametros = ",".join([f":regra{i}" for i in range(len(regras))])
         query = f"""
-            SELECT COUNT(1) AS "__COUNT" FROM "MCPR_DOCUMENTO"
+            SELECT docu_dk FROM "MCPR_DOCUMENTO"
             WHERE ("MCPR_DOCUMENTO"."DOCU_CLDC_DK" IN ({parametros})
               AND "MCPR_DOCUMENTO"."DOCU_FSDC_DK" = 1
               AND "MCPR_DOCUMENTO"."DOCU_ORGI_ORGA_DK_RESPONSAVEL" = :orgao_id
@@ -168,7 +208,10 @@ class ProcessosManager(InvestigacoesManager):
             cursor.execute(query, prep_stat)
             rs = cursor.fetchall()
 
-        return rs[0][0]
+        from dominio.suamesa.dao import DocumentosArquivadosDAO
+        docs_arquivados = DocumentosArquivadosDAO.get(orgao_id=orgao_id)
+
+        return len([r[0] for r in rs if r[0] not in docs_arquivados])
 
 
 class FinalizadosManager(models.Manager):

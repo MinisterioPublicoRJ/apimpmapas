@@ -8,7 +8,6 @@ from django.test import TestCase
 from dominio.tutela.suamesa import (
     get_regras,
     QUERY_REGRAS,
-    VISTAS_PAGE_SIZE,
 )
 
 from dominio.tests.testconf import NoJWTTestCase, NoCacheTestCase
@@ -88,37 +87,25 @@ class TestSuaMesaDetalheVistas(NoJWTTestCase, NoCacheTestCase, TestCase):
 
 
 class TestSuaMesaListaVistasAbertas(NoJWTTestCase, NoCacheTestCase, TestCase):
-    @mock.patch('dominio.mixins.Paginator')
     @mock.patch('dominio.tutela.views.Vista')
-    def test_correct_response(self, _Vista, _Paginator):
-        page_mock = mock.MagicMock()
-        paginate_mock = mock.MagicMock()
-        manager_mock = mock.MagicMock()
-        orderby_mock = mock.MagicMock()
-        values_mock = mock.MagicMock()
-        paginator_response = [
+    def test_correct_response(self, _Vista):
+        response = [
             {
                 "numero_mprj": "1234",
                 "numero_externo": "tj1234",
                 "dt_abertura": date(2020, 1, 1),
                 "classe": "classe 1",
+                "docu_dk": "1"
             },
             {
                 "numero_mprj": "9012",
                 "numero_externo": "tj9012",
                 "dt_abertura": date(2018, 1, 1),
                 "classe": "classe 3",
+                "docu_dk": "2"
             },
         ]
-
-        page_mock.object_list = paginator_response
-        paginate_mock.page.return_value = page_mock
-        _Paginator.return_value = paginate_mock
-        values_mock.values.return_value = 'model response'
-        orderby_mock.order_by.return_value = values_mock
-        manager_mock.filter.return_value = orderby_mock
-
-        _Vista.vistas.abertas_por_data.return_value = manager_mock
+        _Vista.vistas.abertas_por_data.return_value = response
 
         expected = [
             {
@@ -138,19 +125,12 @@ class TestSuaMesaListaVistasAbertas(NoJWTTestCase, NoCacheTestCase, TestCase):
             'dominio:suamesa-lista-vistas',
             args=('1', '2', "trinta_mais")
         )
-        url += '?page=2'
+        url += '?page=1'
 
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.data, expected)
-        manager_mock.filter.assert_called_once_with(trinta_mais=1)
-        orderby_mock.order_by.assert_called_once_with('-data_abertura')
-        _Paginator.assert_called_once_with(
-            'model response',
-            VISTAS_PAGE_SIZE,
-        )
-        paginate_mock.page.assert_called_once_with(2)
 
     def test_return_404_for_incorrcect_data_abertura_value(self):
         url = reverse(
