@@ -17,6 +17,7 @@ class ListaOrgaosDAO(GenericDAO):
         "nome",
         "sexo",
         "pess_dk",
+        "cargo",
     ]
     serializer = serializers.ListaOrgaosSerializer
 
