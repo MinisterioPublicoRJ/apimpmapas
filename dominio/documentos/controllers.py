@@ -32,6 +32,13 @@ class BaseDocumentoController(metaclass=abc.ABCMeta):
     def context(self):
         pass
 
+    @cached_property
+    def responsavel(self):
+        """
+            Retorna o responsável que irá assinar o Documento
+        """
+        return DadosPromotorDAO.get(cpf=self.cpf)
+
     def render(self, response):
         doc = DocxTemplate(self.template)
         doc.render(self.context)
@@ -50,10 +57,6 @@ class MinutaPrescricaoController(BaseDocumentoController):
 
     def corrige_comarca(self, comarca):
         return "CAPITAL" if comarca == "RIO DE JANEIRO" else comarca
-
-    @cached_property
-    def responsavel(self):
-        return DadosPromotorDAO.get(cpf=self.cpf)
 
     @cached_property
     def delitos(self):
@@ -107,7 +110,7 @@ class ProrrogacaoICController(BaseDocumentoController):
     @cached_property
     def context(self):
         contexto = {"data_hoje": self.data_hoje}
-        contexto.update(DadosPromotorDAO.get(cpf=self.cpf))
+        contexto.update(self.responsavel)
         contexto.update(ProrrogacaoICDAO.get(docu_dk=self.docu_dk))
         return contexto
 
@@ -118,7 +121,7 @@ class ProrrogacaoPPController(BaseDocumentoController):
     @cached_property
     def context(self):
         contexto = {"data_hoje": self.data_hoje}
-        contexto.update(DadosPromotorDAO.get(cpf=self.cpf))
+        contexto.update(self.responsavel)
         contexto.update(ProrrogacaoPPDAO.get(docu_dk=self.docu_dk))
         return contexto
 
@@ -129,7 +132,7 @@ class InstauracaoICController(BaseDocumentoController):
     @cached_property
     def context(self):
         contexto = {"data_hoje": self.data_hoje}
-        contexto.update(DadosPromotorDAO.get(cpf=self.cpf))
+        contexto.update(self.responsavel)
         contexto.update(InstauracaoICDAO.get(docu_dk=self.docu_dk))
         return contexto
 
@@ -145,6 +148,6 @@ class ComunicacaoCSMPController(BaseDocumentoController):
     def context(self):
         contexto = {"data_hoje": self.data_hoje}
         contexto["ano"] = date.today().year
-        contexto.update(DadosPromotorDAO.get(cpf=self.cpf))
+        contexto.update(self.responsavel)
         contexto["procs"] = ComunicacaoCSMPDAO.get(id_orgao=self.orgao_id)
         return contexto

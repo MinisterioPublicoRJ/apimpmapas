@@ -2,6 +2,7 @@ from django.conf import settings
 
 from dominio.dao import GenericDAO, SingleDataObjectDAO
 from dominio.documentos.serializers import ComunicacaoCSMPSerializer
+from lupa.db_connectors import oracle_access
 
 
 class DocumentosDAO(SingleDataObjectDAO):
@@ -37,6 +38,10 @@ class DadosPromotorDAO(DocumentosDAO):
             int(ser_data["matricula_promotor"])
         )
         return ser_data
+
+    @classmethod
+    def execute(cls, **kwargs):
+        return oracle_access(cls.query(), kwargs)
 
 
 class DadosAssuntoDAO(GenericDAO):
