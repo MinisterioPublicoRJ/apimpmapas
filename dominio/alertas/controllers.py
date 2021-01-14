@@ -6,9 +6,10 @@ from dominio.db_connectors import get_hbase_table
 
 
 class HBaseAccessController:
-    alerta_sigla = None
     hbase_cf = None
     hbase_table_name = None
+    hbase_all_cf = None
+    hbase_all_table_name = None
 
     def __init__(self, orgao_id, alerta_id):
         self.orgao_id = str(orgao_id)
@@ -22,48 +23,51 @@ class HBaseAccessController:
             self.hbase_table_name
         )
 
-    def get_row_key(self, orgao_id, alerta_id):
-        return f"{orgao_id}_{self.alerta_sigla}_{alerta_id}".encode()
+    @property
+    def get_all_table(self):
+        return get_hbase_table(
+            settings.PROMOTRON_HBASE_NAMESPACE
+            +
+            self.hbase_all_table_name
+        )
+
+    def get_row_key(self, alerta_id):
+        return f"{alerta_id}".encode()
 
     def get_row_data(self, orgao_id, alerta_id):
         return {
             f"{self.hbase_cf}:orgao".encode(): orgao_id.encode(),
             f"{self.hbase_cf}:alerta_id".encode(): alerta_id.encode(),
-            f"{self.hbase_cf}:sigla".encode(): self.alerta_sigla.encode(),
+            f"{self.hbase_cf}:sigla".encode(): alerta_id.split('.')[0].encode(),
         }
 
 
 class DispensaAlertaController(HBaseAccessController):
     def dispensa_para_orgao(self):
-        row_key = self.get_row_key(self.orgao_id, self.alerta_id)
+        row_key = self.get_row_key(self.alerta_id)
         data = self.get_row_data(self.orgao_id, self.alerta_id)
         self.get_table.put(row_key, data)
 
     def retorna_para_orgao(self):
-        row_key = self.get_row_key(self.orgao_id, self.alerta_id)
+        row_key = self.get_row_key(self.alerta_id)
         self.get_table.delete(row_key)
 
     def retorna_para_todos_orgaos(self):
-        row_key = self.get_row_key("ALL", self.alerta_id)
-        self.get_table.delete(row_key)
+        row_key = self.get_row_key(".".join(self.alerta_id.split(".")[:-1]))
+        self.get_all_table.delete(row_key)
 
     def dispensa_para_todos_orgaos(self):
-        row_key = self.get_row_key("ALL", self.alerta_id)
-        data = self.get_row_data("ALL", self.alerta_id)
-        self.get_table.put(row_key, data)
+        alrt_key = ".".join(self.alerta_id.split(".")[:-1])
+        row_key = self.get_row_key(alrt_key)
+        data = self.get_row_data("ALL", alrt_key)
+        self.get_all_table.put(row_key, data)
 
 
-# Mudar de herança para composição
-class DispensaAlertaComprasController(DispensaAlertaController):
-    alerta_sigla = "COMP"
+class DispensaAlertaController(DispensaAlertaController):
     hbase_cf = "dados_alertas"
     hbase_table_name = settings.HBASE_DISPENSAR_ALERTAS_TABLE
-
-
-class DispensaAlertaISPSController(DispensaAlertaController):
-    alerta_sigla = "ISPS"
-    hbase_cf = "dados_alertas"
-    hbase_table_name = settings.HBASE_DISPENSAR_ALERTAS_TABLE
+    hbase_all_cf = "dados_alertas"
+    hbase_all_table_name = settings.HBASE_DISPENSAR_ALERTAS_TABLE + "_todos"
 
 
 class EnviaAlertaOuvidoriaController(HBaseAccessController):
@@ -141,7 +145,7 @@ class EnviaAlertaComprasOuvidoriaController(EnviaAlertaOuvidoriaController):
 
     email_subject = settings.EMAIL_SUBJECT_OUVIDORIA_COMPRAS
 
-    dispensa_controller_class = DispensaAlertaComprasController
+    dispensa_controller_class = DispensaAlertaController
     messager_class = messages.MensagemOuvidoriaCompras
 
 
@@ -152,5 +156,5 @@ class EnviaAlertaISPSOuvidoriaController(EnviaAlertaOuvidoriaController):
 
     email_subject = settings.EMAIL_SUBJECT_OUVIDORIA_SANEAMENTO
 
-    dispensa_controller_class = DispensaAlertaISPSController
+    dispensa_controller_class = DispensaAlertaController
     messager_class = messages.MensagemOuvidoriaISPS

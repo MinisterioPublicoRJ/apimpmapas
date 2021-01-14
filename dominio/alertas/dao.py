@@ -4,10 +4,11 @@ from django.core.cache import cache
 from dominio.dao import GenericDAO, SingleDataObjectDAO
 from dominio.db_connectors import get_hbase_table, run_query
 from dominio.alertas import serializers
-from dominio.alertas.helper import ordem as alrt_ordem
+from dominio.alertas.helper import ordem as alrt_ordem, list_columns
 from dominio.alertas.exceptions import (
     APIInvalidOverlayType,
     APIMissingOverlayType,
+    APIAlertTypeListNotConfigured,
 )
 
 
@@ -115,26 +116,26 @@ class ResumoAlertasDAO(AlertasDAO):
     query_file = "resumo_alertas.sql"
     columns = ["sigla", "count"]
     table_namespaces = {
-        "schema": settings.TABLE_NAMESPACE,
-        "schema_alertas_compras": settings.SCHEMA_ALERTAS,
+        "schema": "alertas_dev",
     }
     serializer = serializers.AlertasResumoSerializer
 
     @classmethod
     def get_all(cls, id_orgao):
-        dt_partition = AlertaMaxPartitionDAO.get()
+        #dt_partition = AlertaMaxPartitionDAO.get()
         resumo = super().get(
-            id_orgao=id_orgao,
-            dt_partition=dt_partition,
+            orgao_id=id_orgao,
+            #dt_partition=dt_partition,
             accept_empty=True
         )
 
         return cls.ordena_alertas(resumo)
 
 
-class AlertaMGPDAO(FiltraAlertasDispensadosMixin, AlertasDAO):
+class AlertaMGPDAO(AlertasDAO):
     query_file = None
-    table_namespaces = {"schema": settings.TABLE_NAMESPACE}
+    table_namespaces = {"schema": "alertas_dev"}
+    cls.query_file = "alertas_get.sql"
     columns = [
         "doc_dk",
         "num_doc",
@@ -145,11 +146,13 @@ class AlertaMGPDAO(FiltraAlertasDispensadosMixin, AlertasDAO):
         "sigla",
         "descricao",
         "classe_hierarquia",
-        "num_externo"
+        "num_externo",
+        "alrt_key",
+        "flag_dispensado"
     ]
-    orgao_kwarg = "orgao_id"
-    alerta_id_kwarg = "id_alerta"
-    sigla_kwarg = "sigla"
+    # orgao_kwarg = "orgao_id"
+    # alerta_id_kwarg = "id_alerta"
+    # sigla_kwarg = "sigla"
 
     @classmethod
     def execute(cls, **kwargs):
@@ -157,12 +160,12 @@ class AlertaMGPDAO(FiltraAlertasDispensadosMixin, AlertasDAO):
 
     @classmethod
     def get(cls, accept_empty=True, **kwargs):
-        if kwargs.get("tipo_alerta") is not None:
-            cls.query_file = "validos_por_orgao_tipo.sql"
-        else:
-            cls.query_file = "validos_por_orgao_base.sql"
+        #if kwargs.get("tipo_alerta") is not None:
+        #    cls.query_file = "validos_por_orgao_tipo.sql"
+        #else:
+        #    cls.query_file = "validos_por_orgao_base.sql"
 
-        kwargs['dt_partition'] = AlertaMaxPartitionDAO.get()
+        #kwargs['dt_partition'] = AlertaMaxPartitionDAO.get()
         result_set = super().get(accept_empty=accept_empty, **kwargs)
         return cls.ordena_alertas(result_set)
 
@@ -199,7 +202,7 @@ class AlertaOverlayPrescricaoDAO(AlertasDAO):
     serializer = serializers.AlertaOverlayPrescricaoSerializer
     table_namespaces = {
         "schema_exadata": settings.EXADATA_NAMESPACE,
-        "schema": settings.TABLE_NAMESPACE
+        "schema": "alertas_dev"
     }
 
 
@@ -211,7 +214,9 @@ class AlertaOverlayIC1ADAO(AlertasDAO, SingleDataObjectDAO):
         'desc_movimento'
     ]
     table_namespaces = {
-        "schema": settings.TABLE_NAMESPACE
+        "schema": settings.TABLE_NAMESPACE,
+        "schema_exadata": "exadata_dev",
+        "schema_exadata_aux": "exadata_aux_dev"
     }
 
 
@@ -293,3 +298,66 @@ class DetalheAlertaISPSDAO(SingleDataObjectDAO):
     table_namespaces = {
         "schema": settings.TABLE_NAMESPACE,
     }
+
+
+class BaixarAlertasDAO(AlertasDAO):
+    table_namespaces = {
+        "schema": "alertas_dev"
+    }
+
+    _file_switcher = {
+        'PRCR': 'get_alertas_mgp.sql',
+        'PRCR1': 'get_alertas_mgp.sql',
+        'PRCR2': 'get_alertas_mgp.sql',
+        'PRCR3': 'get_alertas_mgp.sql',
+        'PRCR4': 'get_alertas_mgp.sql',
+        'COMP': 'get_alertas_comp.sql',
+        'ISPS': 'get_alertas_isps.sql',
+        'GATE': 'get_alertas_gate.sql',
+        'MVVD': 'get_alertas_mgp.sql',
+        'BDPA': 'get_alertas_mgp.sql',
+        'IC1A': 'get_alertas_ppfp.sql',
+        'PA1A': 'get_alertas_mgp.sql',
+        'PPFP': 'get_alertas_ppfp.sql',
+        'PPPV': 'get_alertas_ppfp.sql',
+        'OUVI': 'get_alertas_ouvi.sql',
+        'NF30': 'get_alertas_mgp.sql',
+        'VADF': 'get_alertas_vadf.sql',
+        'DT2I': 'get_alertas_mgp.sql',
+        'DORD': 'get_alertas_mgp.sql',
+        'DNTJ': 'get_alertas_mgp.sql',
+    }
+
+    _serializer_switcher = {
+        'PRCR': serializers.AlertasMGPSerializer,
+        'PRCR1': serializers.AlertasMGPSerializer,
+        'PRCR2': serializers.AlertasMGPSerializer,
+        'PRCR3': serializers.AlertasMGPSerializer,
+        'PRCR4': serializers.AlertasMGPSerializer,
+        'COMP': serializers.AlertasCOMPSerializer,
+        'ISPS': serializers.AlertasISPSSerializer,
+        'GATE': serializers.AlertasGATESerializer,
+        'MVVD': serializers.AlertasMGPSerializer,
+        'BDPA': serializers.AlertasMGPSerializer,
+        'IC1A': serializers.AlertasPPFPSerializer,
+        'PA1A': serializers.AlertasMGPSerializer,
+        'PPFP': serializers.AlertasPPFPSerializer,
+        'PPPV': serializers.AlertasPPFPSerializer,
+        'OUVI': serializers.AlertasOUVISerializer,
+        'NF30': serializers.AlertasMGPSerializer,
+        'VADF': serializers.AlertasVADFSerializer,
+        'DT2I': serializers.AlertasMGPSerializer,
+        'DORD': serializers.AlertasMGPSerializer,
+        'DNTJ': serializers.AlertasMGPSerializer,
+    }
+
+    @classmethod
+    def get(cls, alrt_type, accept_empty=True, **kwargs):
+        try:
+            cls.columns, _ = list_columns[alrt_type]
+            cls.query_file = cls._file_switcher[alrt_type]
+            cls.serializer = cls._serializer_switcher[alrt_type]
+        except KeyError:
+            raise APIAlertTypeListNotConfigured
+
+        return super().get(accept_empty=accept_empty, **kwargs)

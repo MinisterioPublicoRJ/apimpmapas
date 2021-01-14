@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from dominio.mixins import CacheMixin, PaginatorMixin, JWTAuthMixin
 from dominio.alertas import dao
 from dominio.alertas.controllers import (
-    DispensaAlertaComprasController,
+    DispensaAlertaController,
     EnviaAlertaComprasOuvidoriaController,
     EnviaAlertaISPSOuvidoriaController,
 )
@@ -78,7 +78,7 @@ class DispensarAlertaView(JWTAuthMixin, APIView):
         orgao_id = self.kwargs.get(self.orgao_url_kwarg)
         alerta_id = self.get_alerta_id()
 
-        controller = DispensaAlertaComprasController(
+        controller = DispensaAlertaController(
             orgao_id,
             alerta_id
         )
@@ -101,7 +101,7 @@ class RetornarAlertaView(JWTAuthMixin, APIView):
         orgao_id = self.kwargs.get(self.orgao_url_kwarg)
         alerta_id = self.get_alerta_id()
 
-        controller = DispensaAlertaComprasController(
+        controller = DispensaAlertaController(
             orgao_id,
             alerta_id,
         )
@@ -159,22 +159,23 @@ class BaixarAlertasView(JWTAuthMixin, APIView):
         orgao_id = int(kwargs.get(self.orgao_url_kwarg))
         tipo_alerta = request.GET.get("tipo_alerta", None)
 
-        try:
-            data_columns, header = list_columns[tipo_alerta]
-        except KeyError:
-            raise APIAlertTypeListNotConfigured
+        data = dao.BaixarAlertasDAO.get(
+            alrt_type=tipo_alerta,
+            accept_empty=False,
+            id_orgao=orgao_id,
+        )
 
-        if tipo_alerta == 'COMP':
-            data = dao.AlertaComprasDAO.get(
-                id_orgao=orgao_id,
-                accept_empty=False
-            )
-        else:
-            data = dao.AlertaMGPDAO.get(
-                orgao_id=orgao_id,
-                tipo_alerta=tipo_alerta,
-                accept_empty=False
-            )
+        # if tipo_alerta == 'COMP':
+        #     data = dao.AlertaComprasDAO.get(
+        #         id_orgao=orgao_id,
+        #         accept_empty=False
+        #     )
+        # else:
+        #     data = dao.AlertaMGPDAO.get(
+        #         orgao_id=orgao_id,
+        #         tipo_alerta=tipo_alerta,
+        #         accept_empty=False
+        #     )
         data = [tuple(x[c] for c in data_columns) for x in data]
 
         return FileResponse(

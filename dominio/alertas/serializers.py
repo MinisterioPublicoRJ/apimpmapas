@@ -12,6 +12,8 @@ class AlertasListaSerializer(serializers.Serializer):
     descricao = serializers.CharField()
     classe_hierarquia = serializers.CharField()
     num_externo = serializers.CharField()
+    alrt_key = serializers.CharField()
+    flag_dispensado = serializers.IntegerField()
 
 
 class AlertasResumoSerializer(serializers.Serializer):
@@ -51,3 +53,93 @@ class DetalheAlertaSerializer(serializers.Serializer):
 
     def get_var_perc(self, obj):
         return str(obj.get("var_perc", "")).replace(".", ",")
+
+
+class AlertasABR1Serializer(serializers.Serializer):
+    alrt_key = serializers.CharField()
+    alrt_sigla = serializers.CharField()
+    alrt_orgi_orga_dk = serializers.IntegerField()
+    abr1_nr_procedimentos = serializers.IntegerField()
+    abr1_ano_mes = serializers.CharField()
+
+
+class AlertasCOMPSerializer(serializers.Serializer):
+    alrt_key = serializers.CharField()
+    alrt_sigla = serializers.CharField()
+    alrt_orgi_orga_dk = serializers.IntegerField()
+    comp_contratacao = serializers.CharField()
+    comp_item = serializers.CharField()
+    comp_id_item = serializers.CharField()
+    comp_contrato_iditem = serializers.CharField()
+
+
+class AlertasGATESerializer(serializers.Serializer):
+    alrt_key = serializers.CharField()
+    alrt_sigla = serializers.CharField()
+    alrt_orgi_orga_dk = serializers.IntegerField()
+    alrt_docu_dk = serializers.IntegerField()
+    alrt_docu_nr_mp = serializers.CharField()
+    alrt_date_referencia = serializers.DateTimeField(format="%Y-%m-%d")
+    alrt_dias_referencia = serializers.IntegerField()
+    alrt_itcn_dk = serializers.IntegerField()
+
+
+class AlertasISPSSerializer(serializers.Serializer):
+    alrt_key = serializers.CharField()
+    alrt_sigla = serializers.CharField()
+    alrt_orgi_orga_dk = serializers.IntegerField()
+    isps_municipio = serializers.CharField()
+    isps_indicador = serializers.CharField()
+    isps_ano_referencia = serializers.IntegerField()
+
+
+class AlertasMGPSerializer(serializers.Serializer):
+    alrt_key = serializers.CharField()
+    alrt_sigla = serializers.CharField()
+    alrt_orgi_orga_dk = serializers.IntegerField()
+    alrt_docu_dk = serializers.IntegerField()
+    alrt_docu_nr_mp = serializers.CharField()
+    alrt_date_referencia = serializers.DateTimeField(format="%Y-%m-%d")
+    alrt_dias_referencia = serializers.IntegerField()
+
+
+class AlertasOUVISerializer(serializers.Serializer):
+    alrt_key = serializers.CharField()
+    alrt_sigla = serializers.CharField()
+    alrt_orgi_orga_dk = serializers.IntegerField()
+    alrt_docu_dk = serializers.IntegerField()
+    alrt_docu_nr_mp = serializers.CharField()
+    alrt_date_referencia = serializers.DateTimeField(format="%Y-%m-%d")
+    alrt_dias_referencia = serializers.IntegerField()
+    alrt_item_dk = serializers.IntegerField()
+
+
+class AlertasPPFPSerializer(serializers.Serializer):
+    alrt_key = serializers.CharField()
+    alrt_sigla = serializers.CharField()
+    alrt_orgi_orga_dk = serializers.IntegerField()
+    alrt_docu_dk = serializers.IntegerField()
+    alrt_docu_nr_mp = serializers.CharField()
+    alrt_date_referencia = serializers.DateTimeField(format="%Y-%m-%d")
+    alrt_dias_referencia = serializers.IntegerField()
+    alrt_stao_dk = serializers.IntegerField()
+
+
+class AlertasROSerializer(serializers.Serializer):
+    alrt_key = serializers.CharField()
+    alrt_sigla = serializers.CharField()
+    alrt_orgi_orga_dk = serializers.IntegerField()
+    ro_nr_delegacia = serializers.IntegerField()
+    ro_qt_ros_faltantes = serializers.IntegerField()
+    ro_max_proc = serializers.CharField()
+
+
+class AlertasVADFSerializer(serializers.Serializer):
+    alrt_key = serializers.CharField()
+    alrt_sigla = serializers.CharField()
+    alrt_orgi_orga_dk = serializers.IntegerField()
+    alrt_docu_dk = serializers.IntegerField()
+    alrt_docu_nr_mp = serializers.CharField()
+    alrt_date_referencia = serializers.DateTimeField(format="%Y-%m-%d")
+    alrt_dias_referencia = serializers.IntegerField()
+    alrt_vist_dk = serializers.IntegerField()
