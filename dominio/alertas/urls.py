@@ -10,12 +10,12 @@ urlpatterns = [
         name='resumo_alertas'
     ),
     path(
-        "dispensar/<str:orgao_id>/comp",
+        "dispensar/<str:orgao_id>",
         views.DispensarAlertaView.as_view(),
         name="dispensar_alerta"
     ),
     path(
-        "retornar/<str:orgao_id>/comp",
+        "retornar/<str:orgao_id>",
         views.RetornarAlertaView.as_view(),
         name="retornar_alerta"
     ),

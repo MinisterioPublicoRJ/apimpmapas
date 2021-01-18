@@ -1,3 +1,6 @@
+from datetime import date
+
+from django.http import FileResponse
 from django.conf import settings
 from django.core.cache import cache
 
@@ -10,6 +13,7 @@ from dominio.alertas.exceptions import (
     APIMissingOverlayType,
     APIAlertTypeListNotConfigured,
 )
+from dominio.documentos.helpers import gera_planilha_excel
 
 
 class FiltraAlertasDispensadosMixin:
@@ -87,25 +91,6 @@ class AlertasDAO(GenericDAO):
         return sorted(alertas, key=lambda x: ordem_dict[x["sigla"]])
 
 
-class AlertaMaxPartitionDAO(AlertasDAO):
-    query_file = "alerta_max_dt_partition.sql"
-    table_namespaces = {
-        "schema": settings.TABLE_NAMESPACE,
-    }
-    cache_prefix = 'ALERTA_MAX_DT_PARTITION'
-
-    @classmethod
-    def get(cls):
-        data = cache.get(cls.cache_prefix, default=None)
-        if not data:
-            data = cls.execute()
-            if not data:
-                return '-1'
-            data = data[0][0]
-            cache.set(cls.cache_prefix, data, timeout=settings.CACHE_TIMEOUT)
-        return data
-
-
 class ResumoAlertasDAO(AlertasDAO):
     """
     Classe principal do Resumo dos Alertas.
@@ -116,16 +101,14 @@ class ResumoAlertasDAO(AlertasDAO):
     query_file = "resumo_alertas.sql"
     columns = ["sigla", "count"]
     table_namespaces = {
-        "schema": "alertas_dev",
+        "schema": settings.ALERTAS_NAMESPACE,
     }
     serializer = serializers.AlertasResumoSerializer
 
     @classmethod
     def get_all(cls, id_orgao):
-        #dt_partition = AlertaMaxPartitionDAO.get()
         resumo = super().get(
             orgao_id=id_orgao,
-            #dt_partition=dt_partition,
             accept_empty=True
         )
 
@@ -133,9 +116,8 @@ class ResumoAlertasDAO(AlertasDAO):
 
 
 class AlertaMGPDAO(AlertasDAO):
-    query_file = None
-    table_namespaces = {"schema": "alertas_dev"}
-    cls.query_file = "alertas_get.sql"
+    table_namespaces = {"schema": settings.ALERTAS_NAMESPACE}
+    query_file = "alertas_get.sql"
     columns = [
         "doc_dk",
         "num_doc",
@@ -150,9 +132,6 @@ class AlertaMGPDAO(AlertasDAO):
         "alrt_key",
         "flag_dispensado"
     ]
-    # orgao_kwarg = "orgao_id"
-    # alerta_id_kwarg = "id_alerta"
-    # sigla_kwarg = "sigla"
 
     @classmethod
     def execute(cls, **kwargs):
@@ -160,28 +139,19 @@ class AlertaMGPDAO(AlertasDAO):
 
     @classmethod
     def get(cls, accept_empty=True, **kwargs):
-        #if kwargs.get("tipo_alerta") is not None:
-        #    cls.query_file = "validos_por_orgao_tipo.sql"
-        #else:
-        #    cls.query_file = "validos_por_orgao_base.sql"
-
-        #kwargs['dt_partition'] = AlertaMaxPartitionDAO.get()
         result_set = super().get(accept_empty=accept_empty, **kwargs)
+        # TODO: Pode ser necessario entregar tudo no futuro, até dispensados
+        result_set = [x for x in result_set if x['flag_dispensado'] == 0]
         return cls.ordena_alertas(result_set)
 
 
-class AlertaComprasDAO(FiltraAlertasDispensadosMixin, AlertasDAO):
+class AlertaComprasDAO(AlertasDAO):
     query_file = "alerta_compras.sql"
-    columns = ["sigla", "contrato", "iditem", "contrato_iditem", "item"]
+    columns = ["sigla", "contrato", "iditem", "contrato_iditem", "item", "alrt_key", "flag_dispensado"]
     serializer = serializers.AlertasComprasSerializer
     table_namespaces = {
-        "schema": settings.TABLE_NAMESPACE,
-        "schema_alertas_compras": settings.SCHEMA_ALERTAS,
+        "schema": settings.ALERTAS_NAMESPACE,
     }
-
-    orgao_kwarg = "id_orgao"
-    alerta_id_kwarg = "contrato_iditem"
-    sigla_kwarg = "sigla"
 
 
 # ------ DAOs relativos ao Overlay do Alerta
@@ -202,7 +172,7 @@ class AlertaOverlayPrescricaoDAO(AlertasDAO):
     serializer = serializers.AlertaOverlayPrescricaoSerializer
     table_namespaces = {
         "schema_exadata": settings.EXADATA_NAMESPACE,
-        "schema": "alertas_dev"
+        "schema": settings.ALERTAS_NAMESPACE
     }
 
 
@@ -214,9 +184,9 @@ class AlertaOverlayIC1ADAO(AlertasDAO, SingleDataObjectDAO):
         'desc_movimento'
     ]
     table_namespaces = {
-        "schema": settings.TABLE_NAMESPACE,
-        "schema_exadata": "exadata_dev",
-        "schema_exadata_aux": "exadata_aux_dev"
+        "schema": settings.ALERTAS_NAMESPACE,
+        "schema_exadata": settings.EXADATA_NAMESPACE,
+        "schema_exadata_aux": settings.TABLE_NAMESPACE
     }
 
 
@@ -228,7 +198,7 @@ class AlertaOverlayPA1ADAO(AlertasDAO, SingleDataObjectDAO):
     ]
     table_namespaces = {
         "schema_exadata": settings.EXADATA_NAMESPACE,
-        "schema": settings.TABLE_NAMESPACE
+        "schema": settings.ALERTAS_NAMESPACE
     }
 
 
@@ -258,10 +228,8 @@ class AlertasOverlayDAO:
 
         DAO = cls.switcher(tipo)
 
-        dt_partition = AlertaMaxPartitionDAO.get()
         return DAO.get(
-            docu_dk=docu_dk,
-            dt_partition=dt_partition
+            docu_dk=docu_dk
         )
 
     @classmethod
@@ -302,62 +270,54 @@ class DetalheAlertaISPSDAO(SingleDataObjectDAO):
 
 class BaixarAlertasDAO(AlertasDAO):
     table_namespaces = {
-        "schema": "alertas_dev"
+        "schema": settings.ALERTAS_NAMESPACE,
+        "schema_exadata": settings.EXADATA_NAMESPACE,
     }
 
     _file_switcher = {
-        'PRCR': 'get_alertas_mgp.sql',
-        'PRCR1': 'get_alertas_mgp.sql',
-        'PRCR2': 'get_alertas_mgp.sql',
-        'PRCR3': 'get_alertas_mgp.sql',
-        'PRCR4': 'get_alertas_mgp.sql',
-        'COMP': 'get_alertas_comp.sql',
-        'ISPS': 'get_alertas_isps.sql',
-        'GATE': 'get_alertas_gate.sql',
-        'MVVD': 'get_alertas_mgp.sql',
-        'BDPA': 'get_alertas_mgp.sql',
-        'IC1A': 'get_alertas_ppfp.sql',
-        'PA1A': 'get_alertas_mgp.sql',
-        'PPFP': 'get_alertas_ppfp.sql',
-        'PPPV': 'get_alertas_ppfp.sql',
-        'OUVI': 'get_alertas_ouvi.sql',
-        'NF30': 'get_alertas_mgp.sql',
-        'VADF': 'get_alertas_vadf.sql',
-        'DT2I': 'get_alertas_mgp.sql',
-        'DORD': 'get_alertas_mgp.sql',
-        'DNTJ': 'get_alertas_mgp.sql',
-    }
-
-    _serializer_switcher = {
-        'PRCR': serializers.AlertasMGPSerializer,
-        'PRCR1': serializers.AlertasMGPSerializer,
-        'PRCR2': serializers.AlertasMGPSerializer,
-        'PRCR3': serializers.AlertasMGPSerializer,
-        'PRCR4': serializers.AlertasMGPSerializer,
-        'COMP': serializers.AlertasCOMPSerializer,
-        'ISPS': serializers.AlertasISPSSerializer,
-        'GATE': serializers.AlertasGATESerializer,
-        'MVVD': serializers.AlertasMGPSerializer,
-        'BDPA': serializers.AlertasMGPSerializer,
-        'IC1A': serializers.AlertasPPFPSerializer,
-        'PA1A': serializers.AlertasMGPSerializer,
-        'PPFP': serializers.AlertasPPFPSerializer,
-        'PPPV': serializers.AlertasPPFPSerializer,
-        'OUVI': serializers.AlertasOUVISerializer,
-        'NF30': serializers.AlertasMGPSerializer,
-        'VADF': serializers.AlertasVADFSerializer,
-        'DT2I': serializers.AlertasMGPSerializer,
-        'DORD': serializers.AlertasMGPSerializer,
-        'DNTJ': serializers.AlertasMGPSerializer,
+        'PRCR': 'baixar_alertas_mgp.sql',
+        'PRCR1': 'baixar_alertas_mgp.sql',
+        'PRCR2': 'baixar_alertas_mgp.sql',
+        'PRCR3': 'baixar_alertas_mgp.sql',
+        'PRCR4': 'baixar_alertas_mgp.sql',
+        'COMP': 'baixar_alertas_comp.sql',
+        'ISPS': 'baixar_alertas_isps.sql',
+        'GATE': 'baixar_alertas_gate.sql',
+        'MVVD': 'baixar_alertas_mgp.sql',
+        'BDPA': 'baixar_alertas_mgp.sql',
+        'IC1A': 'baixar_alertas_stao.sql',
+        'PA1A': 'baixar_alertas_mgp.sql',
+        'PPFP': 'baixar_alertas_stao.sql',
+        'PPPV': 'baixar_alertas_stao.sql',
+        'OUVI': 'baixar_alertas_movi.sql',
+        'NF30': 'baixar_alertas_mgp.sql',
+        'VADF': 'baixar_alertas_vist.sql',
+        'DT2I': 'baixar_alertas_mgp.sql',
+        'DORD': 'baixar_alertas_mgp.sql',
+        'DNTJ': 'baixar_alertas_mgp.sql',
     }
 
     @classmethod
-    def get(cls, alrt_type, accept_empty=True, **kwargs):
+    def get(cls, alrt_type, **kwargs):
         try:
-            cls.columns, _ = list_columns[alrt_type]
+            _, header = list_columns[alrt_type]
             cls.query_file = cls._file_switcher[alrt_type]
-            cls.serializer = cls._serializer_switcher[alrt_type]
         except KeyError:
             raise APIAlertTypeListNotConfigured
 
-        return super().get(accept_empty=accept_empty, **kwargs)
+        kwargs['alrt_type'] = alrt_type
+        data = cls.execute(**kwargs)
+        if not data:
+            cls.raise_empty_result_error()
+
+        data = [x[:len(header)] for x in data]
+
+        return FileResponse(
+            gera_planilha_excel(
+                data,
+                header=header,
+                sheet_title=f"Alertas {alrt_type}"
+            ),
+            filename=f"Alerta-{alrt_type}-{date.today()}.xlsx",
+            as_attachment=True
+        )

@@ -86,7 +86,7 @@ class EnviaAlertaOuvidoriaController(HBaseAccessController):
 
     @property
     def row_key(self):
-        return f"{self.alerta_sigla}_{self.alerta_id}".encode()
+        return self.get_row_key(self.alerta_id)
 
     @property
     def row_data(self):

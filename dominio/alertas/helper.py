@@ -28,52 +28,52 @@ ordem = [
 # Primeira lista = nome das colunas no serializer
 # Segunda lista = nome das colunas no arquivo excel gerado
 list_columns = {
-    'PRCR': [['num_doc', 'num_externo'], ['numero_mprj', 'numero_externo']],
-    'PRCR1': [['num_doc', 'num_externo'], ['numero_mprj', 'numero_externo']],
-    'PRCR2': [['num_doc', 'num_externo'], ['numero_mprj', 'numero_externo']],
-    'PRCR3': [['num_doc', 'num_externo'], ['numero_mprj', 'numero_externo']],
-    'PRCR4': [['num_doc', 'num_externo'], ['numero_mprj', 'numero_externo']],
+    'PRCR': [['alrt_docu_nr_mp', 'num_externo'], ['numero_mprj', 'numero_externo']],
+    'PRCR1': [['alrt_docu_nr_mp', 'num_externo'], ['numero_mprj', 'numero_externo']],
+    'PRCR2': [['alrt_docu_nr_mp', 'num_externo'], ['numero_mprj', 'numero_externo']],
+    'PRCR3': [['alrt_docu_nr_mp', 'num_externo'], ['numero_mprj', 'numero_externo']],
+    'PRCR4': [['alrt_docu_nr_mp', 'num_externo'], ['numero_mprj', 'numero_externo']],
     'COMP': [['contrato', 'iditem', 'item'], ['contrato', 'iditem', 'item']],
     'ISPS': [
         ['descricao', 'classe_hierarquia'],
         ['nome_indicador', 'municipio']
     ],
     'GATE': [
-        ['id_alerta', 'num_doc', 'num_externo'],
+        ['id_alerta', 'alrt_docu_nr_mp', 'num_externo'],
         ['it_gate', 'numero_mprj', 'numero_externo']
     ],
     # 'MCSI':,
-    'MVVD': [['num_doc', 'num_externo'], ['numero_mprj', 'numero_externo']],
+    'MVVD': [['alrt_docu_nr_mp', 'num_externo'], ['numero_mprj', 'numero_externo']],
     # 'RO':,
     'BDPA': [
-        ['num_doc', 'num_externo', 'data_alerta'],
+        ['alrt_docu_nr_mp', 'num_externo', 'data_alerta'],
         ['numero_mprj', 'numero_externo', 'dt_fim_prazo']
     ],
     # 'ABR1':,
     'IC1A': [
-        ['num_doc', 'num_externo', 'data_alerta'],
+        ['alrt_docu_nr_mp', 'num_externo', 'data_alerta'],
         ['numero_mprj', 'numero_externo', 'dt_fim_prazo']
     ],
     'PA1A': [
-        ['num_doc', 'num_externo', 'data_alerta'],
+        ['alrt_docu_nr_mp', 'num_externo', 'data_alerta'],
         ['numero_mprj', 'numero_externo', 'dt_fim_prazo']
     ],
     'PPFP': [
-        ['num_doc', 'num_externo', 'data_alerta'],
+        ['alrt_docu_nr_mp', 'num_externo', 'data_alerta'],
         ['numero_mprj', 'numero_externo', 'dt_cadastro_documento']
     ],
     'PPPV': [
-        ['num_doc', 'num_externo', 'data_alerta'],
+        ['alrt_docu_nr_mp', 'num_externo', 'data_alerta'],
         ['numero_mprj', 'numero_externo', 'dt_cadastro_documento']
     ],
     # 'OFFP': [['num_doc', 'num_externo'], ['numero_mprj', 'numero_externo']],
-    'OUVI': [['num_doc', 'num_externo'], ['numero_mprj', 'numero_externo']],
+    'OUVI': [['alrt_docu_nr_mp', 'num_externo'], ['numero_mprj', 'numero_externo']],
     'NF30': [
-        ['num_doc', 'num_externo', 'data_alerta'],
+        ['alrt_docu_nr_mp', 'num_externo', 'data_alerta'],
         ['numero_mprj', 'numero_externo', 'data_autuacao']
     ],
-    'VADF': [['num_doc', 'num_externo'], ['numero_mprj', 'numero_externo']],
-    'DT2I': [['num_doc', 'num_externo'], ['numero_mprj', 'numero_externo']],
-    'DORD': [['num_doc', 'num_externo'], ['numero_mprj', 'numero_externo']],
-    'DNTJ': [['num_doc', 'num_externo'], ['numero_mprj', 'numero_externo']],
+    'VADF': [['alrt_docu_nr_mp', 'num_externo'], ['numero_mprj', 'numero_externo']],
+    'DT2I': [['alrt_docu_nr_mp', 'num_externo'], ['numero_mprj', 'numero_externo']],
+    'DORD': [['alrt_docu_nr_mp', 'num_externo'], ['numero_mprj', 'numero_externo']],
+    'DNTJ': [['alrt_docu_nr_mp', 'num_externo'], ['numero_mprj', 'numero_externo']],
 }

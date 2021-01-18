@@ -159,31 +159,8 @@ class BaixarAlertasView(JWTAuthMixin, APIView):
         orgao_id = int(kwargs.get(self.orgao_url_kwarg))
         tipo_alerta = request.GET.get("tipo_alerta", None)
 
-        data = dao.BaixarAlertasDAO.get(
+        return dao.BaixarAlertasDAO.get(
             alrt_type=tipo_alerta,
             accept_empty=False,
-            id_orgao=orgao_id,
-        )
-
-        # if tipo_alerta == 'COMP':
-        #     data = dao.AlertaComprasDAO.get(
-        #         id_orgao=orgao_id,
-        #         accept_empty=False
-        #     )
-        # else:
-        #     data = dao.AlertaMGPDAO.get(
-        #         orgao_id=orgao_id,
-        #         tipo_alerta=tipo_alerta,
-        #         accept_empty=False
-        #     )
-        data = [tuple(x[c] for c in data_columns) for x in data]
-
-        return FileResponse(
-            gera_planilha_excel(
-                data,
-                header=header,
-                sheet_title=f"Alertas {tipo_alerta}"
-            ),
-            filename=f"Alerta-{tipo_alerta}-{date.today()}.xlsx",
-            as_attachment=True
+            orgao_id=orgao_id,
         )

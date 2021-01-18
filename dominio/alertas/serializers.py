@@ -27,6 +27,8 @@ class AlertasComprasSerializer(serializers.Serializer):
     iditem = serializers.IntegerField()
     contrato_iditem = serializers.CharField()
     item = serializers.CharField()
+    alrt_key = serializers.CharField()
+    flag_dispensado = serializers.IntegerField()
 
 
 class IdentificadorAlertaSerializer(serializers.Serializer):

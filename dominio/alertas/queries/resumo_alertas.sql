@@ -5,7 +5,7 @@ FROM (
     WHERE alrt.alrt_orgi_orga_dk = :orgao_id
     UNION ALL
     SELECT alrt_sigla, alrt_key
-    FROM {schema}.mmps_alertas_ppfp alrt
+    FROM {schema}.mmps_alertas_stao alrt
     WHERE alrt.alrt_orgi_orga_dk = :orgao_id
     UNION ALL
     SELECT alrt_sigla, alrt_key
@@ -13,11 +13,11 @@ FROM (
     WHERE alrt.alrt_orgi_orga_dk = :orgao_id
     UNION ALL
     SELECT alrt_sigla, alrt_key
-    FROM {schema}.mmps_alertas_vadf alrt
+    FROM {schema}.mmps_alertas_vist alrt
     WHERE alrt.alrt_orgi_orga_dk = :orgao_id
     UNION ALL
     SELECT alrt_sigla, alrt_key
-    FROM {schema}.mmps_alertas_ouvi alrt
+    FROM {schema}.mmps_alertas_movi alrt
     WHERE alrt.alrt_orgi_orga_dk = :orgao_id
     UNION ALL
     SELECT alrt_sigla, alrt_key
@@ -36,6 +36,7 @@ FROM (
     FROM {schema}.mmps_alertas_comp alrt
     WHERE alrt.alrt_orgi_orga_dk = :orgao_id
 ) t
-LEFT JOIN {schema}.hbase_dispensados ON disp_alrt_key = alrt_key
-WHERE disp_alrt_key IS NULL
+--LEFT JOIN {schema}.hbase_dispensados D ON D.disp_alrt_key = alrt_key
+--LEFT JOIN {schema}.hbase_dispensados_todos DT ON DT.disp_alrt_key = regexp_replace(alrt_key, "\.[0-9]*$", '')
+--WHERE D.disp_alrt_key IS NULL AND DT.disp_alrt_key IS NULL
 GROUP BY alrt_sigla
