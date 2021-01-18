@@ -9,6 +9,7 @@ class ListaOrgaosSerializer(serializers.Serializer):
     nome = serializers.CharField()
     sexo = serializers.CharField()
     pess_dk = serializers.CharField()
+    cargo = serializers.CharField()
 
 
 class PIPValidasSerializer(serializers.Serializer):

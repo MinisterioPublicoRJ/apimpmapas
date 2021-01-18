@@ -26,6 +26,15 @@ class TestImpalaExecuteMixin:
         self.patcher.stop()
 
 
+class TestOracleExecuteMixin:
+    def setUp(self):
+        self.patcher = mock.patch("dominio.documentos.dao.oracle_access")
+        self._oracle_execute = self.patcher.start()
+
+    def tearDown(self):
+        self.patcher.stop()
+
+
 class TestMinutaDAO(TestImpalaExecuteMixin, TestCase):
     def test_get_correct(self):
         num_procedimento = "num_proc"
@@ -56,14 +65,14 @@ class TestMinutaDAO(TestImpalaExecuteMixin, TestCase):
         self.assertEqual(data, expected_value)
 
 
-class TestDadosPromotorDAO(TestImpalaExecuteMixin, TestCase):
+class TestDadosPromotorDAO(TestOracleExecuteMixin, TestCase):
     def test_get_correct(self):
         nome_promotor = "Nome"
         matricula_promotor = "00001234"
         sexo = "X"
 
         cpf = "00000000"
-        self._impala_execute.return_value = [
+        self._oracle_execute.return_value = [
             (
                 matricula_promotor,
                 nome_promotor,

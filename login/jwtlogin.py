@@ -20,7 +20,9 @@ def tipo_orgao(nome_orgao):
         "promotoria de justiça de tutela coletiva do núcleo belford roxo",
     ]
     nome_orgao = nome_orgao.lower()
-    if "investigação penal" in nome_orgao:
+    if "procuradoria" in nome_orgao:
+        orgao = 0
+    elif "investigação penal" in nome_orgao:
         orgao = 2
     elif (
         "tutela" in nome_orgao
