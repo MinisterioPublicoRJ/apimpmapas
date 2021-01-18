@@ -27,7 +27,6 @@ LEFT JOIN RH_CARGOS cgo ON func.cdcargo = cgo.cdcargo
 WHERE func.E_MAIL1 = LOWER(TRIM(:login))
     AND (hist.DTFIMEXERREAL IS NULL OR hist.DTFIMEXERREAL >= SYSDATE)
     AND (org.ORGI_DT_FIM IS NULL OR org.ORGI_DT_FIM > SYSDATE)
-    AND (org.ORGI_NM_ORGAO LIKE '%PROMOTORIA%' OR prom.ORGI_NM_ORGAO LIKE '%PROMOTORIA%')
     AND func.CDCARGO != 70 -- DDL da VW mosta que 70 é Procurador
     AND func.CDSITUACAOFUNC = 1 -- SELECT * FROM RH.SITUACAO_FUNC sf | Situacao Normal
     AND func.CDTIPFUNC != 2 -- SELECT * FROM RH.TIPO_FUNCIONARIO tf  | MP Inativo
