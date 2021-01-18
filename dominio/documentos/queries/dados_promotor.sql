@@ -3,7 +3,7 @@ SELECT
     func.NMFUNCIONARIO AS nome,
     func.CDMATRICULA AS matricula,
     func.SEXO AS sexo,
-    CASE WHEN CDCARGO IN (74)
+    CASE WHEN CDCARGO IN (74, 75)
         THEN 1
         ELSE 0
     END AS EH_PROMOTOR
