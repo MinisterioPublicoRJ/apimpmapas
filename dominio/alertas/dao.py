@@ -153,6 +153,12 @@ class AlertaComprasDAO(AlertasDAO):
         "schema": settings.ALERTAS_NAMESPACE,
     }
 
+    @classmethod
+    def get(cls, accept_empty=True, **kwargs):
+        result_set = super().get(accept_empty=accept_empty, **kwargs)
+        # TODO: Pode ser necessario entregar tudo no futuro, até dispensados
+        return [x for x in result_set if x['flag_dispensado'] == 0]
+
 
 # ------ DAOs relativos ao Overlay do Alerta
 
