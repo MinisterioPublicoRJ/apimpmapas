@@ -1,6 +1,7 @@
 from datetime import datetime, date
 from unittest import mock
 
+from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 from django.core.cache import cache
@@ -296,6 +297,8 @@ class AlertasOverlayTest(NoJWTTestCase, NoCacheTestCase, TestCase):
 class TestEnviarAlertasComprasOuvidoria(NoJWTTestCase, TestCase):
     def setUp(self):
         super().setUp()
+        self.mock_jwt.return_value = {"cargo": settings.PROMOTOR_CARGO_SIGLA}
+
         self.orgao_id = "12345"
         self.alerta_sigla = "COMP"
         self.url = reverse(
@@ -336,6 +339,8 @@ class TestEnviarAlertasComprasOuvidoria(NoJWTTestCase, TestCase):
 class TestEnviarAlertasISPSOuvidoria(NoJWTTestCase, TestCase):
     def setUp(self):
         super().setUp()
+        self.mock_jwt.return_value = {"cargo": settings.PROMOTOR_CARGO_SIGLA}
+
         self.orgao_id = "12345"
         self.alerta_sigla = "ISPS"
         self.alerta_id = "abc12345"

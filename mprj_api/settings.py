@@ -348,3 +348,6 @@ URL_PAINEL_SANEAMENTO = config(
     "https://geo.mprj.mp.br/portal/apps/experiencebuilder/experience/"
     "?id=35ae775b7f37418c9c65f47d62943d67"
 )
+
+PROMOTOR_CARGO_SIGLA = config("PROMOTOR_CARGO_SIGLA", default="PJ")
+FUNCIONARIO_CARGO_SIGLA = config("FUNCIONARIO_CARGO_SIGLA", default="FUNC")

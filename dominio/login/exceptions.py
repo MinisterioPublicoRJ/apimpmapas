@@ -3,7 +3,7 @@ from rest_framework.exceptions import APIException
 
 class UserHasNoValidOfficesError(APIException):
     status_code = 404
-    default_detail = "Usário não está lotado em órgãos válidos"
+    default_detail = "Usuário não está lotado em órgãos válidos"
     default_code = "invalid_offices_errors"
 
 
