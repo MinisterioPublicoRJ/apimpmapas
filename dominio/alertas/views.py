@@ -1,6 +1,3 @@
-from datetime import date
-
-from django.http import FileResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -11,12 +8,9 @@ from dominio.alertas.controllers import (
     EnviaAlertaComprasOuvidoriaController,
     EnviaAlertaISPSOuvidoriaController,
 )
-from dominio.alertas.helper import list_columns
 from dominio.alertas.exceptions import (
-    APIAlertTypeListNotConfigured,
     APIInvalidAlertaSigla,
 )
-from dominio.documentos.helpers import gera_planilha_excel
 
 from .serializers import AlertasListaSerializer, IdentificadorAlertaSerializer
 

@@ -1,5 +1,5 @@
 SELECT
-    alrt_classe_hierarquia,
-    alrt_descricao
-FROM {schema}.mmps_alertas
+    alrt_municipio,
+    alrt_indicador
+FROM {schema}.mmps_alertas_isps
 WHERE alrt_dk = :alerta_id

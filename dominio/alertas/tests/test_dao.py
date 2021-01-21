@@ -2,7 +2,6 @@ from unittest import mock
 import pytest
 
 from django.test import TestCase
-from django.core.cache import cache
 
 from dominio.alertas import dao
 from dominio.alertas.exceptions import (

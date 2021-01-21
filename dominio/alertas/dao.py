@@ -2,12 +2,11 @@ from datetime import date
 
 from django.http import FileResponse
 from django.conf import settings
-from django.core.cache import cache
 
 from dominio.dao import GenericDAO, SingleDataObjectDAO
 from dominio.db_connectors import get_hbase_table, run_query
 from dominio.alertas import serializers
-from dominio.alertas.helper import ordem as alrt_ordem, list_columns
+from dominio.alertas.helper import ordem as alrt_ordem, headers as alrt_header
 from dominio.alertas.exceptions import (
     APIInvalidOverlayType,
     APIMissingOverlayType,
@@ -147,7 +146,15 @@ class AlertaMGPDAO(AlertasDAO):
 
 class AlertaComprasDAO(AlertasDAO):
     query_file = "alerta_compras.sql"
-    columns = ["sigla", "contrato", "iditem", "contrato_iditem", "item", "alrt_key", "flag_dispensado"]
+    columns = [
+        "sigla",
+        "contrato",
+        "iditem",
+        "contrato_iditem",
+        "item",
+        "alrt_key",
+        "flag_dispensado"
+    ]
     serializer = serializers.AlertasComprasSerializer
     table_namespaces = {
         "schema": settings.ALERTAS_NAMESPACE,
@@ -257,7 +264,7 @@ class DetalheAlertaCompraDAO(SingleDataObjectDAO):
         "var_perc",
     ]
     table_namespaces = {
-        "schema_alertas_compras": settings.SCHEMA_ALERTAS,
+        "schema_alertas": settings.ALERTAS_NAMESPACE,
     }
 
 
@@ -270,7 +277,7 @@ class DetalheAlertaISPSDAO(SingleDataObjectDAO):
         "descricao",
     ]
     table_namespaces = {
-        "schema": settings.TABLE_NAMESPACE,
+        "schema": settings.ALERTAS_NAMESPACE,
     }
 
 
@@ -291,13 +298,13 @@ class BaixarAlertasDAO(AlertasDAO):
         'GATE': 'baixar_alertas_gate.sql',
         'MVVD': 'baixar_alertas_mgp.sql',
         'BDPA': 'baixar_alertas_mgp.sql',
-        'IC1A': 'baixar_alertas_stao.sql',
+        'IC1A': 'baixar_alertas_mgp.sql',
         'PA1A': 'baixar_alertas_mgp.sql',
-        'PPFP': 'baixar_alertas_stao.sql',
-        'PPPV': 'baixar_alertas_stao.sql',
-        'OUVI': 'baixar_alertas_movi.sql',
+        'PPFP': 'baixar_alertas_ppfp.sql',
+        'PPPV': 'baixar_alertas_ppfp.sql',
+        'OUVI': 'baixar_alertas_mgp.sql',
         'NF30': 'baixar_alertas_mgp.sql',
-        'VADF': 'baixar_alertas_vist.sql',
+        'VADF': 'baixar_alertas_mgp.sql',
         'DT2I': 'baixar_alertas_mgp.sql',
         'DORD': 'baixar_alertas_mgp.sql',
         'DNTJ': 'baixar_alertas_mgp.sql',
@@ -306,7 +313,7 @@ class BaixarAlertasDAO(AlertasDAO):
     @classmethod
     def get(cls, alrt_type, **kwargs):
         try:
-            _, header = list_columns[alrt_type]
+            header = alrt_header[alrt_type]
             cls.query_file = cls._file_switcher[alrt_type]
         except KeyError:
             raise APIAlertTypeListNotConfigured

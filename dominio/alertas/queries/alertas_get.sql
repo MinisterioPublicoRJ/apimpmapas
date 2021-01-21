@@ -6,73 +6,13 @@ FROM (
         alrt_date_referencia,
         alrt_orgi_orga_dk,
         alrt_dias_referencia,
-        'NO_ID' as alrt_dk,
+        CASE WHEN alrt_sigla = 'GATE' THEN cast(alrt_dk_referencia as string) ELSE 'NO_ID' END as alrt_dk,
         alrt_sigla,
         NULL as alrt_descricao,
         NULL as alrt_classe_hierarquia,
         NULL as alrt_docu_nr_externo,
         alrt_key
     FROM {schema}.mmps_alertas_mgp alrt
-    WHERE alrt.alrt_orgi_orga_dk = :orgao_id
-    UNION ALL
-    SELECT 
-        alrt_docu_dk,
-        alrt_docu_nr_mp,
-        alrt_date_referencia,
-        alrt_orgi_orga_dk,
-        alrt_dias_referencia,
-        'NO_ID' as alrt_dk,
-        alrt_sigla,
-        NULL as alrt_descricao,
-        NULL as alrt_classe_hierarquia,
-        NULL as alrt_docu_nr_externo,
-        alrt_key
-    FROM {schema}.mmps_alertas_stao alrt
-    WHERE alrt.alrt_orgi_orga_dk = :orgao_id
-    UNION ALL
-    SELECT 
-        alrt_docu_dk,
-        alrt_docu_nr_mp,
-        alrt_date_referencia,
-        alrt_orgi_orga_dk,
-        alrt_dias_referencia,
-        cast(alrt_itcn_dk as string) as alrt_dk,
-        alrt_sigla,
-        NULL as alrt_descricao,
-        NULL as alrt_classe_hierarquia,
-        NULL as alrt_docu_nr_externo,
-        alrt_key
-    FROM {schema}.mmps_alertas_gate alrt
-    WHERE alrt.alrt_orgi_orga_dk = :orgao_id
-    UNION ALL
-    SELECT 
-        alrt_docu_dk,
-        alrt_docu_nr_mp,
-        alrt_date_referencia,
-        alrt_orgi_orga_dk,
-        alrt_dias_referencia,
-        'NO_ID' as alrt_dk,
-        alrt_sigla,
-        NULL as alrt_descricao,
-        NULL as alrt_classe_hierarquia,
-        NULL as alrt_docu_nr_externo,
-        alrt_key
-    FROM {schema}.mmps_alertas_vist alrt
-    WHERE alrt.alrt_orgi_orga_dk = :orgao_id
-    UNION ALL
-    SELECT 
-        alrt_docu_dk,
-        alrt_docu_nr_mp,
-        alrt_date_referencia,
-        alrt_orgi_orga_dk,
-        alrt_dias_referencia,
-        'NO_ID' as alrt_dk,
-        alrt_sigla,
-        NULL as alrt_descricao,
-        NULL as alrt_classe_hierarquia,
-        NULL as alrt_docu_nr_externo,
-        alrt_key
-    FROM {schema}.mmps_alertas_movi alrt
     WHERE alrt.alrt_orgi_orga_dk = :orgao_id
     UNION ALL
     SELECT 

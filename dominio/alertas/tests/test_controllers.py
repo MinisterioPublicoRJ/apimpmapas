@@ -74,7 +74,9 @@ class TestDispensaAlertasController(TestCase):
             f"{'.'.join(self.alerta_id.split('.')[:-1])}".encode()
         )
         self.expected_hbase_data[f"{self.hbase_cf}:orgao".encode()] = b"ALL"
-        self.expected_hbase_data[f"{self.hbase_cf}:alerta_id".encode()] = self.expected_hbase_key
+        self.expected_hbase_data[f"{self.hbase_cf}:alerta_id".encode()] = (
+            self.expected_hbase_key
+        )
 
         self.controller.dispensa_para_todos_orgaos()
 

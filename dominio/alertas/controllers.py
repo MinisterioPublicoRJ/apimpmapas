@@ -35,10 +35,11 @@ class HBaseAccessController:
         return f"{alerta_id}".encode()
 
     def get_row_data(self, orgao_id, alerta_id):
+        sigla = alerta_id.split('.')[0]
         return {
             f"{self.hbase_cf}:orgao".encode(): orgao_id.encode(),
             f"{self.hbase_cf}:alerta_id".encode(): alerta_id.encode(),
-            f"{self.hbase_cf}:sigla".encode(): alerta_id.split('.')[0].encode(),
+            f"{self.hbase_cf}:sigla".encode(): sigla.encode(),
         }
 
 

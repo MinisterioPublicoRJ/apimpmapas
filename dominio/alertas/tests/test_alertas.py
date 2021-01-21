@@ -186,8 +186,24 @@ class AlertaComprasTest(
     @mock.patch.object(dao.AlertaComprasDAO, "execute")
     def test_alert_compras(self, _execute):
         return_alerta = [
-            ('COMP', 'Contrato 1', '98765', 'Contrato ID 1', 'ITEM 1', 'alrtkey1', 0),
-            ('COMP', 'Contrato 2', '12345', 'Contrato ID 2', 'ITEM 2', 'alrtkey2', 0),
+            (
+                'COMP',
+                'Contrato 1',
+                '98765',
+                'Contrato ID 1',
+                'ITEM 1',
+                'alrtkey1',
+                0
+            ),
+            (
+                'COMP',
+                'Contrato 2',
+                '12345',
+                'Contrato ID 2',
+                'ITEM 2',
+                'alrtkey2',
+                0
+            ),
         ]
         _execute.return_value = return_alerta
         orgao_id = '0000000'
@@ -434,7 +450,6 @@ class TestBaixarAlertas(
             ('mck', 0, 'nr1', 'mck', 10, 'id'),
             ('mck', 0, 'nr2', 'mck', 10, 'id'),
         ]
-
 
     def tearDown(self):
         super().tearDown()
