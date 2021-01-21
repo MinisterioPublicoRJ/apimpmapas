@@ -3,7 +3,7 @@ SELECT
     count(alrt.alrt_sigla) as "count"
 FROM {schema}.mmps_alertas alrt
 LEFT JOIN (
-    SELECT * FROM exadata_aux_dev.alerta_desabilitado WHERE resolvido = false
+    SELECT * FROM {schema}.alerta_desabilitado WHERE resolvido = false
 ) desabilitar ON alrt_sigla = sigla AND orgao_id = :id_orgao
 WHERE alrt.dt_partition = :dt_partition
     AND alrt.alrt_orgi_orga_dk = :id_orgao
@@ -15,7 +15,7 @@ SELECT 'COMP',
     COUNT(1)
 FROM {schema}.atualizacao_pj_pacote
 LEFT JOIN (
-    SELECT * FROM exadata_aux_dev.alerta_desabilitado WHERE resolvido = false
+    SELECT * FROM {schema}.alerta_desabilitado WHERE resolvido = false
 ) desabilitar ON 'COMP' = sigla AND orgao_id = :id_orgao
 INNER JOIN {schema_alertas_compras}.compras_fora_padrao_capital ON
     var_perc >= 20
