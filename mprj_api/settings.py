@@ -306,6 +306,7 @@ DESAPARECIDOS_CACHE_TIMEOUT = config(
     default=86400
 )
 PROXIES_PLACAS_ROLE = config("PROXIES_PLACAS_ROLE", default="role")
+PROXIES_CADUNICO_ROLE = config("PROXIES_CADUNICO_ROLE", default="role")
 
 ACCESS_TOKEN_LIFETIME = config("ACCESS_TOKEN_LIFETIME", cast=int, default=5)
 REFRESH_TOKEN_LIFETIME = config("REFRESH_TOKEN_LIFETIME", cast=int, default=1)
@@ -318,6 +319,8 @@ SIMPLE_JWT = {
 ZOOKEEPER_SERVER = config("ZOOKEEPER_SERVER", default="zookeeper")
 PLACAS_SOLR_COLLECTION = config("PLACAS_SOLR_COLLECTION", default="placas")
 PLACAS_SOLR_MAX_ROWS = config("PLACAS_SOLR_MAX_ROWS", cast=int, default=1_000)
+
+HOST_SOLR = config("HOST_SOLR", "host-solr")
 
 #EMAIL
 EMAIL_SMTP_SERVER = config("EMAIL_SMTP_SERVER")
