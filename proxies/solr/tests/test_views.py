@@ -88,3 +88,42 @@ class TestSolrPlacasViews(TestCase):
         )
 
         self.assertEqual(resp.status_code, 503)
+
+
+class TestSolrCadUnicoPessoaView(TestCase):
+    def setUp(self):
+        self.solr_request_patcher = mock.patch(
+            "proxies.solr.views.SolrClient.request_query"
+        )
+        self.solr_request_mock = self.solr_request_patcher.start()
+        self.data = {"response": "data"}
+        self.solr_request_mock.return_value = self.data
+
+        access_token = AccessToken()
+        access_token.payload["roles"] = (settings.PROXIES_CADUNICO_ROLE,)
+        access_token.payload["username"] = "username"
+        self.token = str(access_token)
+        self.url = reverse("proxies:solr-cadunico-pessoa")
+
+        self.f_q = "termo pesquisa"
+
+    def tearDown(self):
+        self.solr_request_patcher.stop()
+
+    def test_solr_cadunico_correct_response(self):
+        resp = self.client.get(
+            self.url,
+            {
+                "token": self.token,
+                "f_q": self.f_q,
+            }
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, self.data)
+        self.solr_request_mock.assert_called_once_with(
+            'cadunico_pessoa/select?q=%22termo pesquisa%22&'
+            'wt=json&indent=true&defType=edismax&qf=no_pessoa+'
+            'no_completo_mae_pessoa+nu_cpf_pessoa&qs=1&stopwords=true&'
+            'lowercaseOperators=true&hl=true%22&sort=score%20DESC',
+        )

@@ -26,3 +26,7 @@ class SolrPlacasSerializer(serializers.Serializer):
         )
 
         return {"query": query, "start": attrs["start"], "rows": attrs["rows"]}
+
+
+class SolrCadUnicoSerializer(serializers.Serializer):
+    f_q = serializers.CharField()
