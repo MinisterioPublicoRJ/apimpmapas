@@ -75,8 +75,11 @@ class SolrCadUnicoPessoaView(GenericAPIView):
 
     @token_required(token_conf_var="CADUNICO_AUTH_TOKEN")
     def get(self, request, *args, **kwargs):
-        start = 1
-        rows = 10
+        ser = self.get_serializer_class()(data=request.GET)
+        ser.is_valid(raise_exception=True)
+        start = ser.validated_data["start"]
+        rows = ser.validated_data["rows"]
+
         query = (
             'cadunico_pessoa/select?q=%22{f_q}%22&'
             'wt=json&indent=true&defType=edismax&qf=no_pessoa+'
@@ -84,8 +87,6 @@ class SolrCadUnicoPessoaView(GenericAPIView):
             'lowercaseOperators=true&hl=true%22&sort=score%20DESC&'
             'start={start}&rows={rows}'
         )
-        ser = self.get_serializer_class()(data=request.GET)
-        ser.is_valid(raise_exception=True)
         f_query = query.format(
             f_q=ser.validated_data["f_q"],
             start=start,

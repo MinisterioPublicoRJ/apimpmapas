@@ -107,6 +107,8 @@ class TestSolrCadUnicoPessoaView(TestCase):
         self.url = reverse("proxies:solr-cadunico-pessoa")
 
         self.f_q = "termo pesquisa"
+        self.start = 1
+        self.rows = 5
 
     def tearDown(self):
         self.solr_request_patcher.stop()
@@ -117,6 +119,8 @@ class TestSolrCadUnicoPessoaView(TestCase):
             {
                 "token": self.token,
                 "f_q": self.f_q,
+                "start": self.start,
+                "rows": self.rows,
             }
         )
 
@@ -127,7 +131,7 @@ class TestSolrCadUnicoPessoaView(TestCase):
             'wt=json&indent=true&defType=edismax&qf=no_pessoa+'
             'no_completo_mae_pessoa+nu_cpf_pessoa&qs=1&stopwords=true&'
             'lowercaseOperators=true&hl=true%22&sort=score%20DESC&'
-            'start=1&rows=10',
+            f'start={self.start}&rows={self.rows}',
         )
 
     def test_solr_request_client_error(self):
@@ -137,6 +141,8 @@ class TestSolrCadUnicoPessoaView(TestCase):
             {
                 "token": self.token,
                 "f_q": self.f_q,
+                "start": self.start,
+                "rows": self.rows,
             }
         )
 
