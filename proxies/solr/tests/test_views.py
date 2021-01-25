@@ -1,10 +1,13 @@
 from unittest import mock
 
 from django.conf import settings
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from pysolr import SolrError
 from rest_framework_simplejwt.tokens import AccessToken
+
+
+CADUNICO_TEST_TOKEN = "test token"
 
 
 class TestSolrPlacasViews(TestCase):
@@ -90,6 +93,7 @@ class TestSolrPlacasViews(TestCase):
         self.assertEqual(resp.status_code, 503)
 
 
+@override_settings(CADUNICO_AUTH_TOKEN=CADUNICO_TEST_TOKEN)
 class TestSolrCadUnicoPessoaView(TestCase):
     def setUp(self):
         self.solr_request_patcher = mock.patch(
@@ -99,10 +103,7 @@ class TestSolrCadUnicoPessoaView(TestCase):
         self.data = {"response": "data"}
         self.solr_request_mock.return_value = self.data
 
-        access_token = AccessToken()
-        access_token.payload["roles"] = (settings.PROXIES_CADUNICO_ROLE,)
-        access_token.payload["username"] = "username"
-        self.token = str(access_token)
+        self.token = CADUNICO_TEST_TOKEN
         self.url = reverse("proxies:solr-cadunico-pessoa")
 
         self.f_q = "termo pesquisa"

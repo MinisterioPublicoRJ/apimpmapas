@@ -4,6 +4,7 @@ from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 
+from login.simple import token_required
 from proxies.login.permissions import SCARolePermission
 from proxies.solr.client import SolrClient, create_solr_client
 from proxies.solr.serializers import (
@@ -55,8 +56,6 @@ class SolrPlacasView(GenericAPIView):
 
 class SolrCadUnicoPessoaView(GenericAPIView):
     serializer_class = SolrCadUnicoSerializer
-    permission_classes = (SCARolePermission,)
-    permission_roles = (settings.PROXIES_CADUNICO_ROLE,)
 
     def get_data(self, query, start, rows):
         try:
@@ -74,6 +73,7 @@ class SolrCadUnicoPessoaView(GenericAPIView):
 
         return data
 
+    @token_required(token_conf_var="CADUNICO_AUTH_TOKEN")
     def get(self, request, *args, **kwargs):
         query = (
             'cadunico_pessoa/select?q=%22{f_q}%22&'
@@ -90,6 +90,6 @@ class SolrCadUnicoPessoaView(GenericAPIView):
             rows=10,
         )
         logger.info(
-            f"Consulta em 'cadunico-pessoa' feita por {request.sca_username}"
+            f"Consulta em 'cadunico-pessoa'"
         )
         return Response(data=data)
