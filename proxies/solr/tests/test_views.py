@@ -128,3 +128,15 @@ class TestSolrCadUnicoPessoaView(TestCase):
             'no_completo_mae_pessoa+nu_cpf_pessoa&qs=1&stopwords=true&'
             'lowercaseOperators=true&hl=true%22&sort=score%20DESC',
         )
+
+    def test_solr_request_client_error(self):
+        self.solr_request_mock.side_effect = Exception
+        resp = self.client.get(
+            self.url,
+            {
+                "token": self.token,
+                "f_q": self.f_q,
+            }
+        )
+
+        self.assertEqual(resp.status_code, 503)

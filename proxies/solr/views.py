@@ -60,7 +60,7 @@ class SolrCadUnicoPessoaView(GenericAPIView):
     def get_data(self, query, start, rows):
         try:
             data = SolrClient.request_query(query)
-        except SolrError as e:
+        except Exception as e:
             logger.error(
                 "query={query} - params:{start} | {rows}: {e!r}".format(
                     query=query,
