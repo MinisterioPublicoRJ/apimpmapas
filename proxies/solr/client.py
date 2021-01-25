@@ -1,5 +1,3 @@
-import json
-
 import pysolr
 import requests
 from django.conf import settings
@@ -27,12 +25,9 @@ class SolrClient:
     @classmethod
     def request_query(cls, query):
         complete_url = settings.HOST_SOLR + query
-        return json.loads(
-            requests.get(
-                complete_url,
-                auth=HTTPKerberosAuth()
-            ).content.decode()
-        ).get("response")
+        resp = requests.get(complete_url, auth=HTTPKerberosAuth())
+        resp.raise_for_status()
+        return resp.json().get("response")
 
 
 def create_solr_client():

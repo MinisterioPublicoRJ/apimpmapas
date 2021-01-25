@@ -48,7 +48,7 @@ class TestSolrClient(TestCase):
 class TestSolrClientRequest(TestCase):
     def setUp(self):
         response_mock = mock.Mock()
-        response_mock.content = b'{"response": {"key": "data"}}'
+        response_mock.json.return_value = {"response": {"key": "data"}}
         self.requests_get_patcher = mock.patch(
             "proxies.solr.client.requests.get"
         )

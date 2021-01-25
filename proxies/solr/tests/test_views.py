@@ -126,7 +126,8 @@ class TestSolrCadUnicoPessoaView(TestCase):
             'cadunico_pessoa/select?q=%22termo pesquisa%22&'
             'wt=json&indent=true&defType=edismax&qf=no_pessoa+'
             'no_completo_mae_pessoa+nu_cpf_pessoa&qs=1&stopwords=true&'
-            'lowercaseOperators=true&hl=true%22&sort=score%20DESC',
+            'lowercaseOperators=true&hl=true%22&sort=score%20DESC&'
+            'start=1&rows=10',
         )
 
     def test_solr_request_client_error(self):
