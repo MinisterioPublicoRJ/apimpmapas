@@ -5,22 +5,6 @@ FROM (
     WHERE alrt.alrt_orgi_orga_dk = :orgao_id
     UNION ALL
     SELECT alrt_sigla, alrt_key
-    FROM {schema}.mmps_alertas_stao alrt
-    WHERE alrt.alrt_orgi_orga_dk = :orgao_id
-    UNION ALL
-    SELECT alrt_sigla, alrt_key
-    FROM {schema}.mmps_alertas_gate alrt
-    WHERE alrt.alrt_orgi_orga_dk = :orgao_id
-    UNION ALL
-    SELECT alrt_sigla, alrt_key
-    FROM {schema}.mmps_alertas_vist alrt
-    WHERE alrt.alrt_orgi_orga_dk = :orgao_id
-    UNION ALL
-    SELECT alrt_sigla, alrt_key
-    FROM {schema}.mmps_alertas_movi alrt
-    WHERE alrt.alrt_orgi_orga_dk = :orgao_id
-    UNION ALL
-    SELECT alrt_sigla, alrt_key
     FROM {schema}.mmps_alertas_isps alrt
     WHERE alrt.alrt_orgi_orga_dk = :orgao_id
     UNION ALL

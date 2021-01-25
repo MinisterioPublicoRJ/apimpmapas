@@ -9,7 +9,7 @@ FROM (
         CASE WHEN alrt_sigla = 'GATE' THEN cast(alrt_dk_referencia as string) ELSE 'NO_ID' END as alrt_dk,
         alrt_sigla,
         NULL as alrt_descricao,
-        NULL as alrt_classe_hierarquia,
+        CASE WHEN alrt_sigla = 'BDPA' THEN cast(alrt_info_adicional as string) ELSE NULL END as alrt_classe_hierarquia,
         NULL as alrt_docu_nr_externo,
         alrt_key
     FROM {schema}.mmps_alertas_mgp alrt
@@ -54,7 +54,7 @@ FROM (
         cast(ro_nr_delegacia as string) as alrt_dk,
         alrt_sigla,
         NULL as alrt_descricao,
-        NULL as alrt_classe_hierarquia,
+        ro_cisp_nome_apresentacao as alrt_classe_hierarquia,
         NULL as alrt_docu_nr_externo,
         alrt_key
     FROM {schema}.mmps_alertas_ro alrt

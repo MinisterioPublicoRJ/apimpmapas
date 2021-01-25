@@ -10,6 +10,7 @@ ordem = [
     'MCSI',
     'MVVD',
     'RO',
+    'FEBT',
     'BDPA',
     'ABR1',
     'IC1A',
@@ -39,7 +40,12 @@ headers = {
     # 'MCSI':,
     'MVVD': ['numero_mprj', 'numero_externo'],
     # 'RO':,
-    'BDPA': ['numero_mprj', 'numero_externo', 'dt_fim_prazo'],
+    'BDPA': [
+        'numero_mprj',
+        'numero_externo',
+        'dt_fim_prazo',
+        'delegacia_origem'
+    ],
     # 'ABR1':,
     'IC1A': ['numero_mprj', 'numero_externo', 'dt_fim_prazo'],
     'PA1A': ['numero_mprj', 'numero_externo', 'dt_fim_prazo'],
