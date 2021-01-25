@@ -26,3 +26,18 @@ class SolrPlacasSerializer(serializers.Serializer):
         )
 
         return {"query": query, "start": attrs["start"], "rows": attrs["rows"]}
+
+
+class SolrCadUnicoSerializer(serializers.Serializer):
+    f_q = serializers.CharField()
+    start = serializers.IntegerField(min_value=0)
+    rows = serializers.IntegerField(min_value=1)
+
+    def validate(self, attrs):
+        if attrs["rows"] > settings.CADUNICO_SOLR_MAX_ROWS:
+            raise serializers.ValidationError(
+                "Limite máximo de linhas excedido:"
+                f" max={settings.CADUNICO_SOLR_MAX_ROWS}"
+            )
+
+        return attrs
