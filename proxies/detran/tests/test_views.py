@@ -11,7 +11,10 @@ from proxies.exceptions import (
 )
 
 
-@override_settings(SIMPLE_AUTH_TOKEN=None)
+TEST_TOKEN = "simple-token"
+
+
+@override_settings(SIMPLE_AUTH_TOKEN=TEST_TOKEN)
 class TestDetranProxyView(TestCase):
     @mock.patch("proxies.detran.views.ImpalaGate")
     @mock.patch("proxies.detran.views.HBaseGate")
@@ -26,7 +29,7 @@ class TestDetranProxyView(TestCase):
         # View must remove padding zero
         rg = "012345"
         url = reverse("proxies:foto-detran", kwargs={"rg": rg})
-        resp = self.client.get(url)
+        resp = self.client.get(url, {"proxy-token": TEST_TOKEN})
         expected_used_rg = str(int(rg))
 
         _DataController.assert_called_once_with(
@@ -53,7 +56,7 @@ class TestDetranProxyView(TestCase):
 
         rg = "12345"
         url = reverse("proxies:foto-detran", kwargs={"rg": rg})
-        resp = self.client.get(url)
+        resp = self.client.get(url, {"proxy-token": TEST_TOKEN})
 
         assert resp.status_code == 503
 
@@ -65,7 +68,7 @@ class TestDetranProxyView(TestCase):
 
         rg = "12345"
         url = reverse("proxies:foto-detran", kwargs={"rg": rg})
-        resp = self.client.get(url)
+        resp = self.client.get(url, {"proxy-token": TEST_TOKEN})
 
         assert resp.status_code == 404
         assert resp.json() == {"detail": f"Dado não encontrado para RG: {rg}"}
@@ -78,7 +81,7 @@ class TestDetranProxyView(TestCase):
 
         rg = "12345"
         url = reverse("proxies:foto-detran", kwargs={"rg": rg})
-        resp = self.client.get(url)
+        resp = self.client.get(url, {"proxy-token": TEST_TOKEN})
 
         assert resp.status_code == 503
         assert resp.json() == {
