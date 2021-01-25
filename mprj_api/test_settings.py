@@ -241,7 +241,6 @@ DESAPARECIDOS_CACHE_TIMEOUT = config(
 )
 
 PROXIES_PLACAS_ROLE = config("PROXIES_PLACAS_ROLE", default="role")
-PROXIES_CADUNICO_ROLE = config("PROXIES_CADUNICO_ROLE", default="role")
 
 ZOOKEEPER_SERVER = config("ZOOKEEPER_SERVER", default="zookeeper")
 PLACAS_SOLR_COLLECTION = config("PLACAS_SOLR_COLLECTION", default="placas")
