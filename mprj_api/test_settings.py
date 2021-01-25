@@ -209,6 +209,8 @@ EXADATA_DETRAN_DATA_ORIGIN = config("EXADATA_DETRAN_DATA_ORIGIN")
 
 # SIMPLE AUTH
 SIMPLE_AUTH_TOKEN = config("SIMPLE_AUTH_TOKEN", default="simple-token")
+CADUNICO_AUTH_TOKEN = config("CADUNICO_AUTH_TOKEN", default="token")
+
 
 # DETRAN
 DETRAN_CNPJ = config("DETRAN_CNPJ")
@@ -245,6 +247,8 @@ ZOOKEEPER_SERVER = config("ZOOKEEPER_SERVER", default="zookeeper")
 PLACAS_SOLR_COLLECTION = config("PLACAS_SOLR_COLLECTION", default="placas")
 PLACAS_SOLR_MAX_ROWS = config("PLACAS_SOLR_MAX_ROWS", cast=int, default=1_000)
 
+HOST_SOLR = config("HOST_SOLR", "host-solr")
+
 #EMAIL
 EMAIL_SMTP_SERVER = config("EMAIL_SMTP_SERVER")
 EMAIL_HOST_USER = config("EMAIL_HOST_USER")
@@ -272,3 +276,8 @@ URL_PAINEL_SANEAMENTO = config(
     "https://geo.mprj.mp.br/portal/apps/experiencebuilder/experience/"
     "?id=35ae775b7f37418c9c65f47d62943d67"
 )
+
+PROMOTOR_CARGO_SIGLA = config("PROMOTOR_CARGO_SIGLA", default="PJ")
+FUNCIONARIO_CARGO_SIGLA = config("FUNCIONARIO_CARGO_SIGLA", default="FUNC")
+
+CADUNICO_SOLR_MAX_ROWS = config("CADUNICO_SOLR_MAX_ROWS", cast=int, default=10)

@@ -1,10 +1,13 @@
 from unittest import mock
 
 from django.conf import settings
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from pysolr import SolrError
 from rest_framework_simplejwt.tokens import AccessToken
+
+
+CADUNICO_TEST_TOKEN = "test token"
 
 
 class TestSolrPlacasViews(TestCase):
@@ -82,6 +85,62 @@ class TestSolrPlacasViews(TestCase):
                 "placa": self.placa,
                 "dt_inicio": self.dt_inicio,
                 "dt_fim": self.dt_inicio,
+                "start": self.start,
+                "rows": self.rows,
+            }
+        )
+
+        self.assertEqual(resp.status_code, 503)
+
+
+@override_settings(CADUNICO_AUTH_TOKEN=CADUNICO_TEST_TOKEN)
+class TestSolrCadUnicoPessoaView(TestCase):
+    def setUp(self):
+        self.solr_request_patcher = mock.patch(
+            "proxies.solr.views.SolrClient.request_query"
+        )
+        self.solr_request_mock = self.solr_request_patcher.start()
+        self.data = {"response": "data"}
+        self.solr_request_mock.return_value = self.data
+
+        self.token = CADUNICO_TEST_TOKEN
+        self.url = reverse("proxies:solr-cadunico-pessoa")
+
+        self.f_q = "termo pesquisa"
+        self.start = 1
+        self.rows = 5
+
+    def tearDown(self):
+        self.solr_request_patcher.stop()
+
+    def test_solr_cadunico_correct_response(self):
+        resp = self.client.get(
+            self.url,
+            {
+                "token": self.token,
+                "f_q": self.f_q,
+                "start": self.start,
+                "rows": self.rows,
+            }
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data, self.data)
+        self.solr_request_mock.assert_called_once_with(
+            'cadunico_pessoa/select?q=%22termo pesquisa%22&'
+            'wt=json&indent=true&defType=edismax&qf=no_pessoa+'
+            'no_completo_mae_pessoa+nu_cpf_pessoa&qs=1&stopwords=true&'
+            'lowercaseOperators=true&hl=true%22&sort=score%20DESC&'
+            f'start={self.start}&rows={self.rows}',
+        )
+
+    def test_solr_request_client_error(self):
+        self.solr_request_mock.side_effect = Exception
+        resp = self.client.get(
+            self.url,
+            {
+                "token": self.token,
+                "f_q": self.f_q,
                 "start": self.start,
                 "rows": self.rows,
             }

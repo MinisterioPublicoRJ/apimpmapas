@@ -54,6 +54,7 @@ class TestBuildLoginResponse(TestCase):
                     "NOME 1",
                     "X",
                     "PESS_DK 1",
+                    "CARGO",
                 ),
                 (
                     "1234",
@@ -63,6 +64,7 @@ class TestBuildLoginResponse(TestCase):
                     "NOME 2",
                     "X",
                     "PESS_DK 2",
+                    "CARGO",
                 ),
             ),
         ]
@@ -78,6 +80,7 @@ class TestBuildLoginResponse(TestCase):
             "cpf": "123456789",
             "orgao": "098765",
             "pess_dk": "4567",
+            "cargo": "CARGO",
             "nome": "NOME FUNCIONARIO",
             "tipo_orgao": 2,
             "matricula": "12345",
@@ -93,6 +96,7 @@ class TestBuildLoginResponse(TestCase):
                 "cpf": "CPF 1",
                 "matricula": "MATRICULA 1",
                 "pess_dk": "PESS_DK 1",
+                "cargo": "CARGO",
                 "nome": "NOME 1",
                 "sexo": "X",
                 "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
@@ -106,6 +110,7 @@ class TestBuildLoginResponse(TestCase):
                     "cpf": "CPF 1",
                     "matricula": "MATRICULA 1",
                     "pess_dk": "PESS_DK 1",
+                    "cargo": "CARGO",
                     "nome": "NOME 1",
                     "sexo": "X",
                     "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
@@ -118,6 +123,7 @@ class TestBuildLoginResponse(TestCase):
                     "cpf": "CPF 2",
                     "matricula": "MATRICULA 2",
                     "pess_dk": "PESS_DK 2",
+                    "cargo": "CARGO",
                     "nome": "NOME 2",
                     "sexo": "X",
                     "nm_org": "PROMOTORIA DIFERENTE",
@@ -132,6 +138,7 @@ class TestBuildLoginResponse(TestCase):
                     "cpf": "CPF 1",
                     "matricula": "MATRICULA 1",
                     "pess_dk": "PESS_DK 1",
+                    "cargo": "CARGO",
                     "nome": "NOME 1",
                     "sexo": "X",
                     "nm_org": "PROMOTORIA INVESTIGAÇÃO PENAL",
@@ -254,6 +261,7 @@ class TestBuildLoginResponseUserRegularNoAccess(TestCase):
                     "NOME 2",
                     "X",
                     "PESS_DK 2",
+                    "CARGO",
                 ),
             ),
         ]
@@ -269,6 +277,7 @@ class TestBuildLoginResponseUserRegularNoAccess(TestCase):
             "cpf": "123456789",
             "orgao": "098765",
             "pess_dk": "4567",
+            "cargo": "CARGO",
             "nome": "NOME FUNCIONARIO",
             "tipo_orgao": 2,
             "matricula": "12345",
@@ -285,6 +294,7 @@ class TestBuildLoginResponseUserRegularNoAccess(TestCase):
                     "cpf": "CPF 2",
                     "matricula": "MATRICULA 2",
                     "pess_dk": "PESS_DK 2",
+                    "cargo": "CARGO",
                     "nome": "NOME 2",
                     "sexo": "X",
                     "nm_org": "PROMOTORIA DIFERENTE",
@@ -361,7 +371,7 @@ class TestPermissoesUsuarioRegular(TestCase):
                 "NOME 1",
                 "X",
                 "PESS_DK 1",
-
+                "CARGO",
             ),
             (
                 "1234",
@@ -371,6 +381,7 @@ class TestPermissoesUsuarioRegular(TestCase):
                 "NOME 2",
                 "X",
                 "PESS_DK 2",
+                "CARGO",
             ),
         )
         self.mock_oracle_access.side_effect = [
@@ -381,6 +392,7 @@ class TestPermissoesUsuarioRegular(TestCase):
             {
                 "cpf": "CPF 1",
                 "pess_dk": "PESS_DK 1",
+                "cargo": "CARGO",
                 "nome": "NOME 1",
                 "matricula": "MATRICULA 1",
                 "sexo": "X",
@@ -393,6 +405,7 @@ class TestPermissoesUsuarioRegular(TestCase):
             {
                 "cpf": "CPF 2",
                 "pess_dk": "PESS_DK 2",
+                "cargo": "CARGO",
                 "nome": "NOME 2",
                 "matricula": "MATRICULA 2",
                 "sexo": "X",
@@ -525,6 +538,7 @@ class TestPermissoesUsuarioRegular(TestCase):
                 "NOME 1",
                 "X",
                 "PESS_DK 1",
+                "CARGO",
 
             ),  # Esta pip será removida pois id orgao nao está na lista
             (
@@ -535,6 +549,7 @@ class TestPermissoesUsuarioRegular(TestCase):
                 "NOME 2",
                 "X",
                 "PESS_DK 2",
+                "CARGO",
             ),
         )
         self.mock_oracle_access.side_effect = [
@@ -690,6 +705,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "nome 1",
                 "X",
                 "pess_dk 1",
+                "CARGO",
             ),
             (
                 "cdorgao 2",
@@ -699,6 +715,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "nome 2",
                 "X",
                 "pess_dk 2",
+                "CARGO",
             ),
             (
                 "cdorgao 3",
@@ -708,6 +725,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "nome 3",
                 "X",
                 "pess_dk 3",
+                "CARGO",
             ),
             # Essa PIP deve ser removida por não estar na lista pip_validas
             (
@@ -718,6 +736,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "nome 4",
                 "X",
                 "pess_dk 4",
+                "CARGO",
             ),
         )
         self.oracle_return_lista_orgaos_lotados = (
@@ -729,6 +748,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "nome 2",
                 "X",
                 "pess_dk 2",
+                "CARGO",
             ),
             (
                 "cdorgao 5",
@@ -738,6 +758,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "nome 5",
                 "X",
                 "pess_dk 5",
+                "CARGO",
             ),
         )
         self.mock_oracle_access.side_effect = [
@@ -748,6 +769,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
             {
                 "cpf": "cpf 1",
                 "pess_dk": "pess_dk 1",
+                "cargo": "CARGO",
                 "nome": "nome 1",
                 "matricula": "matricula 1",
                 "sexo": "X",
@@ -760,6 +782,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
             {
                 "cpf": "cpf 2",
                 "pess_dk": "pess_dk 2",
+                "cargo": "CARGO",
                 "nome": "nome 2",
                 "matricula": "matricula 2",
                 "sexo": "X",
@@ -772,6 +795,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
             {
                 "cpf": "cpf 3",
                 "pess_dk": "pess_dk 3",
+                "cargo": "CARGO",
                 "nome": "nome 3",
                 "matricula": "matricula 3",
                 "sexo": "X",
@@ -784,6 +808,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
             {
                 "cpf": "cpf 4",
                 "pess_dk": "pess_dk 4",
+                "cargo": "CARGO",
                 "nome": "nome 4",
                 "matricula": "matricula 4",
                 "sexo": "X",
@@ -837,6 +862,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
         expected = {
             "cpf": "cpf 5",
             "pess_dk": "pess_dk 5",
+            "cargo": "CARGO",
             "nome": "nome 5",
             "matricula": "matricula 5",
             "sexo": "X",
@@ -862,6 +888,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "nome 2",
                 "X",
                 "pess_dk 2",
+                "CARGO",
             ),),
             self.oracle_return_lista_todos_orgaos,
         ]
@@ -881,6 +908,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "nome 1",
                 "X",
                 "pess_dk 1",
+                "CARGO",
             ),
             (
                 "cdorgao 2",
@@ -890,6 +918,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "nome 2",
                 "X",
                 "pess_dk 2",
+                "CARGO",
             ),
             (
                 "cdorgao 3",
@@ -899,6 +928,7 @@ class TesPermissoesUsuarioAdmin(TestCase):
                 "nome 3",
                 "X",
                 "pess_dk 3",
+                "CARGO",
             ),
         )
 

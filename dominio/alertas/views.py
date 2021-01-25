@@ -11,6 +11,7 @@ from dominio.alertas.controllers import (
 from dominio.alertas.exceptions import (
     APIInvalidAlertaSigla,
 )
+from dominio.permissions import PromotorOnlyPermission
 
 from .serializers import AlertasListaSerializer, IdentificadorAlertaSerializer
 
@@ -118,6 +119,7 @@ class AlertasOverlayView(JWTAuthMixin, CacheMixin, APIView):
 
 class EnviarAlertaOuvidoriaView(JWTAuthMixin, APIView):
     # TODO: get_object que retorna 404 se alerta não existir
+    permission_classes = [PromotorOnlyPermission]
 
     def controller_router(self, sigla_alerta):
         sigla_alerta = sigla_alerta.lower()
