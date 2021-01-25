@@ -96,7 +96,5 @@ class SolrCadUnicoPessoaView(GenericAPIView):
             start=start,
             rows=rows,
         )
-        logger.info(
-            f"Consulta em 'cadunico-pessoa'"
-        )
+        logger.info("Consulta em 'cadunico-pessoa'")
         return Response(data=data)
