@@ -13,7 +13,7 @@ from dominio.alertas.exceptions import (
 )
 from dominio.permissions import PromotorOnlyPermission
 
-from .serializers import AlertasListaSerializer, IdentificadorAlertaSerializer
+from .serializers import IdentificadorAlertaSerializer
 
 
 # TODO: criar um endpoint unificado?
@@ -36,9 +36,8 @@ class AlertasView(JWTAuthMixin, PaginatorMixin, APIView):
         #     page=page,
         #     page_size=self.ALERTAS_SIZE
         # )
-        alertas_lista = AlertasListaSerializer(data, many=True)
 
-        return Response(data=alertas_lista.data)
+        return Response(data=data)
 
 
 class ResumoAlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
