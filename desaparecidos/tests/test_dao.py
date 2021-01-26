@@ -105,6 +105,7 @@ class Dao(TestCase):
                 0,
                 0,
                 0,
+                1,
                 0.01
             ),
             (
@@ -125,6 +126,7 @@ class Dao(TestCase):
                 0,
                 0,
                 0,
+                1,
                 0.01
             ),
         ]
@@ -149,6 +151,7 @@ class Dao(TestCase):
                 "score_data_fato": 0,
                 "score_idade": 0,
                 "score_distancia": 0,
+                "score_cor_pele": 1,
                 "score_total": 0.01
             },
 
@@ -170,6 +173,7 @@ class Dao(TestCase):
                 "score_data_fato": 0,
                 "score_idade": 0,
                 "score_distancia": 0,
+                "score_cor_pele": 1,
                 "score_total": 0.01
             }
         ]
