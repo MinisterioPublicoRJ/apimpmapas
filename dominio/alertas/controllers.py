@@ -68,7 +68,7 @@ class DispensaAlertaController(DispensaAlertaController):
     hbase_cf = "dados_alertas"
     hbase_table_name = settings.HBASE_DISPENSAR_ALERTAS_TABLE
     hbase_all_cf = "dados_alertas"
-    hbase_all_table_name = settings.HBASE_DISPENSAR_ALERTAS_TABLE + "_todos"
+    hbase_all_table_name = settings.HBASE_DISPENSAR_ALLALERTAS_TABLE
 
 
 class EnviaAlertaOuvidoriaController(HBaseAccessController):
