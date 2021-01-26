@@ -22,7 +22,7 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
             (
                 0000,
                 'mock',
-                datetime(2020, 1, 1),
+                '2020-01-01',
                 int(orgao_id),
                 -1,
                 'id_alrt',
@@ -36,7 +36,7 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
             (
                 0000,
                 'mock',
-                datetime(2020, 1, 1),
+                '2020-01-01',
                 int(orgao_id),
                 -1,
                 'id_alrt',
@@ -63,6 +63,20 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'num_externo': 'ext1234',
                 'alrt_key': 'alrtkey',
                 'flag_dispensado': 0
+            },
+            {
+                'doc_dk': 0,
+                'num_doc': 'mock',
+                'data_alerta': '2020-01-01',
+                'orgao': 0,
+                'id_alerta': 'id_alrt',
+                'dias_passados': -1,
+                'sigla': 'PRCR',
+                'descricao': 'desc1',
+                'classe_hierarquia': 'classe1',
+                'num_externo': 'ext1234',
+                'alrt_key': 'alrtkey',
+                'flag_dispensado': 1
             }
         ]
 
@@ -87,7 +101,7 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'sigla': 'mock',
                 'doc_dk': 0000,
                 'num_doc': 'mock',
-                'data_alerta': datetime(2020, 1, 1),
+                'data_alerta': '2020-01-01',
                 'orgao': int(orgao_id),
                 'id_alerta': 'id_alrt',
                 'dias_passados': -1,

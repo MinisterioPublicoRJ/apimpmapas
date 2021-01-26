@@ -75,17 +75,6 @@ class AlertasCOMPSerializer(serializers.Serializer):
     comp_contrato_iditem = serializers.CharField()
 
 
-class AlertasGATESerializer(serializers.Serializer):
-    alrt_key = serializers.CharField()
-    alrt_sigla = serializers.CharField()
-    alrt_orgi_orga_dk = serializers.IntegerField()
-    alrt_docu_dk = serializers.IntegerField()
-    alrt_docu_nr_mp = serializers.CharField()
-    alrt_date_referencia = serializers.DateTimeField(format="%Y-%m-%d")
-    alrt_dias_referencia = serializers.IntegerField()
-    alrt_itcn_dk = serializers.IntegerField()
-
-
 class AlertasISPSSerializer(serializers.Serializer):
     alrt_key = serializers.CharField()
     alrt_sigla = serializers.CharField()
@@ -103,28 +92,8 @@ class AlertasMGPSerializer(serializers.Serializer):
     alrt_docu_nr_mp = serializers.CharField()
     alrt_date_referencia = serializers.DateTimeField(format="%Y-%m-%d")
     alrt_dias_referencia = serializers.IntegerField()
-
-
-class AlertasOUVISerializer(serializers.Serializer):
-    alrt_key = serializers.CharField()
-    alrt_sigla = serializers.CharField()
-    alrt_orgi_orga_dk = serializers.IntegerField()
-    alrt_docu_dk = serializers.IntegerField()
-    alrt_docu_nr_mp = serializers.CharField()
-    alrt_date_referencia = serializers.DateTimeField(format="%Y-%m-%d")
-    alrt_dias_referencia = serializers.IntegerField()
-    alrt_item_dk = serializers.IntegerField()
-
-
-class AlertasPPFPSerializer(serializers.Serializer):
-    alrt_key = serializers.CharField()
-    alrt_sigla = serializers.CharField()
-    alrt_orgi_orga_dk = serializers.IntegerField()
-    alrt_docu_dk = serializers.IntegerField()
-    alrt_docu_nr_mp = serializers.CharField()
-    alrt_date_referencia = serializers.DateTimeField(format="%Y-%m-%d")
-    alrt_dias_referencia = serializers.IntegerField()
-    alrt_stao_dk = serializers.IntegerField()
+    alrt_dk_referencia = serializers.IntegerField()
+    alrt_info_adicional = serializers.CharField()
 
 
 class AlertasROSerializer(serializers.Serializer):
@@ -134,14 +103,3 @@ class AlertasROSerializer(serializers.Serializer):
     ro_nr_delegacia = serializers.IntegerField()
     ro_qt_ros_faltantes = serializers.IntegerField()
     ro_max_proc = serializers.CharField()
-
-
-class AlertasVADFSerializer(serializers.Serializer):
-    alrt_key = serializers.CharField()
-    alrt_sigla = serializers.CharField()
-    alrt_orgi_orga_dk = serializers.IntegerField()
-    alrt_docu_dk = serializers.IntegerField()
-    alrt_docu_nr_mp = serializers.CharField()
-    alrt_date_referencia = serializers.DateTimeField(format="%Y-%m-%d")
-    alrt_dias_referencia = serializers.IntegerField()
-    alrt_vist_dk = serializers.IntegerField()

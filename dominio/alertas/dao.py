@@ -131,6 +131,7 @@ class AlertaMGPDAO(AlertasDAO):
         "alrt_key",
         "flag_dispensado"
     ]
+    serializer = serializers.AlertasListaSerializer
 
     @classmethod
     def execute(cls, **kwargs):
@@ -139,8 +140,7 @@ class AlertaMGPDAO(AlertasDAO):
     @classmethod
     def get(cls, accept_empty=True, **kwargs):
         result_set = super().get(accept_empty=accept_empty, **kwargs)
-        # TODO: Pode ser necessario entregar tudo no futuro, até dispensados
-        result_set = [x for x in result_set if x['flag_dispensado'] == 0]
+        # result_set = [x for x in result_set if x['flag_dispensado'] == 0]
         return cls.ordena_alertas(result_set)
 
 
@@ -164,7 +164,8 @@ class AlertaComprasDAO(AlertasDAO):
     def get(cls, accept_empty=True, **kwargs):
         result_set = super().get(accept_empty=accept_empty, **kwargs)
         # TODO: Pode ser necessario entregar tudo no futuro, até dispensados
-        return [x for x in result_set if x['flag_dispensado'] == 0]
+        # result_set = [x for x in result_set if x['flag_dispensado'] == 0]
+        return result_set
 
 
 # ------ DAOs relativos ao Overlay do Alerta
