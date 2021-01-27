@@ -7,9 +7,6 @@ from django.urls import reverse
 from django.core.cache import cache
 
 from dominio.alertas import dao
-from dominio.alertas.tests.testconf import (
-    RemoveFiltroAlertasDispensadosTestCase,
-)
 from dominio.tests.testconf import NoJWTTestCase, NoCacheTestCase
 
 
@@ -192,12 +189,7 @@ class AlertaResumoTest(NoJWTTestCase, NoCacheTestCase, TestCase):
         self.assertEqual(resp.data, alertas_expected)
 
 
-class AlertaComprasTest(
-        RemoveFiltroAlertasDispensadosTestCase,
-        NoJWTTestCase,
-        NoCacheTestCase,
-        TestCase):
-
+class AlertaComprasTest(NoJWTTestCase, NoCacheTestCase, TestCase):
     @mock.patch.object(dao.AlertaComprasDAO, "execute")
     def test_alert_compras(self, _execute):
         return_alerta = [
@@ -443,11 +435,7 @@ class TestEnviarAlertasISPSOuvidoria(NoJWTTestCase, TestCase):
         self.assertEqual(resp.status_code, 400)
 
 
-class TestBaixarAlertas(
-        RemoveFiltroAlertasDispensadosTestCase,
-        NoJWTTestCase,
-        TestCase
-):
+class TestBaixarAlertas(NoJWTTestCase, TestCase):
     def setUp(self):
         super().setUp()
         self.orgao_id = 10

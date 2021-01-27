@@ -8,9 +8,6 @@ from dominio.alertas.exceptions import (
     APIInvalidOverlayType,
     APIMissingOverlayType,
 )
-from dominio.alertas.tests.testconf import (
-    RemoveFiltroAlertasDispensadosTestCase,
-)
 
 
 class ResumoAlertasDAOTest(TestCase):
@@ -57,7 +54,7 @@ class ResumoAlertasDAOTest(TestCase):
         self.assertEqual(resumo, self.expected)
 
 
-class TestAlertaMGPDAO(RemoveFiltroAlertasDispensadosTestCase, TestCase):
+class TestAlertaMGPDAO(TestCase):
     def setUp(self):
         super().setUp()
         self.exec_mgp_dao_patcher = mock.patch.object(
@@ -183,159 +180,6 @@ class TestAlertaMGPDAO(RemoveFiltroAlertasDispensadosTestCase, TestCase):
         self.assertEqual(resp, expected_resp)
 
 
-class TestFiltraAlertasDispensados(TestCase):
-    def setUp(self):
-        self.orgao_id = "12345"
-        self.get_hbase_table_patcher = mock.patch.object(
-            dao.FiltraAlertasDispensadosMixin, "get_table"
-        )
-        self.get_hbase_table_mock = self.get_hbase_table_patcher.start()
-
-        self.table_mock = mock.Mock()
-        self.dados_hbase = [
-            (
-                b"key 1",
-                {
-                    b"dados_alertas:alerta_id": b"12345",
-                    b"dados_alertas:orgao": self.orgao_id.encode(),
-                    b"dados_alertas:sigla": b"COMP"
-                }
-            ),
-            (
-                b"key 2",
-                {
-                    b"dados_alertas:alerta_id": b"bbbbb-12345",
-                    b"dados_alertas:orgao": self.orgao_id.encode(),
-                    b"dados_alertas:sigla": b"COMP"
-                }
-            )
-        ]
-        self.table_mock.scan.return_value = self.dados_hbase
-        self.get_hbase_table_mock.return_value = self.table_mock
-
-        self.get_patcher = mock.patch.object(dao.AlertasDAO, "get")
-        self.get_mock = self.get_patcher.start()
-
-        self.alertas = [
-            {
-                'sigla': 'COMP',
-                'contrato': 'aaaa',
-                'iditem': 87654,
-                'contrato_iditem': 'aaaa-87654',
-                'item': 'item desc',
-            },
-            {
-                'sigla': 'COMP',
-                'contrato': 'bbbbb',
-                'iditem': 12345,
-                'contrato_iditem': 'bbbbb-12345',
-                'item': 'item desc',
-            },
-        ]
-        self.get_mock.return_value = self.alertas
-        self.expected_filtrados = self.alertas[:1]
-
-    def tearDown(self):
-        self.get_hbase_table_patcher.stop()
-        self.get_patcher.stop()
-
-    def test_create_hbase_query(self):
-        hbase_query = dao.FiltraAlertasDispensadosMixin.prepara_hbase_query(
-            self.orgao_id
-        )
-
-        expected = (
-            "SingleColumnValueFilter('dados_alertas', 'orgao', =,"
-            f" 'binary:{self.orgao_id}')"
-            " OR SingleColumnValueFilter('dados_alertas', 'orgao', =,"
-            " 'binary:ALL')"
-        ).encode()
-
-        self.assertEqual(hbase_query, expected)
-
-    def test_prepara_dados_hbase(self):
-        prep_hbase = dao.FiltraAlertasDispensadosMixin.prepara_dados_hbase(
-            self.dados_hbase
-        )
-        expected = [("COMP", "12345"), ("COMP", "bbbbb-12345")]
-
-        self.assertEqual(prep_hbase, expected)
-
-    def test_prepara_dados_hbase_isps(self):
-        self.dados_hbase.append(
-            (
-                b"key 3",
-                {
-                    b"dados_alertas:alerta_id": b"12345_abc_1234",
-                    b"dados_alertas:orgao": self.orgao_id.encode(),
-                    b"dados_alertas:sigla": b"ISPS"
-                }
-            )
-        )
-        prep_hbase = dao.FiltraAlertasDispensadosMixin.prepara_dados_hbase(
-            self.dados_hbase
-        )
-        expected = [
-            ("COMP", "12345"),
-            ("COMP", "bbbbb-12345"),
-            ("ISPS", "abc_1234")
-        ]
-
-        self.assertEqual(prep_hbase, expected)
-
-    @mock.patch.object(
-        dao.FiltraAlertasDispensadosMixin,
-        "prepara_dados_hbase"
-    )
-    @mock.patch.object(dao.FiltraAlertasDispensadosMixin, "get_table")
-    def test_metodo_filtra_com_alerta_isps(self, m_get_table, m_prep_dados):
-        cls = dao.FiltraAlertasDispensadosMixin
-        cls.sigla_kwarg = "alrt_sigla"
-        cls.alerta_id_kwarg = "alrt_id"
-        result_set = [
-            {
-                f"{cls.sigla_kwarg}": "COMP",
-                f"{cls.alerta_id_kwarg}": "12345"
-            },
-            {
-                f"{cls.sigla_kwarg}": "COMP",
-                f"{cls.alerta_id_kwarg}": "67890"
-            },
-            {
-                f"{cls.sigla_kwarg}": "ISPS",
-                f"{cls.alerta_id_kwarg}": "12345_abc_1234"
-            },
-        ]
-        m_prep_dados.return_value = [
-            ("COMP", "12345"),
-            ("ISPS", "abc_1234")
-        ]
-
-        resp = cls.filtra(self.orgao_id, result_set)
-        expected = [
-            {
-                f"{cls.sigla_kwarg}": "COMP",
-                f"{cls.alerta_id_kwarg}": "67890"
-            },
-        ]
-
-        self.assertEqual(resp, expected)
-
-    def test_filtra_alertas_dispensados(self):
-        class AlertaMock(dao.FiltraAlertasDispensadosMixin, dao.AlertasDAO):
-            orgao_kwarg = "id_orgao"
-            alerta_id_kwarg = "contrato_iditem"
-            sigla_kwarg = "sigla"
-
-        resp = AlertaMock.get(id_orgao=self.orgao_id)
-        expected_hbase_query = AlertaMock.prepara_hbase_query(self.orgao_id)
-
-        self.table_mock.scan.assert_called_once_with(
-            filter=expected_hbase_query
-        )
-        self.assertEqual(resp, self.expected_filtrados)
-
-
 class TestAlertasOverlayDAO(TestCase):
     @mock.patch.object(dao.AlertasOverlayDAO, "switcher")
     def test_get_result_OK(self, _switcher):
@@ -416,92 +260,6 @@ class TestAlertasOverlayDAO(TestCase):
             docu_dk=docu_dk, request=mock_request
         )
         self.assertEqual(data, alertas_expected)
-
-
-class TestFiltraAlertasDispensadosTodosOrgaos(TestCase):
-    def setUp(self):
-        self.orgao_id = "12345"
-        self.get_hbase_table_patcher = mock.patch.object(
-            dao.FiltraAlertasDispensadosMixin, "get_table"
-        )
-        self.get_hbase_table_mock = self.get_hbase_table_patcher.start()
-
-        self.table_mock = mock.Mock()
-        self.dados_hbase = [
-            (
-                b"key 1",
-                {
-                    b"dados_alertas:alerta_id": b"12345",
-                    b"dados_alertas:orgao": self.orgao_id.encode(),
-                    b"dados_alertas:sigla": b"COMP"
-                }
-            ),
-            (
-                b"key 2",
-                {
-                    b"dados_alertas:alerta_id": b"bbbbb-12345",
-                    b"dados_alertas:orgao": self.orgao_id.encode(),
-                    b"dados_alertas:sigla": b"COMP"
-                }
-            ),
-            (
-                b"key 3",
-                {
-                    b"dados_alertas:alerta_id": b"cccc-12345",
-                    b"dados_alertas:orgao": "ALL",
-                    b"dados_alertas:sigla": b"COMP"
-                }
-            ),
-        ]
-        self.table_mock.scan.return_value = self.dados_hbase
-        self.get_hbase_table_mock.return_value = self.table_mock
-
-        self.get_patcher = mock.patch.object(dao.AlertasDAO, "get")
-        self.get_mock = self.get_patcher.start()
-
-        self.alertas = [
-            {
-                'sigla': 'COMP',
-                'contrato': 'aaaa',
-                'iditem': 87654,
-                'contrato_iditem': 'aaaa-87654',
-                'item': 'item desc',
-            },
-            {
-                'sigla': 'COMP',
-                'contrato': 'bbbbb',
-                'iditem': 12345,
-                'contrato_iditem': 'bbbbb-12345',
-                'item': 'item desc',
-            },
-            {
-                'sigla': 'COMP',
-                'contrato': 'ccccc',
-                'iditem': 12345,
-                'contrato_iditem': 'cccc-12345',
-                'item': 'item desc',
-            },
-        ]
-        self.get_mock.return_value = self.alertas
-        self.expected_filtrados = self.alertas[:1]
-
-    def tearDown(self):
-        self.get_hbase_table_patcher.stop()
-        self.get_patcher.stop()
-
-    def test_filtra_alertas_dispensados(self):
-        class AlertaMock(dao.FiltraAlertasDispensadosMixin, dao.AlertasDAO):
-            orgao_kwarg = "id_orgao"
-            alerta_id_kwarg = "contrato_iditem"
-            sigla_kwarg = "sigla"
-
-        resp = AlertaMock.get(id_orgao=self.orgao_id)
-        expected_hbase_query = AlertaMock.prepara_hbase_query(self.orgao_id)
-
-        self.table_mock.scan.assert_called_once_with(
-            filter=expected_hbase_query
-        )
-        self.assertEqual(resp, self.expected_filtrados)
 
 
 class TestDetalheAlertaCompras(TestCase):

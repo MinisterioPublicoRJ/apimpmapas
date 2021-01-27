@@ -4,7 +4,7 @@ from django.http import FileResponse
 from django.conf import settings
 
 from dominio.dao import GenericDAO, SingleDataObjectDAO
-from dominio.db_connectors import get_hbase_table, run_query
+from dominio.db_connectors import run_query
 from dominio.alertas import serializers
 from dominio.alertas.helper import ordem as alrt_ordem, headers as alrt_header
 from dominio.alertas.exceptions import (
@@ -13,71 +13,6 @@ from dominio.alertas.exceptions import (
     APIAlertTypeListNotConfigured,
 )
 from dominio.documentos.helpers import gera_planilha_excel
-
-
-class FiltraAlertasDispensadosMixin:
-    orgao_kwarg = None
-    alerta_id_kwarg = None
-    sigla_kwarg = None
-    col_family = "dados_alertas:"
-
-    @classmethod
-    def prepara_hbase_query(cls, orgao_id):
-        return (
-            "SingleColumnValueFilter('dados_alertas', 'orgao', =,"
-            f" 'binary:{orgao_id}')"
-            " OR SingleColumnValueFilter('dados_alertas', 'orgao', =,"
-            " 'binary:ALL')"
-        ).encode()
-
-    @classmethod
-    def prepara_dados_hbase(cls, dados):
-        sigla_key = f"{cls.col_family}sigla".encode()
-        id_key = f"{cls.col_family}alerta_id".encode()
-        prep_dados = []
-        for _, dado in dados:
-            alerta_sigla = dado[sigla_key].decode()
-            alerta_id = dado[id_key].decode()
-            if alerta_sigla == "ISPS":
-                alerta_id = "_".join(alerta_id.split("_")[1:])
-
-            prep_dados.append((alerta_sigla, alerta_id))
-
-        return prep_dados
-
-    @classmethod
-    def get_table(cls):
-        return get_hbase_table(
-            settings.PROMOTRON_HBASE_NAMESPACE
-            + settings.HBASE_DISPENSAR_ALERTAS_TABLE
-        )
-
-    @classmethod
-    def filtra(cls, orgao_id, result_set):
-        table = cls.get_table()
-        dispensados = cls.prepara_dados_hbase(
-            table.scan(filter=cls.prepara_hbase_query(orgao_id))
-        )
-
-        filtrados = []
-        for row in result_set:
-            alerta_sigla = row[cls.sigla_kwarg]
-            alerta_id = row[cls.alerta_id_kwarg]
-            if alerta_sigla == "ISPS":
-                alerta_id = "_".join(alerta_id.split("_")[1:])
-
-            if (alerta_sigla, alerta_id) in dispensados:
-                continue
-
-            filtrados.append(row)
-
-        return filtrados
-
-    @classmethod
-    def get(cls, accept_empty=False, **kwargs):
-        orgao_id = kwargs.get(cls.orgao_kwarg)
-        result_set = super().get(accept_empty=accept_empty, **kwargs)
-        return cls.filtra(orgao_id, result_set)
 
 
 class AlertasDAO(GenericDAO):
