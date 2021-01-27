@@ -44,6 +44,11 @@ class HBaseAccessController:
 
 
 class DispensaAlertaController(HBaseAccessController):
+    hbase_cf = "dados_alertas"
+    hbase_table_name = settings.HBASE_DISPENSAR_ALERTAS_TABLE
+    hbase_all_cf = "dados_alertas"
+    hbase_all_table_name = settings.HBASE_DISPENSAR_ALLALERTAS_TABLE
+
     def dispensa_para_orgao(self):
         row_key = self.get_row_key(self.alerta_id)
         data = self.get_row_data(self.orgao_id, self.alerta_id)
@@ -62,13 +67,6 @@ class DispensaAlertaController(HBaseAccessController):
         row_key = self.get_row_key(alrt_key)
         data = self.get_row_data("ALL", alrt_key)
         self.get_all_table.put(row_key, data)
-
-
-class DispensaAlertaController(DispensaAlertaController):
-    hbase_cf = "dados_alertas"
-    hbase_table_name = settings.HBASE_DISPENSAR_ALERTAS_TABLE
-    hbase_all_cf = "dados_alertas"
-    hbase_all_table_name = settings.HBASE_DISPENSAR_ALLALERTAS_TABLE
 
 
 class EnviaAlertaOuvidoriaController(HBaseAccessController):
