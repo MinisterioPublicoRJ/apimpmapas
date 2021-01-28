@@ -1,25 +1,19 @@
-from datetime import date
-
-from django.http import FileResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from dominio.mixins import CacheMixin, PaginatorMixin, JWTAuthMixin
 from dominio.alertas import dao
 from dominio.alertas.controllers import (
-    DispensaAlertaComprasController,
+    DispensaAlertaController,
     EnviaAlertaComprasOuvidoriaController,
     EnviaAlertaISPSOuvidoriaController,
 )
-from dominio.alertas.helper import list_columns
 from dominio.alertas.exceptions import (
-    APIAlertTypeListNotConfigured,
     APIInvalidAlertaSigla,
 )
-from dominio.documentos.helpers import gera_planilha_excel
 from dominio.permissions import PromotorOnlyPermission
 
-from .serializers import AlertasListaSerializer, IdentificadorAlertaSerializer
+from .serializers import IdentificadorAlertaSerializer
 
 
 # TODO: criar um endpoint unificado?
@@ -42,9 +36,8 @@ class AlertasView(JWTAuthMixin, PaginatorMixin, APIView):
         #     page=page,
         #     page_size=self.ALERTAS_SIZE
         # )
-        alertas_lista = AlertasListaSerializer(data, many=True)
 
-        return Response(data=alertas_lista.data)
+        return Response(data=data)
 
 
 class ResumoAlertasView(JWTAuthMixin, CacheMixin, PaginatorMixin, APIView):
@@ -79,7 +72,7 @@ class DispensarAlertaView(JWTAuthMixin, APIView):
         orgao_id = self.kwargs.get(self.orgao_url_kwarg)
         alerta_id = self.get_alerta_id()
 
-        controller = DispensaAlertaComprasController(
+        controller = DispensaAlertaController(
             orgao_id,
             alerta_id
         )
@@ -102,7 +95,7 @@ class RetornarAlertaView(JWTAuthMixin, APIView):
         orgao_id = self.kwargs.get(self.orgao_url_kwarg)
         alerta_id = self.get_alerta_id()
 
-        controller = DispensaAlertaComprasController(
+        controller = DispensaAlertaController(
             orgao_id,
             alerta_id,
         )
@@ -161,30 +154,8 @@ class BaixarAlertasView(JWTAuthMixin, APIView):
         orgao_id = int(kwargs.get(self.orgao_url_kwarg))
         tipo_alerta = request.GET.get("tipo_alerta", None)
 
-        try:
-            data_columns, header = list_columns[tipo_alerta]
-        except KeyError:
-            raise APIAlertTypeListNotConfigured
-
-        if tipo_alerta == 'COMP':
-            data = dao.AlertaComprasDAO.get(
-                id_orgao=orgao_id,
-                accept_empty=False
-            )
-        else:
-            data = dao.AlertaMGPDAO.get(
-                orgao_id=orgao_id,
-                tipo_alerta=tipo_alerta,
-                accept_empty=False
-            )
-        data = [tuple(x[c] for c in data_columns) for x in data]
-
-        return FileResponse(
-            gera_planilha_excel(
-                data,
-                header=header,
-                sheet_title=f"Alertas {tipo_alerta}"
-            ),
-            filename=f"Alerta-{tipo_alerta}-{date.today()}.xlsx",
-            as_attachment=True
+        return dao.BaixarAlertasDAO.get(
+            alrt_type=tipo_alerta,
+            accept_empty=False,
+            orgao_id=orgao_id,
         )
