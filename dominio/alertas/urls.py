@@ -10,17 +10,17 @@ urlpatterns = [
         name='resumo_alertas'
     ),
     path(
-        "dispensar/<str:orgao_id>",
+        "dispensar/<str:orgao_id>/<str:alerta_id>",
         views.DispensarAlertaView.as_view(),
         name="dispensar_alerta"
     ),
     path(
-        "retornar/<str:orgao_id>",
+        "retornar/<str:orgao_id>/<str:alerta_id>",
         views.RetornarAlertaView.as_view(),
         name="retornar_alerta"
     ),
     path(
-        "ouvidoria/<str:orgao_id>/<str:sigla_alerta>",
+        "ouvidoria/<str:orgao_id>/<str:sigla_alerta>/<str:alerta_id>",
         views.EnviarAlertaOuvidoriaView.as_view(),
         name="alerta_ouvidoria"
     ),

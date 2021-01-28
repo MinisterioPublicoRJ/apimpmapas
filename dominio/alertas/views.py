@@ -13,8 +13,6 @@ from dominio.alertas.exceptions import (
 )
 from dominio.permissions import PromotorOnlyPermission
 
-from .serializers import IdentificadorAlertaSerializer
-
 
 # TODO: criar um endpoint unificado?
 class AlertasView(JWTAuthMixin, PaginatorMixin, APIView):
@@ -62,15 +60,9 @@ class AlertasComprasView(JWTAuthMixin, PaginatorMixin, APIView):
 
 class DispensarAlertaView(JWTAuthMixin, APIView):
     # TODO: get_object que retorna 404 se alerta não existir
-
-    def get_alerta_id(self):
-        ser = IdentificadorAlertaSerializer(data=self.request.GET)
-        ser.is_valid(raise_exception=True)
-        return ser.validated_data["alerta_id"]
-
     def post(self, request, *args, **kwargs):
         orgao_id = self.kwargs.get(self.orgao_url_kwarg)
-        alerta_id = self.get_alerta_id()
+        alerta_id = self.kwargs.get("alerta_id")
 
         controller = DispensaAlertaController(
             orgao_id,
@@ -85,15 +77,9 @@ class DispensarAlertaView(JWTAuthMixin, APIView):
 
 class RetornarAlertaView(JWTAuthMixin, APIView):
     # TODO: get_object que retorna 404 se alerta não existir
-
-    def get_alerta_id(self):
-        ser = IdentificadorAlertaSerializer(data=self.request.GET)
-        ser.is_valid(raise_exception=True)
-        return ser.validated_data["alerta_id"]
-
     def post(self, request, *args, **kwargs):
         orgao_id = self.kwargs.get(self.orgao_url_kwarg)
-        alerta_id = self.get_alerta_id()
+        alerta_id = self.kwargs.get("alerta_id")
 
         controller = DispensaAlertaController(
             orgao_id,
@@ -131,15 +117,10 @@ class EnviarAlertaOuvidoriaView(JWTAuthMixin, APIView):
 
         return controllers[sigla_alerta]
 
-    def get_alerta_id(self):
-        ser = IdentificadorAlertaSerializer(data=self.request.GET)
-        ser.is_valid(raise_exception=True)
-        return ser.validated_data["alerta_id"]
-
     def post(self, request, *args, **kwargs):
         orgao_id = self.kwargs.get(self.orgao_url_kwarg)
         sigla_alerta = self.kwargs.get("sigla_alerta")
-        alerta_id = self.get_alerta_id()
+        alerta_id = self.kwargs.get("alerta_id")
 
         controller = self.controller_router(sigla_alerta)(
             orgao_id,

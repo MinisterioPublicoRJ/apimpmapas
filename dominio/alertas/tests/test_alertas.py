@@ -250,9 +250,10 @@ class TestDispensarAlertas(NoJWTTestCase, TestCase):
     def setUp(self):
         super().setUp()
         self.orgao_id = "12345"
+        self.alerta_id = "AAA.abc123.12345"
         self.url = reverse(
             "dominio:dispensar_alerta",
-            args=(self.orgao_id,),
+            args=(self.orgao_id, self.alerta_id),
         )
 
         self.dispensa_patcher = mock.patch(
@@ -267,29 +268,23 @@ class TestDispensarAlertas(NoJWTTestCase, TestCase):
         self.dispensa_patcher.stop()
 
     def test_post_dispensa_alerta(self):
-        alerta_id = "AAA.abc123.12345"
-        self.url += f"?alerta_id={alerta_id}"
         resp = self.client.post(self.url)
 
         self.dispensa_controller_mock.assert_called_once_with(
-            self.orgao_id, alerta_id
+            self.orgao_id, self.alerta_id
         )
         self.controller_obj_mock.dispensa_para_orgao.assert_called_once_with()
         self.assertEqual(resp.status_code, 201)
-
-    def test_bad_request_missing_alerta_id(self):
-        resp = self.client.post(self.url)
-
-        self.assertEqual(resp.status_code, 400)
 
 
 class TestRetornaAlertas(NoJWTTestCase, TestCase):
     def setUp(self):
         super().setUp()
         self.orgao_id = "12345"
+        self.alerta_id = "AAA.abc123.12345"
         self.url = reverse(
             "dominio:retornar_alerta",
-            args=(self.orgao_id,),
+            args=(self.orgao_id, self.alerta_id),
         )
 
         self.dispensa_patcher = mock.patch(
@@ -304,20 +299,13 @@ class TestRetornaAlertas(NoJWTTestCase, TestCase):
         self.dispensa_patcher.stop()
 
     def test_post_retorna_alerta(self):
-        alerta_id = "AAA.abc123.12345"
-        self.url += f"?alerta_id={alerta_id}"
         resp = self.client.post(self.url)
 
         self.dispensa_controller_mock.assert_called_once_with(
-            self.orgao_id, alerta_id
+            self.orgao_id, self.alerta_id
         )
         self.controller_obj_mock.retorna_para_orgao.assert_called_once_with()
         self.assertEqual(resp.status_code, 200)
-
-    def test_bad_request_missing_alerta_id(self):
-        resp = self.client.post(self.url)
-
-        self.assertEqual(resp.status_code, 400)
 
 
 class AlertasOverlayTest(NoJWTTestCase, NoCacheTestCase, TestCase):
@@ -347,9 +335,10 @@ class TestEnviarAlertasComprasOuvidoria(NoJWTTestCase, TestCase):
 
         self.orgao_id = "12345"
         self.alerta_sigla = "COMP"
+        self.alerta_id = "abc12345"
         self.url = reverse(
             "dominio:alerta_ouvidoria",
-            args=(self.orgao_id, self.alerta_sigla)
+            args=(self.orgao_id, self.alerta_sigla, self.alerta_id)
         )
 
         self.controller_patcher = mock.patch(
@@ -368,18 +357,14 @@ class TestEnviarAlertasComprasOuvidoria(NoJWTTestCase, TestCase):
         self.controller_patcher.stop()
 
     def test_envia_alerta_compras_para_ouvidoria(self):
-        alerta_id = "abc12345"
-        self.url += f"?alerta_id={alerta_id}"
         resp = self.client.post(self.url)
 
         self.controller_obj_mock.envia.assert_called_once_with()
-        self.controller_mock.assert_called_once_with(self.orgao_id, alerta_id)
+        self.controller_mock.assert_called_once_with(
+            self.orgao_id,
+            self.alerta_id
+        )
         self.assertEqual(resp.status_code, self.status)
-
-    def test_bad_request_alerta_id_nao_informado(self):
-        resp = self.client.post(self.url)
-
-        self.assertEqual(resp.status_code, 400)
 
 
 class TestEnviarAlertasISPSOuvidoria(NoJWTTestCase, TestCase):
@@ -393,7 +378,7 @@ class TestEnviarAlertasISPSOuvidoria(NoJWTTestCase, TestCase):
 
         self.url = reverse(
             "dominio:alerta_ouvidoria",
-            args=(self.orgao_id, self.alerta_sigla)
+            args=(self.orgao_id, self.alerta_sigla, self.alerta_id)
         )
 
         self.controller_patcher = mock.patch(
@@ -412,7 +397,6 @@ class TestEnviarAlertasISPSOuvidoria(NoJWTTestCase, TestCase):
         self.controller_patcher.stop()
 
     def test_envia_alerta_compras_para_ouvidoria(self):
-        self.url += f"?alerta_id={self.alerta_id}"
         resp = self.client.post(self.url)
 
         self.controller_obj_mock.envia.assert_called_once_with()
@@ -422,14 +406,12 @@ class TestEnviarAlertasISPSOuvidoria(NoJWTTestCase, TestCase):
         )
         self.assertEqual(resp.status_code, self.status)
 
-    def test_bad_request_alerta_id_nao_informado(self):
-        resp = self.client.post(self.url)
-
-        self.assertEqual(resp.status_code, 400)
-
     def test_bad_request_alerta_sigla_invalida(self):
-        url = reverse("dominio:alerta_ouvidoria", args=(self.orgao_id, "AAA"))
-        url += f"?alerta_id={self.alerta_id}"
+        alerta_sigla = "AAA"
+        url = reverse(
+            "dominio:alerta_ouvidoria",
+            args=(self.orgao_id, alerta_sigla, self.alerta_id)
+        )
         resp = self.client.post(url)
 
         self.assertEqual(resp.status_code, 400)
