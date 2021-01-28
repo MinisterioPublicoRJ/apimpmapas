@@ -31,10 +31,6 @@ class AlertasComprasSerializer(serializers.Serializer):
     flag_dispensado = serializers.IntegerField()
 
 
-class IdentificadorAlertaSerializer(serializers.Serializer):
-    alerta_id = serializers.CharField()
-
-
 class AlertaOverlayPrescricaoSerializer(serializers.Serializer):
     tipo_penal = serializers.CharField()
     nm_investigado = serializers.CharField()
