@@ -10,7 +10,7 @@ ordem = [
     'MCSI',
     'MVVD',
     'RO',
-    'BDPA',
+    # 'BDPA',
     'ABR1',
     'IC1A',
     'PA1A',
