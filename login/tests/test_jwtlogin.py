@@ -57,18 +57,21 @@ class TestJWTLogin(TestCase):
         nome_orgao_5 = (
             "promotoria de justiça de tutela coletiva do núcleo belford roxo"
         )
+        nome_orgao_6 = "Procuradoria de Tutela Coletiva"
 
         tipo_orgao_1 = tipo_orgao(nome_orgao_1)
         tipo_orgao_2 = tipo_orgao(nome_orgao_2)
         tipo_orgao_3 = tipo_orgao(nome_orgao_3)
         tipo_orgao_4 = tipo_orgao(nome_orgao_4)
         tipo_orgao_5 = tipo_orgao(nome_orgao_5)
+        tipo_orgao_6 = tipo_orgao(nome_orgao_6)
 
         self.assertEqual(tipo_orgao_1, 1)
         self.assertEqual(tipo_orgao_2, 0)
         self.assertEqual(tipo_orgao_3, 0)
         self.assertEqual(tipo_orgao_4, 0)
         self.assertEqual(tipo_orgao_5, 0)
+        self.assertEqual(tipo_orgao_6, 0)
 
     def test_tipo_orgao_CAO(self):
         nome_orgao_cao = (

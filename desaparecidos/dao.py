@@ -66,6 +66,7 @@ def serialize(result_set, limit=None):
         "score_data_fato",
         "score_idade",
         "score_distancia",
+        "score_cor_pele",
         "score_total",
     ]
     limit = limit if limit else len(result_set)

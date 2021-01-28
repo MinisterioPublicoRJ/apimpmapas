@@ -28,7 +28,7 @@ class FotoDetranView(APIView):
         )
         return data_controller
 
-    @token_required(name="proxy-token")
+    @token_required(token_conf_var="SIMPLE_AUTH_TOKEN", name="proxy-token")
     def get(self, request, *args, **kwargs):
         # Remove padding zeros
         rg = str(int(kwargs.get("rg", "1")))

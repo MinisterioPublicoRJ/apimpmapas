@@ -1,4 +1,5 @@
 import pysolr
+import requests
 from django.conf import settings
 from requests_kerberos import HTTPKerberosAuth, REQUIRED
 
@@ -20,6 +21,13 @@ class SolrClient:
         return self._client.search(query, start=start, rows=rows).raw_response[
             "response"
         ]
+
+    @classmethod
+    def request_query(cls, query):
+        complete_url = settings.HOST_SOLR + query
+        resp = requests.get(complete_url, auth=HTTPKerberosAuth())
+        resp.raise_for_status()
+        return resp.json().get("response")
 
 
 def create_solr_client():

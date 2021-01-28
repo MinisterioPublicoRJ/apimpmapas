@@ -4,7 +4,7 @@ from unittest import TestCase, mock
 import pysolr
 from django.conf import settings
 
-from proxies.solr.client import create_solr_client
+from proxies.solr.client import SolrClient, create_solr_client
 
 
 class TestSolrClient(TestCase):
@@ -43,6 +43,40 @@ class TestSolrClient(TestCase):
             auth=self.kerberos_auth_mock,
         )
         self.assertEqual(solr_client._client, "solr connection")
+
+
+class TestSolrClientRequest(TestCase):
+    def setUp(self):
+        response_mock = mock.Mock()
+        response_mock.json.return_value = {"response": {"key": "data"}}
+        self.requests_get_patcher = mock.patch(
+            "proxies.solr.client.requests.get"
+        )
+        self.requests_get_mock = self.requests_get_patcher.start()
+        self.requests_get_mock.return_value = response_mock
+
+        self.kerberos_patcher = mock.patch(
+            "proxies.solr.client.HTTPKerberosAuth"
+        )
+        self.kerberos_mock = self.kerberos_patcher.start()
+        self.kerberos_auth_mock = mock.Mock()
+        self.kerberos_mock.return_value = self.kerberos_auth_mock
+
+        self.query = "solr query"
+        self.expected = {'key': 'data'}
+
+    def tearDown(self):
+        self.kerberos_patcher.stop()
+        self.requests_get_patcher.start()
+
+    def test_query_with_requests(self):
+        dados = SolrClient.request_query(self.query)
+
+        self.assertEqual(dados, self.expected)
+        self.requests_get_mock.assert_called_once_with(
+            settings.HOST_SOLR + self.query,
+            auth=self.kerberos_auth_mock
+        )
 
 
 class TestSolrQuery(TestCase):

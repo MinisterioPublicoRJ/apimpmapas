@@ -9,19 +9,21 @@ from dominio.alertas import controllers
 class TestDispensaAlertasController(TestCase):
     def setUp(self):
         self.orgao_id = "12345"
-        self.alerta_id = "abc12345"
+        self.alerta_id = "AAA.abc12345.12345"
         self.alerta_sigla = "AAA"
 
         self.hbase_table_name = "table_name"
         self.hbase_cf = "cf"
+        self.hbase_all_table_name = "table_name_todos"
 
         self.controller = controllers.DispensaAlertaController(
             self.orgao_id,
             self.alerta_id
         )
-        self.controller.alerta_sigla = self.alerta_sigla
         self.controller.hbase_table_name = self.hbase_table_name
         self.controller.hbase_cf = self.hbase_cf
+        self.controller.hbase_all_table_name = self.hbase_all_table_name
+        self.controller.hbase_all_cf = self.hbase_cf
 
         self.get_hbase_table_patcher = mock.patch(
             "dominio.alertas.controllers.get_hbase_table"
@@ -31,7 +33,7 @@ class TestDispensaAlertasController(TestCase):
         self.get_hbase_table_mock.return_value = self.hbase_obj_mock
 
         self.expected_hbase_key = (
-            f"{self.orgao_id}_{self.alerta_sigla}_{self.alerta_id}".encode()
+            f"{self.alerta_id}".encode()
         )
         self.expected_hbase_data = {
            f"{self.hbase_cf}:orgao".encode(): self.orgao_id.encode(),
@@ -69,16 +71,19 @@ class TestDispensaAlertasController(TestCase):
 
     def test_dispensa_alerta_para_todos_orgaos(self):
         self.expected_hbase_key = (
-            f"ALL_{self.alerta_sigla}_{self.alerta_id}".encode()
+            f"{'.'.join(self.alerta_id.split('.')[:-1])}".encode()
         )
         self.expected_hbase_data[f"{self.hbase_cf}:orgao".encode()] = b"ALL"
+        self.expected_hbase_data[f"{self.hbase_cf}:alerta_id".encode()] = (
+            self.expected_hbase_key
+        )
 
         self.controller.dispensa_para_todos_orgaos()
 
         self.get_hbase_table_mock.assert_called_once_with(
             settings.PROMOTRON_HBASE_NAMESPACE
             +
-            self.hbase_table_name
+            self.hbase_all_table_name
         )
         self.hbase_obj_mock.put.assert_called_once_with(
             self.expected_hbase_key,
@@ -87,7 +92,7 @@ class TestDispensaAlertasController(TestCase):
 
     def test_retorna_alerta_para_todos_orgaos(self):
         self.expected_hbase_key = (
-            f"ALL_{self.alerta_sigla}_{self.alerta_id}".encode()
+            f"{'.'.join(self.alerta_id.split('.')[:-1])}".encode()
         )
 
         self.controller.retorna_para_todos_orgaos()
@@ -95,7 +100,7 @@ class TestDispensaAlertasController(TestCase):
         self.get_hbase_table_mock.assert_called_once_with(
             settings.PROMOTRON_HBASE_NAMESPACE
             +
-            self.hbase_table_name
+            self.hbase_all_table_name
         )
         self.hbase_obj_mock.delete.assert_called_once_with(
             self.expected_hbase_key,
@@ -105,7 +110,7 @@ class TestDispensaAlertasController(TestCase):
 class TestEnviaAlertaOuvidoriaController(TestCase):
     def setUp(self):
         self.orgao_id = "12345"
-        self.alerta_id = "abc12345"
+        self.alerta_id = "AAA.abc12345.12345"
         self.alerta_sigla = "AAA"
 
         self.hbase_table_name = "table_name"
@@ -148,7 +153,7 @@ class TestEnviaAlertaOuvidoriaController(TestCase):
         }
         self.expected_status = 201
         self.expected_row_key = (
-            f"{self.alerta_sigla}_{self.alerta_id}"
+            f"{self.alerta_id}"
         ).encode()
         cf = self.controller.hbase_cf
         self.expected_data = {
