@@ -28,7 +28,7 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'classe1',
                 'ext1234',
                 'alrtkey',
-                0
+                # 0
             ),
             (
                 0000,
@@ -42,7 +42,7 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'classe1',
                 'ext1234',
                 'alrtkey',
-                1
+                # 1
             ),
         ]
 
@@ -59,7 +59,7 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'classe_hierarquia': 'classe1',
                 'num_externo': 'ext1234',
                 'alrt_key': 'alrtkey',
-                'flag_dispensado': 0
+                # 'flag_dispensado': 0
             },
             {
                 'doc_dk': 0,
@@ -73,7 +73,7 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'classe_hierarquia': 'classe1',
                 'num_externo': 'ext1234',
                 'alrt_key': 'alrtkey',
-                'flag_dispensado': 1
+                # 'flag_dispensado': 1
             }
         ]
 
@@ -106,7 +106,7 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'classe_hierarquia': 'classe1',
                 'num_externo': 'ext1234',
                 'alrt_key': 'alrtkey',
-                'flag_dispensado': 0
+                # 'flag_dispensado': 0
             },
         ]
 
@@ -123,7 +123,7 @@ class AlertaListaTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'classe_hierarquia': 'classe1',
                 'num_externo': 'ext1234',
                 'alrt_key': 'alrtkey',
-                'flag_dispensado': 0
+                # 'flag_dispensado': 0
             }
         ]
 
@@ -200,7 +200,7 @@ class AlertaComprasTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'Contrato ID 1',
                 'ITEM 1',
                 'alrtkey1',
-                0
+                # 0
             ),
             (
                 'COMP',
@@ -209,7 +209,7 @@ class AlertaComprasTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'Contrato ID 2',
                 'ITEM 2',
                 'alrtkey2',
-                0
+                # 0
             ),
         ]
         _execute.return_value = return_alerta
@@ -222,7 +222,7 @@ class AlertaComprasTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'contrato_iditem': 'Contrato ID 1',
                 'item': 'ITEM 1',
                 'alrt_key': 'alrtkey1',
-                'flag_dispensado': 0
+                # 'flag_dispensado': 0
             },
             {
                 'sigla': 'COMP',
@@ -231,7 +231,7 @@ class AlertaComprasTest(NoJWTTestCase, NoCacheTestCase, TestCase):
                 'contrato_iditem': 'Contrato ID 2',
                 'item': 'ITEM 2',
                 'alrt_key': 'alrtkey2',
-                'flag_dispensado': 0
+                # 'flag_dispensado': 0
 
             }
         ]

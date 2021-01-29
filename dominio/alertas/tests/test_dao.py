@@ -82,7 +82,7 @@ class TestAlertaMGPDAO(TestCase):
                 'classe',
                 'numext',
                 'alrtkey',
-                0
+                # 0
             )
         ]
         resp = dao.AlertaMGPDAO.get(orgao_id=orgao_id)
@@ -99,7 +99,7 @@ class TestAlertaMGPDAO(TestCase):
                 'classe_hierarquia': 'classe',
                 'num_externo': 'numext',
                 'alrt_key': 'alrtkey',
-                'flag_dispensado': 0
+                # 'flag_dispensado': 0
             }
         ]
 
@@ -124,7 +124,7 @@ class TestAlertaMGPDAO(TestCase):
                 'classe',
                 'numext',
                 'alrtkey',
-                0
+                # 0
             ),
             (
                 1,
@@ -138,7 +138,7 @@ class TestAlertaMGPDAO(TestCase):
                 'classe',
                 'numext',
                 'alrtkey',
-                0
+                # 0
             ),
         ]
         resp = dao.AlertaMGPDAO.get(orgao_id=orgao_id, tipo_alerta=tipo_alerta)
@@ -155,7 +155,7 @@ class TestAlertaMGPDAO(TestCase):
                 'classe_hierarquia': 'classe',
                 'num_externo': 'numext',
                 'alrt_key': 'alrtkey',
-                'flag_dispensado': 0
+                # 'flag_dispensado': 0
             },
             {
                 'doc_dk': 1,
@@ -169,7 +169,7 @@ class TestAlertaMGPDAO(TestCase):
                 'classe_hierarquia': 'classe',
                 'num_externo': 'numext',
                 'alrt_key': 'alrtkey',
-                'flag_dispensado': 0
+                # 'flag_dispensado': 0
             }
         ]
 

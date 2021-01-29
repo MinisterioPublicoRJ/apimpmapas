@@ -13,7 +13,7 @@ class AlertasListaSerializer(serializers.Serializer):
     classe_hierarquia = serializers.CharField()
     num_externo = serializers.CharField()
     alrt_key = serializers.CharField()
-    flag_dispensado = serializers.IntegerField()
+    # flag_dispensado = serializers.IntegerField()
 
 
 class AlertasResumoSerializer(serializers.Serializer):
@@ -28,7 +28,7 @@ class AlertasComprasSerializer(serializers.Serializer):
     contrato_iditem = serializers.CharField()
     item = serializers.CharField()
     alrt_key = serializers.CharField()
-    flag_dispensado = serializers.IntegerField()
+    # flag_dispensado = serializers.IntegerField()
 
 
 class AlertaOverlayPrescricaoSerializer(serializers.Serializer):

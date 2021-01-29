@@ -1,4 +1,4 @@
-SELECT t.*, CASE WHEN D.disp_alrt_key IS NULL AND DT.disp_alrt_key IS NULL THEN 0 ELSE 1 END AS flag_dispensado
+SELECT t.* --, CASE WHEN D.disp_alrt_key IS NULL AND DT.disp_alrt_key IS NULL THEN 0 ELSE 1 END AS flag_dispensado
 FROM (
     SELECT 
         alrt_docu_dk,
@@ -62,3 +62,4 @@ FROM (
 ) t
 LEFT JOIN {schema}.hbase_dispensados D ON D.disp_alrt_key = alrt_key
 LEFT JOIN {schema}.hbase_dispensados_todos DT ON DT.disp_alrt_key = regexp_replace(alrt_key, "\.[0-9]*$", '')
+WHERE D.disp_alrt_key IS NULL AND DT.disp_alrt_key IS NULL
