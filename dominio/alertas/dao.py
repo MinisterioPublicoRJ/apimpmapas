@@ -64,7 +64,7 @@ class AlertaMGPDAO(AlertasDAO):
         "classe_hierarquia",
         "num_externo",
         "alrt_key",
-        "flag_dispensado"
+        # "flag_dispensado"
     ]
     serializer = serializers.AlertasListaSerializer
 
@@ -88,7 +88,7 @@ class AlertaComprasDAO(AlertasDAO):
         "contrato_iditem",
         "item",
         "alrt_key",
-        "flag_dispensado"
+        # "flag_dispensado"
     ]
     serializer = serializers.AlertasComprasSerializer
     table_namespaces = {
